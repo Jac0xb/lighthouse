@@ -1,0 +1,125 @@
+name: Main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CACHE: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      any: ${{ steps.changes.outputs.any }}
+      programs: ${{ steps.changes.outputs.programs }}
+      program_matrix: ${{ steps.program_matrix.outputs.matrix }}
+      js_client: ${{ steps.changes.outputs.js_client }}
+      rust_client: ${{ steps.changes.outputs.rust_client }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/file-filters.yml
+
+      - name: Filter program matrix
+        id: program_matrix
+        uses: metaplex-foundation/actions/filter-matrix@v1
+        with:
+          matrix: ${{ env.PROGRAMS }}
+          changes: ${{ steps.changes.outputs.changes }}
+          suffix: _program
+
+  build_programs:
+    name: Programs
+    if: ${{ needs.changes.outputs.any == 'true' }}
+    needs: changes
+    uses: ./.github/workflows/build-programs.yml
+    secrets: inherit
+
+  test_programs:
+    name: Programs
+    if: ${{ needs.changes.outputs.programs == 'true' }}
+    needs: changes
+    uses: ./.github/workflows/test-programs.yml
+    secrets: inherit
+    with:
+      program_matrix: ${{ needs.changes.outputs.program_matrix }}
+
+  generate_clients:
+    name: Generate clients
+    if: ${{ needs.changes.outputs.any == 'true' }}
+    needs: build_programs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Install Linux Build Deps
+        run: sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
+
+      - name: Install Rust
+        uses: metaplex-foundation/actions/install-rust@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Install Solana
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
+          version: ${{ env.SOLANA_VERSION }}
+          cache: ${{ env.CACHE }}
+
+      - name: Cache program dependencies
+        if: env.CACHE == 'true'
+        uses: metaplex-foundation/actions/cache-programs@v1
+
+      - name: Install Node.js
+        uses: metaplex-foundation/actions/install-node-with-pnpm@v1
+        with:
+          version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.CACHE }}
+          dependencies: true
+
+      - name: Cache IDL generators
+        if: env.CACHE == 'true'
+        uses: metaplex-foundation/actions/cache-idl-generators@v1
+
+      - name: Generate IDLs and clients
+        run: pnpm generate
+
+      - name: Ensure working directory is clean
+        run: test -z "$(git status --porcelain)"
+
+  test_js:
+    if: needs.changes.outputs.js_client == 'true'
+    name: JS Client
+    needs: generate_clients
+    uses: ./.github/workflows/test-js-client.yml
+    secrets: inherit
+
+  build_rust_client:
+    if: needs.changes.outputs.rust_client == 'true'
+    name: Rust Client
+    needs: generate_clients
+    uses: ./.github/workflows/build-rust-client.yml
+    secrets: inherit
+
+  test_rust_client:
+    if: needs.changes.outputs.rust_client == 'true'
+    name: Rust Client
+    needs: generate_clients
+    uses: ./.github/workflows/test-rust-client.yml
+    secrets: inherit
