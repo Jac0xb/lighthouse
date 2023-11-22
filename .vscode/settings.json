@@ -1,0 +1,8 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "./clients/rust/Cargo.toml",
+    "./programs/lighthouse/Cargo.toml",
+    "./programs/lighthouse/program/Cargo.toml",
+    "./programs/lighthouse/program/Cargo.toml"
+  ]
+}

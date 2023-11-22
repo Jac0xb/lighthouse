@@ -1,0 +1,76 @@
+name: Test JS client
+
+on:
+  workflow_call:
+
+env:
+  CACHE: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["16.x", "18.x"]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Start validator
+        uses: metaplex-foundation/actions/start-validator@v1
+        with:
+          node: ${{ matrix.node }}
+          solana: ${{ env.SOLANA_VERSION }}
+          cache: ${{ env.CACHE }}
+
+      - name: Install dependencies
+        uses: metaplex-foundation/actions/install-node-dependencies@v1
+        with:
+          folder: ./clients/js
+          cache: ${{ env.CACHE }}
+          key: clients-js
+
+      - name: Build
+        working-directory: ./clients/js
+        run: pnpm build
+
+      - name: Test
+        working-directory: ./clients/js
+        run: pnpm test
+        env:
+          READ_API_RPC_DEVNET: ${{ secrets.READ_API_RPC_DEVNET }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Install Node.js
+        uses: metaplex-foundation/actions/install-node-with-pnpm@v1
+        with:
+          version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.CACHE }}
+
+      - name: Install dependencies
+        uses: metaplex-foundation/actions/install-node-dependencies@v1
+        with:
+          folder: ./clients/js
+          cache: ${{ env.CACHE }}
+          key: clients-js
+
+      - name: Format
+        working-directory: ./clients/js
+        run: pnpm format
+
+      - name: Lint
+        working-directory: ./clients/js
+        run: pnpm lint
