@@ -9,7 +9,7 @@ use super::{
     Error, Result,
 };
 use anchor_lang::*;
-use lighthouse::structs::{Assertion, Expression};
+use lighthouse::structs::{Assertion, Expression, WriteType};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey,
@@ -82,6 +82,7 @@ impl Program {
         accounts: T,
         data: U,
         inner: V,
+        ixs: Vec<Instruction>,
         payer: Pubkey,
         default_signers: &[&Keypair],
         additional_accounts: Vec<AccountMeta>,
@@ -93,6 +94,7 @@ impl Program {
             additional_accounts,
             data,
             payer,
+            ixs,
             client: self.client.clone(),
             signers: def_signers,
             inner,
@@ -104,23 +106,37 @@ impl Program {
         payer: &Keypair,
         assertions: Vec<Assertion>,
         additional_accounts: Vec<Pubkey>,
-        logical_expressions: Option<Vec<Expression>>,
+        logical_expression: Option<Vec<Expression>>,
     ) -> AssertBuilder {
         let accounts = lighthouse::accounts::AssertV1 {
             system_program: system_program::id(),
         };
 
+        let assertion_clone = (assertions).clone();
+        let logical_expression_clone = (logical_expression).clone();
+
         // The conversions below should not fail.
         let data = lighthouse::instruction::AssertV1 {
             assertions,
-            logical_expression: logical_expressions,
-            // options: None,
+            logical_expression,
         };
 
         self.tx_builder(
             accounts,
             data,
             (),
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: (lighthouse::accounts::AssertV1 {
+                    system_program: system_program::id(),
+                })
+                .to_account_metas(None),
+                data: (lighthouse::instruction::AssertV1 {
+                    assertions: assertion_clone,
+                    logical_expression: logical_expression_clone,
+                })
+                .data(),
+            }],
             payer.pubkey(),
             &[payer],
             additional_accounts
@@ -149,35 +165,78 @@ impl Program {
             cache_account_size,
         };
 
-        self.tx_builder(accounts, data, (), payer.pubkey(), &[payer], vec![])
+        self.tx_builder(
+            accounts,
+            data,
+            (),
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: (lighthouse::accounts::CreateCacheAccountV1 {
+                    system_program: system_program::id(),
+                    signer: payer.pubkey(),
+                    cache_account: find_cache_account(payer.pubkey(), cache_index).0,
+                    rent: sysvar::rent::id(),
+                })
+                .to_account_metas(None),
+                data: (lighthouse::instruction::CreateCacheAccountV1 {
+                    cache_index,
+                    cache_account_size,
+                })
+                .data(),
+            }],
+            payer.pubkey(),
+            &[payer],
+            vec![],
+        )
     }
 
-    pub fn load_cache_account(
+    pub fn write_v1(
         &mut self,
         payer: &Keypair,
         source_account: Pubkey,
         cache_index: u8,
-        cache_start: u16,
-        dest_start: u16,
-        slice_length: u16,
+        write_type: WriteType,
     ) -> CacheLoadAccountV1Builder {
-        let accounts = lighthouse::accounts::CacheLoadAccountV1 {
+        let accounts = lighthouse::accounts::WriteV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
             cache_account: find_cache_account(payer.pubkey(), cache_index).0,
             rent: sysvar::rent::id(),
-            source_account,
         };
 
-        // The conversions below should not fail.
-        let data = lighthouse::instruction::CacheLoadAccountV1 {
+        let write_type_clone = write_type.clone();
+
+        let data = lighthouse::instruction::WriteV1 {
+            write_type,
             cache_index,
-            cache_start,
-            dest_start,
-            slice_length,
         };
 
-        self.tx_builder(accounts, data, (), payer.pubkey(), &[payer], vec![])
+        let mut ix_accounts = lighthouse::accounts::WriteV1 {
+            system_program: system_program::id(),
+            signer: payer.pubkey(),
+            cache_account: find_cache_account(payer.pubkey(), cache_index).0,
+            rent: sysvar::rent::id(),
+        }
+        .to_account_metas(None);
+        ix_accounts.append(&mut vec![AccountMeta::new(source_account, false)]);
+
+        self.tx_builder(
+            accounts,
+            data,
+            (),
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: ix_accounts,
+                data: (lighthouse::instruction::WriteV1 {
+                    write_type: write_type_clone,
+                    cache_index,
+                })
+                .data(),
+            }],
+            payer.pubkey(),
+            &[payer],
+            vec![AccountMeta::new(source_account, false)],
+        )
     }
 
     pub fn create_test_account(&mut self, payer: &Keypair) -> CreateTestAccountV1Builder {
@@ -191,6 +250,6 @@ impl Program {
         // The conversions below should not fail.
         let data = lighthouse::instruction::CreateTestAccountV1 {};
 
-        self.tx_builder(accounts, data, (), payer.pubkey(), &[payer], vec![])
+        self.tx_builder(accounts, data, (), vec![], payer.pubkey(), &[payer], vec![])
     }
 }

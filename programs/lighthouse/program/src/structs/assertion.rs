@@ -6,7 +6,7 @@ use solana_program::pubkey::Pubkey;
 
 use super::{BorshField, BorshValue, Operator};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum Assertion {
     // offset, borsh type, operator
     BorshAccountData(u64, BorshField, Operator, BorshValue),

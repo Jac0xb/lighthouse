@@ -5,7 +5,7 @@ use anchor_lang::prelude::{
 
 use super::Operator;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum BorshValue {
     U8(u8),
     I8(i8),

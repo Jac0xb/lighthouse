@@ -39,6 +39,7 @@ pub struct TxBuilder<T, U, V> {
     // This member holds data of a custom type that can be specific to each kind
     // of transaction.
     pub inner: V,
+    pub ixs: Vec<Instruction>,
 }
 
 pub trait OnSuccessfulTxExec {
@@ -193,11 +194,8 @@ impl<'a> OnSuccessfulTxExec for CreateCacheAccountBuilder<'a> {
     }
 }
 
-pub type CacheLoadAccountV1Builder<'a> = TxBuilder<
-    lighthouse::accounts::CacheLoadAccountV1,
-    lighthouse::instruction::CacheLoadAccountV1,
-    (),
->;
+pub type CacheLoadAccountV1Builder<'a> =
+    TxBuilder<lighthouse::accounts::WriteV1, lighthouse::instruction::WriteV1, ()>;
 
 impl<'a> OnSuccessfulTxExec for CacheLoadAccountV1Builder<'a> {
     fn on_successful_execute(&mut self) -> Result<()> {
