@@ -2,9 +2,12 @@ pub mod utils;
 
 use std::io::Error;
 
+use anchor_lang::system_program::System;
 use anchor_lang::InstructionData;
 use lighthouse::structs::{Assertion, BorshField, BorshValue, Expression, Operator};
+use solana_program::instruction::Instruction;
 use solana_program::pubkey::Pubkey;
+use solana_program::rent::Rent;
 use solana_program_test::tokio;
 use solana_sdk::{signer::EncodableKeypair, transaction::Transaction};
 
@@ -26,10 +29,9 @@ pub fn find_cache_account(user: Pubkey, cache_index: u8) -> (solana_program::pub
     )
 }
 
-/*
 #[tokio::test]
 async fn test_basic() {
-    let context = TestContext::new().await.unwrap();
+    let context = &mut TestContext::new().await.unwrap();
 
     let mut program = Program::new(context.client());
 
@@ -37,7 +39,7 @@ async fn test_basic() {
         &context.payer(),
         vec![
             Assertion::AccountBalance(0, Operator::GreaterThan),
-            Assertion::AccountBalance(0, Operator::LessThan),
+            // Assertion::AccountBalance(0, Operator::LessThan),
         ],
         vec![
             context.payer().encodable_pubkey(),
@@ -46,168 +48,155 @@ async fn test_basic() {
         None,
     );
 
-    let tx = tx_builder.to_transaction(vec![]).await;
-
-    if let Err(err) = tx {
-        println!("err: {:?}", err);
-
-        panic!("Should have passed");
-    } else if let Ok(tx) = tx {
-        println!("Tx size: {}", tx.message().serialize().len());
-
-        let response = context
-            .client()
-            .process_transaction_with_metadata(tx)
-            .await
-            .unwrap();
-
-        let logs = response.metadata.unwrap().log_messages;
-
-        for log in logs {
-            println!("{:?}", log);
-        }
-    } else {
-        panic!("Should have passed");
-    }
+    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
 }
-*/
 
-/*
 #[tokio::test]
 async fn test_borsh_account_data() {
-    let context = TestContext::new().await.unwrap();
+    let context = &mut TestContext::new().await.unwrap();
 
     let mut program = Program::new(context.client());
 
-    let account = find_cache().0;
+    let account = find_test_account().0;
 
-    let mut tx_builder = program.create_assertion(
-        &context.payer(),
-        vec![
-            Assertion::BorshAccountData(
-                8,
-                BorshField::U8,
-                Operator::Equal,
-                lighthouse::BorshValue::U8(1),
-            ),
-            Assertion::BorshAccountData(
-                9,
-                BorshField::I8,
-                Operator::Equal,
-                lighthouse::BorshValue::I8(-1),
-            ),
-            Assertion::BorshAccountData(
-                10,
-                BorshField::U16,
-                Operator::Equal,
-                lighthouse::BorshValue::U16((u8::MAX as u16) + 1),
-            ),
-            Assertion::BorshAccountData(
-                12,
-                BorshField::I16,
-                Operator::Equal,
-                lighthouse::BorshValue::I16((i8::MIN as i16) - 1),
-            ),
-            Assertion::BorshAccountData(
-                14,
-                BorshField::U32,
-                Operator::Equal,
-                lighthouse::BorshValue::U32((u16::MAX as u32) + 1),
-            ),
-            Assertion::BorshAccountData(
-                18,
-                BorshField::I32,
-                Operator::Equal,
-                lighthouse::BorshValue::I32((i16::MIN as i32) - 1),
-            ),
-            Assertion::BorshAccountData(
-                22,
-                BorshField::U64,
-                Operator::Equal,
-                lighthouse::BorshValue::U64((u32::MAX as u64) + 1),
-            ),
-            Assertion::BorshAccountData(
-                30,
-                BorshField::I64,
-                Operator::Equal,
-                lighthouse::BorshValue::I64((i32::MIN as i64) - 1),
-            ),
-            Assertion::BorshAccountData(
-                38,
-                BorshField::U128,
-                Operator::Equal,
-                lighthouse::BorshValue::U128((u64::MAX as u128) + 1),
-            ),
-            Assertion::BorshAccountData(
-                54,
-                BorshField::I128,
-                Operator::Equal,
-                lighthouse::BorshValue::I128((i64::MIN as i128) - 1),
-            ),
-        ],
-        vec![
-            account, account, account, account, account, account, account, account, account,
-            account, account,
-        ],
-        None,
-    );
+    process_transaction_assert_success(
+        context,
+        program
+            .create_assertion(
+                &context.payer(),
+                vec![
+                    Assertion::BorshAccountData(
+                        8,
+                        BorshField::U8,
+                        Operator::Equal,
+                        BorshValue::U8(1),
+                    ),
+                    Assertion::BorshAccountData(
+                        9,
+                        BorshField::I8,
+                        Operator::Equal,
+                        BorshValue::I8(-1),
+                    ),
+                    Assertion::BorshAccountData(
+                        10,
+                        BorshField::U16,
+                        Operator::Equal,
+                        BorshValue::U16((u8::MAX as u16) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        12,
+                        BorshField::I16,
+                        Operator::Equal,
+                        BorshValue::I16((i8::MIN as i16) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        14,
+                        BorshField::U32,
+                        Operator::Equal,
+                        BorshValue::U32((u16::MAX as u32) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        18,
+                        BorshField::I32,
+                        Operator::Equal,
+                        BorshValue::I32((i16::MIN as i32) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        22,
+                        BorshField::U64,
+                        Operator::Equal,
+                        BorshValue::U64((u32::MAX as u64) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        30,
+                        BorshField::I64,
+                        Operator::Equal,
+                        BorshValue::I64((i32::MIN as i64) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        38,
+                        BorshField::U128,
+                        Operator::Equal,
+                        BorshValue::U128((u64::MAX as u128) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        54,
+                        BorshField::I128,
+                        Operator::Equal,
+                        BorshValue::I128((i64::MIN as i128) - 1),
+                    ),
+                ],
+                vec![account; 10],
+                None,
+            )
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
 
-    let tx = &tx_builder
-        .to_transaction(vec![Instruction {
-            program_id: lighthouse::ID,
-            accounts: lighthouse::accounts::CreateTestAccount {
-                signer: context.payer().encodable_pubkey(),
-                test_account: find_cache().0,
-                rent: Rent::id(),
-                system_program: System::id(),
-            }
-            .to_account_metas(None),
-            data: (lighthouse::instruction::CreateTestAccount {}).data(),
-        }])
-        .await;
+    // let tx = &tx_builder
+    //     .to_transaction(vec![Instruction {
+    //         program_id: lighthouse::ID,
+    //         accounts: (lighthouse::accounts::CreateTestAccountV1 {
+    //             signer: context.payer().encodable_pubkey(),
+    //             test_account: find_cache().0,
+    //             rent: Rent::id(),
+    //             system_program: System::id(),
+    //         })
+    //         .to_account_metas(None),
+    //         data: (lighthouse::instruction::CreateTestAccountV1 {}).data(),
+    //     }])
+    //     .await;
 
-    if let Err(err) = tx {
-        println!("err: {:?}", err);
-        panic!("Should have passed");
-    } else if let Ok(tx) = tx {
-        println!("Tx size: {}", tx.message().serialize().len());
+    // if let Err(err) = tx {
+    //     println!("err: {:?}", err);
+    //     panic!("Should have passed");
+    // } else if let Ok(tx) = tx {
+    //     println!("Tx size: {}", tx.message().serialize().len());
 
-        let response = context
-            .client()
-            .process_transaction_with_metadata(tx.clone())
-            .await
-            .unwrap();
+    //     let response = context
+    //         .client()
+    //         .process_transaction_with_metadata(tx.clone())
+    //         .await
+    //         .unwrap();
 
-        let logs = response.metadata.unwrap().log_messages;
+    //     let logs = response.metadata.unwrap().log_messages;
 
-        for log in logs {
-            println!("{:?}", log);
-        }
+    //     for log in logs {
+    //         println!("{:?}", log);
+    //     }
 
-        println!(
-            "account: {:?}",
-            context
-                .client()
-                .get_account(find_cache().0)
-                .await
-                .unwrap()
-                .unwrap()
-                .data
-        );
-    } else {
-        panic!("Should have passed");
-    }
+    //     println!(
+    //         "account: {:?}",
+    //         context
+    //             .client()
+    //             .get_account(find_cache().0)
+    //             .await
+    //             .unwrap()
+    //             .unwrap()
+    //             .data
+    //     );
+    // } else {
+    //     panic!("Should have passed");
+    // }
 }
-*/
 
-/*
 #[tokio::test]
 async fn test_logical_expression() {
-    let context = TestContext::new().await.unwrap();
+    let context = &mut TestContext::new().await.unwrap();
 
     let mut program = Program::new(context.client());
 
-    let account = find_cache().0;
+    let account = find_test_account().0;
+    // Create test account
+    process_transaction_assert_success(
+        context,
+        program
+            .create_test_account(&context.payer())
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
 
     let mut tx_builder = program.create_assertion(
         &context.payer(),
@@ -220,116 +209,95 @@ async fn test_logical_expression() {
                 Operator::Equal,
                 BorshValue::U16((u8::MAX as u16) + 1),
             ),
-            Assertion::BorshAccountData(
-                10,
-                BorshField::U16,
-                Operator::Equal,
-                BorshValue::U16(30),
-            ),
+            Assertion::BorshAccountData(10, BorshField::U16, Operator::Equal, BorshValue::U16(30)),
         ],
         vec![account, account, account, account],
         Some(vec![
             Expression::Or(vec![0, 1]),
-            Expression::And(vec![2, 3]),
+            Expression::Or(vec![2, 3]),
+            Expression::And(vec![0, 2]),
         ]),
     );
 
+    let _ =
+        process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+
     // let value = &Expression::Or(vec![0, 1])
 
-    let tx = &tx_builder
-        .to_transaction(vec![Instruction {
-            program_id: lighthouse::ID,
-            accounts: lighthouse::accounts::CreateTestAccount {
-                signer: context.payer().encodable_pubkey(),
-                test_account: find_cache().0,
-                rent: Rent::id(),
-                system_program: System::id(),
-            }
-            .to_account_metas(None),
-            data: (lighthouse::instruction::CreateTestAccount {}).data(),
-        }])
-        .await;
+    // let tx = &tx_builder
+    //     .to_transaction(vec![Instruction {
+    //         program_id: lighthouse::ID,
+    //         accounts: lighthouse::accounts::CreateTestAccountV1 {
+    //             signer: context.payer().encodable_pubkey(),
+    //             test_account: find_cache().0,
+    //             rent: Rent::id(),
+    //             system_program: System::id(),
+    //         }
+    //         .to_account_metas(None),
+    //         data: (lighthouse::instruction::CreateTestAccount {}).data(),
+    //     }])
+    //     .await;
 
-    if let Err(err) = tx {
-        println!("err: {:?}", err);
-        panic!("Should have passed");
-    } else if let Ok(tx) = tx {
-        println!("Tx size: {}", tx.message().serialize().len());
+    // if let Err(err) = tx {
+    //     println!("err: {:?}", err);
+    //     panic!("Should have passed");
+    // } else if let Ok(tx) = tx {
+    //     println!("Tx size: {}", tx.message().serialize().len());
 
-        let response = context
-            .client()
-            .process_transaction_with_metadata(tx.clone())
-            .await
-            .unwrap();
+    //     let response = context
+    //         .client()
+    //         .process_transaction_with_metadata(tx.clone())
+    //         .await
+    //         .unwrap();
 
-        let logs = response.metadata.unwrap().log_messages;
+    //     let logs = response.metadata.unwrap().log_messages;
 
-        for log in logs {
-            println!("{:?}", log);
-        }
+    //     for log in logs {
+    //         println!("{:?}", log);
+    //     }
 
-        println!(
-            "account: {:?}",
-            context
-                .client()
-                .get_account(find_cache().0)
-                .await
-                .unwrap()
-                .unwrap()
-                .data
-        );
-    } else {
-        panic!("Should have passed");
-    }
+    //     println!(
+    //         "account: {:?}",
+    //         context
+    //             .client()
+    //             .get_account(find_cache().0)
+    //             .await
+    //             .unwrap()
+    //             .unwrap()
+    //             .data
+    //     );
+    // } else {
+    //     panic!("Should have passed");
+    // }
 }
 
-*/
-
-/*
 #[tokio::test]
 async fn test_raw_account_data() {
-    let context = TestContext::new().await.unwrap();
+    let context = &mut TestContext::new().await.unwrap();
 
     let mut program = Program::new(context.client());
 
-    let mut tx_builder = program.create_assertion(
-        &context.payer(),
-        vec![
-            Assertion::AccountBalance(0, Operator::GreaterThan),
-            Assertion::AccountBalance(0, Operator::LessThan),
-        ],
-        vec![
-            context.payer().encodable_pubkey(),
-            context.payer().encodable_pubkey(),
-        ],
-        None,
-    );
+    process_transaction_assert_success(
+        &context,
+        program
+            .create_assertion(
+                &context.payer(),
+                vec![
+                    Assertion::AccountBalance(0, Operator::GreaterThan),
+                    Assertion::AccountBalance(999995999975001u64, Operator::LessThan),
+                ],
+                vec![
+                    context.payer().encodable_pubkey(),
+                    context.payer().encodable_pubkey(),
+                ],
+                None,
+            )
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
 
-    let tx = tx_builder.to_transaction(vec![]).await;
-
-    if let Err(err) = tx {
-        println!("err: {:?}", err);
-
-        panic!("Should have passed");
-    } else if let Ok(tx) = tx {
-        // println!("tx: {:?}", tx);
-
-        let response = context
-            .client()
-            .process_transaction_with_metadata(tx)
-            .await
-            .unwrap();
-
-        let logs = response.metadata.unwrap().log_messages;
-
-        for log in logs {
-            println!("{:?}", log);
-        }
-    } else {
-        panic!("Should have passed");
-    }
-
-    let account = find_cache().0;
+    let account = find_test_account().0;
 
     let mut tx_builder = program.create_assertion(
         &context.payer(),
@@ -342,203 +310,255 @@ async fn test_raw_account_data() {
         None,
     );
 
-    let tx = tx_builder
-        .to_transaction(vec![Instruction {
-            program_id: lighthouse::ID,
-            accounts: lighthouse::accounts::CreateTestAccount {
-                signer: context.payer().encodable_pubkey(),
-                test_account: find_cache().0,
-                rent: Rent::id(),
-                system_program: System::id(),
-            }
-            .to_account_metas(None),
-            data: (lighthouse::instruction::CreateTestAccount {}).data(),
-        }])
+    // let tx = tx_builder
+    //     .to_transaction(vec![Instruction {
+    //         program_id: lighthouse::ID,
+    //         accounts: lighthouse::accounts::CreateTestAccount {
+    //             signer: context.payer().encodable_pubkey(),
+    //             test_account: find_cache().0,
+    //             rent: Rent::id(),
+    //             system_program: System::id(),
+    //         }
+    //         .to_account_metas(None),
+    //         data: (lighthouse::instruction::CreateTestAccount {}).data(),
+    //     }])
+    //     .await;
+
+    // if let Err(err) = tx {
+    //     println!("err: {:?}", err);
+    //     panic!("Should have passed");
+    // } else if let Ok(tx) = tx {
+    //     println!("Tx size: {}", tx.message().serialize().len());
+
+    //     let response = context
+    //         .client()
+    //         .process_transaction_with_metadata(tx)
+    //         .await
+    //         .unwrap();
+
+    //     let logs = response.metadata.unwrap().log_messages;
+
+    //     for log in logs {
+    //         println!("{:?}", log);
+    //     }
+
+    //     println!(
+    //         "account: {:?}",
+    //         context
+    //             .client()
+    //             .get_account(find_cache().0)
+    //             .await
+    //             .unwrap()
+    //             .unwrap()
+    //             .data
+    //     );
+    // } else {
+    //     panic!("Should have passed");
+    // }
+}
+
+#[tokio::test]
+async fn test_write() {
+    let context = &mut TestContext::new().await.unwrap();
+    let mut program = Program::new(context.client());
+
+    // Create cache
+    let mut create_cache_builder = program.create_cache_account(&context.payer(), 0, 256);
+    let tx = create_cache_builder.to_transaction(vec![]).await;
+    process_transaction_assert_success(context, tx).await;
+
+    // Create test account
+    process_transaction_assert_success(
+        context,
+        program
+            .create_test_account(&context.payer())
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
+
+    let cache_account = find_cache_account(context.payer().encodable_pubkey(), 0).0;
+
+    {
+        // Test writing account data to cache.
+        process_transaction_assert_success(
+            context,
+            program
+                .write_v1(
+                    &context.payer(),
+                    find_test_account().0,
+                    0,
+                    lighthouse::structs::WriteType::AccountDataU16(0, 8, 128),
+                )
+                .to_transaction(vec![])
+                .await,
+        )
         .await;
 
-    if let Err(err) = tx {
-        println!("err: {:?}", err);
-        panic!("Should have passed");
-    } else if let Ok(tx) = tx {
-        println!("Tx size: {}", tx.message().serialize().len());
+        // Assert that data was properly written to cache.
+        let tx = program
+            .create_assertion(
+                &context.payer(),
+                vec![
+                    Assertion::BorshAccountData(
+                        8,
+                        BorshField::U8,
+                        Operator::Equal,
+                        BorshValue::U8(1),
+                    ),
+                    Assertion::BorshAccountData(
+                        9,
+                        BorshField::I8,
+                        Operator::Equal,
+                        BorshValue::I8(-1),
+                    ),
+                    Assertion::BorshAccountData(
+                        10,
+                        BorshField::U16,
+                        Operator::Equal,
+                        BorshValue::U16((u8::MAX as u16) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        12,
+                        BorshField::I16,
+                        Operator::Equal,
+                        BorshValue::I16((i8::MIN as i16) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        14,
+                        BorshField::U32,
+                        Operator::Equal,
+                        BorshValue::U32((u16::MAX as u32) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        18,
+                        BorshField::I32,
+                        Operator::Equal,
+                        BorshValue::I32((i16::MIN as i32) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        22,
+                        BorshField::U64,
+                        Operator::Equal,
+                        BorshValue::U64((u32::MAX as u64) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        30,
+                        BorshField::I64,
+                        Operator::Equal,
+                        BorshValue::I64((i32::MIN as i64) - 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        38,
+                        BorshField::U128,
+                        Operator::Equal,
+                        BorshValue::U128((u64::MAX as u128) + 1),
+                    ),
+                    Assertion::BorshAccountData(
+                        54,
+                        BorshField::I128,
+                        Operator::Equal,
+                        BorshValue::I128((i64::MIN as i128) - 1),
+                    ),
+                ],
+                vec![cache_account; 10],
+                None,
+            )
+            .to_transaction(vec![])
+            .await;
 
-        let response = context
-            .client()
-            .process_transaction_with_metadata(tx)
+        process_transaction_assert_success(context, tx).await;
+    }
+    {
+        // Test writing account balance to cache.
+        let mut load_cache_builder = program.write_v1(
+            &context.payer(),
+            find_test_account().0,
+            0,
+            lighthouse::structs::WriteType::AccountBalanceU8(0),
+        );
+        let tx = load_cache_builder.to_transaction(vec![]).await;
+        process_transaction_assert_success(context, tx).await;
+
+        let tx = program
+            .create_assertion(
+                &context.payer(),
+                vec![Assertion::BorshAccountData(
+                    8,
+                    BorshField::U64,
+                    Operator::Equal,
+                    BorshValue::U64(2672640),
+                )],
+                vec![cache_account],
+                None,
+            )
+            .to_transaction(vec![])
+            .await;
+        process_transaction_assert_success(context, tx).await;
+    }
+    {
+        let mut load_cache_builder = program.write_v1(
+            &context.payer(),
+            find_test_account().0,
+            0,
+            lighthouse::structs::WriteType::AccountBalanceU8(33),
+        );
+        let tx = load_cache_builder.to_transaction(vec![]).await;
+        process_transaction_assert_success(context, tx).await;
+
+        let tx = program
+            .create_assertion(
+                &context.payer(),
+                vec![
+                    Assertion::BorshAccountData(
+                        8,
+                        BorshField::U64,
+                        Operator::Equal,
+                        BorshValue::U64(2672640),
+                    ),
+                    Assertion::BorshAccountData(
+                        8 + 33,
+                        BorshField::U64,
+                        Operator::Equal,
+                        BorshValue::U64(2672640),
+                    ),
+                ],
+                vec![cache_account; 2],
+                None,
+            )
+            .to_transaction(vec![])
+            .await;
+        process_transaction_assert_success(context, tx).await;
+    }
+    {
+        let _ = &context
+            .fund_account(find_test_account().0, 1000)
             .await
             .unwrap();
 
-        let logs = response.metadata.unwrap().log_messages;
-
-        for log in logs {
-            println!("{:?}", log);
-        }
-
-        println!(
-            "account: {:?}",
-            context
-                .client()
-                .get_account(find_cache().0)
-                .await
-                .unwrap()
-                .unwrap()
-                .data
-        );
-    } else {
-        panic!("Should have passed");
-    }
-}
-*/
-
-#[tokio::test]
-async fn create_cache_account() {
-    let context = TestContext::new().await.unwrap();
-
-    let mut program = Program::new(context.client());
-    let mut create_cache_builder = program.create_cache_account(&context.payer(), 0, 64);
-    let tx = create_cache_builder.to_transaction(vec![]).await;
-
-    let tx = tx.expect("Should have been processed");
-    let tx_metadata = process_transaction(&context, &tx)
-        .await
-        .unwrap()
-        .metadata
-        .unwrap();
-    let logs = tx_metadata.log_messages;
-    for log in logs {
-        println!("{:?}", log);
-    }
-
-    let data = context
-        .client()
-        .get_account(find_cache_account(context.payer().encodable_pubkey(), 0).0)
-        .await
-        .unwrap()
-        .unwrap()
-        .data;
-
-    println!("{}", format_hex(&data));
-
-    let tx = program
-        .create_test_account(&context.payer())
-        .to_transaction(vec![])
-        .await;
-    process_transaction_assert_success(&context, tx).await;
-
-    let mut load_cache_builder =
-        program.load_cache_account(&context.payer(), find_test_account().0, 0, 0, 8, 128);
-    let tx = load_cache_builder.to_transaction(vec![]).await;
-    let tx = tx.expect("Should have been processed");
-    println!("Tx size: {}", tx.message().serialize().len());
-
-    let tx_metadata = process_transaction(&context, &tx)
-        .await
-        .unwrap()
-        .metadata
-        .unwrap();
-    let logs = tx_metadata.log_messages;
-    for log in logs {
-        println!("{:?}", log);
-    }
-
-    let data = context
-        .client()
-        .get_account(find_cache_account(context.payer().encodable_pubkey(), 0).0)
-        .await
-        .unwrap()
-        .unwrap()
-        .data;
-
-    println!("cache account {}", format_hex(&data));
-
-    let data = context
-        .client()
-        .get_account(find_test_account().0)
-        .await
-        .unwrap()
-        .unwrap()
-        .data;
-
-    println!("test account {}", format_hex(&data));
-
-    let offset = 0;
-    let account = find_cache_account(context.payer().encodable_pubkey(), 0).0;
-
-    let mut tx = program
-        .create_assertion(
+        println!("test 4");
+        let load_cache_builder = program.write_v1(
             &context.payer(),
-            vec![
-                Assertion::BorshAccountData(
-                    offset + 8,
-                    BorshField::U8,
-                    Operator::Equal,
-                    BorshValue::U8(1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 9,
-                    BorshField::I8,
-                    Operator::Equal,
-                    BorshValue::I8(-1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 10,
-                    BorshField::U16,
-                    Operator::Equal,
-                    BorshValue::U16((u8::MAX as u16) + 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 12,
-                    BorshField::I16,
-                    Operator::Equal,
-                    BorshValue::I16((i8::MIN as i16) - 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 14,
-                    BorshField::U32,
-                    Operator::Equal,
-                    BorshValue::U32((u16::MAX as u32) + 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 18,
-                    BorshField::I32,
-                    Operator::Equal,
-                    BorshValue::I32((i16::MIN as i32) - 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 22,
+            find_test_account().0,
+            0,
+            lighthouse::structs::WriteType::AccountBalanceU8(0),
+        );
+        let tx = program
+            .create_assertion(
+                &context.payer(),
+                vec![Assertion::BorshAccountData(
+                    8,
                     BorshField::U64,
                     Operator::Equal,
-                    BorshValue::U64((u32::MAX as u64) + 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 30,
-                    BorshField::I64,
-                    Operator::Equal,
-                    BorshValue::I64((i32::MIN as i64) - 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 38,
-                    BorshField::U128,
-                    Operator::Equal,
-                    BorshValue::U128((u64::MAX as u128) + 1),
-                ),
-                Assertion::BorshAccountData(
-                    offset + 54,
-                    BorshField::I128,
-                    Operator::Equal,
-                    BorshValue::I128((i64::MIN as i128) - 1),
-                ),
-            ],
-            vec![
-                account, account, account, account, account, account, account, account, account,
-                account, account,
-            ],
-            None,
-        )
-        .to_transaction(vec![])
-        .await;
-
-    process_transaction_assert_success(&context, tx).await;
+                    BorshValue::U64(2672640 + 1000),
+                )],
+                vec![cache_account],
+                None,
+            )
+            .to_transaction(load_cache_builder.ixs)
+            .await;
+        process_transaction_assert_success(context, tx).await;
+    }
 }
 
 fn format_hex(data: &[u8]) -> String {
@@ -584,12 +604,12 @@ async fn process_transaction_assert_success(
 
     let tx_metadata = process_transaction(&context, &tx).await.unwrap();
 
-    let logs = tx_metadata.metadata.unwrap().log_messages;
-    for log in logs {
-        println!("{:?}", log);
-    }
-
     if tx_metadata.result.is_err() {
+        let logs = tx_metadata.metadata.unwrap().log_messages;
+        for log in logs {
+            println!("{:?}", log);
+        }
+
         panic!("Transaction failed");
     }
 }
