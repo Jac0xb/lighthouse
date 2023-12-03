@@ -23,4 +23,5 @@ pub enum WriteType {
     TokenAccount(u16),
     TokenAccountOwner(u16),
     TokenAccountBalance(u16),
+    // Program Account Assertions
 }

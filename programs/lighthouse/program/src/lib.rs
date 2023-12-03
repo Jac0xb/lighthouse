@@ -12,7 +12,7 @@ pub mod utils;
 
 use crate::{processor::v1::*, structs::*};
 
-declare_id!("2dGQitaSbztBZq996FqCmnDkrgimvgzPyMAobUCH2N78");
+declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
 #[program]
 pub mod lighthouse {
@@ -44,8 +44,8 @@ pub mod lighthouse {
         ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
         assertions: Vec<Assertion>,
         logical_expression: Option<Vec<Expression>>,
-        // options: Option<Config>,
+        options: Option<Config>,
     ) -> Result<()> {
-        processor::assert(ctx, assertions, logical_expression, None)
+        processor::assert(ctx, assertions, logical_expression, options)
     }
 }

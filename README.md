@@ -4,7 +4,7 @@
 
 ## Overview
 
-Lighthouse is a Solana program developed to make asertions on Solana state that will fail the transaction if not true. Designed to combat prevalent issues such as MEV (Miner Extractable Value) attacks, and more specifically sandwich attacks. Allows for whitehat probing of Solana programs. Lighthouse empowers developers by enabling assertions about account balances, and account state. This ensures that transactions adhere to predefined conditions, safeguarding user assets and maintaining transaction integrity.
+Lighthouse is a Solana program developed to make asertions on Solana state that will fail the transaction if not true. Designed to combat prevalent issues such as MEV (Miner Extractable Value) attacks, and more specifically sandwich attacks. Allows for whitehat probing of Solana programs. Lighthouse empowers developers by enabling assertions about account balances and account state. This ensures that transactions adhere to predefined conditions, with usecases like safeguarding signer assets and maintaining transaction integrity.
 
 ## Features
 
@@ -17,8 +17,7 @@ Lighthouse is a Solana program developed to make asertions on Solana state that 
 
 ### Prerequisites
 
-- Rust programming language and Solana Tool Suite installed.
-- Fundamental knowledge of the Solana blockchain and smart contract interactions.
+TODO
 
 ### Installation
 
@@ -32,24 +31,14 @@ Lighthouse is a Solana program developed to make asertions on Solana state that 
    ```
 3. Compile the program:
    ```bash
-   cargo build-bpf
+   npm run programs:build
    ```
-
-### Deployment
-
-Deploy Lighthouse to the Solana blockchain:
-
-```bash
-solana program deploy /path/to/lighthouse/compiled/program.so
-```
 
 ## Usage
 
 Integrate Lighthouse in your Solana transactions by specifying your assertion criteria. Here's an example in Rust:
 
-```rust
-// Example Rust code showcasing how to interact with Lighthouse
-```
+~COMING SOON~
 
 ## Contributing
 
@@ -63,10 +52,11 @@ This project is under the [MIT License](LICENSE).
 
 Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
 
----
-
-This template sets the stage for your project's GitHub page, providing essential information about Lighthouse. Make sure to replace the placeholders and example code with actual details and usage instructions specific to Lighthouse.
-
 ## Todo
 
-- CPI protections
+- Instruction protections (Allow for assertions on CPI, etc)
+- Program data address check (Program data swap attack)
+- Turn config into bit flag to save instruction space
+- Add security info
+- Add verification of source
+- Resize cache account
