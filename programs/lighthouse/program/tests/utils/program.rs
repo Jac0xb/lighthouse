@@ -9,13 +9,15 @@ use super::{
     Error, Result,
 };
 use anchor_lang::*;
-use lighthouse::structs::{Assertion, Expression, WriteType};
+use lighthouse::{
+    processor::Config,
+    structs::{Assertion, Expression, WriteType},
+};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
-    pubkey,
     pubkey::Pubkey,
     rent::Rent,
-    system_instruction, system_program, sysvar,
+    system_program, sysvar,
 };
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -43,8 +45,6 @@ impl Program {
         Program { client }
     }
 
-    // Helper method to execute a transaction with the specified arguments
-    // (i.e. single instruction) via the inner Banks client.
     pub async fn process_tx<T: Signers>(
         &mut self,
         instruction: Instruction,
@@ -75,8 +75,7 @@ impl Program {
             .map_err(|err| Box::new(Error::BanksClient(err)))
     }
 
-    // Helper fn to instantiate the various `TxBuilder` based concrete types
-    // associated with each operation.
+    #[allow(clippy::too_many_arguments)]
     fn tx_builder<T, U, V>(
         &mut self,
         accounts: T,
@@ -119,6 +118,7 @@ impl Program {
         let data = lighthouse::instruction::AssertV1 {
             assertions,
             logical_expression,
+            options: Some(Config { verbose: true }),
         };
 
         self.tx_builder(
@@ -134,6 +134,7 @@ impl Program {
                 data: (lighthouse::instruction::AssertV1 {
                     assertions: assertion_clone,
                     logical_expression: logical_expression_clone,
+                    options: Some(Config { verbose: true }),
                 })
                 .data(),
             }],

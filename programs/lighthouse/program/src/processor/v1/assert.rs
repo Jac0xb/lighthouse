@@ -14,8 +14,7 @@ pub struct AssertV1<'info> {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct Config {
-    pub dont_fail: bool,
-    pub verbose_level: u8,
+    pub verbose: bool,
 }
 
 pub fn assert<'info>(
@@ -26,16 +25,19 @@ pub fn assert<'info>(
 ) -> Result<()> {
     let remaining_accounts = &ctx.remaining_accounts.to_vec();
 
+    let verbose = options.map(|options| options.verbose).unwrap_or(false);
     let mut assertion_results: Vec<bool> = vec![];
     let mut logically_dependent_assertions: Option<BTreeSet<u8>> = None;
 
     if let Some(logical_expression) = &logical_expression {
-        msg!("Logical expression: {:?}", logical_expression);
+        if verbose {
+            msg!("Logical expression: {:?}", logical_expression);
+        }
 
         logically_dependent_assertions = Some(BTreeSet::new());
         let tree = logically_dependent_assertions.as_mut().unwrap();
 
-        for (i, logical_expression) in logical_expression.iter().enumerate() {
+        for (_, logical_expression) in logical_expression.iter().enumerate() {
             match logical_expression {
                 Expression::And(assertion_indexes) => {
                     for assertion_index in assertion_indexes {
@@ -58,7 +60,9 @@ pub fn assert<'info>(
         }
 
         let mut assertion_result = true;
-        msg!("Testing assertion {:?}", assertion_type);
+        if verbose {
+            msg!("Testing assertion {:?}", assertion_type);
+        }
 
         match assertion_type {
             Assertion::AccountExists => {
@@ -95,18 +99,20 @@ pub fn assert<'info>(
                     _ => return Err(ProgramError::UnsupportedOperator.into()),
                 }
 
-                msg!(
-                    "{} Assertion::RawAccountData ({}) -> {:?} {} {:?}",
-                    if assertion_result {
-                        "[✅] SUCCESS"
-                    } else {
-                        "[❌] FAIL   "
-                    },
-                    account.key().to_string(),
-                    slice,
-                    operator.format(),
-                    expected_slice,
-                );
+                if verbose {
+                    msg!(
+                        "{} Assertion::RawAccountData ({}) -> {:?} {} {:?}",
+                        if assertion_result {
+                            "[✅] SUCCESS"
+                        } else {
+                            "[❌] FAIL   "
+                        },
+                        account.key().to_string(),
+                        slice,
+                        operator.format(),
+                        expected_slice,
+                    );
+                }
             }
             Assertion::BorshAccountData(offset, borsh_field, operator, expected_value) => {
                 let account = &remaining_accounts[i];
@@ -300,20 +306,24 @@ pub fn assert<'info>(
                 assertion_result =
                     operator.is_true(&**account.try_borrow_lamports()?, &expected_balance);
 
-                msg!(
-                    "{} Assertion::AccountBalance ({}) -> {} {} {}",
-                    if assertion_result {
-                        "[✅] SUCCESS"
-                    } else {
-                        "[❌] FAIL   "
-                    },
-                    account.key().to_string(),
-                    account.get_lamports(),
-                    operator.format(),
-                    expected_balance,
-                );
+                if verbose {
+                    msg!(
+                        "{} Assertion::AccountBalance ({}) -> {} {} {}",
+                        if assertion_result {
+                            "[✅] SUCCESS"
+                        } else {
+                            "[❌] FAIL   "
+                        },
+                        account.key().to_string(),
+                        account.get_lamports(),
+                        operator.format(),
+                        expected_balance,
+                    );
+                }
             }
-            Assertion::TokenAccountBalance(expected_balance, operator) => {}
+            Assertion::TokenAccountBalance(expected_balance, operator) => {
+                return Err(ProgramError::Unimplemented.into());
+            }
         }
 
         assertion_results.push(assertion_result);
@@ -339,20 +349,22 @@ pub fn assert<'info>(
                         result = result && assertion_results[*assertion_index as usize];
                     }
 
-                    msg!(
-                        "{} Expression::And -> {:?} {}",
-                        if result {
-                            "[✅] SUCCESS"
-                        } else {
-                            "[❌] FAIL   "
-                        },
-                        result,
-                        assertion_indexes
-                            .iter()
-                            .map(|i| format!("[{}]", i))
-                            .collect::<Vec<String>>()
-                            .join(" AND ")
-                    );
+                    if verbose {
+                        msg!(
+                            "{} Expression::And -> {:?} {}",
+                            if result {
+                                "[✅] SUCCESS"
+                            } else {
+                                "[❌] FAIL   "
+                            },
+                            result,
+                            assertion_indexes
+                                .iter()
+                                .map(|i| format!("[{}]", i))
+                                .collect::<Vec<String>>()
+                                .join(" AND ")
+                        );
+                    }
 
                     if !result {
                         return Err(ProgramError::AssertionFailed.into());
@@ -365,20 +377,22 @@ pub fn assert<'info>(
                         result = result || assertion_results[*assertion_index as usize];
                     }
 
-                    msg!(
-                        "{} Expression::Or -> {:?} {}",
-                        if result {
-                            "[✅] SUCCESS"
-                        } else {
-                            "[❌] FAIL   "
-                        },
-                        result,
-                        assertion_indexes
-                            .iter()
-                            .map(|i| format!("[{}]", i))
-                            .collect::<Vec<String>>()
-                            .join(" OR ")
-                    );
+                    if verbose {
+                        msg!(
+                            "{} Expression::Or -> {:?} {}",
+                            if result {
+                                "[✅] SUCCESS"
+                            } else {
+                                "[❌] FAIL   "
+                            },
+                            result,
+                            assertion_indexes
+                                .iter()
+                                .map(|i| format!("[{}]", i))
+                                .collect::<Vec<String>>()
+                                .join(" OR ")
+                        );
+                    }
 
                     if !result {
                         return Err(ProgramError::AssertionFailed.into());

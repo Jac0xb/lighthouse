@@ -32,7 +32,6 @@ pub fn find_cache_account(user: Pubkey, cache_index: u8) -> (solana_program::pub
 #[tokio::test]
 async fn test_basic() {
     let context = &mut TestContext::new().await.unwrap();
-
     let mut program = Program::new(context.client());
 
     let mut tx_builder = program.create_assertion(
@@ -54,10 +53,18 @@ async fn test_basic() {
 #[tokio::test]
 async fn test_borsh_account_data() {
     let context = &mut TestContext::new().await.unwrap();
-
     let mut program = Program::new(context.client());
 
     let account = find_test_account().0;
+
+    process_transaction_assert_success(
+        context,
+        program
+            .create_test_account(&context.payer())
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
 
     process_transaction_assert_success(
         context,
@@ -600,9 +607,7 @@ async fn process_transaction_assert_success(
 ) {
     let tx = tx.expect("Should have been processed");
 
-    // if (tx_metadata)
-
-    let tx_metadata = process_transaction(&context, &tx).await.unwrap();
+    let tx_metadata = process_transaction(context, &tx).await.unwrap();
 
     if tx_metadata.result.is_err() {
         let logs = tx_metadata.metadata.unwrap().log_messages;
