@@ -55,8 +55,24 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
 ## Todo
 
 - Instruction protections (Allow for assertions on CPI, etc)
+  - Assert address is signer
 - Program data address check (Program data swap attack)
+  - Program unchanged
 - Turn config into bit flag to save instruction space
 - Add security info
 - Add verification of source
 - Resize cache account
+- Write account info support
+- Token Account Assertions
+  - State assertions
+  - Has Delegate (https://twitter.com/kb24x7/status/1731261594141671824)
+  - Has No Delegate
+- Instruction Data Hotloader
+  - Allow instruction data to be hot loaded from cache to allow for instruction data to react to state change
+- Piece-wise instruction CPI constructor
+  - Piece-wise write segments of instruction data in a cache and then cpi execute the instruction data
+- Perform arithmetic on cached values
+  - Look into creating expressions which can
+- Protected cache write spaces
+  - Think about if it is necessary to assign/protect cache space to transactions/assertion ids
+- Assert on blocktime, slot, etc.
