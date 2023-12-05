@@ -14,4 +14,8 @@ pub enum ProgramError {
     BorshValueMismatch,
     #[msg("UnsupportedOperator")]
     UnsupportedOperator,
+    #[msg("CacheOutOfRange")]
+    CacheOutOfRange,
+    #[msg("AccountBorrowFailed")]
+    AccountBorrowFailed,
 }

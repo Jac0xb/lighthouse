@@ -2,9 +2,12 @@ pub mod utils;
 
 use std::io::Error;
 
+use anchor_lang::accounts::account::Account;
 use anchor_lang::system_program::System;
-use anchor_lang::InstructionData;
-use lighthouse::structs::{Assertion, BorshField, BorshValue, Expression, Operator};
+use anchor_lang::{AnchorDeserialize, InstructionData};
+use lighthouse::structs::{
+    AccountInfoData, Assertion, BorshField, BorshValue, Expression, Operator,
+};
 use solana_program::instruction::Instruction;
 use solana_program::pubkey::Pubkey;
 use solana_program::rent::Rent;
@@ -265,13 +268,13 @@ async fn test_logical_expression() {
 
     //     println!(
     //         "account: {:?}",
-    //         context
-    //             .client()
-    //             .get_account(find_cache().0)
-    //             .await
-    //             .unwrap()
-    //             .unwrap()
-    //             .data
+    // context
+    //     .client()
+    //     .get_account(find_cache().0)
+    //     .await
+    //     .unwrap()
+    //     .unwrap()
+    //     .data
     //     );
     // } else {
     //     panic!("Should have passed");
@@ -584,6 +587,168 @@ fn format_hex(data: &[u8]) -> String {
         result.push('\n');
     }
     result
+}
+
+#[tokio::test]
+async fn test_assert_account_info() {
+    let context = &mut TestContext::new().await.unwrap();
+    let mut program = Program::new(context.client());
+
+    // Create cache
+    let mut create_cache_builder = program.create_cache_account(&context.payer(), 0, 256);
+    let tx = create_cache_builder.to_transaction(vec![]).await;
+    process_transaction_assert_success(context, tx).await;
+
+    // Create test account
+    process_transaction_assert_success(
+        context,
+        program
+            .create_test_account(&context.payer())
+            .to_transaction(vec![])
+            .await,
+    )
+    .await;
+
+    let cache_account = find_cache_account(context.payer().encodable_pubkey(), 0).0;
+
+    {
+        // Test writing account data to cache.
+        process_transaction_assert_success(
+            context,
+            program
+                .write_v1(
+                    &context.payer(),
+                    find_test_account().0,
+                    0,
+                    lighthouse::structs::WriteType::AccountInfoU8(0),
+                )
+                .to_transaction(vec![])
+                .await,
+        )
+        .await;
+
+        let data = context
+            .client()
+            .get_account(cache_account)
+            .await
+            .unwrap()
+            .unwrap()
+            .data;
+
+        println!("cache account: {}", format_hex(&data));
+        println!(
+            "deserialized account info: {:?}",
+            AccountInfoData::try_from_slice(&data[8..8 + AccountInfoData::size() as usize])
+        );
+
+        // Assert that data was properly written to cache.
+        let tx = program
+            .create_assertion(
+                &context.payer(),
+                vec![Assertion::BorshAccountData(
+                    8,
+                    BorshField::U8,
+                    Operator::Equal,
+                    BorshValue::U8(1),
+                )],
+                vec![cache_account; 10],
+                None,
+            )
+            .to_transaction(vec![])
+            .await;
+
+        process_transaction_assert_success(context, tx).await;
+    }
+    // {
+    //     // Test writing account balance to cache.
+    //     let mut load_cache_builder = program.write_v1(
+    //         &context.payer(),
+    //         find_test_account().0,
+    //         0,
+    //         lighthouse::structs::WriteType::AccountBalanceU8(0),
+    //     );
+    //     let tx = load_cache_builder.to_transaction(vec![]).await;
+    //     process_transaction_assert_success(context, tx).await;
+
+    //     let tx = program
+    //         .create_assertion(
+    //             &context.payer(),
+    //             vec![Assertion::BorshAccountData(
+    //                 8,
+    //                 BorshField::U64,
+    //                 Operator::Equal,
+    //                 BorshValue::U64(2672640),
+    //             )],
+    //             vec![cache_account],
+    //             None,
+    //         )
+    //         .to_transaction(vec![])
+    //         .await;
+    //     process_transaction_assert_success(context, tx).await;
+    // }
+    // {
+    //     let mut load_cache_builder = program.write_v1(
+    //         &context.payer(),
+    //         find_test_account().0,
+    //         0,
+    //         lighthouse::structs::WriteType::AccountBalanceU8(33),
+    //     );
+    //     let tx = load_cache_builder.to_transaction(vec![]).await;
+    //     process_transaction_assert_success(context, tx).await;
+
+    //     let tx = program
+    //         .create_assertion(
+    //             &context.payer(),
+    //             vec![
+    //                 Assertion::BorshAccountData(
+    //                     8,
+    //                     BorshField::U64,
+    //                     Operator::Equal,
+    //                     BorshValue::U64(2672640),
+    //                 ),
+    //                 Assertion::BorshAccountData(
+    //                     8 + 33,
+    //                     BorshField::U64,
+    //                     Operator::Equal,
+    //                     BorshValue::U64(2672640),
+    //                 ),
+    //             ],
+    //             vec![cache_account; 2],
+    //             None,
+    //         )
+    //         .to_transaction(vec![])
+    //         .await;
+    //     process_transaction_assert_success(context, tx).await;
+    // }
+    // {
+    //     let _ = &context
+    //         .fund_account(find_test_account().0, 1000)
+    //         .await
+    //         .unwrap();
+
+    //     println!("test 4");
+    //     let load_cache_builder = program.write_v1(
+    //         &context.payer(),
+    //         find_test_account().0,
+    //         0,
+    //         lighthouse::structs::WriteType::AccountBalanceU8(0),
+    //     );
+    //     let tx = program
+    //         .create_assertion(
+    //             &context.payer(),
+    //             vec![Assertion::BorshAccountData(
+    //                 8,
+    //                 BorshField::U64,
+    //                 Operator::Equal,
+    //                 BorshValue::U64(2672640 + 1000),
+    //             )],
+    //             vec![cache_account],
+    //             None,
+    //         )
+    //         .to_transaction(load_cache_builder.ixs)
+    //         .await;
+    //     process_transaction_assert_success(context, tx).await;
+    // }
 }
 
 async fn process_transaction(

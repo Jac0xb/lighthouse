@@ -2088,6 +2088,7 @@ dependencies = [
  "bytemuck",
  "mpl-token-metadata",
  "num-traits",
+ "optionize_macro",
  "solana-banks-interface",
  "solana-program",
  "solana-program-test",
@@ -2595,6 +2596,15 @@ dependencies = [
  "pin-project",
  "rand 0.8.5",
  "thiserror",
+]
+
+[[package]]
+name = "optionize_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2 1.0.66",
+ "quote 1.0.32",
+ "syn 1.0.109",
 ]
 
 [[package]]
