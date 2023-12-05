@@ -324,6 +324,7 @@ pub fn assert<'info>(
             Assertion::TokenAccountBalance(expected_balance, operator) => {
                 return Err(ProgramError::Unimplemented.into());
             }
+            (_) => {} // REMOVE
         }
 
         assertion_results.push(assertion_result);

@@ -3,7 +3,7 @@ use anchor_spl::token::TokenAccount;
 use borsh::BorshDeserialize;
 
 use crate::error::ProgramError;
-use crate::structs::WriteType;
+use crate::structs::{AccountInfoData, WriteType};
 
 #[derive(Accounts)]
 #[instruction(cache_index: u8)]
@@ -36,6 +36,7 @@ pub fn write<'info>(
     let account_offset: usize;
     let data_length: usize;
 
+    // TODO: make less messy but the main point is to allow more compact instruction data.
     (cache_offset, account_offset, data_length) = match write_type {
         WriteType::AccountBalanceU8(_cache_offset) => (_cache_offset as usize, 0, 8),
         WriteType::AccountBalanceU16(_cache_offset) => (_cache_offset as usize, 0, 16),
@@ -55,16 +56,27 @@ pub fn write<'info>(
             account_offset as usize,
             data_length as usize,
         ),
-        // TODO: Implement these
         WriteType::BorshFieldU8(_cache_offset, _) => (_cache_offset as usize, 0, 0),
         WriteType::BorshFieldU16(_cache_offset, _) => (_cache_offset as usize, 0, 0),
         WriteType::MintAccount => (0, 0, 0),
         WriteType::TokenAccount(_cache_offset) => (_cache_offset as usize, 0, TokenAccount::LEN),
         WriteType::TokenAccountOwner(_cache_offset) => (_cache_offset as usize, 0, 32),
         WriteType::TokenAccountBalance(_cache_offset) => (_cache_offset as usize, 0, 8),
+        WriteType::AccountInfoU8(_cache_offset) => {
+            (_cache_offset as usize, 0, AccountInfoData::size() as usize)
+        }
+        WriteType::AccountInfoU16(_cache_offset) => {
+            (_cache_offset as usize, 0, AccountInfoData::size() as usize)
+        }
+        WriteType::AccountInfoU32(_cache_offset) => {
+            (_cache_offset as usize, 0, AccountInfoData::size() as usize)
+        }
     };
 
-    cache_offset += 8;
+    // Cache offset can never write to the first 8 bytes of the cache account
+    cache_offset = cache_offset
+        .checked_add(8)
+        .ok_or(ProgramError::CacheOutOfRange)?;
 
     match write_type {
         WriteType::AccountBalanceU8(_)
@@ -94,13 +106,15 @@ pub fn write<'info>(
 
             if let Some(target_account) = source_account {
                 if (cache_offset + data_length) < cache_data_length {
-                    let data = target_account.try_borrow_data()?;
+                    let data = target_account.try_borrow_data().map_err(|err| {
+                        msg!("Error: {:?}", err);
+                        ProgramError::AccountBorrowFailed
+                    })?;
                     let data_slice = &data[account_offset..(account_offset + data_length)];
 
                     cache_ref[cache_offset..(cache_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
-                    // TODO: MAKE A BETTER ERROR
                     return Err(ProgramError::NotEnoughAccounts.into());
                 }
             } else {
@@ -108,12 +122,16 @@ pub fn write<'info>(
             }
         }
         WriteType::TokenAccount(_) => {
+            // TODO: Not sure we really need this, could be extracted by user
+
             msg!("write_type: TokenAccount");
             let source_account = ctx.remaining_accounts.first();
 
-            if let Some(target_account) = source_account {
+            if let Some(source_account) = source_account {
+                // TODO: add validation to token account
+
                 if (cache_offset + data_length) < cache_data_length {
-                    let data = target_account.try_borrow_data()?;
+                    let data = source_account.try_borrow_data()?;
                     let data_slice = &data[0..data_length];
 
                     cache_ref[cache_offset..(cache_offset + data_length)]
@@ -153,6 +171,37 @@ pub fn write<'info>(
                     let data = target_account.try_borrow_data()?;
                     let token_account = TokenAccount::try_deserialize(&mut data.as_ref())?;
                     let data_slice = token_account.owner.to_bytes();
+
+                    cache_ref[cache_offset..(cache_offset + data_length)]
+                        .copy_from_slice(data_slice.as_ref());
+                } else {
+                    return Err(ProgramError::NotEnoughAccounts.into());
+                }
+            } else {
+                return Err(ProgramError::NotEnoughAccounts.into());
+            }
+        }
+        WriteType::AccountInfoU8(_)
+        | WriteType::AccountInfoU16(_)
+        | WriteType::AccountInfoU32(_) => {
+            msg!("write_type: AccountInfoU8");
+            let source_account = ctx.remaining_accounts.first();
+
+            if let Some(target_account) = source_account {
+                if (cache_offset + data_length) < cache_data_length {
+                    let account_info = AccountInfoData {
+                        key: *target_account.key,
+                        is_signer: target_account.is_signer,
+                        is_writable: target_account.is_writable,
+                        executable: target_account.executable,
+                        lamports: **target_account.try_borrow_lamports()?, // TODO: make this unwrap nicer
+                        data_length: target_account.try_borrow_data()?.len() as u64, // TODO: make this unwrap nicer
+                        owner: *target_account.owner,
+                        rent_epoch: target_account.rent_epoch,
+                    };
+
+                    let data = account_info.try_to_vec()?; // TODO: map this unwrap error
+                    let data_slice = &data[0..data_length];
 
                     cache_ref[cache_offset..(cache_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());

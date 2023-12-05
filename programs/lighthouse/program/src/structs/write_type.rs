@@ -16,6 +16,13 @@ pub enum WriteType {
     AccountDataU16(u16, u16, u16),
     AccountDataU32(u32, u32, u32),
 
+    // CacheOffset
+    AccountInfoU8(u8),
+    AccountInfoU16(u16),
+    AccountInfoU32(u32),
+
+    // TODO:
+
     // CacheOffset, BorshField
     BorshFieldU8(u8, BorshField),
     BorshFieldU16(u16, BorshField),
@@ -26,4 +33,6 @@ pub enum WriteType {
     TokenAccountOwner(u16),
     TokenAccountBalance(u16),
     // Program Account Assertions
+
+    // Always add variants to the end of this enum to avoid messing with indexers.
 }

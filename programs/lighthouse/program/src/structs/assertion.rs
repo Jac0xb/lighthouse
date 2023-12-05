@@ -4,7 +4,7 @@ use anchor_lang::prelude::{
 };
 use solana_program::pubkey::Pubkey;
 
-use super::{BorshField, BorshValue, Operator};
+use super::{AccountInfoData, BorshField, BorshValue, Operator, OptionalAccountInfoData};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum Assertion {
@@ -22,4 +22,6 @@ pub enum Assertion {
 
     // token balance, operator
     TokenAccountBalance(u64, Operator),
+
+    AccountInfo(OptionalAccountInfoData),
 }
