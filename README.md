@@ -76,3 +76,6 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
 - Protected cache write spaces
   - Think about if it is necessary to assign/protect cache space to transactions/assertion ids
 - Assert on blocktime, slot, etc.
+
+- Write Multi V1
+  - Save on tranasction space by only needing to call write once.
