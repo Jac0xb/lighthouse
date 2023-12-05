@@ -4,7 +4,7 @@
 
 ## Overview
 
-Lighthouse is a Solana program developed to make asertions on Solana state that will fail the transaction if not true. Designed to combat prevalent issues such as MEV (Miner Extractable Value) attacks, and more specifically sandwich attacks. Allows for whitehat probing of Solana programs. Lighthouse empowers developers by enabling assertions about account balances and account state. This ensures that transactions adhere to predefined conditions, with usecases like safeguarding signer assets and maintaining transaction integrity.
+Lighthouse is a Solana program developed to make assertions on Solana state that will fail the transaction if not true. Designed to combat prevalent issues such as MEV (Miner Extractable Value) attacks, and more specifically sandwich attacks. Allows for whitehat probing of Solana programs. Lighthouse empowers developers by enabling assertions about account balances and account state. This ensures that transactions adhere to predefined conditions, with usecases like safeguarding signer assets and maintaining transaction integrity.
 
 ## Features
 
@@ -72,7 +72,7 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
 - Piece-wise instruction CPI constructor
   - Piece-wise write segments of instruction data in a cache and then cpi execute the instruction data
 - Perform arithmetic on cached values
-  - Look into creating expressions which can
+  - Look into creating expressions which can load values, evaluate expression, save back to cache
 - Protected cache write spaces
   - Think about if it is necessary to assign/protect cache space to transactions/assertion ids
 - Assert on blocktime, slot, etc.
