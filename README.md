@@ -79,3 +79,5 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
 
 - Write Multi V1
   - Save on tranasction space by only needing to call write once.
+- Auto-increment validation
+  - Check to make sure transactions are ran in sequence or they fail

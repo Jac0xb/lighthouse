@@ -3,6 +3,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 use super::borsh_field::BorshField;
 
+// TODO: probably worth creating a macro that permeates all these size variants so
+// sdk can optimize space. Need to make sure its smaller than 256 variants though
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {
     AccountBalanceU8(u8),
