@@ -2,7 +2,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use anchor_lang::prelude::*;
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::BorshDeserialize;
 
 pub mod error;
 pub mod processor;
@@ -35,7 +35,7 @@ pub mod lighthouse {
     pub fn write_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
         cache_index: u8,
-        write_type: WriteType,
+        write_type: WriteTypeParameter,
     ) -> Result<()> {
         processor::v1::write(ctx, cache_index, write_type)
     }

@@ -4,19 +4,18 @@ use anchor_lang::prelude::{
 };
 use solana_program::pubkey::Pubkey;
 
-use super::{AccountInfoData, BorshField, BorshValue, Operator, OptionalAccountInfoData};
+use super::{DataValue, Operator, OptionalAccountInfoData};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum Assertion {
-    // offset, borsh type, operator
-    BorshAccountData(u64, BorshField, Operator, BorshValue),
+    // memory offset, assertion
+    Memory(u16, Operator, DataValue),
 
-    RawAccountData(u64, Operator, Vec<u8>),
+    // account data offset, borsh type, operator
+    AccountData(u16, Operator, DataValue),
 
     // balance, operator
     AccountBalance(u64, Operator),
-
-    AccountExists,
 
     AccountOwnedBy(Pubkey),
 

@@ -11,7 +11,7 @@ use super::{
 use anchor_lang::*;
 use lighthouse::{
     processor::Config,
-    structs::{Assertion, Expression, WriteType},
+    structs::{Assertion, Expression, WriteType, WriteTypeParameter},
 };
 use solana_program::{
     instruction::{AccountMeta, Instruction},
@@ -108,7 +108,8 @@ impl Program {
         logical_expression: Option<Vec<Expression>>,
     ) -> AssertBuilder {
         let accounts = lighthouse::accounts::AssertV1 {
-            system_program: system_program::id(),
+            // system_program: system_program::id(),
+            cache: None,
         };
 
         let assertion_clone = (assertions).clone();
@@ -128,7 +129,8 @@ impl Program {
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: (lighthouse::accounts::AssertV1 {
-                    system_program: system_program::id(),
+                    // system_program: system_program::id(),
+                    cache: None,
                 })
                 .to_account_metas(None),
                 data: (lighthouse::instruction::AssertV1 {
@@ -196,7 +198,7 @@ impl Program {
         payer: &Keypair,
         source_account: Pubkey,
         cache_index: u8,
-        write_type: WriteType,
+        write_type_parameter: WriteTypeParameter,
     ) -> CacheLoadAccountV1Builder {
         let accounts = lighthouse::accounts::WriteV1 {
             system_program: system_program::id(),
@@ -205,10 +207,10 @@ impl Program {
             rent: sysvar::rent::id(),
         };
 
-        let write_type_clone = write_type.clone();
+        let write_type_clone = write_type_parameter.clone();
 
         let data = lighthouse::instruction::WriteV1 {
-            write_type,
+            write_type: write_type_parameter,
             cache_index,
         };
 
