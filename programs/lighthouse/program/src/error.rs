@@ -10,12 +10,14 @@ pub enum ProgramError {
     AssertionFailed,
     #[msg("NotEnoughAccounts")]
     NotEnoughAccounts,
-    #[msg("BorshValueMismatch")]
-    BorshValueMismatch,
+    #[msg("DataValueMismatch")]
+    DataValueMismatch,
     #[msg("UnsupportedOperator")]
     UnsupportedOperator,
     #[msg("CacheOutOfRange")]
     CacheOutOfRange,
     #[msg("AccountBorrowFailed")]
     AccountBorrowFailed,
+    #[msg("InvalidAccount")]
+    InvalidAccount,
 }

@@ -4,12 +4,12 @@ use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::ProgramError;
-use crate::structs::{Assertion, BorshField, BorshValue, Expression, Operator};
-use crate::utils::process_value;
+use crate::structs::{Assertion, Expression};
 
 #[derive(Accounts)]
 pub struct AssertV1<'info> {
-    pub system_program: Program<'info, System>,
+    // TODO:
+    pub cache: Option<UncheckedAccount<'info>>,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
@@ -53,241 +53,51 @@ pub fn assert<'info>(
         }
     }
 
-    for (i, assertion_type) in assertions.into_iter().enumerate() {
+    for (i, assertion) in assertions.into_iter().enumerate() {
         if (i + 1) > remaining_accounts.len() {
             msg!("The next assertion requires more accounts than were provided");
             return Err(ProgramError::NotEnoughAccounts.into());
         }
 
-        let mut assertion_result = true;
-        if verbose {
-            msg!("Testing assertion {:?}", assertion_type);
-        }
+        let mut assertion_result = false;
 
-        match assertion_type {
-            Assertion::AccountExists => {
-                let account = &remaining_accounts[i];
-
-                if account.data_is_empty() && account.lamports() == 0 {
-                    assertion_result = false;
-                }
-            }
+        match assertion {
             Assertion::AccountOwnedBy(pubkey) => {
                 let account = &remaining_accounts[i];
-
-                if !account.owner.key().eq(&pubkey) {
-                    assertion_result = false;
-                }
+                assertion_result = account.owner.key().eq(&pubkey);
             }
-            Assertion::RawAccountData(offset, operator, expected_slice) => {
-                let account = &remaining_accounts[i];
-                let data = account.try_borrow_data()?;
+            Assertion::Memory(cache_offset, operator, memory_value) => {
+                let cache = ctx.accounts.cache.as_ref().unwrap(); // TODO: Graceful error handling
+                let cache_data = cache.try_borrow_data()?; // TODO: Graceful error handling
 
-                let slice = &data[offset as usize..(offset + expected_slice.len() as u64) as usize];
-
-                match operator {
-                    Operator::Equal => {
-                        if !slice.eq(&expected_slice) {
-                            assertion_result = false;
-                        }
-                    }
-                    Operator::NotEqual => {
-                        if slice.eq(&expected_slice) {
-                            assertion_result = false;
-                        }
-                    }
-                    _ => return Err(ProgramError::UnsupportedOperator.into()),
-                }
-
-                if verbose {
-                    msg!(
-                        "{} Assertion::RawAccountData ({}) -> {:?} {} {:?}",
-                        if assertion_result {
-                            "[✅] SUCCESS"
-                        } else {
-                            "[❌] FAIL   "
-                        },
-                        account.key().to_string(),
-                        slice,
-                        operator.format(),
-                        expected_slice,
-                    );
-                }
-            }
-            Assertion::BorshAccountData(offset, borsh_field, operator, expected_value) => {
-                let account = &remaining_accounts[i];
-                let data = account.try_borrow_data()?;
-
-                let value_str: String;
-                let expected_value_str: String;
-
-                match borsh_field {
-                    BorshField::U8 => {
-                        (value_str, expected_value_str, assertion_result) = process_value::<u8>(
-                            &data,
-                            offset as u32,
-                            1,
-                            &match expected_value {
-                                BorshValue::U8(value) => value,
-                                _ => return Err(ProgramError::BorshValueMismatch.into()),
-                            },
-                            &borsh_field,
-                            &operator,
-                        )?;
-                    }
-                    BorshField::I8 => {
-                        let slice = &data[offset as usize..(offset + 1) as usize];
-                        let value = i8::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::I8(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::U16 => {
-                        let expected_value = match expected_value {
-                            BorshValue::U16(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        let slice = &data[offset as usize..(offset + 2) as usize];
-                        let value = u16::try_from_slice(slice)?;
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::I16 => {
-                        let expected_value = match expected_value {
-                            BorshValue::I16(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        let slice = &data[offset as usize..(offset + 2) as usize];
-                        let value = i16::try_from_slice(slice)?;
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::U32 => {
-                        let slice = &data[offset as usize..(offset + 4) as usize];
-                        let value = u32::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::U32(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::I32 => {
-                        let slice = &data[offset as usize..(offset + 4) as usize];
-                        let value = i32::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::I32(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::U64 => {
-                        let slice: &[u8] = &data[offset as usize..(offset + 8) as usize];
-                        let value = u64::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::U64(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::I64 => {
-                        let slice: &[u8] = &data[offset as usize..(offset + 8) as usize];
-                        let value = i64::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::I64(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::U128 => {
-                        let slice: &[u8] = &data[offset as usize..(offset + 16) as usize];
-                        let value = u128::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::U128(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                    BorshField::I128 => {
-                        let slice: &[u8] = &data[offset as usize..(offset + 16) as usize];
-                        let value = i128::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::I128(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-
-                        // let value = i128::from_le_bytes(*array_ref![data, offset as usize, 16]);
-                    }
-                    BorshField::Bytes(bytes) => {
-                        let slice: &[u8] =
-                            &data[offset as usize..(offset + bytes.len() as u64) as usize];
-                        let value = u128::try_from_slice(slice)?;
-
-                        let expected_value = match expected_value {
-                            BorshValue::U128(value) => value,
-                            _ => return Err(ProgramError::BorshValueMismatch.into()),
-                        };
-
-                        match operator {
-                            Operator::Equal => {}
-                            Operator::NotEqual => {}
-                            _ => return Err(ProgramError::UnsupportedOperator.into()),
-                        }
-
-                        assertion_result = operator.is_true(&value, &expected_value);
-
-                        value_str = value.to_string();
-                        expected_value_str = expected_value.to_string();
-                    }
-                }
+                let (value_str, expected_value_str, assertion_result) = memory_value
+                    .deserialize_and_compare(*cache_data, (cache_offset + 8) as usize, &operator)?;
 
                 msg!(
-                    "{} {} Assertion::BorshAccountData ({}) -> {} {} {}",
+                    "{} {} AssertionParameter::Memory ({}) -> {} {} {}",
+                    format!("[{:?}]", i),
+                    if assertion_result {
+                        "[✅] SUCCESS"
+                    } else {
+                        "[❌] FAIL   "
+                    },
+                    cache.key().to_string(),
+                    value_str,
+                    operator.format(),
+                    expected_value_str,
+                );
+            }
+            Assertion::AccountData(account_offset, operator, memory_value) => {
+                let account = &remaining_accounts[i];
+                let account_data = account.try_borrow_data()?;
+
+                let (value_str, expected_value_str, result) = memory_value
+                    .deserialize_and_compare(*account_data, account_offset as usize, &operator)?;
+
+                assertion_result = result;
+
+                msg!(
+                    "{} {} Assertion::AccountData ({}) -> {} {} {}",
                     format!("[{:?}]", i),
                     if assertion_result {
                         "[✅] SUCCESS"
@@ -323,6 +133,62 @@ pub fn assert<'info>(
             }
             Assertion::TokenAccountBalance(expected_balance, operator) => {
                 return Err(ProgramError::Unimplemented.into());
+            }
+            Assertion::AccountInfo(optional_account_info_data) => {
+                let account = &remaining_accounts[i];
+
+                let account_info_data = optional_account_info_data;
+                // {
+                //     OptionalAccountInfoData::None => return Err(ProgramError::Unimplemented.into()),
+                //     OptionalAccountInfoData::Some(account_info_data) => account_info_data,
+                // };
+
+                let mut assertion_result = true;
+
+                if let Some(owner) = &account_info_data.owner {
+                    if !account.owner.key().eq(owner) {
+                        assertion_result = false;
+                    }
+                }
+
+                if let Some(lamports) = &account_info_data.lamports {
+                    if !account.get_lamports().eq(lamports) {
+                        assertion_result = false;
+                    }
+                }
+
+                // if let Some(data_length) = &account_info_data.data_length {
+                //     if !account.data_len().eq(&(data_length as usize)) {
+                //         assertion_result = false;
+                //     }
+                // }
+
+                // if let Some(data) = &account_info_data.data {
+                //     let account_data = account.try_borrow_data()?;
+
+                //     if !account_data.eq(data) {
+                //         assertion_result = false;
+                //     }
+                // }
+
+                if let Some(rent_epoch) = &account_info_data.rent_epoch {
+                    if !account.rent_epoch.eq(rent_epoch) {
+                        assertion_result = false;
+                    }
+                }
+
+                if verbose {
+                    msg!(
+                        "{} Assertion::AccountInfo ({}) -> {:?}",
+                        if assertion_result {
+                            "[✅] SUCCESS"
+                        } else {
+                            "[❌] FAIL   "
+                        },
+                        account.key().to_string(),
+                        account_info_data,
+                    );
+                }
             }
             (_) => {} // REMOVE
         }
