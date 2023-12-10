@@ -23,16 +23,14 @@ impl AccountInfoData {
     }
 }
 
-// TODO: check data borsh size of this struct
-// Created the optionze macro but intellisense sucks
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub struct OptionalAccountInfoData {
-    pub key: Option<Pubkey>,
-    pub lamports: Option<u64>,
-    pub data_length: Option<u64>,
-    pub owner: Option<Pubkey>,
-    pub rent_epoch: Option<u64>,
-    pub is_signer: Option<bool>,
-    pub is_writable: Option<bool>,
-    pub executable: Option<bool>,
+pub enum AccountInfoDataField {
+    Key(Pubkey),
+    Lamports(u64),
+    DataLength(u64),
+    Owner(Pubkey),
+    RentEpoch(u64),
+    IsSigner(bool),
+    IsWritable(bool),
+    Executable(bool),
 }

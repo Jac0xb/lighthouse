@@ -28,7 +28,7 @@ impl WriteType {
             WriteType::AccountData(_, len) => *len as usize,
             WriteType::AccountInfo => 8,
             WriteType::DataValue(memory_value) => match memory_value {
-                DataValue::U8(_) | DataValue::I8(_) => 1,
+                DataValue::Bool(_) | DataValue::U8(_) | DataValue::I8(_) => 1,
                 DataValue::U16(_) | DataValue::I16(_) => 2,
                 DataValue::U32(_) | DataValue::I32(_) => 4,
                 DataValue::U64(_) | DataValue::I64(_) => 8,
@@ -49,7 +49,7 @@ impl WriteType {
             WriteType::AccountBalance => true,
             WriteType::AccountData(_, _) => true,
             WriteType::AccountInfo => true,
-            WriteType::DataValue(_) => false,
+            WriteType::DataValue(_) => true,
             WriteType::MintAccount => {
                 account.owner == &spl_token::id() && account.data_len() == Mint::LEN
             }
