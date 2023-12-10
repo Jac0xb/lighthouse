@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::ProgramError;
-use crate::structs::{Assertion, Expression};
+use crate::structs::{AccountInfoDataField, Assertion, Expression};
 
 #[derive(Accounts)]
 pub struct AssertV1<'info> {
@@ -23,7 +23,7 @@ pub fn assert<'info>(
     logical_expression: Option<Vec<Expression>>,
     options: Option<Config>,
 ) -> Result<()> {
-    let remaining_accounts = &ctx.remaining_accounts.to_vec();
+    let remaining_accounts = &mut ctx.remaining_accounts.iter();
 
     let verbose = options.map(|options| options.verbose).unwrap_or(false);
     let mut assertion_results: Vec<bool> = vec![];
@@ -54,24 +54,21 @@ pub fn assert<'info>(
     }
 
     for (i, assertion) in assertions.into_iter().enumerate() {
-        if (i + 1) > remaining_accounts.len() {
-            msg!("The next assertion requires more accounts than were provided");
-            return Err(ProgramError::NotEnoughAccounts.into());
-        }
-
         let mut assertion_result = false;
 
         match assertion {
             Assertion::AccountOwnedBy(pubkey) => {
-                let account = &remaining_accounts[i];
+                let account = remaining_accounts.next().unwrap();
                 assertion_result = account.owner.key().eq(&pubkey);
             }
             Assertion::Memory(cache_offset, operator, memory_value) => {
                 let cache = ctx.accounts.cache.as_ref().unwrap(); // TODO: Graceful error handling
                 let cache_data = cache.try_borrow_data()?; // TODO: Graceful error handling
 
-                let (value_str, expected_value_str, assertion_result) = memory_value
+                let (value_str, expected_value_str, result) = memory_value
                     .deserialize_and_compare(*cache_data, (cache_offset + 8) as usize, &operator)?;
+
+                assertion_result = result;
 
                 msg!(
                     "{} {} AssertionParameter::Memory ({}) -> {} {} {}",
@@ -81,14 +78,14 @@ pub fn assert<'info>(
                     } else {
                         "[❌] FAIL   "
                     },
-                    cache.key().to_string(),
+                    "Cache...".to_string(),
                     value_str,
                     operator.format(),
                     expected_value_str,
                 );
             }
             Assertion::AccountData(account_offset, operator, memory_value) => {
-                let account = &remaining_accounts[i];
+                let account = remaining_accounts.next().unwrap();
                 let account_data = account.try_borrow_data()?;
 
                 let (value_str, expected_value_str, result) = memory_value
@@ -98,23 +95,23 @@ pub fn assert<'info>(
 
                 msg!(
                     "{} {} Assertion::AccountData ({}) -> {} {} {}",
-                    format!("[{:?}]", i),
+                    format!("[{:02}]", i),
                     if assertion_result {
                         "[✅] SUCCESS"
                     } else {
                         "[❌] FAIL   "
                     },
-                    account.key().to_string(),
+                    truncate_pubkey(&account.key()),
                     value_str,
                     operator.format(),
                     expected_value_str,
                 );
             }
             Assertion::AccountBalance(expected_balance, operator) => {
-                let account = &remaining_accounts[i];
+                let account = remaining_accounts.next().unwrap();
 
                 assertion_result =
-                    operator.is_true(&**account.try_borrow_lamports()?, &expected_balance);
+                    operator.evaluate(&**account.try_borrow_lamports()?, &expected_balance);
 
                 if verbose {
                     msg!(
@@ -124,7 +121,7 @@ pub fn assert<'info>(
                         } else {
                             "[❌] FAIL   "
                         },
-                        account.key().to_string(),
+                        truncate_pubkey(&account.key()),
                         account.get_lamports(),
                         operator.format(),
                         expected_balance,
@@ -134,63 +131,56 @@ pub fn assert<'info>(
             Assertion::TokenAccountBalance(expected_balance, operator) => {
                 return Err(ProgramError::Unimplemented.into());
             }
-            Assertion::AccountInfo(optional_account_info_data) => {
-                let account = &remaining_accounts[i];
+            Assertion::AccountInfo(account_info_fields, operator) => {
+                let account = remaining_accounts.next().unwrap();
 
-                let account_info_data = optional_account_info_data;
-                // {
-                //     OptionalAccountInfoData::None => return Err(ProgramError::Unimplemented.into()),
-                //     OptionalAccountInfoData::Some(account_info_data) => account_info_data,
-                // };
-
-                let mut assertion_result = true;
-
-                if let Some(owner) = &account_info_data.owner {
-                    if !account.owner.key().eq(owner) {
-                        assertion_result = false;
+                for account_info_field in account_info_fields {
+                    match account_info_field {
+                        AccountInfoDataField::Key(pubkey) => {
+                            assertion_result = operator.evaluate(&account.key(), &pubkey);
+                        }
+                        AccountInfoDataField::Owner(pubkey) => {
+                            assertion_result = operator.evaluate(account.owner, &pubkey);
+                        }
+                        AccountInfoDataField::Lamports(lamports) => {
+                            assertion_result =
+                                operator.evaluate(&account.get_lamports(), &lamports);
+                        }
+                        AccountInfoDataField::DataLength(data_length) => {
+                            assertion_result =
+                                operator.evaluate(&(account.data_len() as u64), &data_length);
+                        }
+                        AccountInfoDataField::Executable(executable) => {
+                            assertion_result = operator.evaluate(&account.executable, &executable);
+                        }
+                        AccountInfoDataField::IsSigner(is_signer) => {
+                            assertion_result = operator.evaluate(&account.is_signer, &is_signer);
+                        }
+                        AccountInfoDataField::IsWritable(is_writable) => {
+                            assertion_result =
+                                operator.evaluate(&account.is_writable, &is_writable);
+                        }
+                        AccountInfoDataField::RentEpoch(rent_epoch) => {
+                            assertion_result =
+                                operator.evaluate(&account.rent_epoch as &u64, &rent_epoch);
+                        }
                     }
                 }
 
-                if let Some(lamports) = &account_info_data.lamports {
-                    if !account.get_lamports().eq(lamports) {
-                        assertion_result = false;
-                    }
-                }
-
-                // if let Some(data_length) = &account_info_data.data_length {
-                //     if !account.data_len().eq(&(data_length as usize)) {
-                //         assertion_result = false;
-                //     }
+                // if verbose {
+                //     msg!(
+                //         "{} Assertion::AccountInfo ({}) -> {:?}",
+                //         if assertion_result {
+                //             "[✅] SUCCESS"
+                //         } else {
+                //             "[❌] FAIL   "
+                //         },
+                //         account.key().to_string(),
+                //         account_info_data,
+                //     );
                 // }
-
-                // if let Some(data) = &account_info_data.data {
-                //     let account_data = account.try_borrow_data()?;
-
-                //     if !account_data.eq(data) {
-                //         assertion_result = false;
-                //     }
-                // }
-
-                if let Some(rent_epoch) = &account_info_data.rent_epoch {
-                    if !account.rent_epoch.eq(rent_epoch) {
-                        assertion_result = false;
-                    }
-                }
-
-                if verbose {
-                    msg!(
-                        "{} Assertion::AccountInfo ({}) -> {:?}",
-                        if assertion_result {
-                            "[✅] SUCCESS"
-                        } else {
-                            "[❌] FAIL   "
-                        },
-                        account.key().to_string(),
-                        account_info_data,
-                    );
-                }
             }
-            (_) => {} // REMOVE
+            _ => {} // REMOVE
         }
 
         assertion_results.push(assertion_result);
@@ -270,4 +260,12 @@ pub fn assert<'info>(
     }
 
     Ok(())
+}
+
+pub fn truncate_pubkey(pubkey: &Pubkey) -> String {
+    let mut pubkey_str = pubkey.to_string();
+    pubkey_str.truncate(5);
+    pubkey_str.push_str("...");
+
+    pubkey_str
 }

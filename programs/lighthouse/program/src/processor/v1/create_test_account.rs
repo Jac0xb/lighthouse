@@ -13,7 +13,8 @@ pub struct TestAccountV1 {
     pub u128: u128,
     pub i128: i128,
     pub bytes: [u8; 32],
-    pub string: String,
+    pub true_: bool,
+    pub false_: bool,
 }
 
 #[derive(Accounts)]
@@ -50,7 +51,8 @@ pub fn create_test_account<'info>(
     test_account.u128 = (u64::MAX as u128) + 1;
     test_account.i128 = (i64::MIN as i128) - 1;
     test_account.bytes = [u8::MAX; 32];
-    test_account.string = "Hello, World!".to_string();
+    test_account.true_ = true;
+    test_account.false_ = false;
 
     Ok(())
 }

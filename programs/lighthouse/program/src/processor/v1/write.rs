@@ -86,7 +86,8 @@ pub fn write<'info>(
             let account_offset = account_offset as usize;
 
             if let Some(target_account) = target_account {
-                if write_type.account_validation(target_account) {
+                if !write_type.account_validation(target_account) {
+                    msg!("Could not validation account");
                     return Err(ProgramError::InvalidAccount.into());
                 }
 

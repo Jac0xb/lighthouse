@@ -106,11 +106,9 @@ impl Program {
         assertions: Vec<Assertion>,
         additional_accounts: Vec<Pubkey>,
         logical_expression: Option<Vec<Expression>>,
+        cache: Option<Pubkey>,
     ) -> AssertBuilder {
-        let accounts = lighthouse::accounts::AssertV1 {
-            // system_program: system_program::id(),
-            cache: None,
-        };
+        let accounts = lighthouse::accounts::AssertV1 { cache };
 
         let assertion_clone = (assertions).clone();
         let logical_expression_clone = (logical_expression).clone();
@@ -130,7 +128,7 @@ impl Program {
                 program_id: lighthouse::id(),
                 accounts: (lighthouse::accounts::AssertV1 {
                     // system_program: system_program::id(),
-                    cache: None,
+                    cache,
                 })
                 .to_account_metas(None),
                 data: (lighthouse::instruction::AssertV1 {

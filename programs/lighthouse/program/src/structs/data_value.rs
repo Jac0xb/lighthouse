@@ -10,6 +10,7 @@ use super::operator::Operator;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataType {
+    Bool,
     U8,
     I8,
     U16,
@@ -26,6 +27,7 @@ pub enum DataType {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValue {
+    Bool(bool),
     U8(u8),
     I8(i8),
     U16(u16),
@@ -41,8 +43,45 @@ pub enum DataValue {
 }
 
 impl DataValue {
+    pub fn get_data_type(&self) -> DataType {
+        match self {
+            DataValue::Bool(_) => DataType::Bool,
+            DataValue::U8(_) => DataType::U8,
+            DataValue::I8(_) => DataType::I8,
+            DataValue::U16(_) => DataType::U16,
+            DataValue::I16(_) => DataType::I16,
+            DataValue::U32(_) => DataType::U32,
+            DataValue::I32(_) => DataType::I32,
+            DataValue::U64(_) => DataType::U64,
+            DataValue::I64(_) => DataType::I64,
+            DataValue::U128(_) => DataType::U128,
+            DataValue::I128(_) => DataType::I128,
+            DataValue::Bytes(_) => DataType::Bytes,
+            DataValue::Pubkey(_) => DataType::Pubkey,
+        }
+    }
+
+    pub fn size(&self) -> usize {
+        match self {
+            DataValue::Bool(_) => 1,
+            DataValue::U8(_) => 1,
+            DataValue::I8(_) => 1,
+            DataValue::U16(_) => 2,
+            DataValue::I16(_) => 2,
+            DataValue::U32(_) => 4,
+            DataValue::I32(_) => 4,
+            DataValue::U64(_) => 8,
+            DataValue::I64(_) => 8,
+            DataValue::U128(_) => 16,
+            DataValue::I128(_) => 16,
+            DataValue::Bytes(value) => value.len(),
+            DataValue::Pubkey(_) => 32,
+        }
+    }
+
     pub fn serialize(self) -> Vec<u8> {
         match self {
+            DataValue::Bool(value) => vec![value as u8],
             DataValue::U8(value) => value.to_le_bytes().to_vec(),
             DataValue::I8(value) => value.to_le_bytes().to_vec(),
             DataValue::U16(value) => value.to_le_bytes().to_vec(),
@@ -59,6 +98,14 @@ impl DataValue {
     }
     pub fn deserialize(data_type: DataType, bytes: &[u8]) -> Self {
         match data_type {
+            DataType::Bool => {
+                let len = bytes.len();
+                if len != 1 {
+                    panic!("Invalid bool length: {}", len);
+                } else {
+                    DataValue::Bool(bytes[0] != 0)
+                }
+            }
             DataType::U8 => DataValue::U8(u8::from_le_bytes(bytes.try_into().unwrap())),
             DataType::I8 => DataValue::I8(i8::from_le_bytes(bytes.try_into().unwrap())),
             DataType::U16 => DataValue::U16(u16::from_le_bytes(bytes.try_into().unwrap())),
@@ -78,18 +125,18 @@ impl DataValue {
 
     pub fn compare(&self, other: &Self, operator: Operator) -> bool {
         match (self, other) {
-            (DataValue::U8(a), DataValue::U8(b)) => operator.is_true(a, b),
-            (DataValue::I8(a), DataValue::I8(b)) => operator.is_true(a, b),
-            (DataValue::U16(a), DataValue::U16(b)) => operator.is_true(a, b),
-            (DataValue::I16(a), DataValue::I16(b)) => operator.is_true(a, b),
-            (DataValue::U32(a), DataValue::U32(b)) => operator.is_true(a, b),
-            (DataValue::I32(a), DataValue::I32(b)) => operator.is_true(a, b),
-            (DataValue::U64(a), DataValue::U64(b)) => operator.is_true(a, b),
-            (DataValue::I64(a), DataValue::I64(b)) => operator.is_true(a, b),
-            (DataValue::U128(a), DataValue::U128(b)) => operator.is_true(a, b),
-            (DataValue::I128(a), DataValue::I128(b)) => operator.is_true(a, b),
-            (DataValue::Bytes(a), DataValue::Bytes(b)) => operator.is_true(a, b),
-            (DataValue::Pubkey(a), DataValue::Pubkey(b)) => operator.is_true(a, b),
+            (DataValue::U8(a), DataValue::U8(b)) => operator.evaluate(a, b),
+            (DataValue::I8(a), DataValue::I8(b)) => operator.evaluate(a, b),
+            (DataValue::U16(a), DataValue::U16(b)) => operator.evaluate(a, b),
+            (DataValue::I16(a), DataValue::I16(b)) => operator.evaluate(a, b),
+            (DataValue::U32(a), DataValue::U32(b)) => operator.evaluate(a, b),
+            (DataValue::I32(a), DataValue::I32(b)) => operator.evaluate(a, b),
+            (DataValue::U64(a), DataValue::U64(b)) => operator.evaluate(a, b),
+            (DataValue::I64(a), DataValue::I64(b)) => operator.evaluate(a, b),
+            (DataValue::U128(a), DataValue::U128(b)) => operator.evaluate(a, b),
+            (DataValue::I128(a), DataValue::I128(b)) => operator.evaluate(a, b),
+            (DataValue::Bytes(a), DataValue::Bytes(b)) => operator.evaluate(a, b),
+            (DataValue::Pubkey(a), DataValue::Pubkey(b)) => operator.evaluate(a, b),
             (_, _) => false,
         }
     }
@@ -100,173 +147,159 @@ impl DataValue {
         offset: usize,
         operator: &Operator,
     ) -> Result<(String, String, bool), ProgramError> {
-        let mut value_str = String::new();
-        let mut expected_value_str = String::new();
-        let mut assertion_result = false;
+        let slice = &data[offset..(offset + self.size())];
+        let value = DataValue::deserialize(self.get_data_type(), slice);
 
         match self {
-            DataValue::U8(expected_value) => {
-                let slice = &data[offset as usize..(offset + 1) as usize];
-                let value = DataValue::deserialize(DataType::U8, slice);
+            DataValue::Bool(expected_value) => {
+                let value = match value {
+                    DataValue::Bool(value) => value,
+                    _ => return Err(ProgramError::DataValueMismatch),
+                };
 
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
+            }
+            DataValue::U8(expected_value) => {
                 let value = match value {
                     DataValue::U8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = expected_value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I8(expected_value) => {
-                let slice = &data[offset as usize..(offset + 1) as usize];
-                let value = DataValue::deserialize(DataType::I8, slice);
-
                 let value = match value {
                     DataValue::I8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U16(expected_value) => {
-                let slice = &data[offset as usize..(offset + 2) as usize];
-                let value = DataValue::deserialize(DataType::U16, slice);
-
                 let value = match value {
                     DataValue::U16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I16(expected_value) => {
-                let slice = &data[offset as usize..(offset + 2) as usize];
-                let value = DataValue::deserialize(DataType::I16, slice);
-
                 let value = match value {
                     DataValue::I16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = expected_value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U32(expected_value) => {
-                let slice = &data[offset as usize..(offset + 4) as usize];
-                let value = DataValue::deserialize(DataType::U32, slice);
-
                 let value = match value {
                     DataValue::U32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I32(expected_value) => {
-                let slice = &data[offset as usize..(offset + 4) as usize];
-                let value = DataValue::deserialize(DataType::I32, slice);
-
                 let value = match value {
                     DataValue::I32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U64(expected_value) => {
-                let slice = &data[offset as usize..(offset + 8) as usize];
-                let value = DataValue::deserialize(DataType::U64, slice);
-
                 let value = match value {
                     DataValue::U64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I64(expected_value) => {
-                let slice = &data[offset as usize..(offset + 8) as usize];
-                let value = DataValue::deserialize(DataType::I64, slice);
-
                 let value = match value {
                     DataValue::I64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U128(expected_value) => {
-                let slice = &data[offset as usize..(offset + 16) as usize];
-                let value = DataValue::deserialize(DataType::U128, slice);
-
                 let value = match value {
                     DataValue::U128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = expected_value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I128(expected_value) => {
-                let slice = &data[offset as usize..(offset + 16) as usize];
-                let value = DataValue::deserialize(DataType::I128, slice);
-
                 let value = match value {
                     DataValue::I128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::Bytes(expected_value) => {
-                let slice: &[u8] = &data[offset as usize..(offset + expected_value.len() as usize)];
-                let value = DataValue::deserialize(DataType::Bytes, slice);
-
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
-                    _ => return Err(ProgramError::UnsupportedOperator.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 }
 
                 let value = match value {
                     DataValue::Bytes(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch.into()),
+                    _ => return Err(ProgramError::DataValueMismatch),
                 };
 
                 // print array
-                value_str = value
+                let value_str = value
                     .iter()
                     .map(|byte| format!("{:02x}", byte))
                     .collect::<Vec<String>>()
                     .join("");
-                expected_value_str = expected_value
+                let expected_value_str = expected_value
                     .iter()
                     .map(|byte| format!("{:02x}", byte))
                     .collect::<Vec<String>>()
                     .join("");
-                assertion_result = operator.is_true(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, &expected_value);
+
+                Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::Pubkey(expected_value) => {
-                let slice = &data[offset as usize..(offset + 32) as usize];
-                let value = DataValue::deserialize(DataType::Pubkey, slice);
-
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
@@ -278,12 +311,12 @@ impl DataValue {
                     _ => return Err(ProgramError::DataValueMismatch),
                 };
 
-                value_str = value_str.to_string();
-                expected_value_str = expected_value.to_string();
-                assertion_result = operator.is_true(&value, &expected_value);
+                let value_str = value.to_string();
+                let expected_value_str = expected_value.to_string();
+                let assertion_result = operator.evaluate(&value, &expected_value);
+
+                Ok((value_str, expected_value_str, assertion_result))
             }
         }
-
-        Ok((value_str, expected_value_str, assertion_result))
     }
 }
