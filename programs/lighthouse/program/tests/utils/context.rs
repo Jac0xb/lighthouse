@@ -1,6 +1,4 @@
-use std::fmt::Display;
-
-use super::{clone_keypair, program_test, BanksResult, Error, Result};
+use super::{clone_keypair, program_test, Error, Result};
 use solana_program::pubkey::Pubkey;
 use solana_program_test::{BanksClient, ProgramTestContext, ProgramTestError};
 use solana_sdk::{

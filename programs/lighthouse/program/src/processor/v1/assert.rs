@@ -66,12 +66,12 @@ pub fn assert<'info>(
                 let cache_data = cache.try_borrow_data()?; // TODO: Graceful error handling
 
                 let (value_str, expected_value_str, result) = memory_value
-                    .deserialize_and_compare(*cache_data, (cache_offset + 8) as usize, &operator)?;
+                    .deserialize_and_compare(cache_data, (cache_offset + 8) as usize, &operator)?;
 
                 assertion_result = result;
 
                 msg!(
-                    "{} {} AssertionParameter::Memory ({}) -> {} {} {}",
+                    "{} {} Assertion::Memory ({}) -> {} {} {}",
                     format!("[{:?}]", i),
                     if assertion_result {
                         "[✅] SUCCESS"
@@ -89,7 +89,7 @@ pub fn assert<'info>(
                 let account_data = account.try_borrow_data()?;
 
                 let (value_str, expected_value_str, result) = memory_value
-                    .deserialize_and_compare(*account_data, account_offset as usize, &operator)?;
+                    .deserialize_and_compare(account_data, account_offset as usize, &operator)?;
 
                 assertion_result = result;
 
@@ -128,7 +128,7 @@ pub fn assert<'info>(
                     );
                 }
             }
-            Assertion::TokenAccountBalance(expected_balance, operator) => {
+            Assertion::TokenAccountBalance(_, _) => {
                 return Err(ProgramError::Unimplemented.into());
             }
             Assertion::AccountInfo(account_info_fields, operator) => {
@@ -166,21 +166,7 @@ pub fn assert<'info>(
                         }
                     }
                 }
-
-                // if verbose {
-                //     msg!(
-                //         "{} Assertion::AccountInfo ({}) -> {:?}",
-                //         if assertion_result {
-                //             "[✅] SUCCESS"
-                //         } else {
-                //             "[❌] FAIL   "
-                //         },
-                //         account.key().to_string(),
-                //         account_info_data,
-                //     );
-                // }
             }
-            _ => {} // REMOVE
         }
 
         assertion_results.push(assertion_result);

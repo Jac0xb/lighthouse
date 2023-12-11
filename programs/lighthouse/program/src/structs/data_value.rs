@@ -1,3 +1,5 @@
+use std::cell::Ref;
+
 use anchor_lang::prelude::{
     borsh,
     borsh::{BorshDeserialize, BorshSerialize},
@@ -143,7 +145,7 @@ impl DataValue {
 
     pub fn deserialize_and_compare(
         self,
-        data: &[u8],
+        data: Ref<'_, &mut [u8]>,
         offset: usize,
         operator: &Operator,
     ) -> Result<(String, String, bool), ProgramError> {
