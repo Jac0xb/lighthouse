@@ -1,6 +1,4 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::error::MetadataError;
-use num_traits::FromPrimitive;
 
 #[error_code]
 pub enum ProgramError {
@@ -14,10 +12,25 @@ pub enum ProgramError {
     DataValueMismatch,
     #[msg("UnsupportedOperator")]
     UnsupportedOperator,
-    #[msg("CacheOutOfRange")]
-    CacheOutOfRange,
+    #[msg("OutOfRange")]
+    OutOfRange,
     #[msg("AccountBorrowFailed")]
     AccountBorrowFailed,
     #[msg("InvalidAccount")]
     InvalidAccount,
+
+    #[msg("InvalidDataLength")]
+    InvalidDataLength,
+
+    #[msg("AccountOutOfRange")]
+    AccountOutOfRange,
+
+    #[msg("AccountOwnerValidationFailed")]
+    AccountOwnerValidationFailed,
+
+    #[msg("AccountFundedValidationFailed")]
+    AccountFundedValidationFailed,
+
+    #[msg("AccountDiscriminatorValidationFailed")]
+    AccountDiscriminatorValidationFailed,
 }

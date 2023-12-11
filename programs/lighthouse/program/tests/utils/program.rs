@@ -1,7 +1,7 @@
-use crate::{find_cache_account, find_test_account};
-
 use super::{
     clone_keypair,
+    context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},
+    process_transaction_assert_success,
     tx_builder::{
         AssertBuilder, CacheLoadAccountV1Builder, CreateCacheAccountBuilder,
         CreateTestAccountV1Builder, TxBuilder,
@@ -11,7 +11,7 @@ use super::{
 use anchor_lang::*;
 use lighthouse::{
     processor::Config,
-    structs::{Assertion, Expression, WriteType, WriteTypeParameter},
+    structs::{Assertion, Expression, WriteTypeParameter},
 };
 use solana_program::{
     instruction::{AccountMeta, Instruction},
@@ -26,22 +26,12 @@ use solana_sdk::{
     transaction::Transaction,
 };
 
-// A convenience object that records some of the parameters for compressed
-// trees and generates TX builders with the default configuration for each
-// operation.
 pub struct Program {
     client: BanksClient,
 }
 
 impl Program {
-    // This and `with_creator` use a bunch of defaults; things can be
-    // customized some more via the public access, or we can add extra
-    // methods to make things even easier.
     pub fn new(client: BanksClient) -> Self {
-        Self::with_creator(&Keypair::new(), client)
-    }
-
-    pub fn with_creator(tree_creator: &Keypair, client: BanksClient) -> Self {
         Program { client }
     }
 
@@ -126,11 +116,7 @@ impl Program {
             (),
             vec![Instruction {
                 program_id: lighthouse::id(),
-                accounts: (lighthouse::accounts::AssertV1 {
-                    // system_program: system_program::id(),
-                    cache,
-                })
-                .to_account_metas(None),
+                accounts: (lighthouse::accounts::AssertV1 { cache }).to_account_metas(None),
                 data: (lighthouse::instruction::AssertV1 {
                     assertions: assertion_clone,
                     logical_expression: logical_expression_clone,
@@ -160,7 +146,6 @@ impl Program {
             rent: sysvar::rent::id(),
         };
 
-        // The conversions below should not fail.
         let data = lighthouse::instruction::CreateCacheAccountV1 {
             cache_index,
             cache_account_size,
@@ -202,7 +187,6 @@ impl Program {
             system_program: system_program::id(),
             signer: payer.pubkey(),
             cache_account: find_cache_account(payer.pubkey(), cache_index).0,
-            rent: sysvar::rent::id(),
         };
 
         let write_type_clone = write_type_parameter.clone();
@@ -216,7 +200,6 @@ impl Program {
             system_program: system_program::id(),
             signer: payer.pubkey(),
             cache_account: find_cache_account(payer.pubkey(), cache_index).0,
-            rent: sysvar::rent::id(),
         }
         .to_account_metas(None);
         ix_accounts.append(&mut vec![AccountMeta::new(source_account, false)]);
@@ -248,9 +231,49 @@ impl Program {
             rent: sysvar::rent::id(),
         };
 
-        // The conversions below should not fail.
         let data = lighthouse::instruction::CreateTestAccountV1 {};
 
         self.tx_builder(accounts, data, (), vec![], payer.pubkey(), &[payer], vec![])
     }
+}
+
+pub async fn create_test_account(context: &mut TestContext, payer: &Keypair) -> Result<()> {
+    let mut program = Program::new(context.client());
+    let mut tx_builder = program.create_test_account(payer);
+    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    Ok(())
+}
+
+pub async fn create_cache_account(
+    context: &mut TestContext,
+    user: &Keypair,
+    size: u64,
+) -> Result<()> {
+    let mut program = Program::new(context.client());
+    let mut tx_builder = program.create_cache_account(user, 0, size);
+    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    Ok(())
+}
+
+pub fn find_test_account() -> (solana_program::pubkey::Pubkey, u8) {
+    solana_program::pubkey::Pubkey::find_program_address(
+        &["test_account".to_string().as_ref()],
+        &lighthouse::ID,
+    )
+}
+
+pub fn find_cache_account(user: Pubkey, cache_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+    solana_program::pubkey::Pubkey::find_program_address(
+        &["cache".to_string().as_ref(), user.as_ref(), &[cache_index]],
+        &lighthouse::ID,
+    )
+}
+
+pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {
+    let user = Keypair::new();
+    let _ = ctx
+        .fund_account(user.pubkey(), DEFAULT_LAMPORTS_FUND_AMOUNT)
+        .await;
+
+    Ok(user)
 }

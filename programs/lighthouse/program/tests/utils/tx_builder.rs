@@ -121,7 +121,7 @@ where
             .chain(vec![ix])
             .collect::<Vec<_>>();
 
-        let tx = &mut Transaction::new_with_payer(&ixs, Some(&self.payer));
+        let tx = &mut Transaction::new_with_payer(ixs, Some(&self.payer));
 
         // Using `try_partial_sign` to avoid panics (and get an error when something is
         // wrong instead) no matter what signers are configured.

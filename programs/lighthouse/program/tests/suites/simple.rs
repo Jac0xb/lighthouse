@@ -1,33 +1,14 @@
-pub mod utils;
-
-use std::io::Error;
-
+use crate::utils::context::TestContext;
+use crate::utils::program::{
+    create_cache_account, create_test_account, create_user, find_cache_account, find_test_account,
+    Program,
+};
+use crate::utils::utils::to_transaction_error;
+use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
 use lighthouse::error::ProgramError;
 use lighthouse::structs::{Assertion, DataValue, Expression, Operator, WriteType};
-use solana_program::instruction::InstructionError;
-use solana_program::pubkey::Pubkey;
 use solana_program_test::tokio;
-use solana_sdk::signature::Keypair;
-use solana_sdk::transaction::TransactionError;
-use solana_sdk::{signer::EncodableKeypair, transaction::Transaction};
-
-use solana_banks_interface::BanksTransactionResultWithMetadata;
-use utils::context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT};
-use utils::program::Program;
-
-pub fn find_test_account() -> (solana_program::pubkey::Pubkey, u8) {
-    solana_program::pubkey::Pubkey::find_program_address(
-        &["test_account".to_string().as_ref()],
-        &lighthouse::ID,
-    )
-}
-
-pub fn find_cache_account(user: Pubkey, cache_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
-    solana_program::pubkey::Pubkey::find_program_address(
-        &["cache".to_string().as_ref(), user.as_ref(), &[cache_index]],
-        &lighthouse::ID,
-    )
-}
+use solana_sdk::signer::EncodableKeypair;
 
 #[tokio::test]
 async fn test_basic() {
@@ -197,9 +178,9 @@ async fn test_logical_expression() {
 
 #[tokio::test]
 async fn test_account_balance() {
-    let context = &mut TestContext::new().await.unwrap();
+    // let context = &mut TestContext::new().await.unwrap();
 
-    let mut program = Program::new(context.client());
+    // let mut program = Program::new(context.client());
     // create_test_account(context, user).await.unwrap();
 }
 
@@ -226,7 +207,7 @@ async fn test_write() {
                     0,
                     lighthouse::structs::WriteTypeParameter::WriteU8(
                         0,
-                        WriteType::AccountData(8, 128),
+                        WriteType::AccountData(8, Some(128), None),
                     ),
                 )
                 .to_transaction(vec![])
@@ -268,133 +249,3 @@ async fn test_write() {
         process_transaction_assert_success(context, tx).await;
     }
 }
-
-fn format_hex(data: &[u8]) -> String {
-    let mut result = String::new();
-    for (i, chunk) in data.chunks(32).enumerate() {
-        // Write the offset
-        result.push_str(&format!("{:08x} ({:08}): ", i * 32, i * 32));
-
-        // Write each byte in the chunk
-        for byte in chunk {
-            result.push_str(&format!("{:02x} ", byte));
-        }
-
-        // Add a new line
-        result.push('\r');
-        result.push('\n');
-    }
-    result
-}
-
-async fn process_transaction(
-    context: &TestContext,
-    tx: &Transaction,
-) -> Result<BanksTransactionResultWithMetadata, Error> {
-    let result: solana_banks_interface::BanksTransactionResultWithMetadata = context
-        .client()
-        .process_transaction_with_metadata(tx.clone())
-        .await
-        .unwrap();
-
-    Ok(result)
-}
-
-async fn process_transaction_assert_success(
-    context: &TestContext,
-    tx: Result<Transaction, Box<utils::Error>>,
-) {
-    let tx = tx.expect("Should have been processed");
-
-    let tx_metadata = process_transaction(context, &tx).await.unwrap();
-
-    let logs = tx_metadata.metadata.unwrap().log_messages;
-    for log in logs {
-        println!("{:?}", log);
-    }
-
-    if tx_metadata.result.is_err() {
-        panic!("Transaction failed");
-    }
-}
-
-async fn process_transaction_assert_failure(
-    context: &TestContext,
-    tx: Result<Transaction, Box<utils::Error>>,
-    expected_error_code: TransactionError,
-    log_match_regex: Option<&[String]>,
-) {
-    let tx = tx.expect("Should have been processed");
-
-    let tx_metadata = process_transaction(context, &tx).await.unwrap();
-
-    if tx_metadata.result.is_ok() {
-        panic!("Transaction should have failed");
-    }
-
-    let err = tx_metadata.result.unwrap_err();
-
-    if err != expected_error_code {
-        panic!("Transaction failed with unexpected error code");
-    }
-
-    if let Some(log_regex) = log_match_regex {
-        let regexes = log_regex
-            .iter()
-            .map(|s| regex::Regex::new(s).unwrap())
-            .collect::<Vec<regex::Regex>>();
-
-        let logs = tx_metadata.metadata.unwrap().log_messages;
-        for log in &logs {
-            println!("{:?}", log);
-        }
-
-        // find one log that matches each regex
-        for regex in regexes {
-            let mut found = false;
-            for log in &logs {
-                if regex.is_match(log) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if !found {
-                panic!("Log not found: {}", regex);
-            }
-        }
-    }
-}
-
-async fn create_test_account(context: &mut TestContext, payer: &Keypair) -> Result<(), Error> {
-    let mut program = Program::new(context.client());
-    let mut tx_builder = program.create_test_account(&payer);
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
-    Ok(())
-}
-
-async fn create_cache_account(
-    context: &mut TestContext,
-    user: &Keypair,
-    size: u64,
-) -> Result<(), Error> {
-    let mut program = Program::new(context.client());
-    let mut tx_builder = program.create_cache_account(&user, 0, size);
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
-    Ok(())
-}
-
-fn to_transaction_error(ix_index: u8, program_error: ProgramError) -> TransactionError {
-    TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error.into()))
-}
-
-async fn create_user(ctx: &mut TestContext) -> Result<Keypair, Error> {
-    let user = Keypair::new();
-    let _ = ctx
-        .fund_account(user.encodable_pubkey(), DEFAULT_LAMPORTS_FUND_AMOUNT)
-        .await;
-
-    Ok(user)
-}
-
-// Tests to write
