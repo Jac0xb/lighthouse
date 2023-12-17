@@ -4,7 +4,8 @@ use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::ProgramError;
-use crate::structs::{AccountInfoDataField, Assertion, Expression};
+use crate::structs::{AccountInfoDataField, Assertion, AssertionState, Expression};
+use crate::utils::print_result;
 
 #[derive(Accounts)]
 pub struct AssertV1<'info> {
@@ -26,40 +27,22 @@ pub fn assert<'info>(
     let remaining_accounts = &mut ctx.remaining_accounts.iter();
 
     let verbose = options.map(|options| options.verbose).unwrap_or(false);
-    let mut assertion_results: Vec<bool> = vec![];
-    let mut logically_dependent_assertions: Option<BTreeSet<u8>> = None;
-
-    if let Some(logical_expression) = &logical_expression {
-        if verbose {
-            msg!("Logical expression: {:?}", logical_expression);
-        }
-
-        logically_dependent_assertions = Some(BTreeSet::new());
-        let tree = logically_dependent_assertions.as_mut().unwrap();
-
-        for (_, logical_expression) in logical_expression.iter().enumerate() {
-            match logical_expression {
-                Expression::And(assertion_indexes) => {
-                    for assertion_index in assertion_indexes {
-                        tree.insert(*assertion_index);
-                    }
-                }
-                Expression::Or(assertion_indexes) => {
-                    for assertion_index in assertion_indexes {
-                        tree.insert(*assertion_index);
-                    }
-                }
-            }
-        }
-    }
+    let mut assertion_state = AssertionState::new(assertions.clone(), logical_expression)?;
 
     for (i, assertion) in assertions.into_iter().enumerate() {
         let mut assertion_result = false;
 
         match assertion {
-            Assertion::AccountOwnedBy(pubkey) => {
+            Assertion::AccountOwnedBy(pubkey, operator) => {
                 let account = remaining_accounts.next().unwrap();
                 assertion_result = account.owner.key().eq(&pubkey);
+
+                let value_str = account.owner.key().to_string();
+                let expected_value_str = pubkey.to_string();
+
+                if verbose {
+                    print_result(assertion_result, i, operator, value_str, expected_value_str);
+                }
             }
             Assertion::Memory(cache_offset, operator, memory_value) => {
                 let cache = ctx.accounts.cache.as_ref().unwrap(); // TODO: Graceful error handling
@@ -70,19 +53,9 @@ pub fn assert<'info>(
 
                 assertion_result = result;
 
-                msg!(
-                    "{} {} Assertion::Memory ({}) -> {} {} {}",
-                    format!("[{:?}]", i),
-                    if assertion_result {
-                        "[✅] SUCCESS"
-                    } else {
-                        "[❌] FAIL   "
-                    },
-                    "Cache...".to_string(),
-                    value_str,
-                    operator.format(),
-                    expected_value_str,
-                );
+                if verbose {
+                    print_result(assertion_result, i, operator, value_str, expected_value_str);
+                }
             }
             Assertion::AccountData(account_offset, operator, memory_value) => {
                 let account = remaining_accounts.next().unwrap();
@@ -93,19 +66,9 @@ pub fn assert<'info>(
 
                 assertion_result = result;
 
-                msg!(
-                    "{} {} Assertion::AccountData ({}) -> {} {} {}",
-                    format!("[{:02}]", i),
-                    if assertion_result {
-                        "[✅] SUCCESS"
-                    } else {
-                        "[❌] FAIL   "
-                    },
-                    truncate_pubkey(&account.key()),
-                    value_str,
-                    operator.format(),
-                    expected_value_str,
-                );
+                if verbose {
+                    print_result(assertion_result, i, operator, value_str, expected_value_str);
+                }
             }
             Assertion::AccountBalance(expected_balance, operator) => {
                 let account = remaining_accounts.next().unwrap();
@@ -114,17 +77,12 @@ pub fn assert<'info>(
                     operator.evaluate(&**account.try_borrow_lamports()?, &expected_balance);
 
                 if verbose {
-                    msg!(
-                        "{} Assertion::AccountBalance ({}) -> {} {} {}",
-                        if assertion_result {
-                            "[✅] SUCCESS"
-                        } else {
-                            "[❌] FAIL   "
-                        },
-                        truncate_pubkey(&account.key()),
-                        account.get_lamports(),
-                        operator.format(),
-                        expected_balance,
+                    print_result(
+                        assertion_result,
+                        i,
+                        operator,
+                        account.get_lamports().to_string(),
+                        expected_balance.to_string(),
                     );
                 }
             }
@@ -169,81 +127,86 @@ pub fn assert<'info>(
             }
         }
 
-        assertion_results.push(assertion_result);
+        assertion_state.record_result(i, assertion_result)?;
 
-        if (logical_expression.is_none()
-            || !logically_dependent_assertions
-                .as_ref()
-                .unwrap()
-                .contains(&(i as u8)))
-            && !assertion_result
-        {
-            return Err(ProgramError::AssertionFailed.into());
-        }
+        // assertion_results.push(assertion_result);
+
+        // if (logical_expression.is_none()
+        //     || !logically_dependent_assertions
+        //         .as_ref()
+        //         .unwrap()
+        //         .contains(&(i as u8)))
+        //     && !assertion_result
+        // {
+        //     return Err(ProgramError::AssertionFailed.into());
+        // }
     }
 
-    if let Some(logical_expressions) = &logical_expression {
-        for logical_expression in logical_expressions {
-            match logical_expression {
-                Expression::And(assertion_indexes) => {
-                    let mut result = true;
+    msg!("assertion_state: {:?}", assertion_state);
+    assertion_state.evaluate()?;
 
-                    for assertion_index in assertion_indexes {
-                        result = result && assertion_results[*assertion_index as usize];
-                    }
+    // if let Some(logical_expressions) = &logical_expression {
+    //     for logical_expression in logical_expressions {
+    //         match logical_expression {
+    //             Expression::And(assertion_indexes) => {
+    //                 let mut result = true;
 
-                    if verbose {
-                        msg!(
-                            "{} Expression::And -> {:?} {}",
-                            if result {
-                                "[✅] SUCCESS"
-                            } else {
-                                "[❌] FAIL   "
-                            },
-                            result,
-                            assertion_indexes
-                                .iter()
-                                .map(|i| format!("[{}]", i))
-                                .collect::<Vec<String>>()
-                                .join(" AND ")
-                        );
-                    }
+    //                 for assertion_index in assertion_indexes {
+    //                     result = result && assertion_results[*assertion_index as usize];
+    //                 }
 
-                    if !result {
-                        return Err(ProgramError::AssertionFailed.into());
-                    }
-                }
-                Expression::Or(assertion_indexes) => {
-                    let mut result = false;
+    //                 if verbose {
+    //                     msg!(
+    //                         "{} Expression::And -> {:?} {}",
+    //                         if result {
+    //                             "[✅] SUCCESS"
+    //                         } else {
+    //                             "[❌] FAIL   "
+    //                         },
+    //                         result,
+    //                         assertion_indexes
+    //                             .iter()
+    //                             .map(|i| format!("[{}]", i))
+    //                             .collect::<Vec<String>>()
+    //                             .join(" AND ")
+    //                     );
+    //                 }
 
-                    for assertion_index in assertion_indexes {
-                        result = result || assertion_results[*assertion_index as usize];
-                    }
+    //                 if !result {
+    //                     return Err(ProgramError::AssertionFailed.into());
+    //                 }
+    //             }
+    //             Expression::Or(assertion_indexes) => {
+    //                 let mut result = false;
 
-                    if verbose {
-                        msg!(
-                            "{} Expression::Or -> {:?} {}",
-                            if result {
-                                "[✅] SUCCESS"
-                            } else {
-                                "[❌] FAIL   "
-                            },
-                            result,
-                            assertion_indexes
-                                .iter()
-                                .map(|i| format!("[{}]", i))
-                                .collect::<Vec<String>>()
-                                .join(" OR ")
-                        );
-                    }
+    //                 for assertion_index in assertion_indexes {
+    //                     result = result || assertion_results[*assertion_index as usize];
+    //                 }
 
-                    if !result {
-                        return Err(ProgramError::AssertionFailed.into());
-                    }
-                }
-            }
-        }
-    }
+    //                 if verbose {
+    //                     msg!(
+    //                         "{} Expression::Or -> {:?} {}",
+    //                         if result {
+    //                             "[✅] SUCCESS"
+    //                         } else {
+    //                             "[❌] FAIL   "
+    //                         },
+    //                         result,
+    //                         assertion_indexes
+    //                             .iter()
+    //                             .map(|i| format!("[{}]", i))
+    //                             .collect::<Vec<String>>()
+    //                             .join(" OR ")
+    //                     );
+    //                 }
+
+    //                 if !result {
+    //                     return Err(ProgramError::AssertionFailed.into());
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     Ok(())
 }

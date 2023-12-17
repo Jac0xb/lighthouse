@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{accounts::account, prelude::*};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use super::DataValue;
@@ -14,7 +14,7 @@ pub struct AccountValidation {
 pub enum WriteType {
     AccountBalance,
 
-    // Account Data Offset, Data Length
+    // Account Data Offset, Data Length, Validation
     AccountData(u16, Option<u16>, Option<AccountValidation>),
     AccountInfo,
     DataValue(DataValue),
@@ -22,10 +22,27 @@ pub enum WriteType {
 }
 
 impl WriteType {
-    pub fn size(&self) -> Option<usize> {
+    pub fn size(
+        &self,
+        account_info: Option<&anchor_lang::prelude::AccountInfo<'_>>,
+    ) -> Option<usize> {
         match self {
             WriteType::AccountBalance => Some(8),
-            WriteType::AccountData(_, len, _) => len.as_ref().map(|len| *len as usize),
+            WriteType::AccountData(account_offset, data_length, _) => {
+                if let Some(data_length) = data_length {
+                    Some(*data_length as usize)
+                } else {
+                    match account_info {
+                        Some(account_info) => Some(
+                            account_info
+                                .data_len()
+                                .checked_sub(*account_offset as usize)?,
+                        ),
+                        None => None,
+                    }
+                }
+            }
+
             WriteType::AccountInfo => Some(8),
             WriteType::DataValue(memory_value) => match memory_value {
                 DataValue::Bool(_) | DataValue::U8(_) | DataValue::I8(_) => Some(1),

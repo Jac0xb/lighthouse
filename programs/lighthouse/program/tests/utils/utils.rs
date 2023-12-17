@@ -47,6 +47,11 @@ pub async fn process_transaction_assert_failure(
 
     let tx_metadata = process_transaction(context, &tx).await.unwrap();
 
+    let logs = tx_metadata.metadata.clone().unwrap().log_messages;
+    for log in logs {
+        println!("{:?}", log);
+    }
+
     if tx_metadata.result.is_ok() {
         panic!("Transaction should have failed");
     }

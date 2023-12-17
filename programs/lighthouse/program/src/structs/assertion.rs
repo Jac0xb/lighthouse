@@ -17,7 +17,7 @@ pub enum Assertion {
     // balance, operator
     AccountBalance(u64, Operator),
 
-    AccountOwnedBy(Pubkey),
+    AccountOwnedBy(Pubkey, Operator),
 
     // token balance, operator
     TokenAccountBalance(u64, Operator),

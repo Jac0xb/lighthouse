@@ -47,30 +47,27 @@ pub fn write<'info>(
         ProgramError::OutOfRange
     })?;
 
-    let data_length = write_type.size();
+    let data_length = write_type
+        .size(ctx.remaining_accounts.first())
+        .ok_or(ProgramError::InvalidDataLength)?;
+    if cache_data_length < (cache_offset + data_length) {
+        msg!("Cache offset overflowed");
+        return Err(ProgramError::OutOfRange.into());
+    }
 
     match write_type {
         WriteType::Program => {
             return Err(ProgramError::Unimplemented.into());
         }
         WriteType::DataValue(borsh_value) => {
-            let data_length = data_length.ok_or(ProgramError::InvalidDataLength)?;
-
-            if (cache_offset + data_length) < cache_data_length {
-                let data_slice = &(borsh_value.serialize())[0..data_length];
-
-                cache_ref[cache_offset..(cache_offset + data_length)]
-                    .copy_from_slice(data_slice.as_ref());
-            } else {
-                return Err(ProgramError::NotEnoughAccounts.into());
-            }
+            let data_slice = &(borsh_value.serialize())[0..data_length];
+            cache_ref[cache_offset..(cache_offset + data_length)]
+                .copy_from_slice(data_slice.as_ref());
         }
         WriteType::AccountBalance => {
             let source_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = source_account {
-                let data_length = data_length.ok_or(ProgramError::InvalidDataLength)?;
-
                 if (cache_offset + data_length) < cache_data_length {
                     let data = target_account.lamports();
                     let data_slice = &data.to_le_bytes();
@@ -88,6 +85,7 @@ pub fn write<'info>(
             let target_account = ctx.remaining_accounts.first();
             let account_offset = account_offset as usize;
 
+            // Additional validation on account that's been written to.
             if let Some(target_account) = target_account {
                 if let Some(account_validation) = account_validation {
                     if let Some(owner) = account_validation.owner {
@@ -122,13 +120,6 @@ pub fn write<'info>(
                     }
                 }
 
-                let data_length = data_length.unwrap_or(
-                    target_account
-                        .data_len()
-                        .checked_sub(account_offset)
-                        .ok_or(ProgramError::AccountOutOfRange)?,
-                );
-
                 if (cache_offset + data_length) < cache_data_length {
                     let data = target_account.try_borrow_data().map_err(|err| {
                         msg!("Error: {:?}", err);
@@ -149,8 +140,6 @@ pub fn write<'info>(
             let target_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = target_account {
-                let data_length = data_length.ok_or(ProgramError::InvalidDataLength)?;
-
                 if (cache_offset + data_length) < cache_data_length {
                     let account_info = AccountInfoData {
                         key: *target_account.key,
@@ -175,7 +164,7 @@ pub fn write<'info>(
                 return Err(ProgramError::NotEnoughAccounts.into());
             }
         }
-    }
+    };
 
     Ok(())
 }
