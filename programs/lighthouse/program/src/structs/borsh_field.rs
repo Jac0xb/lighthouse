@@ -6,7 +6,7 @@ use anchor_lang::prelude::{
 use super::Operator;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum BorshField {
+pub enum BorshType {
     U8,
     I8,
     U16,
@@ -20,20 +20,20 @@ pub enum BorshField {
     Bytes(Vec<u8>),
 }
 
-impl BorshField {
+impl BorshType {
     pub fn is_supported_operator(&self, operator: &Operator) -> bool {
         match self {
-            BorshField::U8 => true,
-            BorshField::I8 => true,
-            BorshField::U16 => true,
-            BorshField::I16 => true,
-            BorshField::U32 => true,
-            BorshField::I32 => true,
-            BorshField::U64 => true,
-            BorshField::I64 => true,
-            BorshField::U128 => true,
-            BorshField::I128 => true,
-            BorshField::Bytes(_) => matches!(operator, Operator::Equal | Operator::NotEqual),
+            BorshType::U8 => true,
+            BorshType::I8 => true,
+            BorshType::U16 => true,
+            BorshType::I16 => true,
+            BorshType::U32 => true,
+            BorshType::I32 => true,
+            BorshType::U64 => true,
+            BorshType::I64 => true,
+            BorshType::U128 => true,
+            BorshType::I128 => true,
+            BorshType::Bytes(_) => matches!(operator, Operator::Equal | Operator::NotEqual),
         }
     }
 }

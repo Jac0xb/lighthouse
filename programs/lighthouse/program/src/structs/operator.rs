@@ -14,7 +14,7 @@ pub enum Operator {
 }
 
 impl Operator {
-    pub fn is_true<T: PartialEq + Eq + PartialOrd + Ord>(
+    pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord>(
         self,
         value: &T,
         expected_value: &T,

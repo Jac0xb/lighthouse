@@ -81,3 +81,7 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
   - Save on tranasction space by only needing to call write once.
 - Auto-increment validation
   - Check to make sure transactions are ran in sequence or they fail
+- Decide on using CPI events vs program logs events
+  - Extra account overhead for cpi events pda
+  - program logs concat
+  - Do we even need logs :P

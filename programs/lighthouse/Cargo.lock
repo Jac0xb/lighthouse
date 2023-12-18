@@ -2086,8 +2086,10 @@ dependencies = [
  "anchor-spl",
  "async-trait",
  "bytemuck",
+ "macros",
  "mpl-token-metadata",
  "num-traits",
+ "regex",
  "solana-banks-interface",
  "solana-program",
  "solana-program-test",
@@ -2148,6 +2150,15 @@ checksum = "57d27b317e207b10f69f5e75494119e391a96f48861ae870d1da6edac98ca900"
 dependencies = [
  "cc",
  "libc",
+]
+
+[[package]]
+name = "macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2 1.0.66",
+ "quote 1.0.32",
+ "syn 1.0.109",
 ]
 
 [[package]]

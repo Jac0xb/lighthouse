@@ -1,6 +1,4 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::error::MetadataError;
-use num_traits::FromPrimitive;
 
 #[error_code]
 pub enum ProgramError {
@@ -10,8 +8,29 @@ pub enum ProgramError {
     AssertionFailed,
     #[msg("NotEnoughAccounts")]
     NotEnoughAccounts,
-    #[msg("BorshValueMismatch")]
-    BorshValueMismatch,
+    #[msg("DataValueMismatch")]
+    DataValueMismatch,
     #[msg("UnsupportedOperator")]
     UnsupportedOperator,
+    #[msg("OutOfRange")]
+    OutOfRange,
+    #[msg("AccountBorrowFailed")]
+    AccountBorrowFailed,
+    #[msg("InvalidAccount")]
+    InvalidAccount,
+
+    #[msg("InvalidDataLength")]
+    InvalidDataLength,
+
+    #[msg("AccountOutOfRange")]
+    AccountOutOfRange,
+
+    #[msg("AccountOwnerValidationFailed")]
+    AccountOwnerValidationFailed,
+
+    #[msg("AccountFundedValidationFailed")]
+    AccountFundedValidationFailed,
+
+    #[msg("AccountDiscriminatorValidationFailed")]
+    AccountDiscriminatorValidationFailed,
 }
