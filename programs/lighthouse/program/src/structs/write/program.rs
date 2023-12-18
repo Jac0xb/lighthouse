@@ -1,9 +1,6 @@
-use anchor_lang::{
-    prelude::{
-        borsh,
-        borsh::{BorshDeserialize, BorshSerialize},
-    },
-    Id,
+use anchor_lang::prelude::{
+    borsh,
+    borsh::{BorshDeserialize, BorshSerialize},
 };
 use solana_program::pubkey::Pubkey;
 

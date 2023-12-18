@@ -25,7 +25,17 @@ pub async fn process_transaction_assert_success(
 ) {
     let tx = tx.expect("Should have been processed");
 
-    let tx_metadata = process_transaction(context, &tx).await.unwrap();
+    let tx_metadata = process_transaction(context, &tx).await;
+
+    if let Err(err) = tx_metadata {
+        panic!("Transaction failed to process: {:?}", err);
+    }
+
+    let tx_metadata = tx_metadata.unwrap();
+
+    if tx_metadata.result.is_err() {
+        println!("Tx Result {:?}", tx_metadata.result.clone().err());
+    }
 
     let logs = tx_metadata.metadata.unwrap().log_messages;
     for log in logs {
