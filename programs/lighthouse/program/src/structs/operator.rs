@@ -11,8 +11,6 @@ pub enum Operator {
     LessThan,
     GreaterThanOrEqual,
     LessThanOrEqual,
-    // Todo
-    // WithinThreshold
 }
 
 impl Operator {

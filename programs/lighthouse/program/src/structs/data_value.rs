@@ -45,6 +45,34 @@ pub enum DataValue {
 }
 
 impl DataValue {
+    pub fn format(&self) -> String {
+        match self {
+            DataValue::Bool(value) => value.to_string(),
+            DataValue::U8(value) => value.to_string(),
+            DataValue::I8(value) => value.to_string(),
+            DataValue::U16(value) => value.to_string(),
+            DataValue::I16(value) => value.to_string(),
+            DataValue::U32(value) => value.to_string(),
+            DataValue::I32(value) => value.to_string(),
+            DataValue::U64(value) => value.to_string(),
+            DataValue::I64(value) => value.to_string(),
+            DataValue::U128(value) => value.to_string(),
+            DataValue::I128(value) => value.to_string(),
+            DataValue::Bytes(value) => {
+                let value_str = value
+                    .iter()
+                    .take(15)
+                    .map(|byte| format!("{:02x}", byte))
+                    .collect::<Vec<String>>()
+                    .join("");
+                format!("0x{}", value_str)
+            }
+            DataValue::Pubkey(value) => value.to_string(),
+        }
+    }
+}
+
+impl DataValue {
     pub fn get_data_type(&self) -> DataType {
         match self {
             DataValue::Bool(_) => DataType::Bool,
@@ -144,7 +172,7 @@ impl DataValue {
     }
 
     pub fn deserialize_and_compare(
-        self,
+        &self,
         data: Ref<'_, &mut [u8]>,
         offset: usize,
         operator: &Operator,
@@ -161,7 +189,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U8(expected_value) => {
@@ -172,7 +200,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I8(expected_value) => {
@@ -183,7 +211,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U16(expected_value) => {
@@ -194,7 +222,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I16(expected_value) => {
@@ -205,7 +233,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U32(expected_value) => {
@@ -216,7 +244,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I32(expected_value) => {
@@ -227,7 +255,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U64(expected_value) => {
@@ -238,7 +266,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I64(expected_value) => {
@@ -249,7 +277,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::U128(expected_value) => {
@@ -260,7 +288,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::I128(expected_value) => {
@@ -271,7 +299,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
                 Ok((value_str, expected_value_str, assertion_result))
             }
             DataValue::Bytes(expected_value) => {
@@ -297,7 +325,7 @@ impl DataValue {
                     .map(|byte| format!("{:02x}", byte))
                     .collect::<Vec<String>>()
                     .join("");
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
 
                 Ok((value_str, expected_value_str, assertion_result))
             }
@@ -315,7 +343,7 @@ impl DataValue {
 
                 let value_str = value.to_string();
                 let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, &expected_value);
+                let assertion_result = operator.evaluate(&value, expected_value);
 
                 Ok((value_str, expected_value_str, assertion_result))
             }

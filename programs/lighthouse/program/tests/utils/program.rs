@@ -9,15 +9,17 @@ use super::{
     Error, Result,
 };
 use anchor_lang::*;
+use anchor_spl::associated_token;
 use lighthouse::{
-    processor::Config,
+    processor::AssertionConfig,
     structs::{Assertion, Expression, WriteTypeParameter},
 };
 use solana_program::{
     instruction::{AccountMeta, Instruction},
+    program_pack::Pack,
     pubkey::Pubkey,
     rent::Rent,
-    system_program, sysvar,
+    system_instruction, system_program, sysvar,
 };
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -25,6 +27,7 @@ use solana_sdk::{
     signer::signers::Signers,
     transaction::Transaction,
 };
+use spl_token::state::Mint;
 
 pub struct Program {
     client: BanksClient,
@@ -107,7 +110,7 @@ impl Program {
         let data = lighthouse::instruction::AssertV1 {
             assertions,
             logical_expression,
-            options: Some(Config { verbose: true }),
+            options: Some(AssertionConfig { verbose: true }),
         };
 
         self.tx_builder(
@@ -120,7 +123,7 @@ impl Program {
                 data: (lighthouse::instruction::AssertV1 {
                     assertions: assertion_clone,
                     logical_expression: logical_expression_clone,
-                    options: Some(Config { verbose: true }),
+                    options: Some(AssertionConfig { verbose: true }),
                 })
                 .data(),
             }],
@@ -276,4 +279,93 @@ pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {
         .await;
 
     Ok(user)
+}
+
+pub async fn create_mint(ctx: &mut TestContext, payer: &Keypair) -> Result<(Transaction, Keypair)> {
+    let mint = Keypair::new();
+
+    let mint_rent = Rent::default().minimum_balance(Mint::get_packed_len());
+    let create_ix = system_instruction::create_account(
+        &payer.pubkey(),
+        &mint.pubkey(),
+        mint_rent,
+        Mint::get_packed_len() as u64,
+        &spl_token::id(),
+    );
+
+    let mint_ix = spl_token::instruction::initialize_mint2(
+        &spl_token::id(),
+        &mint.pubkey(),
+        &payer.pubkey(),
+        None,
+        100,
+    )
+    .unwrap();
+
+    let mut tx = Transaction::new_with_payer(&[create_ix, mint_ix], Some(&payer.pubkey()));
+
+    let signers: &[Keypair; 2] = &[payer.insecure_clone(), mint.insecure_clone()];
+
+    // print all the accounts in tx and is_signer
+    for (i, account) in tx.message().account_keys.iter().enumerate() {
+        println!("account: {} {}", account, tx.message.is_signer(i));
+    }
+
+    // print the signers pubkey in array
+    for signer in signers.iter() {
+        let pos = tx.get_signing_keypair_positions(&[signer.pubkey()]);
+        println!(
+            "signer: {} {}",
+            signer.insecure_clone().pubkey(),
+            pos.unwrap()[0].unwrap_or(0)
+        );
+    }
+
+    tx.try_partial_sign(
+        &signers.iter().collect::<Vec<_>>(),
+        ctx.client().get_latest_blockhash().await.unwrap(),
+    )
+    .unwrap();
+
+    Ok((tx, mint))
+}
+
+pub async fn mint_to(
+    ctx: &mut TestContext,
+    mint: &Pubkey,
+    authority: &Keypair,
+    dest: &Pubkey,
+    amount: u64,
+) -> Result<Transaction> {
+    let token_account = associated_token::get_associated_token_address(dest, mint);
+    let create_account_ix =
+        spl_associated_token_account::instruction::create_associated_token_account(
+            &authority.pubkey(),
+            dest,
+            mint,
+            &spl_token::id(),
+        );
+
+    let mint_to_ix = spl_token::instruction::mint_to(
+        &spl_token::id(),
+        mint,
+        &token_account,
+        &authority.pubkey(),
+        &[],
+        amount,
+    )
+    .unwrap();
+
+    let mut tx =
+        Transaction::new_with_payer(&[create_account_ix, mint_to_ix], Some(&authority.pubkey()));
+
+    let signers: &[Keypair; 1] = &[authority.insecure_clone()];
+
+    tx.try_partial_sign(
+        &signers.iter().collect::<Vec<_>>(),
+        ctx.client().get_latest_blockhash().await.unwrap(),
+    )
+    .unwrap();
+
+    Ok(tx)
 }

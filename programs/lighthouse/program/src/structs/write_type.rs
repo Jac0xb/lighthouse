@@ -1,4 +1,4 @@
-use anchor_lang::{accounts::account, prelude::*};
+use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use super::DataValue;

@@ -4,8 +4,8 @@ use proc_macro::TokenStream;
 // use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, Attribute, Data, DataStruct,
-    DeriveInput, Field, Fields,
+    parse_macro_input, punctuated::Punctuated, token::Comma, Data, DataStruct, DeriveInput, Field,
+    Fields,
 };
 // use syn::{parse_macro_input, DeriveInput};
 

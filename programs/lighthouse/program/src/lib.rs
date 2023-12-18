@@ -44,7 +44,7 @@ pub mod lighthouse {
         ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
         assertions: Vec<Assertion>,
         logical_expression: Option<Vec<Expression>>,
-        options: Option<Config>,
+        options: Option<AssertionConfig>,
     ) -> Result<()> {
         processor::assert(ctx, assertions, logical_expression, options)
     }
