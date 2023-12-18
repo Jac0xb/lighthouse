@@ -1,27 +1,34 @@
-use anchor_lang::prelude::{borsh::BorshDeserialize, *};
+use crate::{processor::assert::AssertionConfig, structs::Operator};
+use solana_program::msg;
 
-use crate::{
-    error,
-    structs::{BorshField, Operator},
-};
-
-pub fn process_value<T: Ord + BorshDeserialize + ToString>(
-    data: &[u8],
-    offset: u32,
-    size: usize,
-    expected_value: &T,
-    borsh_field: &BorshField,
+pub fn print_assertion_result(
+    config: &Option<AssertionConfig>,
+    assertion_info: String,
+    assertion_result: bool,
+    assertion_index: usize,
     operator: &Operator,
-) -> Result<(String, String, bool)> {
-    let slice = &data[offset as usize..(offset as usize + size)];
-    let value = T::try_from_slice(slice).map_err(|_| error::ProgramError::BorshValueMismatch)?;
+    value_str: String,
+    expected_value_str: String,
+) {
+    if let Some(config) = config {
+        if !config.verbose {
+            return;
+        }
+    } else {
+        return;
+    }
 
-    borsh_field.is_supported_operator(operator);
-    let assertion_result = operator.is_true(&value, expected_value);
-
-    Ok((
-        value.to_string(),
-        expected_value.to_string(),
-        assertion_result,
-    ))
+    msg!(
+        "{} {} {} -> {} {} {}",
+        format!("[{:?}]", assertion_index),
+        if assertion_result {
+            "[✅] SUCCESS"
+        } else {
+            "[❌] FAIL   "
+        },
+        assertion_info,
+        value_str,
+        operator.format(),
+        expected_value_str,
+    );
 }
