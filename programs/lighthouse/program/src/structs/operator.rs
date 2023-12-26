@@ -13,20 +13,30 @@ pub enum Operator {
     LessThanOrEqual,
 }
 
+pub struct EvaluationResult {
+    pub passed: bool,
+    pub actual: String,
+    pub expected: String,
+}
+
 impl Operator {
-    pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord>(
-        self,
-        value: &T,
-        expected_value: &T,
-    ) -> bool {
-        match self {
-            Operator::Equal => T::eq(value, expected_value),
-            Operator::NotEqual => T::ne(value, expected_value),
-            Operator::GreaterThan => T::gt(value, expected_value),
-            Operator::LessThan => T::lt(value, expected_value),
-            Operator::GreaterThanOrEqual => T::ge(value, expected_value),
-            Operator::LessThanOrEqual => T::le(value, expected_value),
-        }
+    pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord + ToString>(
+        &self,
+        actual: &T,
+        expected: &T,
+    ) -> Box<EvaluationResult> {
+        Box::new(EvaluationResult {
+            passed: match self {
+                Operator::Equal => T::eq(actual, expected),
+                Operator::NotEqual => T::ne(actual, expected),
+                Operator::GreaterThan => T::gt(actual, expected),
+                Operator::LessThan => T::lt(actual, expected),
+                Operator::GreaterThanOrEqual => T::ge(actual, expected),
+                Operator::LessThanOrEqual => T::le(actual, expected),
+            },
+            actual: actual.to_string(),
+            expected: expected.to_string(),
+        })
     }
 
     pub fn format(&self) -> String {

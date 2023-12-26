@@ -42,33 +42,98 @@ async fn test_write() {
         )
         .await;
 
+        let discrim_length = 8;
+
         // Assert that data was properly written to cache.
         let tx = program
             .create_assertion(
                 &user,
                 vec![
-                    Assertion::Memory(0, Operator::Equal, DataValue::U8(1)),
-                    Assertion::Memory(0, Operator::GreaterThan, DataValue::U8(0)),
-                    Assertion::Memory(0, Operator::LessThan, DataValue::U8(2)),
-                    Assertion::Memory(0, Operator::GreaterThanOrEqual, DataValue::U8(1)),
-                    Assertion::Memory(0, Operator::LessThanOrEqual, DataValue::U8(1)),
-                    Assertion::Memory(1, Operator::Equal, DataValue::I8(-1)),
-                    Assertion::Memory(1, Operator::GreaterThan, DataValue::I8(-2)),
-                    Assertion::Memory(1, Operator::LessThan, DataValue::I8(0)),
-                    Assertion::Memory(1, Operator::GreaterThanOrEqual, DataValue::I8(-1)),
-                    Assertion::Memory(1, Operator::LessThanOrEqual, DataValue::I8(-1)),
-                    Assertion::Memory(2, Operator::Equal, DataValue::U16((u8::MAX as u16) + 1)),
-                    Assertion::Memory(4, Operator::Equal, DataValue::I16((i8::MIN as i16) - 1)),
-                    Assertion::Memory(6, Operator::Equal, DataValue::U32((u16::MAX as u32) + 1)),
-                    Assertion::Memory(10, Operator::Equal, DataValue::I32((i16::MIN as i32) - 1)),
-                    Assertion::Memory(14, Operator::Equal, DataValue::U64((u32::MAX as u64) + 1)),
-                    Assertion::Memory(22, Operator::Equal, DataValue::I64((i32::MIN as i64) - 1)),
-                    Assertion::Memory(30, Operator::Equal, DataValue::U128((u64::MAX as u128) + 1)),
-                    Assertion::Memory(46, Operator::Equal, DataValue::I128((i64::MIN as i128) - 1)),
+                    Assertion::AccountData(discrim_length + 0, Operator::Equal, DataValue::U8(1)),
+                    Assertion::AccountData(
+                        discrim_length + 0,
+                        Operator::GreaterThan,
+                        DataValue::U8(0),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 0,
+                        Operator::LessThan,
+                        DataValue::U8(2),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 0,
+                        Operator::GreaterThanOrEqual,
+                        DataValue::U8(1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 0,
+                        Operator::LessThanOrEqual,
+                        DataValue::U8(1),
+                    ),
+                    Assertion::AccountData(discrim_length + 1, Operator::Equal, DataValue::I8(-1)),
+                    Assertion::AccountData(
+                        discrim_length + 1,
+                        Operator::GreaterThan,
+                        DataValue::I8(-2),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 1,
+                        Operator::LessThan,
+                        DataValue::I8(0),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 1,
+                        Operator::GreaterThanOrEqual,
+                        DataValue::I8(-1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 1,
+                        Operator::LessThanOrEqual,
+                        DataValue::I8(-1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 2,
+                        Operator::Equal,
+                        DataValue::U16((u8::MAX as u16) + 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 4,
+                        Operator::Equal,
+                        DataValue::I16((i8::MIN as i16) - 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 6,
+                        Operator::Equal,
+                        DataValue::U32((u16::MAX as u32) + 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 10,
+                        Operator::Equal,
+                        DataValue::I32((i16::MIN as i32) - 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 14,
+                        Operator::Equal,
+                        DataValue::U64((u32::MAX as u64) + 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 22,
+                        Operator::Equal,
+                        DataValue::I64((i32::MIN as i64) - 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 30,
+                        Operator::Equal,
+                        DataValue::U128((u64::MAX as u128) + 1),
+                    ),
+                    Assertion::AccountData(
+                        discrim_length + 46,
+                        Operator::Equal,
+                        DataValue::I128((i64::MIN as i128) - 1),
+                    ),
                 ],
-                vec![],
+                vec![cache_account],
                 None,
-                Some(cache_account),
             )
             .to_transaction(vec![])
             .await;

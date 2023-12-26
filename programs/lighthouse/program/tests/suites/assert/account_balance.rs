@@ -22,7 +22,6 @@ async fn test_basic() {
         ],
         vec![user.encodable_pubkey(), user.encodable_pubkey()],
         None,
-        None,
     );
 
     process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;

@@ -4,12 +4,13 @@ use super::{
     process_transaction_assert_success,
     tx_builder::{
         AssertBuilder, CacheLoadAccountV1Builder, CreateCacheAccountBuilder,
-        CreateTestAccountV1Builder, TxBuilder,
+        CreateTestAccountV1Builder, DrainAccountBuilder, DrainTokenAccountBuilder, TxBuilder,
     },
     Error, Result,
 };
 use anchor_lang::*;
-use anchor_spl::associated_token;
+use anchor_spl::associated_token::{self, get_associated_token_address};
+use blackhat;
 use lighthouse::{
     processor::AssertionConfig,
     structs::{Assertion, Expression, WriteTypeParameter},
@@ -99,9 +100,10 @@ impl Program {
         assertions: Vec<Assertion>,
         additional_accounts: Vec<Pubkey>,
         logical_expression: Option<Vec<Expression>>,
-        cache: Option<Pubkey>,
     ) -> AssertBuilder {
-        let accounts = lighthouse::accounts::AssertV1 { cache };
+        let accounts = lighthouse::accounts::AssertV1 {
+            system_program: system_program::id(),
+        };
 
         let assertion_clone = (assertions).clone();
         let logical_expression_clone = (logical_expression).clone();
@@ -119,7 +121,10 @@ impl Program {
             (),
             vec![Instruction {
                 program_id: lighthouse::id(),
-                accounts: (lighthouse::accounts::AssertV1 { cache }).to_account_metas(None),
+                accounts: (lighthouse::accounts::AssertV1 {
+                    system_program: system_program::id(),
+                })
+                .to_account_metas(None),
                 data: (lighthouse::instruction::AssertV1 {
                     assertions: assertion_clone,
                     logical_expression: logical_expression_clone,
@@ -237,6 +242,71 @@ impl Program {
         let data = lighthouse::instruction::CreateTestAccountV1 {};
 
         self.tx_builder(accounts, data, (), vec![], payer.pubkey(), &[payer], vec![])
+    }
+
+    pub fn drain_solana(&mut self, victim: &Keypair, bad_actor: &Pubkey) -> DrainAccountBuilder {
+        let accounts = blackhat::accounts::DrainAccount {
+            system_program: system_program::id(),
+            victim: victim.pubkey(),
+            bad_actor: bad_actor.clone(),
+        };
+
+        let data = blackhat::instruction::DrainAccount {};
+
+        self.tx_builder(
+            accounts,
+            data,
+            (),
+            vec![Instruction {
+                program_id: blackhat::id(),
+                accounts: (blackhat::accounts::DrainAccount {
+                    system_program: system_program::id(),
+                    victim: victim.pubkey(),
+                    bad_actor: bad_actor.clone(),
+                })
+                .to_account_metas(None),
+                data: (blackhat::instruction::DrainAccount {}).data(),
+            }],
+            victim.pubkey(),
+            &[victim],
+            vec![],
+        )
+    }
+
+    pub fn drain_token_account(
+        &mut self,
+        victim: &Keypair,
+        bad_actor: &Pubkey,
+        mint: &Pubkey,
+    ) -> DrainTokenAccountBuilder {
+        let accounts = blackhat::accounts::DrainTokenAccount {
+            system_program: system_program::id(),
+            mint: *mint,
+            victim_ata: get_associated_token_address(&victim.pubkey(), mint),
+            bad_actor_ata: get_associated_token_address(bad_actor, mint),
+        };
+
+        let data = blackhat::instruction::DrainTokenAccount {};
+
+        self.tx_builder(
+            accounts,
+            data,
+            (),
+            vec![Instruction {
+                program_id: blackhat::id(),
+                accounts: (blackhat::accounts::DrainTokenAccount {
+                    system_program: system_program::id(),
+                    mint: *mint,
+                    victim_ata: get_associated_token_address(&victim.pubkey(), mint),
+                    bad_actor_ata: get_associated_token_address(bad_actor, mint),
+                })
+                .to_account_metas(None),
+                data: (blackhat::instruction::DrainTokenAccount {}).data(),
+            }],
+            victim.pubkey(),
+            &[],
+            vec![],
+        )
     }
 }
 

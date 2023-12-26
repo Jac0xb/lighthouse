@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use borsh::BorshDeserialize;
+use solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 
 use crate::error::ProgramError;
 use crate::structs::{AccountInfoData, WriteType, WriteTypeParameter};
@@ -27,6 +28,11 @@ pub fn write<'info>(
     _: u8,
     write_type: WriteTypeParameter,
 ) -> Result<()> {
+    if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {
+        msg!("Stack height is greater than transaction level stack height");
+        return Err(ProgramError::UnauthorizedIxEntry.into());
+    }
+
     let cache_ref = &mut ctx.accounts.cache_account.try_borrow_mut_data()?;
     let cache_data_length = cache_ref.len();
 

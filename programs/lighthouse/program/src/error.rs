@@ -19,6 +19,9 @@ pub enum ProgramError {
     #[msg("InvalidAccount")]
     InvalidAccount,
 
+    #[msg("UnauthorizedIxEntry")]
+    UnauthorizedIxEntry,
+
     #[msg("InvalidDataLength")]
     InvalidDataLength,
 
