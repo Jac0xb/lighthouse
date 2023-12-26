@@ -37,7 +37,6 @@ async fn test_basic() {
         ],
         vec![token_account; 6],
         None,
-        None,
     );
 
     process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;

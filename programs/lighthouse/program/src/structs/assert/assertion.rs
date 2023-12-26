@@ -4,14 +4,13 @@ use anchor_lang::prelude::{
 };
 use solana_program::pubkey::Pubkey;
 
-use crate::structs::{operator::Operator, AccountInfoDataField, DataValue};
+use crate::structs::{
+    operator::Operator, AccountInfoDataField, DataValue, LegacyTokenAccountDataField,
+};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum Assertion {
-    // memory offset, assertion
-    Memory(u16, Operator, DataValue),
-
-    AccountInfo(Vec<AccountInfoDataField>, Operator),
+    AccountInfoField(AccountInfoDataField, Operator),
 
     // account data offset, borsh type, operator
     AccountData(u16, Operator, DataValue),
@@ -22,41 +21,26 @@ pub enum Assertion {
     AccountOwnedBy(Pubkey, Operator),
 
     // token balance, operator
-    TokenAccountBalance(u64, Operator),
-    // TODO
-    // IsSigner,
+    LegacyTokenAccountField(LegacyTokenAccountDataField, Operator),
 }
 
 impl Assertion {
     pub fn format(&self) -> String {
         match self {
-            Assertion::Memory(offset, operator, value) => {
-                format!(
-                    "Memory[{}] {} {}",
-                    offset,
-                    operator.format(),
-                    value.format()
-                )
-            }
             Assertion::AccountData(offset, operator, value) => {
-                format!(
-                    "AccountData[{}] {} {}",
-                    offset,
-                    operator.format(),
-                    value.format()
-                )
+                format!("AccountData[{}|{:?}|{:?}]", offset, operator, value)
             }
             Assertion::AccountBalance(balance, operator) => {
-                format!("AccountBalance {} {}", balance, operator.format())
+                format!("AccountBalance[{}|{:?}]", balance, operator)
             }
             Assertion::AccountOwnedBy(pubkey, operator) => {
-                format!("AccountOwnedBy {} {}", pubkey, operator.format())
+                format!("AccountOwnedBy[{}|{:?}]", pubkey, operator)
             }
-            Assertion::TokenAccountBalance(balance, operator) => {
-                format!("TokenAccountBalance {} {}", balance, operator.format())
+            Assertion::LegacyTokenAccountField(field, operator) => {
+                format!("LegacyTokenAccountField[{:?}|{:?}]", field, operator)
             }
-            Assertion::AccountInfo(fields, operator) => {
-                format!("AccountInfo {:?} {}", fields, operator.format())
+            Assertion::AccountInfoField(fields, operator) => {
+                format!("AccountInfoField[{:?}|{:?}]", fields, operator)
             }
         }
     }

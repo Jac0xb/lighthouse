@@ -1,0 +1,41 @@
+[package]
+name = "rust-sdk" # Replace with your SDK name
+version = "0.1.0" # The current version of your SDK
+edition = "2021" # Rust edition, typically "2018" or "2021"
+authors = ["Jac0xb"] # Your contact information
+license = "MIT" # Or your choice of license (e.g., "Apache-2.0", "MIT/Apache-2.0")
+description = "A brief description of your SDK"
+repository = "https://github.com/jac0xb/lighthouse" # Replace with your repository URL
+documentation = "https://docs.rs/your_sdk_name" # Replace with your documentation URL, if applicable
+
+[dependencies]
+async-trait = "0.1.71"
+# solana-program = "~1.16.5"
+anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
+solana-sdk = "~1.17.13"
+spl-concurrent-merkle-tree = "0.2.0"
+spl-merkle-tree-reference = "0.1.0"
+spl-noop = { version = "0.1.3", features = ["no-entrypoint"] }
+solana-banks-interface = "1.14.10"
+regex = "1.5.4"
+solana-client = "1.17.13"
+
+[dev-dependencies]
+# Development dependencies (used for tests, examples, benchmarks, etc.)
+# Example:
+# tokio = { version = "1", features = ["full"] }
+
+[features]
+# Define optional features
+# Example:
+# default = ["use_serde"]
+# use_serde = ["serde"]
+
+[workspace]
+# If your SDK is part of a larger workspace, configure it here
+
+# Other sections you might want to include:
+# [build-dependencies]
+# [build]
+# [profile.release]
+# ... etc.

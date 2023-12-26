@@ -36,7 +36,6 @@ async fn test_logical_expression() {
             Expression::Or(vec![3, 2]),
             Expression::And(vec![0, 2]),
         ]),
-        None,
     );
     process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
 
@@ -52,7 +51,6 @@ async fn test_logical_expression() {
         ],
         vec![find_test_account().0; 4],
         Some(vec![Expression::Or(vec![1, 3])]),
-        None,
     );
     process_transaction_assert_failure(
         context,
@@ -73,7 +71,6 @@ async fn test_logical_expression() {
         ],
         vec![find_test_account().0; 4],
         Some(vec![Expression::And(vec![0, 1]), Expression::Or(vec![2])]),
-        None,
     );
     process_transaction_assert_failure(
         context,
