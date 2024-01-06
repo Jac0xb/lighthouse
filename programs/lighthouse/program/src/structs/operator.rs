@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use anchor_lang::prelude::{
     borsh,
     borsh::{BorshDeserialize, BorshSerialize},
@@ -15,15 +17,15 @@ pub enum Operator {
 
 pub struct EvaluationResult {
     pub passed: bool,
-    pub actual: String,
-    pub expected: String,
+    pub output: String,
 }
 
 impl Operator {
-    pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord + ToString>(
+    pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord + Debug>(
         &self,
         actual: &T,
         expected: &T,
+        output: bool,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -34,8 +36,11 @@ impl Operator {
                 Operator::GreaterThanOrEqual => T::ge(actual, expected),
                 Operator::LessThanOrEqual => T::le(actual, expected),
             },
-            actual: actual.to_string(),
-            expected: expected.to_string(),
+            output: if output {
+                format!("{:?} {:?} {:?}", actual, self, expected)
+            } else {
+                "".to_string()
+            },
         })
     }
 

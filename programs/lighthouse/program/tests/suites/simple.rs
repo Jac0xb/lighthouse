@@ -34,7 +34,7 @@ async fn test_write() {
                         WriteType::AccountData(8, Some(128), None),
                     ),
                 )
-                .to_transaction(vec![])
+                .to_transaction()
                 .await,
         )
         .await;
@@ -124,7 +124,7 @@ async fn test_write() {
                 vec![cache_account],
                 None,
             )
-            .to_transaction(vec![])
+            .to_transaction()
             .await;
 
         process_transaction_assert_success(context, tx).await;

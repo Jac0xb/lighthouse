@@ -2,7 +2,7 @@ use anchor_lang::prelude::{
     borsh,
     borsh::{BorshDeserialize, BorshSerialize},
 };
-use anchor_spl::token::spl_token::state::{Account, AccountState};
+use anchor_spl::token::spl_token::state::AccountState;
 use solana_program::pubkey::Pubkey;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
