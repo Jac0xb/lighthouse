@@ -2,19 +2,13 @@ use super::{
     clone_keypair,
     context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},
     process_transaction_assert_success,
-    tx_builder::{
-        AssertBuilder, CacheLoadAccountV1Builder, CreateCacheAccountBuilder,
-        CreateTestAccountV1Builder, DrainAccountBuilder, DrainTokenAccountBuilder, TxBuilder,
-    },
+    tx_builder::TxBuilder,
     Error, Result,
 };
 use anchor_lang::*;
 use anchor_spl::associated_token::{self, get_associated_token_address};
 use blackhat;
-use lighthouse::{
-    processor::AssertionConfig,
-    structs::{Assertion, Expression, WriteTypeParameter},
-};
+use lighthouse::structs::{Assertion, AssertionConfig, WriteTypeParameter};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     program_pack::Pack,
@@ -70,28 +64,36 @@ impl Program {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn tx_builder<T, U, V>(
+    fn tx_builder(
         &mut self,
-        accounts: T,
-        data: U,
-        inner: V,
         ixs: Vec<Instruction>,
         payer: Pubkey,
-        default_signers: &[&Keypair],
-        additional_accounts: Vec<AccountMeta>,
-    ) -> TxBuilder<T, U, V> {
-        let def_signers = default_signers.iter().map(|k| clone_keypair(k)).collect();
-
+        signers: &[&Keypair],
+    ) -> TxBuilder {
         TxBuilder {
-            accounts,
-            additional_accounts,
-            data,
             payer,
             ixs,
             client: self.client.clone(),
-            signers: def_signers,
-            inner,
+            signers: signers.iter().map(|k| clone_keypair(k)).collect(),
         }
+    }
+
+    pub fn create_assert_compact(
+        &mut self,
+        payer: &Keypair,
+        target_account: Pubkey,
+        assertion: Assertion,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: (lighthouse::accounts::AssertCompactV1 { target_account })
+                    .to_account_metas(None),
+                data: lighthouse::instruction::AssertCompactV1 { assertion }.data(),
+            }],
+            payer.pubkey(),
+            &[payer],
+        )
     }
 
     pub fn create_assertion(
@@ -99,45 +101,32 @@ impl Program {
         payer: &Keypair,
         assertions: Vec<Assertion>,
         additional_accounts: Vec<Pubkey>,
-        logical_expression: Option<Vec<Expression>>,
-    ) -> AssertBuilder {
-        let accounts = lighthouse::accounts::AssertV1 {
+    ) -> TxBuilder {
+        let mut accounts = (lighthouse::accounts::AssertMultiV1 {
             system_program: system_program::id(),
-        };
+        })
+        .to_account_metas(None);
 
-        let assertion_clone = (assertions).clone();
-        let logical_expression_clone = (logical_expression).clone();
-
-        // The conversions below should not fail.
-        let data = lighthouse::instruction::AssertV1 {
-            assertions,
-            logical_expression,
-            options: Some(AssertionConfig { verbose: true }),
-        };
+        // append additional_accounts to accounts
+        accounts.append(
+            &mut additional_accounts
+                .into_iter()
+                .map(|pubkey| AccountMeta::new_readonly(pubkey, false))
+                .collect(),
+        );
 
         self.tx_builder(
-            accounts,
-            data,
-            (),
             vec![Instruction {
                 program_id: lighthouse::id(),
-                accounts: (lighthouse::accounts::AssertV1 {
-                    system_program: system_program::id(),
-                })
-                .to_account_metas(None),
-                data: (lighthouse::instruction::AssertV1 {
-                    assertions: assertion_clone,
-                    logical_expression: logical_expression_clone,
-                    options: Some(AssertionConfig { verbose: true }),
+                accounts,
+                data: (lighthouse::instruction::AssertMultiV1 {
+                    assertions,
+                    config: Some(AssertionConfig { verbose: true }),
                 })
                 .data(),
             }],
             payer.pubkey(),
             &[payer],
-            additional_accounts
-                .into_iter()
-                .map(|pubkey| AccountMeta::new_readonly(pubkey, false))
-                .collect(),
         )
     }
 
@@ -146,23 +135,8 @@ impl Program {
         payer: &Keypair,
         cache_index: u8,
         cache_account_size: u64,
-    ) -> CreateCacheAccountBuilder {
-        let accounts = lighthouse::accounts::CreateCacheAccountV1 {
-            system_program: system_program::id(),
-            signer: payer.pubkey(),
-            cache_account: find_cache_account(payer.pubkey(), cache_index).0,
-            rent: sysvar::rent::id(),
-        };
-
-        let data = lighthouse::instruction::CreateCacheAccountV1 {
-            cache_index,
-            cache_account_size,
-        };
-
+    ) -> TxBuilder {
         self.tx_builder(
-            accounts,
-            data,
-            (),
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: (lighthouse::accounts::CreateCacheAccountV1 {
@@ -180,7 +154,6 @@ impl Program {
             }],
             payer.pubkey(),
             &[payer],
-            vec![],
         )
     }
 
@@ -190,20 +163,8 @@ impl Program {
         source_account: Pubkey,
         cache_index: u8,
         write_type_parameter: WriteTypeParameter,
-    ) -> CacheLoadAccountV1Builder {
-        let accounts = lighthouse::accounts::WriteV1 {
-            system_program: system_program::id(),
-            signer: payer.pubkey(),
-            cache_account: find_cache_account(payer.pubkey(), cache_index).0,
-        };
-
+    ) -> TxBuilder {
         let write_type_clone = write_type_parameter.clone();
-
-        let data = lighthouse::instruction::WriteV1 {
-            write_type: write_type_parameter,
-            cache_index,
-        };
-
         let mut ix_accounts = lighthouse::accounts::WriteV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
@@ -213,9 +174,6 @@ impl Program {
         ix_accounts.append(&mut vec![AccountMeta::new(source_account, false)]);
 
         self.tx_builder(
-            accounts,
-            data,
-            (),
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: ix_accounts,
@@ -227,11 +185,10 @@ impl Program {
             }],
             payer.pubkey(),
             &[payer],
-            vec![AccountMeta::new(source_account, false)],
         )
     }
 
-    pub fn create_test_account(&mut self, payer: &Keypair) -> CreateTestAccountV1Builder {
+    pub fn create_test_account(&mut self, payer: &Keypair) -> TxBuilder {
         let accounts = lighthouse::accounts::CreateTestAccountV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
@@ -241,35 +198,38 @@ impl Program {
 
         let data = lighthouse::instruction::CreateTestAccountV1 {};
 
-        self.tx_builder(accounts, data, (), vec![], payer.pubkey(), &[payer], vec![])
+        self.tx_builder(
+            vec![
+                Instruction {
+                    program_id: lighthouse::id(),
+                    accounts: accounts.to_account_metas(None),
+                    data: data.data(),
+                },
+                system_instruction::transfer(
+                    &payer.pubkey(),
+                    &find_test_account().0,
+                    DEFAULT_LAMPORTS_FUND_AMOUNT,
+                ),
+            ],
+            payer.pubkey(),
+            &[payer],
+        )
     }
 
-    pub fn drain_solana(&mut self, victim: &Keypair, bad_actor: &Pubkey) -> DrainAccountBuilder {
-        let accounts = blackhat::accounts::DrainAccount {
-            system_program: system_program::id(),
-            victim: victim.pubkey(),
-            bad_actor: bad_actor.clone(),
-        };
-
-        let data = blackhat::instruction::DrainAccount {};
-
+    pub fn drain_solana(&mut self, victim: &Keypair, bad_actor: &Pubkey) -> TxBuilder {
         self.tx_builder(
-            accounts,
-            data,
-            (),
             vec![Instruction {
                 program_id: blackhat::id(),
-                accounts: (blackhat::accounts::DrainAccount {
+                accounts: blackhat::accounts::DrainAccount {
                     system_program: system_program::id(),
                     victim: victim.pubkey(),
-                    bad_actor: bad_actor.clone(),
-                })
+                    bad_actor: *bad_actor,
+                }
                 .to_account_metas(None),
-                data: (blackhat::instruction::DrainAccount {}).data(),
+                data: blackhat::instruction::DrainAccount {}.data(),
             }],
             victim.pubkey(),
             &[victim],
-            vec![],
         )
     }
 
@@ -278,34 +238,28 @@ impl Program {
         victim: &Keypair,
         bad_actor: &Pubkey,
         mint: &Pubkey,
-    ) -> DrainTokenAccountBuilder {
+    ) -> TxBuilder {
         let accounts = blackhat::accounts::DrainTokenAccount {
             system_program: system_program::id(),
             mint: *mint,
+            victim: victim.pubkey(),
             victim_ata: get_associated_token_address(&victim.pubkey(), mint),
+            bad_actor: *bad_actor,
             bad_actor_ata: get_associated_token_address(bad_actor, mint),
+            associated_token_program: associated_token::ID,
+            token_program: spl_token::id(),
         };
 
         let data = blackhat::instruction::DrainTokenAccount {};
 
         self.tx_builder(
-            accounts,
-            data,
-            (),
             vec![Instruction {
                 program_id: blackhat::id(),
-                accounts: (blackhat::accounts::DrainTokenAccount {
-                    system_program: system_program::id(),
-                    mint: *mint,
-                    victim_ata: get_associated_token_address(&victim.pubkey(), mint),
-                    bad_actor_ata: get_associated_token_address(bad_actor, mint),
-                })
-                .to_account_metas(None),
-                data: (blackhat::instruction::DrainTokenAccount {}).data(),
+                accounts: accounts.to_account_metas(None),
+                data: data.data(),
             }],
             victim.pubkey(),
-            &[],
-            vec![],
+            &[victim],
         )
     }
 }
@@ -313,7 +267,7 @@ impl Program {
 pub async fn create_test_account(context: &mut TestContext, payer: &Keypair) -> Result<()> {
     let mut program = Program::new(context.client());
     let mut tx_builder = program.create_test_account(payer);
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    process_transaction_assert_success(context, tx_builder.to_transaction().await).await;
     Ok(())
 }
 
@@ -324,7 +278,7 @@ pub async fn create_cache_account(
 ) -> Result<()> {
     let mut program = Program::new(context.client());
     let mut tx_builder = program.create_cache_account(user, 0, size);
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    process_transaction_assert_success(context, tx_builder.to_transaction().await).await;
     Ok(())
 }
 

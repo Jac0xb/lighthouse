@@ -36,16 +36,14 @@ pub async fn process_transaction_assert_success(
 
     let tx_metadata = tx_metadata.unwrap();
 
+    if let Some(logs) = tx_metadata.metadata.clone().map(|m| m.log_messages) {
+        for log in logs {
+            println!("{:?}", log);
+        }
+    }
+
     if tx_metadata.result.is_err() {
         println!("Tx Result {:?}", tx_metadata.result.clone().err());
-    }
-
-    let logs = tx_metadata.metadata.unwrap().log_messages;
-    for log in logs {
-        println!("{:?}", log);
-    }
-
-    if tx_metadata.result.is_err() {
         panic!("Transaction failed");
     }
 }

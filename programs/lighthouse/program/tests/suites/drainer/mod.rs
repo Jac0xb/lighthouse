@@ -6,9 +6,10 @@ use crate::utils::{
     },
     utils::{build_tx, to_transaction_error},
 };
+use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::{
     error::ProgramError,
-    structs::{Assertion, Operator, WriteType},
+    structs::{Assertion, LegacyTokenAccountDataField, Operator, WriteType},
 };
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -76,26 +77,22 @@ async fn test_drain_token_account() {
         .unwrap();
     process_transaction_assert_success(context, Ok(tx)).await;
 
-    let drainer_ix = program
-        .drain_token_account(&user, &drainer.encodable_pubkey(), &mint.pubkey())
-        .ixs;
-    // let assert_ix = program
-    //     .create_assertion(
-    //         &user,
-    //         vec![Assertion::TokenAccountBalance(69_000, Operator::Equal)],
-    //         vec![user.encodable_pubkey()],
-    //         None,
-    //     )
-    //     .to_instruction();
+    let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
 
-    let tx = build_tx(
-        drainer_ix,
-        vec![&user],
-        &user.encodable_pubkey(),
-        &mut context.client(),
-    )
-    .await
-    .unwrap();
+    let tx = program
+        .drain_token_account(&user, &drainer.encodable_pubkey(), &mint.pubkey())
+        .concat_tx_builder(program.create_assertion(
+            &user,
+            vec![Assertion::LegacyTokenAccountField(
+                LegacyTokenAccountDataField::Amount(69_000),
+                Operator::Equal,
+            )],
+            vec![user_ata],
+            None,
+        ))
+        .to_transaction()
+        .await
+        .unwrap();
 
     process_transaction_assert_failure(
         context,

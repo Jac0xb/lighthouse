@@ -16,8 +16,8 @@ declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
 #[program]
 pub mod lighthouse {
-
     use super::*;
+
     pub fn create_cache_account_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateCacheAccountV1<'info>>,
         cache_index: u8,
@@ -40,12 +40,44 @@ pub mod lighthouse {
         processor::v1::write(ctx, cache_index, write_type)
     }
 
-    pub fn assert_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
-        assertions: Vec<Assertion>,
-        logical_expression: Option<Vec<Expression>>,
-        options: Option<AssertionConfig>,
+    pub fn assert_compact_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, AssertCompactV1<'info>>,
+        assertion: Assertion,
     ) -> Result<()> {
-        processor::assert(ctx, assertions, logical_expression, options)
+        processor::v1::assert_compact(ctx, assertion)
+    }
+
+    pub fn assert_multi_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, AssertMultiV1<'info>>,
+        assertions: Vec<Assertion>,
+        config: Option<AssertionConfig>,
+    ) -> Result<()> {
+        Assertion::assert_multi(ctx.remaining_accounts, assertions.as_slice(), config)
+    }
+
+    pub fn assert_multi_compact_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, AssertMultiCompactV1<'info>>,
+        assertions: AssertionArray,
+    ) -> Result<()> {
+        let assertions: &[Assertion] = match &assertions {
+            AssertionArray::Size1(a) => a,
+            AssertionArray::Size2(a) => a,
+            AssertionArray::Size3(a) => a,
+            AssertionArray::Size4(a) => a,
+            AssertionArray::Size5(a) => a,
+            AssertionArray::Size6(a) => a,
+            AssertionArray::Size7(a) => a,
+            AssertionArray::Size8(a) => a,
+            AssertionArray::Size9(a) => a,
+            AssertionArray::Size10(a) => a,
+            AssertionArray::Size11(a) => a,
+            AssertionArray::Size12(a) => a,
+            AssertionArray::Size13(a) => a,
+            AssertionArray::Size14(a) => a,
+            AssertionArray::Size15(a) => a,
+            AssertionArray::Size16(a) => a,
+        };
+
+        Assertion::assert_multi(ctx.remaining_accounts, assertions, None)
     }
 }

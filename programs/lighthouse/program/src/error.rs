@@ -16,8 +16,12 @@ pub enum ProgramError {
     OutOfRange,
     #[msg("AccountBorrowFailed")]
     AccountBorrowFailed,
-    #[msg("InvalidAccount")]
-    InvalidAccount,
+
+    #[msg("AccountNotTokenAccount")]
+    AccountNotTokenAccount,
+
+    #[msg("AccountNotInitialized")]
+    AccountNotInitialized,
 
     #[msg("UnauthorizedIxEntry")]
     UnauthorizedIxEntry,
