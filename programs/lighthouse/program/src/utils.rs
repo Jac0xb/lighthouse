@@ -1,34 +1,21 @@
-use crate::{processor::assert::AssertionConfig, structs::Operator};
+use crate::structs::{operator::EvaluationResult, Assertion};
 use solana_program::msg;
 
 pub fn print_assertion_result(
-    config: &Option<AssertionConfig>,
-    assertion_info: String,
-    assertion_result: bool,
+    assertion: &Assertion,
     assertion_index: usize,
-    operator: &Operator,
-    value_str: String,
-    expected_value_str: String,
+    evaluation_result: &Box<EvaluationResult>,
 ) {
-    if let Some(config) = config {
-        if !config.verbose {
-            return;
-        }
-    } else {
-        return;
-    }
-
     msg!(
-        "{} {} {} -> {} {} {}",
-        format!("[{:?}]", assertion_index),
-        if assertion_result {
-            "[✅] SUCCESS"
+        // repeating zeros infront of assettion index
+        "{} {} {} {}",
+        format!("[{:0>2}]", assertion_index),
+        if evaluation_result.passed {
+            "[✓] PASSED"
         } else {
-            "[❌] FAIL   "
+            "[✕] FAILED"
         },
-        assertion_info,
-        value_str,
-        operator.format(),
-        expected_value_str,
+        assertion.format(),
+        evaluation_result.output
     );
 }

@@ -25,20 +25,36 @@ async fn test_basic() {
     process_transaction_assert_success(context, Ok(tx)).await;
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
-    let mut tx_builder = program.create_assertion(
+    let mut tx_builder = program.create_assert_multi(
         &user,
         vec![
-            Assertion::TokenAccountBalance(0, Operator::GreaterThan),
-            Assertion::TokenAccountBalance(101, Operator::LessThan),
-            Assertion::TokenAccountBalance(100, Operator::LessThanOrEqual),
-            Assertion::TokenAccountBalance(100, Operator::GreaterThanOrEqual),
-            Assertion::TokenAccountBalance(100, Operator::Equal),
-            Assertion::TokenAccountBalance(99, Operator::NotEqual),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(0),
+                Operator::GreaterThan,
+            ),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(101),
+                Operator::LessThan,
+            ),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(100),
+                Operator::LessThanOrEqual,
+            ),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(100),
+                Operator::GreaterThanOrEqual,
+            ),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(100),
+                Operator::Equal,
+            ),
+            Assertion::LegacyTokenAccountField(
+                lighthouse::structs::LegacyTokenAccountDataField::Amount(99),
+                Operator::NotEqual,
+            ),
         ],
-        vec![token_account; 6],
-        None,
-        None,
+        vec![token_account],
     );
 
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    process_transaction_assert_success(context, tx_builder.to_transaction().await).await;
 }

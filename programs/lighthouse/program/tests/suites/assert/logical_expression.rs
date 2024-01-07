@@ -1,5 +1,5 @@
 use lighthouse::{
-    error::ProgramError,
+    error::LighthouseError,
     structs::{Assertion, DataValue, Expression, Operator},
 };
 use solana_program_test::tokio;
@@ -36,7 +36,6 @@ async fn test_logical_expression() {
             Expression::Or(vec![3, 2]),
             Expression::And(vec![0, 2]),
         ]),
-        None,
     );
     process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
 
@@ -52,33 +51,31 @@ async fn test_logical_expression() {
         ],
         vec![find_test_account().0; 4],
         Some(vec![Expression::Or(vec![1, 3])]),
-        None,
     );
     process_transaction_assert_failure(
         context,
         tx_builder.to_transaction(vec![]).await,
-        to_transaction_error(0, ProgramError::AssertionFailed),
+        to_transaction_error(0, LighthouseError::AssertionFailed),
         Some(&["1 == 5".to_string(), "256 == 30".to_string()]),
     )
     .await;
 
     // Test that the assertion fails when the logical expression is false.
     println!("Test that the assertion fails when the logical expression is false.");
-    let mut tx_builder = program.create_assertion(
+    let mut tx_builder = program.create_assert_multi(
         &user,
         vec![
             Assertion::AccountData(8, Operator::Equal, DataValue::U8(1)),
             Assertion::AccountData(8, Operator::GreaterThan, DataValue::U8(0)),
             Assertion::AccountData(10, Operator::LessThan, DataValue::U16(u8::MAX as u16)),
         ],
-        vec![find_test_account().0; 4],
+        vec![find_test_account().0],
         Some(vec![Expression::And(vec![0, 1]), Expression::Or(vec![2])]),
-        None,
     );
     process_transaction_assert_failure(
         context,
         tx_builder.to_transaction(vec![]).await,
-        to_transaction_error(0, ProgramError::AssertionFailed),
+        to_transaction_error(0, LighthouseError::AssertionFailed),
         Some(&["1 == 1".to_string(), "256 < 255".to_string()]),
     )
     .await;

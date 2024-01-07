@@ -1,3 +1,3 @@
-pub mod cache;
+pub mod memory;
 
-pub use cache::*;
+pub use memory::*;

@@ -6,7 +6,7 @@ use crate::utils::{
     context::TestContext,
     process_transaction_assert_success,
     program::{
-        create_cache_account, create_test_account, create_user, find_cache_account,
+        create_memory_account, create_test_account, create_user, find_memory_account,
         find_test_account, Program,
     },
 };
@@ -19,12 +19,12 @@ async fn test_write_program() {
 
     // Create test account
     let _ = create_test_account(context, &user).await;
-    let _ = create_cache_account(context, &user, 256).await;
+    let _ = create_memory_account(context, &user, 256).await;
 
-    let cache_account = find_cache_account(user.encodable_pubkey(), 0).0;
+    let memory_account = find_memory_account(user.encodable_pubkey(), 0).0;
 
     {
-        // Test writing account data to cache.
+        // Test writing account data to memory.
         process_transaction_assert_success(
             context,
             program
@@ -39,14 +39,14 @@ async fn test_write_program() {
         )
         .await;
 
-        // Assert that data was properly written to cache.
+        // Assert that data was properly written to memory.
         let tx = program
             .create_assertion(
                 &user,
                 vec![Assertion::Memory(0, Operator::Equal, DataValue::U8(1))],
                 vec![],
                 None,
-                Some(cache_account),
+                Some(memory_account),
             )
             .to_transaction(vec![])
             .await;

@@ -85,3 +85,4 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
   - Extra account overhead for cpi events pda
   - program logs concat
   - Do we even need logs :P
+- Assertion type: hash of account, for post-simulation account integrity
