@@ -1,6 +1,6 @@
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::error::LighthouseError;
-use lighthouse::structs::{Assertion, Operator};
+use lighthouse::structs::{AccountInfoDataField, Assertion, Operator};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
@@ -21,7 +21,7 @@ async fn test_basic() {
     let mut tx_builder = program.create_assert_compact(
         &user,
         user.encodable_pubkey(),
-        Assertion::AccountBalance(0, Operator::GreaterThan),
+        Assertion::AccountInfoField(AccountInfoDataField::Lamports(0), Operator::GreaterThan),
     );
 
     process_transaction_assert_success(context, tx_builder.to_transaction().await).await;

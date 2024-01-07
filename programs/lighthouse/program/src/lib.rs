@@ -18,26 +18,26 @@ declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 pub mod lighthouse {
     use super::*;
 
-    pub fn create_cache_account_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateCacheAccountV1<'info>>,
-        cache_index: u8,
-        cache_account_size: u64,
+    pub fn create_memory_account_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateMemoryAccountV1<'info>>,
+        memory_index: u8,
+        memory_account_size: u64,
     ) -> Result<()> {
-        processor::v1::create_cache_account(ctx, cache_index, cache_account_size)
+        processor::v1::create_memory_account(ctx, memory_index, memory_account_size)
     }
 
     pub fn write_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
-        cache_index: u8,
+        memory_index: u8,
         write_type: WriteTypeParameter,
     ) -> Result<()> {
-        processor::v1::write(ctx, cache_index, write_type)
+        processor::v1::write(ctx, memory_index, write_type)
     }
 
     pub fn assert_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
         assertion: Assertion,
-        config: Option<AssertionConfig>,
+        config: Option<AssertionConfigV1>,
     ) -> Result<()> {
         processor::v1::assert(&ctx.accounts.target_account, &assertion, config)
     }
@@ -52,7 +52,7 @@ pub mod lighthouse {
     pub fn assert_multi_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, AssertMultiV1<'info>>,
         assertions: Vec<Assertion>,
-        config: Option<AssertionConfig>,
+        config: Option<AssertionConfigV1>,
     ) -> Result<()> {
         processor::v1::assert_multi(ctx.remaining_accounts, assertions.as_slice(), config)
     }

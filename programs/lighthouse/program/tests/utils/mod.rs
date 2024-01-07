@@ -32,18 +32,6 @@ pub fn program_test() -> ProgramTest {
     test
 }
 
-fn instruction<T, U>(accounts: &T, data: &U) -> Instruction
-where
-    T: ToAccountMetas,
-    U: InstructionData,
-{
-    Instruction {
-        program_id: lighthouse::id(),
-        accounts: accounts.to_account_metas(None),
-        data: data.data(),
-    }
-}
-
 // Helper method to copy keypairs for testing, since they don't implement
 // `Copy/Clone` themselves (for some good reasons).
 pub fn clone_keypair(k: &Keypair) -> Keypair {

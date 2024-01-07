@@ -6,7 +6,7 @@ use crate::error::LighthouseError;
 use crate::structs::{AccountInfoData, WriteType, WriteTypeParameter};
 
 #[derive(Accounts)]
-#[instruction(cache_index: u8)]
+#[instruction(memory_index: u8)]
 pub struct WriteV1<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -14,13 +14,13 @@ pub struct WriteV1<'info> {
     #[account(
         mut,
         seeds=[
-            b"cache".as_ref(),
+            b"memory".as_ref(),
             signer.key.as_ref(),
-            &[cache_index],
+            &[memory_index],
         ],
         bump
     )]
-    pub cache_account: UncheckedAccount<'info>,
+    pub memory_account: UncheckedAccount<'info>,
 }
 
 pub fn write<'info>(
@@ -33,31 +33,31 @@ pub fn write<'info>(
         return Err(LighthouseError::UnauthorizedIxEntry.into());
     }
 
-    let cache_ref = &mut ctx.accounts.cache_account.try_borrow_mut_data()?;
-    let cache_data_length = cache_ref.len();
+    let memory_ref = &mut ctx.accounts.memory_account.try_borrow_mut_data()?;
+    let memory_data_length = memory_ref.len();
 
-    let (mut cache_offset, write_type) = match write_type {
-        WriteTypeParameter::WriteU8(cache_offset, write_type) => {
-            (cache_offset as usize, write_type)
+    let (mut memory_offset, write_type) = match write_type {
+        WriteTypeParameter::WriteU8(memory_offset, write_type) => {
+            (memory_offset as usize, write_type)
         }
-        WriteTypeParameter::WriteU16(cache_offset, write_type) => {
-            (cache_offset as usize, write_type)
+        WriteTypeParameter::WriteU16(memory_offset, write_type) => {
+            (memory_offset as usize, write_type)
         }
-        WriteTypeParameter::WriteU32(cache_offset, write_type) => {
-            (cache_offset as usize, write_type)
+        WriteTypeParameter::WriteU32(memory_offset, write_type) => {
+            (memory_offset as usize, write_type)
         }
     };
 
-    cache_offset = cache_offset.checked_add(8).ok_or_else(|| {
-        msg!("Cache offset overflowed");
+    memory_offset = memory_offset.checked_add(8).ok_or_else(|| {
+        msg!("Memory offset overflowed");
         LighthouseError::OutOfRange
     })?;
 
     let data_length = write_type
         .size(ctx.remaining_accounts.first())
         .ok_or(LighthouseError::InvalidDataLength)?;
-    if cache_data_length < (cache_offset + data_length) {
-        msg!("Cache offset overflowed");
+    if memory_data_length < (memory_offset + data_length) {
+        msg!("Memory offset overflowed");
         return Err(LighthouseError::OutOfRange.into());
     }
 
@@ -67,18 +67,18 @@ pub fn write<'info>(
         }
         WriteType::DataValue(borsh_value) => {
             let data_slice = &(borsh_value.serialize())[0..data_length];
-            cache_ref[cache_offset..(cache_offset + data_length)]
+            memory_ref[memory_offset..(memory_offset + data_length)]
                 .copy_from_slice(data_slice.as_ref());
         }
         WriteType::AccountBalance => {
             let source_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = source_account {
-                if (cache_offset + data_length) < cache_data_length {
+                if (memory_offset + data_length) < memory_data_length {
                     let data = target_account.lamports();
                     let data_slice = &data.to_le_bytes();
 
-                    cache_ref[cache_offset..(cache_offset + data_length)]
+                    memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
                     return Err(LighthouseError::NotEnoughAccounts.into());
@@ -128,14 +128,14 @@ pub fn write<'info>(
                     }
                 }
 
-                if (cache_offset + data_length) < cache_data_length {
+                if (memory_offset + data_length) < memory_data_length {
                     let data = target_account.try_borrow_data().map_err(|err| {
                         msg!("Error: {:?}", err);
                         LighthouseError::AccountBorrowFailed
                     })?;
                     let data_slice = &data[account_offset..(account_offset + data_length)];
 
-                    cache_ref[cache_offset..(cache_offset + data_length)]
+                    memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
                     return Err(LighthouseError::NotEnoughAccounts.into());
@@ -148,7 +148,7 @@ pub fn write<'info>(
             let target_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = target_account {
-                if (cache_offset + data_length) < cache_data_length {
+                if (memory_offset + data_length) < memory_data_length {
                     let account_info = AccountInfoData {
                         key: *target_account.key,
                         is_signer: target_account.is_signer,
@@ -163,7 +163,7 @@ pub fn write<'info>(
                     let data = account_info.try_to_vec()?; // TODO: map this unwrap error
                     let data_slice = &data[0..data_length];
 
-                    cache_ref[cache_offset..(cache_offset + data_length)]
+                    memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
                     return Err(LighthouseError::NotEnoughAccounts.into());

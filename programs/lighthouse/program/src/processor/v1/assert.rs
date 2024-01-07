@@ -1,6 +1,6 @@
 use crate::{
     error::LighthouseError,
-    structs::{Assertion, AssertionConfig},
+    structs::{Assertion, AssertionConfigV1},
     utils::print_assertion_result,
 };
 use anchor_lang::prelude::*;
@@ -18,7 +18,7 @@ pub struct AssertCompactV1<'info> {
 pub fn assert(
     target_account: &AccountInfo<'_>,
     assertion: &Assertion,
-    config: Option<AssertionConfig>,
+    config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let include_output = match &config {
         Some(config) => config.verbose,

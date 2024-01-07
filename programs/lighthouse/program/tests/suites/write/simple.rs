@@ -6,7 +6,7 @@ use crate::utils::{
     context::TestContext,
     process_transaction_assert_success,
     program::{
-        create_cache_account, create_test_account, create_user, find_cache_account,
+        create_memory_account, create_test_account, create_user, find_memory_account,
         find_test_account, Program,
     },
 };
@@ -19,11 +19,11 @@ async fn test_write() {
 
     // Create test account
     let _ = create_test_account(context, &user).await;
-    let _ = create_cache_account(context, &user, 256).await;
+    let _ = create_memory_account(context, &user, 256).await;
 
-    let cache_account = find_cache_account(user.encodable_pubkey(), 0).0;
+    let memory_account = find_memory_account(user.encodable_pubkey(), 0).0;
 
-    // Test writing account data to cache.
+    // Test writing account data to memory.
     process_transaction_assert_success(
         context,
         program
@@ -43,7 +43,7 @@ async fn test_write() {
 
     let discrim_length = 8;
 
-    // Assert that data was properly written to cache.
+    // Assert that data was properly written to memory.
     // Program L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK consumed 85510 of 1400000 compute units
     let tx = program
         .create_assert_multi(
@@ -120,14 +120,14 @@ async fn test_write() {
                     DataValue::I128((i64::MIN as i128) - 1),
                 ),
             ],
-            vec![cache_account],
+            vec![memory_account],
         )
         .to_transaction()
         .await;
 
     process_transaction_assert_success(context, tx).await;
 
-    // Assert that data was properly written to cache.
+    // Assert that data was properly written to memory.
     // L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK consumed 7872 of 1400000 compute units
     let tx_compact = program
         .create_assert_multi_compact(
@@ -194,7 +194,7 @@ async fn test_write() {
                     DataValue::I64((i32::MIN as i64) - 1),
                 ),
             ],
-            vec![cache_account],
+            vec![memory_account],
         )
         .to_transaction()
         .await;

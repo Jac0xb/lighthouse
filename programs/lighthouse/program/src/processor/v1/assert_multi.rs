@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     error::LighthouseError,
-    structs::{Assertion, AssertionConfig},
+    structs::{Assertion, AssertionConfigV1},
     utils::print_assertion_result,
 };
 
@@ -58,7 +58,7 @@ pub struct AssertMultiV1<'info> {
 pub fn assert_multi(
     remaining_accounts: &[AccountInfo<'_>],
     assertions: &[Assertion],
-    config: Option<AssertionConfig>,
+    config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let include_output = match &config {
         Some(config) => config.verbose,
