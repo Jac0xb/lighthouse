@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use borsh::BorshDeserialize;
 use solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 
-use crate::error::ProgramError;
+use crate::error::LighthouseError;
 use crate::structs::{AccountInfoData, WriteType, WriteTypeParameter};
 
 #[derive(Accounts)]
@@ -30,7 +30,7 @@ pub fn write<'info>(
 ) -> Result<()> {
     if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {
         msg!("Stack height is greater than transaction level stack height");
-        return Err(ProgramError::UnauthorizedIxEntry.into());
+        return Err(LighthouseError::UnauthorizedIxEntry.into());
     }
 
     let cache_ref = &mut ctx.accounts.cache_account.try_borrow_mut_data()?;
@@ -50,20 +50,20 @@ pub fn write<'info>(
 
     cache_offset = cache_offset.checked_add(8).ok_or_else(|| {
         msg!("Cache offset overflowed");
-        ProgramError::OutOfRange
+        LighthouseError::OutOfRange
     })?;
 
     let data_length = write_type
         .size(ctx.remaining_accounts.first())
-        .ok_or(ProgramError::InvalidDataLength)?;
+        .ok_or(LighthouseError::InvalidDataLength)?;
     if cache_data_length < (cache_offset + data_length) {
         msg!("Cache offset overflowed");
-        return Err(ProgramError::OutOfRange.into());
+        return Err(LighthouseError::OutOfRange.into());
     }
 
     match write_type {
         WriteType::Program => {
-            return Err(ProgramError::Unimplemented.into());
+            return Err(LighthouseError::Unimplemented.into());
         }
         WriteType::DataValue(borsh_value) => {
             let data_slice = &(borsh_value.serialize())[0..data_length];
@@ -81,10 +81,10 @@ pub fn write<'info>(
                     cache_ref[cache_offset..(cache_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
-                    return Err(ProgramError::NotEnoughAccounts.into());
+                    return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
-                return Err(ProgramError::NotEnoughAccounts.into());
+                return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
         WriteType::AccountData(account_offset, _, account_validation) => {
@@ -96,32 +96,34 @@ pub fn write<'info>(
                 if let Some(account_validation) = account_validation {
                     if let Some(owner) = account_validation.owner {
                         if owner != *target_account.owner {
-                            return Err(ProgramError::AccountOwnerValidationFailed.into());
+                            return Err(LighthouseError::AccountOwnerValidationFailed.into());
                         }
                     }
 
                     if let Some(assert_is_funded) = account_validation.is_funded {
                         let is_funded = target_account.lamports() == 0;
                         if assert_is_funded != is_funded {
-                            return Err(ProgramError::AccountFundedValidationFailed.into());
+                            return Err(LighthouseError::AccountFundedValidationFailed.into());
                         }
                     }
 
                     if let Some(discriminator) = account_validation.discriminator {
                         let data = target_account.try_borrow_data().map_err(|err| {
                             msg!("Error: {:?}", err);
-                            ProgramError::AccountBorrowFailed
+                            LighthouseError::AccountBorrowFailed
                         })?;
 
                         if discriminator.len() > data.len() {
                             msg!("Discriminator length is greater than account data length");
-                            return Err(ProgramError::AccountOutOfRange.into());
+                            return Err(LighthouseError::AccountOutOfRange.into());
                         }
 
                         let data_slice = &data[0..discriminator.len()];
 
                         if !data_slice.eq(discriminator.as_slice()) {
-                            return Err(ProgramError::AccountDiscriminatorValidationFailed.into());
+                            return Err(
+                                LighthouseError::AccountDiscriminatorValidationFailed.into()
+                            );
                         }
                     }
                 }
@@ -129,17 +131,17 @@ pub fn write<'info>(
                 if (cache_offset + data_length) < cache_data_length {
                     let data = target_account.try_borrow_data().map_err(|err| {
                         msg!("Error: {:?}", err);
-                        ProgramError::AccountBorrowFailed
+                        LighthouseError::AccountBorrowFailed
                     })?;
                     let data_slice = &data[account_offset..(account_offset + data_length)];
 
                     cache_ref[cache_offset..(cache_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
-                    return Err(ProgramError::NotEnoughAccounts.into());
+                    return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
-                return Err(ProgramError::NotEnoughAccounts.into());
+                return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
         WriteType::AccountInfo => {
@@ -164,10 +166,10 @@ pub fn write<'info>(
                     cache_ref[cache_offset..(cache_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
-                    return Err(ProgramError::NotEnoughAccounts.into());
+                    return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
-                return Err(ProgramError::NotEnoughAccounts.into());
+                return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
     };

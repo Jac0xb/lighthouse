@@ -8,7 +8,7 @@ use super::{
 use anchor_lang::*;
 use anchor_spl::associated_token::{self, get_associated_token_address};
 use blackhat;
-use lighthouse::structs::{Assertion, AssertionConfig, WriteTypeParameter};
+use lighthouse::structs::{Assertion, AssertionArray, AssertionConfig, WriteTypeParameter};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     program_pack::Pack,
@@ -78,6 +78,28 @@ impl Program {
         }
     }
 
+    pub fn create_assert(
+        &mut self,
+        payer: &Keypair,
+        target_account: Pubkey,
+        assertion: Assertion,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: (lighthouse::accounts::AssertV1 { target_account })
+                    .to_account_metas(None),
+                data: lighthouse::instruction::AssertV1 {
+                    assertion,
+                    config: Some(AssertionConfig { verbose: true }),
+                }
+                .data(),
+            }],
+            payer.pubkey(),
+            &[payer],
+        )
+    }
+
     pub fn create_assert_compact(
         &mut self,
         payer: &Keypair,
@@ -96,7 +118,7 @@ impl Program {
         )
     }
 
-    pub fn create_assertion(
+    pub fn create_assert_multi(
         &mut self,
         payer: &Keypair,
         assertions: Vec<Assertion>,
@@ -115,6 +137,15 @@ impl Program {
                 .collect(),
         );
 
+        let length = (lighthouse::instruction::AssertMultiV1 {
+            assertions: assertions.clone(),
+            config: Some(AssertionConfig { verbose: true }),
+        })
+        .data()
+        .len();
+
+        println!("length: {}", length);
+
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::id(),
@@ -122,6 +153,214 @@ impl Program {
                 data: (lighthouse::instruction::AssertMultiV1 {
                     assertions,
                     config: Some(AssertionConfig { verbose: true }),
+                })
+                .data(),
+            }],
+            payer.pubkey(),
+            &[payer],
+        )
+    }
+
+    pub fn create_assert_multi_compact(
+        &mut self,
+        payer: &Keypair,
+        assertions: Vec<Assertion>,
+        additional_accounts: Vec<Pubkey>,
+    ) -> TxBuilder {
+        let mut accounts = (lighthouse::accounts::AssertMultiCompactV1 {
+            system_program: system_program::id(),
+        })
+        .to_account_metas(None);
+
+        // append additional_accounts to accounts
+        accounts.append(
+            &mut additional_accounts
+                .into_iter()
+                .map(|pubkey| AccountMeta::new_readonly(pubkey, false))
+                .collect(),
+        );
+
+        let assertion_array: AssertionArray = match assertions.len() {
+            1 => AssertionArray::Size1([assertions[0].clone()]),
+            2 => AssertionArray::Size2([assertions[0].clone(), assertions[1].clone()]),
+            3 => AssertionArray::Size3([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+            ]),
+            4 => AssertionArray::Size4([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+            ]),
+            5 => AssertionArray::Size5([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+            ]),
+            6 => AssertionArray::Size6([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+            ]),
+            7 => AssertionArray::Size7([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+            ]),
+            8 => AssertionArray::Size8([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+            ]),
+            9 => AssertionArray::Size9([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+            ]),
+            10 => AssertionArray::Size10([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+            ]),
+            11 => AssertionArray::Size11([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+            ]),
+            12 => AssertionArray::Size12([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+                assertions[11].clone(),
+            ]),
+            13 => AssertionArray::Size13([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+                assertions[11].clone(),
+                assertions[12].clone(),
+            ]),
+            14 => AssertionArray::Size14([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+                assertions[11].clone(),
+                assertions[12].clone(),
+                assertions[13].clone(),
+            ]),
+            15 => AssertionArray::Size15([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+                assertions[11].clone(),
+                assertions[12].clone(),
+                assertions[13].clone(),
+                assertions[14].clone(),
+            ]),
+            16 => AssertionArray::Size16([
+                assertions[0].clone(),
+                assertions[1].clone(),
+                assertions[2].clone(),
+                assertions[3].clone(),
+                assertions[4].clone(),
+                assertions[5].clone(),
+                assertions[6].clone(),
+                assertions[7].clone(),
+                assertions[8].clone(),
+                assertions[9].clone(),
+                assertions[10].clone(),
+                assertions[11].clone(),
+                assertions[12].clone(),
+                assertions[13].clone(),
+                assertions[14].clone(),
+                assertions[15].clone(),
+            ]),
+            _ => panic!("length mismatch"),
+        };
+
+        let length = (lighthouse::instruction::AssertMultiCompactV1 {
+            assertions: assertion_array.clone(),
+        })
+        .data()
+        .len();
+
+        println!("length: {}", length);
+
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts,
+                data: (lighthouse::instruction::AssertMultiCompactV1 {
+                    assertions: assertion_array,
                 })
                 .data(),
             }],
@@ -189,28 +428,21 @@ impl Program {
     }
 
     pub fn create_test_account(&mut self, payer: &Keypair) -> TxBuilder {
-        let accounts = lighthouse::accounts::CreateTestAccountV1 {
+        let accounts = blackhat::accounts::CreateTestAccountV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
             test_account: find_test_account().0,
             rent: sysvar::rent::id(),
         };
 
-        let data = lighthouse::instruction::CreateTestAccountV1 {};
+        let data = blackhat::instruction::CreateTestAccountV1 {};
 
         self.tx_builder(
-            vec![
-                Instruction {
-                    program_id: lighthouse::id(),
-                    accounts: accounts.to_account_metas(None),
-                    data: data.data(),
-                },
-                system_instruction::transfer(
-                    &payer.pubkey(),
-                    &find_test_account().0,
-                    DEFAULT_LAMPORTS_FUND_AMOUNT,
-                ),
-            ],
+            vec![Instruction {
+                program_id: blackhat::id(),
+                accounts: accounts.to_account_metas(None),
+                data: data.data(),
+            }],
             payer.pubkey(),
             &[payer],
         )
@@ -285,7 +517,7 @@ pub async fn create_cache_account(
 pub fn find_test_account() -> (solana_program::pubkey::Pubkey, u8) {
     solana_program::pubkey::Pubkey::find_program_address(
         &["test_account".to_string().as_ref()],
-        &lighthouse::ID,
+        &blackhat::ID,
     )
 }
 

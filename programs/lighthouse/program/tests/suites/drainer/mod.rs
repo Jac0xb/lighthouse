@@ -8,7 +8,7 @@ use crate::utils::{
 };
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::{
-    error::ProgramError,
+    error::LighthouseError,
     structs::{Assertion, LegacyTokenAccountDataField, Operator, WriteType},
 };
 use solana_program_test::tokio;
@@ -32,14 +32,13 @@ async fn test_drain_solana() {
 
     let drainer_ixs = program.drain_solana(&user, &drainer.encodable_pubkey()).ixs;
     let assert_ix = program
-        .create_assertion(
+        .create_assert_multi(
             &user,
             vec![Assertion::AccountBalance(
                 user_balance - 10_000,
                 Operator::GreaterThan,
             )],
             vec![user.encodable_pubkey()],
-            None,
         )
         .ixs;
 
@@ -55,7 +54,7 @@ async fn test_drain_solana() {
     process_transaction_assert_failure(
         context,
         Ok(tx),
-        to_transaction_error(1, ProgramError::AssertionFailed),
+        to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
     )
     .await;
@@ -81,14 +80,13 @@ async fn test_drain_token_account() {
 
     let tx = program
         .drain_token_account(&user, &drainer.encodable_pubkey(), &mint.pubkey())
-        .concat_tx_builder(program.create_assertion(
+        .append(program.create_assert_compact(
             &user,
-            vec![Assertion::LegacyTokenAccountField(
+            user_ata,
+            Assertion::LegacyTokenAccountField(
                 LegacyTokenAccountDataField::Amount(69_000),
                 Operator::Equal,
-            )],
-            vec![user_ata],
-            None,
+            ),
         ))
         .to_transaction()
         .await
@@ -97,7 +95,7 @@ async fn test_drain_token_account() {
     process_transaction_assert_failure(
         context,
         Ok(tx),
-        to_transaction_error(1, ProgramError::AssertionFailed),
+        to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
     )
     .await;

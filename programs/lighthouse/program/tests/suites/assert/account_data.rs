@@ -17,7 +17,7 @@ async fn test_borsh_account_data() {
     process_transaction_assert_success(
         context,
         program
-            .create_assertion(
+            .create_assert_multi(
                 &user,
                 vec![
                     Assertion::AccountData(8, Operator::Equal, DataValue::U8(1)),
@@ -70,10 +70,9 @@ async fn test_borsh_account_data() {
                     Assertion::AccountData(102, Operator::Equal, DataValue::Bool(true)),
                     Assertion::AccountData(103, Operator::Equal, DataValue::Bool(false)),
                 ],
-                vec![find_test_account().0; 13],
-                None,
+                vec![find_test_account().0],
             )
-            .to_transaction(vec![])
+            .to_transaction()
             .await,
     )
     .await;

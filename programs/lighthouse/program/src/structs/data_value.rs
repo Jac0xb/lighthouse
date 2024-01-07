@@ -6,7 +6,7 @@ use anchor_lang::prelude::{
 };
 use solana_program::pubkey::Pubkey;
 
-use crate::error::ProgramError;
+use crate::error::LighthouseError;
 
 use super::operator::{EvaluationResult, Operator};
 
@@ -159,7 +159,7 @@ impl DataValue {
         offset: usize,
         operator: &Operator,
         include_output: bool,
-    ) -> Result<Box<EvaluationResult>, ProgramError> {
+    ) -> Result<Box<EvaluationResult>, LighthouseError> {
         let slice = &data[offset..(offset + self.size())];
         let value = DataValue::deserialize(self.get_data_type(), slice);
 
@@ -167,7 +167,7 @@ impl DataValue {
             DataValue::Bool(expected_value) => {
                 let value = match value {
                     DataValue::Bool(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -175,7 +175,7 @@ impl DataValue {
             DataValue::U8(expected_value) => {
                 let value = match value {
                     DataValue::U8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -183,7 +183,7 @@ impl DataValue {
             DataValue::I8(expected_value) => {
                 let value = match value {
                     DataValue::I8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -191,7 +191,7 @@ impl DataValue {
             DataValue::U16(expected_value) => {
                 let value = match value {
                     DataValue::U16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -199,7 +199,7 @@ impl DataValue {
             DataValue::I16(expected_value) => {
                 let value = match value {
                     DataValue::I16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -207,7 +207,7 @@ impl DataValue {
             DataValue::U32(expected_value) => {
                 let value = match value {
                     DataValue::U32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -215,7 +215,7 @@ impl DataValue {
             DataValue::I32(expected_value) => {
                 let value = match value {
                     DataValue::I32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -223,7 +223,7 @@ impl DataValue {
             DataValue::U64(expected_value) => {
                 let value = match value {
                     DataValue::U64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -231,7 +231,7 @@ impl DataValue {
             DataValue::I64(expected_value) => {
                 let value = match value {
                     DataValue::I64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -239,7 +239,7 @@ impl DataValue {
             DataValue::U128(expected_value) => {
                 let value = match value {
                     DataValue::U128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -247,7 +247,7 @@ impl DataValue {
             DataValue::I128(expected_value) => {
                 let value = match value {
                     DataValue::I128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -256,12 +256,12 @@ impl DataValue {
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 }
 
                 let value = match value {
                     DataValue::Bytes(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))
@@ -270,12 +270,12 @@ impl DataValue {
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
-                    _ => return Err(ProgramError::UnsupportedOperator),
+                    _ => return Err(LighthouseError::UnsupportedOperator),
                 }
 
                 let value = match value {
                     DataValue::Pubkey(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
                 Ok(operator.evaluate(&value, expected_value, include_output))

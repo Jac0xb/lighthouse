@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use crate::{
-    error::ProgramError,
+    error::LighthouseError,
     structs::{Assertion, Expression},
 };
 pub use anchor_lang::prelude::Result;
@@ -42,7 +42,7 @@ impl AssertionState {
         for index in btree {
             if index as usize >= assertion_results.len() {
                 msg!("expression contained index out of bounds {:?}", index);
-                return Err(ProgramError::OutOfRange.into());
+                return Err(LighthouseError::OutOfRange.into());
             }
         }
 
@@ -69,7 +69,7 @@ impl AssertionState {
 
                     if !result {
                         msg!("expression failed {:?}", expression);
-                        return Err(ProgramError::AssertionFailed.into());
+                        return Err(LighthouseError::AssertionFailed.into());
                     }
                 }
                 Expression::Or(assertion_indexes) => {
@@ -81,7 +81,7 @@ impl AssertionState {
 
                     if !result {
                         msg!("expression failed {:?}", expression);
-                        return Err(ProgramError::AssertionFailed.into());
+                        return Err(LighthouseError::AssertionFailed.into());
                     }
                 }
             }
