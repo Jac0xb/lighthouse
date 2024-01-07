@@ -2,14 +2,14 @@ use crate::utils::{
     context::TestContext,
     process_transaction_assert_failure, process_transaction_assert_success,
     program::{
-        create_cache_account, create_mint, create_user, find_cache_account, mint_to, Program,
+        create_memory_account, create_mint, create_user, find_memory_account, mint_to, Program,
     },
     utils::{build_tx, to_transaction_error},
 };
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::{
     error::LighthouseError,
-    structs::{Assertion, LegacyTokenAccountDataField, Operator, WriteType},
+    structs::{AccountInfoDataField, Assertion, LegacyTokenAccountDataField, Operator, WriteType},
 };
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -34,8 +34,8 @@ async fn test_drain_solana() {
     let assert_ix = program
         .create_assert_multi(
             &user,
-            vec![Assertion::AccountBalance(
-                user_balance - 10_000,
+            vec![Assertion::AccountInfoField(
+                AccountInfoDataField::Lamports(user_balance - 10_000),
                 Operator::GreaterThan,
             )],
             vec![user.encodable_pubkey()],

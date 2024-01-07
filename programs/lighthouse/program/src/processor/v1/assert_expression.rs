@@ -1,4 +1,4 @@
-use crate::structs::{Assertion, AssertionConfig, AssertionState, Expression};
+use crate::structs::{Assertion, AssertionConfigV1, AssertionState, Expression};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -6,12 +6,14 @@ pub struct AssertExpressionV1<'info> {
     system_program: Program<'info, System>,
 }
 
+//
 // WIP
+//
 pub fn assert_expression<'info>(
     ctx: Context<'_, '_, '_, 'info, AssertExpressionV1<'info>>,
     assertions: Vec<Assertion>,
     logical_expression: Vec<Expression>,
-    config: Option<AssertionConfig>,
+    config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let remaining_accounts = ctx.remaining_accounts;
     let mut assertion_state = AssertionState::new(assertions.clone(), logical_expression)?;
@@ -26,12 +28,4 @@ pub fn assert_expression<'info>(
     assertion_state.evaluate()?;
 
     Ok(())
-}
-
-pub fn truncate_pubkey(pubkey: &Pubkey) -> String {
-    let mut pubkey_str = pubkey.to_string();
-    pubkey_str.truncate(5);
-    pubkey_str.push_str("...");
-
-    pubkey_str
 }

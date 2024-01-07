@@ -20,7 +20,7 @@ use crate::{
 use anchor_spl::token::{self, spl_token::state::Account};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
-pub struct AssertionConfig {
+pub struct AssertionConfigV1 {
     pub verbose: bool,
 }
 
@@ -54,11 +54,6 @@ pub enum Assertion {
     // account data offset, borsh type, operator
     AccountData(u16, Operator, DataValue),
 
-    // balance, operator
-    AccountBalance(u64, Operator),
-
-    AccountOwnedBy(Pubkey, Operator),
-
     // token balance, operator
     LegacyTokenAccountField(LegacyTokenAccountDataField, Operator),
 }
@@ -68,12 +63,6 @@ impl Assertion {
         match self {
             Assertion::AccountData(offset, operator, value) => {
                 format!("AccountData[{}|{:?}|{:?}]", offset, operator, value)
-            }
-            Assertion::AccountBalance(balance, operator) => {
-                format!("AccountBalance[{}|{:?}]", balance, operator)
-            }
-            Assertion::AccountOwnedBy(pubkey, operator) => {
-                format!("AccountOwnedBy[{}|{:?}]", pubkey, operator)
             }
             Assertion::LegacyTokenAccountField(field, operator) => {
                 format!("LegacyTokenAccountField[{:?}|{:?}]", field, operator)
@@ -90,9 +79,6 @@ impl Assertion {
         include_output: bool,
     ) -> Result<Box<EvaluationResult>> {
         match &self {
-            Assertion::AccountOwnedBy(pubkey, operator) => {
-                Ok(operator.evaluate(&target_account.owner, &pubkey, include_output))
-            }
             Assertion::AccountData(account_offset, operator, memory_value) => {
                 let account_data = target_account.try_borrow_data()?;
 
@@ -103,11 +89,6 @@ impl Assertion {
                     include_output,
                 )?)
             }
-            Assertion::AccountBalance(balance_value, operator) => Ok(operator.evaluate(
-                &**target_account.try_borrow_lamports()?,
-                balance_value,
-                include_output,
-            )),
             Assertion::LegacyTokenAccountField(token_account_field, operator) => {
                 if target_account.data_is_empty() {
                     return Err(LighthouseError::AccountNotInitialized.into());

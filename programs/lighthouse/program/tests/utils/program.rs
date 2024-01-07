@@ -8,7 +8,7 @@ use super::{
 use anchor_lang::*;
 use anchor_spl::associated_token::{self, get_associated_token_address};
 use blackhat;
-use lighthouse::structs::{Assertion, AssertionArray, AssertionConfig, WriteTypeParameter};
+use lighthouse::structs::{Assertion, AssertionArray, AssertionConfigV1, WriteTypeParameter};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     program_pack::Pack,
@@ -91,7 +91,7 @@ impl Program {
                     .to_account_metas(None),
                 data: lighthouse::instruction::AssertV1 {
                     assertion,
-                    config: Some(AssertionConfig { verbose: true }),
+                    config: Some(AssertionConfigV1 { verbose: true }),
                 }
                 .data(),
             }],
@@ -139,7 +139,7 @@ impl Program {
 
         let length = (lighthouse::instruction::AssertMultiV1 {
             assertions: assertions.clone(),
-            config: Some(AssertionConfig { verbose: true }),
+            config: Some(AssertionConfigV1 { verbose: true }),
         })
         .data()
         .len();
@@ -152,7 +152,7 @@ impl Program {
                 accounts,
                 data: (lighthouse::instruction::AssertMultiV1 {
                     assertions,
-                    config: Some(AssertionConfig { verbose: true }),
+                    config: Some(AssertionConfigV1 { verbose: true }),
                 })
                 .data(),
             }],
@@ -369,25 +369,25 @@ impl Program {
         )
     }
 
-    pub fn create_cache_account(
+    pub fn create_memory_account(
         &mut self,
         payer: &Keypair,
-        cache_index: u8,
-        cache_account_size: u64,
+        memory_index: u8,
+        memory_account_size: u64,
     ) -> TxBuilder {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::id(),
-                accounts: (lighthouse::accounts::CreateCacheAccountV1 {
+                accounts: (lighthouse::accounts::CreateMemoryAccountV1 {
                     system_program: system_program::id(),
                     signer: payer.pubkey(),
-                    cache_account: find_cache_account(payer.pubkey(), cache_index).0,
+                    memory_account: find_memory_account(payer.pubkey(), memory_index).0,
                     rent: sysvar::rent::id(),
                 })
                 .to_account_metas(None),
-                data: (lighthouse::instruction::CreateCacheAccountV1 {
-                    cache_index,
-                    cache_account_size,
+                data: (lighthouse::instruction::CreateMemoryAccountV1 {
+                    memory_index,
+                    memory_account_size,
                 })
                 .data(),
             }],
@@ -400,14 +400,14 @@ impl Program {
         &mut self,
         payer: &Keypair,
         source_account: Pubkey,
-        cache_index: u8,
+        memory_index: u8,
         write_type_parameter: WriteTypeParameter,
     ) -> TxBuilder {
         let write_type_clone = write_type_parameter.clone();
         let mut ix_accounts = lighthouse::accounts::WriteV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
-            cache_account: find_cache_account(payer.pubkey(), cache_index).0,
+            memory_account: find_memory_account(payer.pubkey(), memory_index).0,
         }
         .to_account_metas(None);
         ix_accounts.append(&mut vec![AccountMeta::new(source_account, false)]);
@@ -418,7 +418,7 @@ impl Program {
                 accounts: ix_accounts,
                 data: (lighthouse::instruction::WriteV1 {
                     write_type: write_type_clone,
-                    cache_index,
+                    memory_index,
                 })
                 .data(),
             }],
@@ -503,13 +503,13 @@ pub async fn create_test_account(context: &mut TestContext, payer: &Keypair) -> 
     Ok(())
 }
 
-pub async fn create_cache_account(
+pub async fn create_memory_account(
     context: &mut TestContext,
     user: &Keypair,
     size: u64,
 ) -> Result<()> {
     let mut program = Program::new(context.client());
-    let mut tx_builder = program.create_cache_account(user, 0, size);
+    let mut tx_builder = program.create_memory_account(user, 0, size);
     process_transaction_assert_success(context, tx_builder.to_transaction().await).await;
     Ok(())
 }
@@ -521,9 +521,13 @@ pub fn find_test_account() -> (solana_program::pubkey::Pubkey, u8) {
     )
 }
 
-pub fn find_cache_account(user: Pubkey, cache_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+pub fn find_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
     solana_program::pubkey::Pubkey::find_program_address(
-        &["cache".to_string().as_ref(), user.as_ref(), &[cache_index]],
+        &[
+            "memory".to_string().as_ref(),
+            user.as_ref(),
+            &[memory_index],
+        ],
         &lighthouse::ID,
     )
 }
