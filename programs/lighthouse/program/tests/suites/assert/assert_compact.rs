@@ -1,5 +1,5 @@
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::error::ProgramError;
+use lighthouse::error::LighthouseError;
 use lighthouse::structs::{Assertion, Operator};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -72,7 +72,7 @@ async fn test_compact_token_account() {
     process_transaction_assert_failure(
         context,
         tx_builder.to_transaction().await,
-        to_transaction_error(0, ProgramError::AssertionFailed),
+        to_transaction_error(0, LighthouseError::AssertionFailed),
         None,
     )
     .await;

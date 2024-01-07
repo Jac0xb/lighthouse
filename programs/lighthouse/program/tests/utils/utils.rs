@@ -1,6 +1,6 @@
 use super::context::TestContext;
 use crate::utils;
-use lighthouse::error::ProgramError;
+use lighthouse::error::LighthouseError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_program::instruction::InstructionError;
 use solana_program::{instruction::Instruction, pubkey::Pubkey};
@@ -37,8 +37,9 @@ pub async fn process_transaction_assert_success(
     let tx_metadata = tx_metadata.unwrap();
 
     if let Some(logs) = tx_metadata.metadata.clone().map(|m| m.log_messages) {
+        println!("Transaction Logs:");
         for log in logs {
-            println!("{:?}", log);
+            println!("{}", log);
         }
     }
 
@@ -101,7 +102,7 @@ pub async fn process_transaction_assert_failure(
     }
 }
 
-pub fn to_transaction_error(ix_index: u8, program_error: ProgramError) -> TransactionError {
+pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {
     TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error.into()))
 }
 

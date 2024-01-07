@@ -11,9 +11,9 @@ pub fn print_assertion_result(
         "{} {} {} {}",
         format!("[{:0>2}]", assertion_index),
         if evaluation_result.passed {
-            "[✅] PASSED"
+            "[✓] PASSED"
         } else {
-            "[❌] FAILED"
+            "[✕] FAILED"
         },
         assertion.format(),
         evaluation_result.output

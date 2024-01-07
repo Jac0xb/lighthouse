@@ -1,4 +1,3 @@
-use anchor_lang::{self};
 use solana_program::{instruction::Instruction, pubkey::Pubkey};
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -127,13 +126,22 @@ impl<'a> TxBuilder {
         Ok(tx.clone())
     }
 
-    pub fn concat_tx_builder(&mut self, mut tx_builder: TxBuilder) -> &mut Self {
+    pub fn prepend(&mut self, mut tx_builder: TxBuilder) -> &mut Self {
+        tx_builder.ixs.append(&mut self.ixs);
+        tx_builder.signers.append(&mut self.signers);
+
+        self.ixs = tx_builder.ixs;
+        self.signers = tx_builder.signers;
+
+        self
+    }
+
+    pub fn append(&mut self, mut tx_builder: TxBuilder) -> &mut Self {
         self.ixs.append(&mut tx_builder.ixs);
         self.signers.append(&mut tx_builder.signers);
 
         self
     }
-
     // Returning `&mut Self` to allow method chaining.
     // pub fn set_signers(&mut self, signers: &[&Keypair]) -> &mut Self {
     //     self.signers = signers.iter().map(|k| clone_keypair(k)).collect();

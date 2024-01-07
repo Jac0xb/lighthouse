@@ -11,12 +11,11 @@ use solana_program::{
 };
 
 use crate::{
-    error::ProgramError,
+    error::LighthouseError,
     structs::{
         operator::{EvaluationResult, Operator},
         u8_from_account_state, AccountInfoDataField, DataValue, LegacyTokenAccountDataField,
     },
-    utils::print_assertion_result,
 };
 use anchor_spl::token::{self, spl_token::state::Account};
 
@@ -25,7 +24,10 @@ pub struct AssertionConfig {
     pub verbose: bool,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+///
+///     Used to store assertions in a compact form and not require 3 additional vector bytes
+///
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum AssertionArray {
     Size1([Assertion; 1]),
     Size2([Assertion; 2]),
@@ -82,77 +84,6 @@ impl Assertion {
         }
     }
 
-    ///
-    ///  Remaining account modding for assertion association with remaining accounts
-    ///  Reasoning: there are a few ways to associate assertions with accounts
-    ///  1. You could store the remaining account index in the assertion instruction data (1 byte)
-    ///  2. You could group assertions by account through a vector<vector<assertion> (4 * (4 bytes * unique accounts)), struct (1 byte), or enough
-    ///  3. Sort assertions such that their remainder is equal to the index of the remaining account associated with the assertion (<1 byte of transaction data for best case)
-    ///     - This sorting will be handled by the client and can be as inefficient or as efficient as the client wants
-    ///     - IE a client could pass in a remaining account of [A, A, A, A] or [A] and assertions will be properly associated with the remaining accounts
-    ///
-    ///  Account A, B, C
-    ///
-    ///  remaining accounts = [A]
-    ///  Assertion 1 (A)
-    ///  Assertion 2 (A)
-    ///  Assertion 3 (A)
-    ///  (A [0%1=0], A [1%1=0], A [2%1=0])
-    ///  (1, 2, 3)
-    ///
-    ///  remaining accounts = [A, B]
-    ///  Assertion 1 (A)
-    ///  Assertion 2 (A) <- Reorder to third position
-    ///  Assertion 3 (B)
-    ///  (A [0%2=0], B [1%2=1], A [2%2=0])
-    ///  (1, 3, 2)
-    ///
-    ///  remaining accounts = [A, B, C]
-    ///  Assertion 1 (A)
-    ///  Assertion 2 (B)
-    ///  Assertion 3 (C)
-    ///  (A [0%3=0], B [1%3=1], C [2%3=2])
-    ///  (1, 2, 3)
-    ///
-    ///  remaining accounts = [A, B, A]
-    ///  Assertion 1 (A)
-    ///  Assertion 2 (B)
-    ///  Assertion 4 (A)
-    ///  Assertion 3 (A)
-    ///  (A [0%4=0], B [1%4=1], A [2%3=2], A [3%3=0])
-    ///  (1, 2, 4, 3)
-    pub fn assert_multi(
-        remaining_accounts: &[AccountInfo<'_>],
-        assertions: &[Assertion],
-        config: Option<AssertionConfig>,
-    ) -> Result<()> {
-        let include_output = match &config {
-            Some(config) => config.verbose,
-            None => false,
-        };
-
-        if remaining_accounts.is_empty() {
-            return Err(ProgramError::NotEnoughAccounts.into());
-        }
-
-        for (assertion_index, assertion) in assertions.iter().enumerate() {
-            let evaluation_result = assertion.evaluate(
-                &remaining_accounts[assertion_index % remaining_accounts.len()],
-                include_output,
-            )?;
-
-            if include_output {
-                print_assertion_result(assertion, assertion_index, &evaluation_result);
-            }
-
-            if !evaluation_result.passed {
-                return Err(ProgramError::AssertionFailed.into());
-            }
-        }
-
-        Ok(())
-    }
-
     pub fn evaluate(
         &self,
         target_account: &AccountInfo,
@@ -179,11 +110,11 @@ impl Assertion {
             )),
             Assertion::LegacyTokenAccountField(token_account_field, operator) => {
                 if target_account.data_is_empty() {
-                    return Err(ProgramError::AccountNotInitialized.into());
+                    return Err(LighthouseError::AccountNotInitialized.into());
                 }
 
                 if !target_account.owner.eq(&token::ID) {
-                    return Err(ProgramError::AccountNotTokenAccount.into());
+                    return Err(LighthouseError::AccountNotTokenAccount.into());
                 }
 
                 let token_account = Account::unpack_from_slice(&target_account.try_borrow_data()?)?;
@@ -198,8 +129,8 @@ impl Assertion {
                     LegacyTokenAccountDataField::Amount(amount) => {
                         operator.evaluate(&token_account.amount, amount, include_output)
                     }
-                    LegacyTokenAccountDataField::Delegate(expected_pubkey) => {
-                        match (token_account.delegate, expected_pubkey) {
+                    LegacyTokenAccountDataField::Delegate(assertion_pubkey) => {
+                        match (token_account.delegate, assertion_pubkey) {
                             (COption::None, None) => Box::new(EvaluationResult {
                                 passed: true,
                                 output: "None == None".to_string(),
@@ -210,14 +141,14 @@ impl Assertion {
                                     output: format!("{:?} != None", token_account_delegate),
                                 })
                             }
-                            (COption::None, Some(expected_pubkey)) => Box::new(EvaluationResult {
+                            (COption::None, Some(assertion_pubkey)) => Box::new(EvaluationResult {
                                 passed: false,
-                                output: format!("None != {:?}", expected_pubkey),
+                                output: format!("None != {:?}", assertion_pubkey),
                             }),
-                            (COption::Some(token_account_delegate), Some(expected_pubkey)) => {
+                            (COption::Some(token_account_delegate), Some(assertion_pubkey)) => {
                                 operator.evaluate(
                                     &token_account_delegate,
-                                    expected_pubkey,
+                                    assertion_pubkey,
                                     include_output,
                                 )
                             }

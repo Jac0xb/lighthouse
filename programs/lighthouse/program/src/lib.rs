@@ -26,12 +26,6 @@ pub mod lighthouse {
         processor::v1::create_cache_account(ctx, cache_index, cache_account_size)
     }
 
-    pub fn create_test_account_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
-    ) -> Result<()> {
-        processor::v1::create_test_account(ctx)
-    }
-
     pub fn write_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
         cache_index: u8,
@@ -40,11 +34,19 @@ pub mod lighthouse {
         processor::v1::write(ctx, cache_index, write_type)
     }
 
+    pub fn assert_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
+        assertion: Assertion,
+        config: Option<AssertionConfig>,
+    ) -> Result<()> {
+        processor::v1::assert(&ctx.accounts.target_account, &assertion, config)
+    }
+
     pub fn assert_compact_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, AssertCompactV1<'info>>,
         assertion: Assertion,
     ) -> Result<()> {
-        processor::v1::assert_compact(ctx, assertion)
+        processor::v1::assert(&ctx.accounts.target_account, &assertion, None)
     }
 
     pub fn assert_multi_v1<'info>(
@@ -52,7 +54,7 @@ pub mod lighthouse {
         assertions: Vec<Assertion>,
         config: Option<AssertionConfig>,
     ) -> Result<()> {
-        Assertion::assert_multi(ctx.remaining_accounts, assertions.as_slice(), config)
+        processor::v1::assert_multi(ctx.remaining_accounts, assertions.as_slice(), config)
     }
 
     pub fn assert_multi_compact_v1<'info>(
@@ -78,6 +80,6 @@ pub mod lighthouse {
             AssertionArray::Size16(a) => a,
         };
 
-        Assertion::assert_multi(ctx.remaining_accounts, assertions, None)
+        processor::v1::assert_multi(ctx.remaining_accounts, assertions, None)
     }
 }

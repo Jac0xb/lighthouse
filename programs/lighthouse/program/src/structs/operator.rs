@@ -23,21 +23,21 @@ pub struct EvaluationResult {
 impl Operator {
     pub fn evaluate<T: PartialEq + Eq + PartialOrd + Ord + Debug>(
         &self,
-        actual: &T,
-        expected: &T,
+        actual_value: &T,
+        assertion_value: &T,
         output: bool,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
-                Operator::Equal => T::eq(actual, expected),
-                Operator::NotEqual => T::ne(actual, expected),
-                Operator::GreaterThan => T::gt(actual, expected),
-                Operator::LessThan => T::lt(actual, expected),
-                Operator::GreaterThanOrEqual => T::ge(actual, expected),
-                Operator::LessThanOrEqual => T::le(actual, expected),
+                Operator::Equal => T::eq(actual_value, assertion_value),
+                Operator::NotEqual => T::ne(actual_value, assertion_value),
+                Operator::GreaterThan => T::gt(actual_value, assertion_value),
+                Operator::LessThan => T::lt(actual_value, assertion_value),
+                Operator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
+                Operator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
             output: if output {
-                format!("{:?} {:?} {:?}", actual, self, expected)
+                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
             } else {
                 "".to_string()
             },
