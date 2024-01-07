@@ -1,6 +1,6 @@
 # Lighthouse: Solana Assertion Program
-![image](https://github.com/Jac0xb/lighthouse/assets/5273873/ca0f4d07-de08-4db0-9ac7-6f573049f464)
 
+![image](https://github.com/Jac0xb/lighthouse/assets/5273873/ca0f4d07-de08-4db0-9ac7-6f573049f464)
 
 ---
 
@@ -38,9 +38,10 @@ TODO
 
 ## Usage
 
-Integrate Lighthouse in your Solana transactions by specifying your assertion criteria. Here's an example in Rust:
+For experimental use only, program has yet to receive an audit and more tests need to be written!
 
-~COMING SOON~
+devnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
+mainnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
 
 ## Contributing
 
