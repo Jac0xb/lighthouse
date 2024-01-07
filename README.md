@@ -1,4 +1,6 @@
 # Lighthouse: Solana Assertion Program
+![image](https://github.com/Jac0xb/lighthouse/assets/5273873/ca0f4d07-de08-4db0-9ac7-6f573049f464)
+
 
 ---
 
