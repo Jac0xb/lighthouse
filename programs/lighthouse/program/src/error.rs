@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ProgramError {
+pub enum LighthouseError {
     #[msg("Unimplemented")]
     Unimplemented,
     #[msg("AssertionFailed")]
@@ -16,8 +16,15 @@ pub enum ProgramError {
     OutOfRange,
     #[msg("AccountBorrowFailed")]
     AccountBorrowFailed,
-    #[msg("InvalidAccount")]
-    InvalidAccount,
+
+    #[msg("AccountNotTokenAccount")]
+    AccountNotTokenAccount,
+
+    #[msg("AccountNotInitialized")]
+    AccountNotInitialized,
+
+    #[msg("UnauthorizedIxEntry")]
+    UnauthorizedIxEntry,
 
     #[msg("InvalidDataLength")]
     InvalidDataLength,

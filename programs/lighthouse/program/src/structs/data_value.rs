@@ -6,9 +6,9 @@ use anchor_lang::prelude::{
 };
 use solana_program::pubkey::Pubkey;
 
-use crate::error::ProgramError;
+use crate::error::LighthouseError;
 
-use super::operator::Operator;
+use super::operator::{EvaluationResult, Operator};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataType {
@@ -153,30 +153,13 @@ impl DataValue {
         }
     }
 
-    pub fn compare(&self, other: &Self, operator: Operator) -> bool {
-        match (self, other) {
-            (DataValue::U8(a), DataValue::U8(b)) => operator.evaluate(a, b),
-            (DataValue::I8(a), DataValue::I8(b)) => operator.evaluate(a, b),
-            (DataValue::U16(a), DataValue::U16(b)) => operator.evaluate(a, b),
-            (DataValue::I16(a), DataValue::I16(b)) => operator.evaluate(a, b),
-            (DataValue::U32(a), DataValue::U32(b)) => operator.evaluate(a, b),
-            (DataValue::I32(a), DataValue::I32(b)) => operator.evaluate(a, b),
-            (DataValue::U64(a), DataValue::U64(b)) => operator.evaluate(a, b),
-            (DataValue::I64(a), DataValue::I64(b)) => operator.evaluate(a, b),
-            (DataValue::U128(a), DataValue::U128(b)) => operator.evaluate(a, b),
-            (DataValue::I128(a), DataValue::I128(b)) => operator.evaluate(a, b),
-            (DataValue::Bytes(a), DataValue::Bytes(b)) => operator.evaluate(a, b),
-            (DataValue::Pubkey(a), DataValue::Pubkey(b)) => operator.evaluate(a, b),
-            (_, _) => false,
-        }
-    }
-
-    pub fn deserialize_and_compare(
+    pub fn evaluate_from_data_slice(
         &self,
         data: Ref<'_, &mut [u8]>,
         offset: usize,
         operator: &Operator,
-    ) -> Result<(String, String, bool), ProgramError> {
+        include_output: bool,
+    ) -> Result<Box<EvaluationResult>, LighthouseError> {
         let slice = &data[offset..(offset + self.size())];
         let value = DataValue::deserialize(self.get_data_type(), slice);
 
@@ -184,168 +167,118 @@ impl DataValue {
             DataValue::Bool(expected_value) => {
                 let value = match value {
                     DataValue::Bool(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::U8(expected_value) => {
                 let value = match value {
                     DataValue::U8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::I8(expected_value) => {
                 let value = match value {
                     DataValue::I8(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::U16(expected_value) => {
                 let value = match value {
                     DataValue::U16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::I16(expected_value) => {
                 let value = match value {
                     DataValue::I16(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::U32(expected_value) => {
                 let value = match value {
                     DataValue::U32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::I32(expected_value) => {
                 let value = match value {
                     DataValue::I32(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::U64(expected_value) => {
                 let value = match value {
                     DataValue::U64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::I64(expected_value) => {
                 let value = match value {
                     DataValue::I64(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::U128(expected_value) => {
                 let value = match value {
                     DataValue::U128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::I128(expected_value) => {
                 let value = match value {
                     DataValue::I128(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::Bytes(expected_value) => {
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 }
 
                 let value = match value {
                     DataValue::Bytes(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                // print array
-                let value_str = value
-                    .iter()
-                    .map(|byte| format!("{:02x}", byte))
-                    .collect::<Vec<String>>()
-                    .join("");
-                let expected_value_str = expected_value
-                    .iter()
-                    .map(|byte| format!("{:02x}", byte))
-                    .collect::<Vec<String>>()
-                    .join("");
-                let assertion_result = operator.evaluate(&value, expected_value);
-
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
             DataValue::Pubkey(expected_value) => {
                 match operator {
                     Operator::Equal => {}
                     Operator::NotEqual => {}
-                    _ => return Err(ProgramError::UnsupportedOperator),
+                    _ => return Err(LighthouseError::UnsupportedOperator),
                 }
 
                 let value = match value {
                     DataValue::Pubkey(value) => value,
-                    _ => return Err(ProgramError::DataValueMismatch),
+                    _ => return Err(LighthouseError::DataValueMismatch),
                 };
 
-                let value_str = value.to_string();
-                let expected_value_str = expected_value.to_string();
-                let assertion_result = operator.evaluate(&value, expected_value);
-
-                Ok((value_str, expected_value_str, assertion_result))
+                Ok(operator.evaluate(&value, expected_value, include_output))
             }
         }
     }

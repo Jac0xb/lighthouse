@@ -1,4 +1,4 @@
-use lighthouse::structs::{Assertion, Operator};
+use lighthouse::structs::{AccountInfoDataField, Assertion, Operator};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
@@ -14,16 +14,11 @@ async fn test_basic() {
     let mut program = Program::new(context.client());
     let user = create_user(context).await.unwrap();
 
-    let mut tx_builder = program.create_assertion(
+    let mut tx_builder = program.create_assert(
         &user,
-        vec![
-            Assertion::AccountBalance(0, Operator::GreaterThan),
-            // Assertion::AccountBalance(0, Operator::LessThan),
-        ],
-        vec![user.encodable_pubkey(), user.encodable_pubkey()],
-        None,
-        None,
+        user.encodable_pubkey(),
+        Assertion::AccountInfoField(AccountInfoDataField::Lamports(0), Operator::GreaterThan),
     );
 
-    process_transaction_assert_success(context, tx_builder.to_transaction(vec![]).await).await;
+    process_transaction_assert_success(context, tx_builder.to_transaction().await).await;
 }
