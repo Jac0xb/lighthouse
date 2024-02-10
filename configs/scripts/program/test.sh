@@ -31,14 +31,17 @@ WORKING_DIR=$(pwd)
 SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
 
-for p in ${PROGRAMS[@]}; do
-    cd ${WORKING_DIR}/programs/${p}
+# for p in ${PROGRAMS[@]}; do
+#     cd ${WORKING_DIR}/programs/${p}
 
-    if [ ! "$(command -v $SOLFMT)" = "" ]; then
-        echo "Running solana test-sbf for ${p}..."
-        RUST_LOG=error CARGO_TERM_COLOR=always cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS} 2>&1 | ${SOLFMT}
-    else
-        echo "Running solana test-sbf for ${p}..."
-        RUST_LOG=error cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS} -- --nocapture
-    fi
-done
+#     # if [ ! "$(command -v $SOLFMT)" = "" ]; then
+#     #     echo "Running solana test-sbf for ${p}..."
+#     #     RUST_LOG=error CARGO_TERM_COLOR=always cargo test ${ARGS} 2>&1 | ${SOLFMT}
+#     # else
+#     echo "Running solana test-sbf for ${p}..."
+#     RUST_LOG=error cargo test --nocapture
+#     # fi
+# done
+
+cd ${WORKING_DIR}/tests/lighthouse
+RUST_LOG=error cargo test 2>&1

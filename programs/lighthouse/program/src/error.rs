@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
+#[derive(PartialEq)]
 pub enum LighthouseError {
     #[msg("Unimplemented")]
     Unimplemented,
@@ -40,4 +41,31 @@ pub enum LighthouseError {
 
     #[msg("AccountDiscriminatorValidationFailed")]
     AccountDiscriminatorValidationFailed,
+}
+
+#[cfg(test)]
+pub fn assert_is_anchor_error(err: Error, expected_error: LighthouseError) {
+    match err {
+        Error::ProgramError(err) => {
+            assert_eq!(
+                err.program_error,
+                ProgramError::Custom(expected_error as u32 + 1)
+            );
+        }
+        Error::AnchorError(err) => {
+            assert_eq!(err.error_code_number, 6000 + expected_error as u32);
+        }
+    }
+}
+
+#[cfg(test)]
+pub fn assert_is_program_error(err: Error, expected_error: ProgramError) {
+    match err {
+        Error::ProgramError(err) => {
+            assert_eq!(err.program_error, expected_error);
+        }
+        Error::AnchorError(err) => {
+            panic!("Expected ProgramError, got AnchorError");
+        }
+    }
 }

@@ -3,7 +3,7 @@ use borsh::BorshDeserialize;
 use solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 
 use crate::error::LighthouseError;
-use crate::structs::{AccountInfoData, WriteType, WriteTypeParameter};
+use crate::types::{AccountInfoData, WriteType, WriteTypeParameter};
 
 #[derive(Accounts)]
 #[instruction(memory_index: u8)]
@@ -11,6 +11,7 @@ pub struct WriteV1<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
+    /// CHECK: ...
     #[account(
         mut,
         seeds=[
