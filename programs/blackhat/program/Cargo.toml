@@ -18,16 +18,18 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 test-sbf = []
 default = []
+rc = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
-solana-program = "~1.16.5"
+solana-program = "~1.18.1"
+arrayref = "0.3.7"
 
 [dev-dependencies]
 async-trait = "0.1.71"
-solana-program-test = "~1.16.5"
-solana-sdk = "~1.16.5"
+solana-program-test = "~1.18.1"
+solana-sdk = "~1.18.1"
 spl-concurrent-merkle-tree = "0.2.0"
 spl-merkle-tree-reference = "0.1.0"
 spl-noop = { version = "0.1.3", features = ["no-entrypoint"] }

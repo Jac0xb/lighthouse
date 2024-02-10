@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     error::LighthouseError,
-    structs::{Assertion, AssertionConfigV1},
+    types::{Assertion, AssertionConfigV1},
     utils::print_assertion_result,
 };
 

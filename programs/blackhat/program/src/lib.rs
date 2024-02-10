@@ -20,8 +20,9 @@ pub mod blackhat {
 
     pub fn create_test_account_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
+        random: bool,
     ) -> Result<()> {
-        processor::create_test_account(ctx)
+        processor::create_test_account(ctx, random)
     }
 
     pub fn drain_account<'info>(

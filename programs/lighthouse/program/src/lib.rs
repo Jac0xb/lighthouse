@@ -7,10 +7,10 @@ use borsh::BorshDeserialize;
 pub mod error;
 pub mod processor;
 pub mod state;
-pub mod structs;
+pub mod types;
 pub mod utils;
 
-use crate::{processor::v1::*, structs::*};
+use crate::{processor::*, types::*};
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
@@ -59,25 +59,25 @@ pub mod lighthouse {
 
     pub fn assert_multi_compact_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, AssertMultiCompactV1<'info>>,
-        assertions: AssertionArray,
+        assertions: CompactAssertionArray,
     ) -> Result<()> {
         let assertions: &[Assertion] = match &assertions {
-            AssertionArray::Size1(a) => a,
-            AssertionArray::Size2(a) => a,
-            AssertionArray::Size3(a) => a,
-            AssertionArray::Size4(a) => a,
-            AssertionArray::Size5(a) => a,
-            AssertionArray::Size6(a) => a,
-            AssertionArray::Size7(a) => a,
-            AssertionArray::Size8(a) => a,
-            AssertionArray::Size9(a) => a,
-            AssertionArray::Size10(a) => a,
-            AssertionArray::Size11(a) => a,
-            AssertionArray::Size12(a) => a,
-            AssertionArray::Size13(a) => a,
-            AssertionArray::Size14(a) => a,
-            AssertionArray::Size15(a) => a,
-            AssertionArray::Size16(a) => a,
+            CompactAssertionArray::Size1(a) => a,
+            CompactAssertionArray::Size2(a) => a,
+            CompactAssertionArray::Size3(a) => a,
+            CompactAssertionArray::Size4(a) => a,
+            CompactAssertionArray::Size5(a) => a,
+            CompactAssertionArray::Size6(a) => a,
+            CompactAssertionArray::Size7(a) => a,
+            CompactAssertionArray::Size8(a) => a,
+            CompactAssertionArray::Size9(a) => a,
+            CompactAssertionArray::Size10(a) => a,
+            CompactAssertionArray::Size11(a) => a,
+            CompactAssertionArray::Size12(a) => a,
+            CompactAssertionArray::Size13(a) => a,
+            CompactAssertionArray::Size14(a) => a,
+            CompactAssertionArray::Size15(a) => a,
+            CompactAssertionArray::Size16(a) => a,
         };
 
         processor::v1::assert_multi(ctx.remaining_accounts, assertions, None)

@@ -1,10 +1,10 @@
-use crate::structs::{operator::EvaluationResult, Assertion};
+use crate::types::{operator::EvaluationResult, Assertion};
 use solana_program::msg;
 
 pub fn print_assertion_result(
     assertion: &Assertion,
     assertion_index: usize,
-    evaluation_result: &Box<EvaluationResult>,
+    evaluation_result: &EvaluationResult,
 ) {
     msg!(
         // repeating zeros infront of assettion index
