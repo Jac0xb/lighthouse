@@ -40,6 +40,7 @@ blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoin
 rust_sdk = { path = "../../rust-sdk" }
 memoffset = "0.6"  # Ensure memoffset is also a dependency
 macros = { path = "../../macros" }
+solana-vote-program = "1.18.1"
 
 
 [dev-dependencies]

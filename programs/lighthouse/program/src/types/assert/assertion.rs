@@ -1,12 +1,9 @@
 use anchor_lang::{
-    error::Error,
-    prelude::{
-        borsh::{self, BorshDeserialize, BorshSerialize},
-        Result,
-    },
-    Key, Lamports,
+    error::{self, Error},
+    prelude::borsh::{self, BorshDeserialize, BorshSerialize},
+    Key, Lamports, Result,
 };
-use solana_program::{account_info::AccountInfo, program_error::ProgramError};
+use solana_program::{account_info::AccountInfo, keccak, program_error::ProgramError};
 
 use crate::{
     error::LighthouseError,
@@ -14,8 +11,17 @@ use crate::{
         operator::{EvaluationResult, Operator},
         AccountInfoDataField, DataValue,
     },
-    Assert, TokenAccountDataField,
+    TokenAccountDataField,
 };
+
+pub trait Assert {
+    fn evaluate(
+        &self,
+        account: &AccountInfo,
+        operator: &Operator,
+        include_output: bool,
+    ) -> Result<Box<EvaluationResult>>;
+}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AssertionConfigV1 {
@@ -52,6 +58,8 @@ pub enum Assertion {
     // Account data offset, Borsh type, Operator
     AccountData(u16, Operator, DataValue),
 
+    AccountDataHash([u8; 32], Operator, Option<u16>, Option<u16>),
+
     AcountDataOption(u64, Operator, DataValue),
 
     // Token Account Field, Operator
@@ -66,6 +74,12 @@ impl Assertion {
             }
             Assertion::AcountDataOption(offset, operator, value) => {
                 format!("AcountDataOption[{}|{:?}|{:?}]", offset, operator, value)
+            }
+            Assertion::AccountDataHash(hash, operator, start, end) => {
+                format!(
+                    "AccountDataHash[{:?}|{:?}|({:?},{:?})]",
+                    hash, operator, start, end
+                )
             }
             Assertion::TokenAccountField(field, operator) => {
                 format!("TokenAccountField[{:?}|{:?}]", field, operator)
@@ -91,6 +105,17 @@ impl Assertion {
                     operator,
                     include_output,
                 )?)
+            }
+            Assertion::AccountDataHash(account_hash_value, operator, start, end) => {
+                let account_data = target_account.try_borrow_data()?;
+
+                let start = start.unwrap_or(0);
+                let end = end.unwrap_or(account_data.len() as u16);
+
+                let account_data = &account_data[start as usize..end as usize];
+                let account_hash = keccak::hashv(&[&account_data]).0;
+
+                Ok(operator.evaluate(&account_hash, account_hash_value, include_output))
             }
             Assertion::AcountDataOption(account_offset, operator, memory_value) => {
                 let account_data = target_account.try_borrow_data()?;

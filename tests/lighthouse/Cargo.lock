@@ -2236,6 +2236,7 @@ dependencies = [
  "solana-program",
  "solana-program-test",
  "solana-sdk",
+ "solana-vote-program",
  "spl-associated-token-account",
  "spl-concurrent-merkle-tree",
  "spl-merkle-tree-reference",
