@@ -6,7 +6,7 @@ use anchor_lang::{
 use anchor_spl::token_interface::{self, spl_token_2022::state::AccountState};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
-use crate::{error::LighthouseError, EvaluationResult, Operator};
+use crate::{error::LighthouseError, Assert, EvaluationResult, Operator};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum TokenAccountDataField {
@@ -35,15 +35,6 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
         AccountState::Initialized => 1,
         AccountState::Frozen => 2,
     }
-}
-
-pub trait Assert {
-    fn evaluate(
-        &self,
-        account: &AccountInfo,
-        operator: &Operator,
-        include_output: bool,
-    ) -> Result<Box<EvaluationResult>, error::Error>;
 }
 
 impl Assert for TokenAccountDataField {

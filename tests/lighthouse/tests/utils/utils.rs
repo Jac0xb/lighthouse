@@ -22,7 +22,10 @@ pub async fn process_transaction(
     Ok(result)
 }
 
-pub async fn process_transaction_assert_success(context: &TestContext, tx: Transaction) {
+pub async fn process_transaction_assert_success(
+    context: &TestContext,
+    tx: Transaction,
+) -> Result<(), Error> {
     let tx_metadata = process_transaction(context, &tx).await;
 
     if let Err(err) = tx_metadata {
@@ -40,8 +43,10 @@ pub async fn process_transaction_assert_success(context: &TestContext, tx: Trans
 
     if tx_metadata.result.is_err() {
         println!("Tx Result {:?}", tx_metadata.result.clone().err());
-        panic!("Transaction failed");
+        return Err(Error::TransactionFailed);
     }
+
+    Ok(())
 }
 
 pub async fn process_transaction_assert_failure(

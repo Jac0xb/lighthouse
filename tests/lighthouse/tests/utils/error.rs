@@ -11,4 +11,5 @@ pub enum Error {
     // The on-chain (via banks) and locally computed roots for a tree do not match.
     RootMismatch,
     Signer(SignerError),
+    TransactionFailed,
 }
