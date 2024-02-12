@@ -1,6 +1,5 @@
 use super::context::TestContext;
 use super::error::Error;
-use crate::utils;
 use lighthouse::error::LighthouseError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_program::instruction::InstructionError;
@@ -20,21 +19,6 @@ pub async fn process_transaction(
         .unwrap();
 
     Ok(result)
-}
-
-// returns failure error and
-pub async fn process_multi_transaction_assert_success(
-    context: &TestContext,
-    txs: Vec<Transaction>,
-) -> Result<(), Error> {
-    for tx in txs {
-        let result = process_transaction(context, &tx).await;
-        if let Err(err) = result {
-            Err(err)
-        }
-    }
-
-    Ok(())
 }
 
 pub async fn process_transaction_assert_success(

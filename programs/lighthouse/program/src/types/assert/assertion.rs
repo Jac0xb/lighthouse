@@ -61,8 +61,6 @@ pub enum Assertion {
 
     AccountDataHash([u8; 32], Operator, Option<u16>, Option<u16>),
 
-    AcountDataOption(u64, Operator, DataValue),
-
     // Token Account Field, Operator
     TokenAccountField(TokenAccountDataField, Operator),
 }
@@ -72,9 +70,6 @@ impl Assertion {
         match self {
             Assertion::AccountData(offset, operator, value) => {
                 format!("AccountData[{}|{:?}|{:?}]", offset, operator, value)
-            }
-            Assertion::AcountDataOption(offset, operator, value) => {
-                format!("AcountDataOption[{}|{:?}|{:?}]", offset, operator, value)
             }
             Assertion::AccountDataHash(hash, operator, start, end) => {
                 format!(
@@ -117,65 +112,6 @@ impl Assertion {
                 let account_hash = keccak::hashv(&[&account_data]).0;
 
                 Ok(operator.evaluate(&account_hash, account_hash_value, include_output))
-            }
-            Assertion::AcountDataOption(account_offset, operator, memory_value) => {
-                let account_data = target_account.try_borrow_data()?;
-
-                let option = *(account_data
-                    .get(*account_offset as usize)
-                    .ok_or(LighthouseError::OutOfRange)?);
-
-                match operator {
-                    Operator::DoesNotExist => {
-                        if option == 0 {
-                            return Ok(Box::new(EvaluationResult {
-                                output: if include_output {
-                                    format!(
-                                        "AccountDataOption[{}|{:?}|{:?}] does not exist",
-                                        account_offset, operator, memory_value
-                                    )
-                                } else {
-                                    "".to_string()
-                                },
-                                passed: true,
-                            }));
-                        } else {
-                            return Ok(Box::new(EvaluationResult {
-                                output: if include_output {
-                                    format!(
-                                        "AccountDataOption[{}|{:?}|{:?}] existed",
-                                        account_offset, operator, memory_value
-                                    )
-                                } else {
-                                    "".to_string()
-                                },
-                                passed: false,
-                            }));
-                        }
-                    }
-                    _ => {
-                        if option == 0 {
-                            return Ok(Box::new(EvaluationResult {
-                                output: if include_output {
-                                    format!(
-                                        "AccountDataOption[{}|{:?}|{:?}] does not exist",
-                                        account_offset, operator, memory_value
-                                    )
-                                } else {
-                                    "".to_string()
-                                },
-                                passed: false,
-                            }));
-                        }
-                    }
-                };
-
-                Ok(memory_value.evaluate_from_data_slice(
-                    account_data,
-                    (*account_offset) as usize,
-                    operator,
-                    include_output,
-                )?)
             }
             Assertion::TokenAccountField(token_account_field, operator) => {
                 let result = token_account_field
