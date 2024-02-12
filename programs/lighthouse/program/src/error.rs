@@ -19,7 +19,7 @@ pub enum LighthouseError {
     AccountBorrowFailed,
 
     #[msg("AccountNotTokenAccount")]
-    AccountNotTokenAccount,
+    OwnerMismatch,
 
     #[msg("AccountNotInitialized")]
     AccountNotInitialized,

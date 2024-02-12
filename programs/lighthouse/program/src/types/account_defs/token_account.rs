@@ -1,16 +1,14 @@
+use crate::{
+    error::LighthouseError,
+    utils::{unpack_coption_key, unpack_coption_u64},
+    Assert, EvaluationResult, Operator,
+};
 use anchor_lang::{
     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
     Owners, Result,
 };
-use anchor_spl::token_interface::{
-    self,
-    spl_token_2022::state::{Account, AccountState},
-};
-use solana_program::{
-    account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
-};
-
-use crate::{error::LighthouseError, Assert, EvaluationResult, Operator};
+use anchor_spl::token_interface::{self, spl_token_2022::state::AccountState};
+use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum TokenAccountDataField {
@@ -41,7 +39,7 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
     }
 }
 
-impl Assert for TokenAccountDataField {
+impl Assert<AccountInfo<'_>> for TokenAccountDataField {
     fn evaluate(
         &self,
         account: &AccountInfo,
@@ -53,28 +51,12 @@ impl Assert for TokenAccountDataField {
         }
 
         if !token_interface::TokenAccount::owners().contains(account.owner) {
-            return Err(LighthouseError::AccountNotTokenAccount.into());
+            return Err(LighthouseError::OwnerMismatch.into());
         }
 
-        if account.data_len() < Account::LEN {
-            return Err(LighthouseError::AccountNotTokenAccount.into());
-        }
+        // TODO: Logic to assert on if account is a token account
 
         let data = account.try_borrow_mut_data().unwrap();
-
-        // let (mint, owner, amount, delegate, state, is_native, delegated_amount, close_authority) =
-        //     array_refs![src, 32, 32, 8, 36, 1, 12, 8, 36];
-        // Ok(Account {
-        //     mint: Pubkey::new_from_array(*mint),
-        //     owner: Pubkey::new_from_array(*owner),
-        //     amount: u64::from_le_bytes(*amount),
-        //     delegate: unpack_coption_key(delegate)?,
-        //     state: AccountState::try_from_primitive(state[0])
-        //         .or(Err(ProgramError::InvalidAccountData))?,
-        //     is_native: unpack_coption_u64(is_native)?,
-        //     delegated_amount: u64::from_le_bytes(*delegated_amount),
-        //     close_authority: unpack_coption_key(close_authority)?,
-        // });
 
         let result = match self {
             TokenAccountDataField::Mint(pubkey) => {
@@ -178,30 +160,6 @@ impl Assert for TokenAccountDataField {
         };
 
         Ok(result)
-    }
-}
-
-pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
-    let tag = &src[0..4];
-    let body = &src[4..36];
-
-    match *tag {
-        [0, 0, 0, 0] => Ok(COption::None),
-        [1, 0, 0, 0] => Ok(COption::Some(Pubkey::new_from_array(
-            body.try_into().unwrap(),
-        ))),
-        _ => Err(LighthouseError::AccountNotInitialized.into()),
-    }
-}
-
-pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
-    let tag = &src[0..4];
-    let body = &src[4..12];
-
-    match *tag {
-        [0, 0, 0, 0] => Ok(COption::None),
-        [1, 0, 0, 0] => Ok(COption::Some(u64::from_le_bytes(body.try_into().unwrap()))),
-        _ => Err(LighthouseError::AccountNotInitialized.into()),
     }
 }
 
