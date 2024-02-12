@@ -4,21 +4,20 @@ use anchor_lang::{
     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
     Key, Lamports, Result,
 };
-use solana_program::{account_info::AccountInfo, keccak};
+use solana_program::{account_info::AccountInfo, clock::Clock, keccak, sysvar::Sysvar};
 
 use crate::{
-    error::LighthouseError,
     types::{
         operator::{EvaluationResult, Operator},
         AccountInfoDataField, DataValue,
     },
-    TokenAccountDataField,
+    ClockField, MintAccountField, TokenAccountDataField,
 };
 
-pub trait Assert {
+pub trait Assert<T> {
     fn evaluate(
         &self,
-        account: &AccountInfo,
+        account: &T,
         operator: &Operator,
         include_output: bool,
     ) -> Result<Box<EvaluationResult>>;
@@ -61,8 +60,9 @@ pub enum Assertion {
 
     AccountDataHash([u8; 32], Operator, Option<u16>, Option<u16>),
 
-    // Token Account Field, Operator
     TokenAccountField(TokenAccountDataField, Operator),
+    MintAccountField(MintAccountField, Operator),
+    ClockField(ClockField, Operator),
 }
 
 impl Assertion {
@@ -79,6 +79,12 @@ impl Assertion {
             }
             Assertion::TokenAccountField(field, operator) => {
                 format!("TokenAccountField[{:?}|{:?}]", field, operator)
+            }
+            Assertion::MintAccountField(field, operator) => {
+                format!("MintAccountField[{:?}|{:?}]", field, operator)
+            }
+            Assertion::ClockField(field, operator) => {
+                format!("ClockField[{:?}|{:?}]", field, operator)
             }
             Assertion::AccountInfoField(fields, operator) => {
                 format!("AccountInfoField[{:?}|{:?}]", fields, operator)
@@ -116,6 +122,20 @@ impl Assertion {
             Assertion::TokenAccountField(token_account_field, operator) => {
                 let result = token_account_field
                     .evaluate(target_account, operator, include_output)
+                    .unwrap();
+
+                Ok(result)
+            }
+            Assertion::MintAccountField(mint_account_field, operator) => {
+                let result = mint_account_field
+                    .evaluate(target_account, operator, include_output)
+                    .unwrap();
+
+                Ok(result)
+            }
+            Assertion::ClockField(clock_field, operator) => {
+                let result = clock_field
+                    .evaluate(&Clock::get()?, operator, include_output)
                     .unwrap();
 
                 Ok(result)
