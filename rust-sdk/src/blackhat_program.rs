@@ -10,7 +10,11 @@ pub struct BlackhatProgram {}
 
 impl BlackhatProgram {
     fn tx_builder(&self, ixs: Vec<Instruction>, payer: Pubkey) -> TxBuilder {
-        TxBuilder { payer, ixs }
+        TxBuilder {
+            payer,
+            ixs,
+            look_up_tables: vec![],
+        }
     }
 
     pub fn create_test_account(

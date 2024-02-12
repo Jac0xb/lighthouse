@@ -30,7 +30,8 @@ async fn test_basic() {
             .to_transaction_and_sign(vec![&user], context.get_blockhash())
             .unwrap(),
     )
-    .await;
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
@@ -39,7 +40,9 @@ async fn test_compact_token_account() {
     let mut program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
     let (tx, mint) = create_mint(context, &user).await.unwrap();
-    process_transaction_assert_success(context, tx).await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     let tx = mint_to(
         context,
@@ -50,7 +53,10 @@ async fn test_compact_token_account() {
     )
     .await
     .unwrap();
-    process_transaction_assert_success(context, tx).await;
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     let token_account =
         get_associated_token_address(&user.encodable_pubkey(), &mint.encodable_pubkey());
@@ -70,7 +76,8 @@ async fn test_compact_token_account() {
             .to_transaction_and_sign(vec![&user], context.get_blockhash())
             .unwrap(),
     )
-    .await;
+    .await
+    .unwrap();
 
     let mut tx_builder = program.create_assert_compact(
         &user,
@@ -89,5 +96,6 @@ async fn test_compact_token_account() {
         to_transaction_error(0, LighthouseError::AssertionFailed),
         None,
     )
-    .await;
+    .await
+    .unwrap();
 }

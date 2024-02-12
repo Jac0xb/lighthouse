@@ -1,9 +1,10 @@
+#![allow(non_snake_case)]
+
 use anchor_lang::{
-    error::{self, Error},
     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
     Key, Lamports, Result,
 };
-use solana_program::{account_info::AccountInfo, keccak, program_error::ProgramError};
+use solana_program::{account_info::AccountInfo, keccak};
 
 use crate::{
     error::LighthouseError,
@@ -177,8 +178,9 @@ impl Assertion {
                 )?)
             }
             Assertion::TokenAccountField(token_account_field, operator) => {
-                let result =
-                    token_account_field.evaluate(target_account, operator, include_output)?;
+                let result = token_account_field
+                    .evaluate(target_account, operator, include_output)
+                    .unwrap();
 
                 Ok(result)
             }
@@ -222,7 +224,9 @@ impl Assertion {
 
 #[cfg(test)]
 mod tests {
-    use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+    use solana_program::{
+        account_info::AccountInfo, keccak, program_error::ProgramError, pubkey::Pubkey,
+    };
     use solana_sdk::{signature::Keypair, signer::Signer};
     use std::{cell::RefCell, rc::Rc};
 
@@ -230,6 +234,31 @@ mod tests {
         error::{assert_is_anchor_error, assert_is_program_error, LighthouseError},
         AccountInfoDataField, Assertion, DataValue, Operator,
     };
+
+    #[test]
+    fn evaluate__data_hash() {
+        let lamports_data: &mut u64 = &mut 0;
+        let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+
+        let account_data: &mut [u8] = &mut [69u8; 10];
+        let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(account_data));
+
+        let data_hash = keccak::hashv(&[&[69u8; 10]]).0;
+
+        let account_info = AccountInfo {
+            key: &Pubkey::default(),
+            is_signer: false,
+            is_writable: false,
+            owner: &Pubkey::default(),
+            lamports: Rc::new(lamports),
+            rent_epoch: 0,
+            data,
+            executable: false,
+        };
+        let assertion = Assertion::AccountDataHash(data_hash, Operator::Equal, None, None);
+        let result = assertion.evaluate(&account_info, false).unwrap();
+        assert!(result.passed);
+    }
 
     #[test]
     fn evaluate__out_of_range() {
@@ -278,6 +307,8 @@ mod tests {
 
         let assertion = Assertion::AccountData(0, Operator::Equal, DataValue::U64(0));
         let result = assertion.evaluate(&account_info, false);
+
+        drop(borrowed);
 
         assert_is_program_error(result.err().unwrap(), ProgramError::AccountBorrowFailed)
     }

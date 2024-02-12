@@ -32,5 +32,6 @@ async fn test_borsh_account_data() {
             .to_transaction_and_sign(vec![&user], context.get_blockhash())
             .unwrap(),
     )
-    .await;
+    .await
+    .unwrap();
 }

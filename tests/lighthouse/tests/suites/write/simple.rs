@@ -36,7 +36,8 @@ async fn test_write() {
             .to_transaction_and_sign(vec![&user], context.get_blockhash())
             .unwrap(),
     )
-    .await;
+    .await
+    .unwrap();
 
     let discrim_length = 8;
 
@@ -122,7 +123,9 @@ async fn test_write() {
         .to_transaction_and_sign(vec![&user], context.get_blockhash())
         .unwrap();
 
-    process_transaction_assert_success(context, tx).await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     // Assert that data was properly written to memory.
     // L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK consumed 7872 of 1400000 compute units
@@ -196,5 +199,7 @@ async fn test_write() {
         .to_transaction_and_sign(vec![&user], context.get_blockhash())
         .unwrap();
 
-    process_transaction_assert_success(context, tx_compact).await;
+    process_transaction_assert_success(context, tx_compact)
+        .await
+        .unwrap();
 }

@@ -1,4 +1,4 @@
-use lighthouse::types::{AccountInfoDataField, Assertion, Operator};
+use lighthouse::types::{AccountInfoDataField, Assertion, AssertionConfigV1, Operator};
 use rust_sdk::LighthouseProgram;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -16,6 +16,7 @@ async fn test_basic() {
         &user,
         user.encodable_pubkey(),
         Assertion::AccountInfoField(AccountInfoDataField::Lamports(0), Operator::GreaterThan),
+        Some(AssertionConfigV1 { verbose: true }),
     );
 
     process_transaction_assert_success(
@@ -24,5 +25,6 @@ async fn test_basic() {
             .to_transaction_and_sign(vec![&user], context.get_blockhash())
             .unwrap(),
     )
-    .await;
+    .await
+    .unwrap();
 }
