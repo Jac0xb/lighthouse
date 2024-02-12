@@ -12,9 +12,12 @@ use crate::TxBuilder;
 pub struct LighthouseProgram {}
 
 impl<'a> LighthouseProgram {
-    #[allow(clippy::too_many_arguments)]
     fn tx_builder(&mut self, ixs: Vec<Instruction>, payer: Pubkey) -> TxBuilder {
-        TxBuilder { payer, ixs }
+        TxBuilder {
+            payer,
+            ixs,
+            look_up_tables: vec![],
+        }
     }
 
     pub fn create_assert(
@@ -22,17 +25,14 @@ impl<'a> LighthouseProgram {
         payer: &'a Keypair,
         target_account: Pubkey,
         assertion: Assertion,
+        config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: (lighthouse::accounts::AssertV1 { target_account })
                     .to_account_metas(None),
-                data: lighthouse::instruction::AssertV1 {
-                    assertion,
-                    config: Some(AssertionConfigV1 { verbose: true }),
-                }
-                .data(),
+                data: lighthouse::instruction::AssertV1 { assertion, config }.data(),
             }],
             payer.pubkey(),
         )
@@ -280,16 +280,8 @@ impl<'a> LighthouseProgram {
                 assertions[14].clone(),
                 assertions[15].clone(),
             ]),
-            _ => panic!("length mismatch"),
+            _ => panic!("Too many assertions for compact array instruction!"),
         };
-
-        let length = (lighthouse::instruction::AssertMultiCompactV1 {
-            assertions: assertion_array.clone(),
-        })
-        .data()
-        .len();
-
-        println!("length: {}", length);
 
         self.tx_builder(
             vec![Instruction {

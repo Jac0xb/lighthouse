@@ -6,6 +6,7 @@ use crate::Error;
 pub struct TxBuilder {
     pub payer: Pubkey,
     pub ixs: Vec<Instruction>,
+    pub look_up_tables: Vec<Pubkey>,
 }
 
 impl TxBuilder {

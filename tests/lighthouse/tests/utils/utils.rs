@@ -22,6 +22,21 @@ pub async fn process_transaction(
     Ok(result)
 }
 
+// returns failure error and
+pub async fn process_multi_transaction_assert_success(
+    context: &TestContext,
+    txs: Vec<Transaction>,
+) -> Result<(), Error> {
+    for tx in txs {
+        let result = process_transaction(context, &tx).await;
+        if let Err(err) = result {
+            Err(err)
+        }
+    }
+
+    Ok(())
+}
+
 pub async fn process_transaction_assert_success(
     context: &TestContext,
     tx: Transaction,
@@ -42,8 +57,10 @@ pub async fn process_transaction_assert_success(
     }
 
     if tx_metadata.result.is_err() {
-        println!("Tx Result {:?}", tx_metadata.result.clone().err());
-        return Err(Error::TransactionFailed);
+        return Err(Error::TransactionFailed(format!(
+            "Tx Result {:?}",
+            tx_metadata.result.clone().err()
+        )));
     }
 
     Ok(())
@@ -54,7 +71,7 @@ pub async fn process_transaction_assert_failure(
     tx: Transaction,
     expected_error_code: TransactionError,
     log_match_regex: Option<&[String]>,
-) {
+) -> Result<(), Error> {
     let tx_metadata = process_transaction(context, &tx).await.unwrap();
 
     let logs = tx_metadata.metadata.clone().unwrap().log_messages;
@@ -63,13 +80,15 @@ pub async fn process_transaction_assert_failure(
     }
 
     if tx_metadata.result.is_ok() {
-        panic!("Transaction should have failed");
+        return Err(Error::TransactionExpectedFailure(
+            "Transaction was expected to fail".to_string(),
+        ));
     }
 
     let err = tx_metadata.result.unwrap_err();
 
     if err != expected_error_code {
-        panic!("Transaction failed with unexpected error code");
+        return Err(Error::UnexpectedErrorCode);
     }
 
     if let Some(log_regex) = log_match_regex {
@@ -94,10 +113,12 @@ pub async fn process_transaction_assert_failure(
             }
 
             if !found {
-                panic!("Log not found: {}", regex);
+                return Err(Error::LogNotFound(format!("Log not found: {}", regex)));
             }
         }
     }
+
+    Ok(())
 }
 
 pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {

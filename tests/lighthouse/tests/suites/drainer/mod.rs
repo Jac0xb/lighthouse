@@ -72,12 +72,16 @@ async fn test_drain_token_account() {
     let user = create_user(context).await.unwrap();
 
     let (tx, mint) = create_mint(context, &user).await.unwrap();
-    process_transaction_assert_success(context, tx).await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     let tx = mint_to(context, &mint.pubkey(), &user, &user.pubkey(), 69_000)
         .await
         .unwrap();
-    process_transaction_assert_success(context, tx).await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
 

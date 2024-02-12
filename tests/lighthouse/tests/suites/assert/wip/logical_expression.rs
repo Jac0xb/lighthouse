@@ -78,5 +78,6 @@ async fn test_logical_expression() {
         to_transaction_error(0, LighthouseError::AssertionFailed),
         Some(&["1 == 1".to_string(), "256 < 255".to_string()]),
     )
-    .await;
+    .await
+    .unwrap();
 }

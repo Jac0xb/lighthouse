@@ -37,7 +37,8 @@ async fn test_write_program() {
                 .to_transaction(vec![])
                 .await,
         )
-        .await;
+        .await
+        .unwrap();
 
         // Assert that data was properly written to memory.
         let tx = program
@@ -51,6 +52,8 @@ async fn test_write_program() {
             .to_transaction(vec![])
             .await;
 
-        process_transaction_assert_success(context, tx).await;
+        process_transaction_assert_success(context, tx)
+            .await
+            .unwrap();
     }
 }
