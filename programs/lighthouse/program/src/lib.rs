@@ -29,16 +29,18 @@ pub mod lighthouse {
     pub fn close_memory_account_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, CloseMemoryAccountV1<'info>>,
         memory_index: u8,
+        memory_bump: u8,
     ) -> Result<()> {
-        processor::v1::close_memory_account(ctx, memory_index)
+        processor::v1::close_memory_account(ctx)
     }
 
     pub fn write_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
         memory_index: u8,
+        memory_account_bump: u8,
         write_type: WriteTypeParameter,
     ) -> Result<()> {
-        processor::v1::write(ctx, memory_index, write_type)
+        processor::v1::write(ctx, memory_index, memory_account_bump, write_type)
     }
 
     pub fn assert_v1<'info>(

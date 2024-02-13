@@ -6,7 +6,7 @@ use crate::error::LighthouseError;
 use crate::types::{AccountInfoData, WriteType, WriteTypeParameter};
 
 #[derive(Accounts)]
-#[instruction(memory_index: u8)]
+#[instruction(memory_index: u8, memory_account_bump: u8)]
 pub struct WriteV1<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -19,14 +19,15 @@ pub struct WriteV1<'info> {
             signer.key.as_ref(),
             &[memory_index],
         ],
-        bump
+        bump = memory_account_bump,
     )]
     pub memory_account: UncheckedAccount<'info>,
 }
 
 pub fn write<'info>(
     ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
-    _: u8,
+    _memory_index: u8,
+    _memory_account_bump: u8,
     write_type: WriteTypeParameter,
 ) -> Result<()> {
     if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {
@@ -50,15 +51,21 @@ pub fn write<'info>(
     };
 
     memory_offset = memory_offset.checked_add(8).ok_or_else(|| {
-        msg!("Memory offset overflowed");
+        msg!("Memory offset overflow");
         LighthouseError::OutOfRange
     })?;
 
     let data_length = write_type
         .size(ctx.remaining_accounts.first())
         .ok_or(LighthouseError::InvalidDataLength)?;
+
     if memory_data_length < (memory_offset + data_length) {
-        msg!("Memory offset overflowed");
+        msg!(
+            "Memory offset overflowed {} < {} + {}",
+            memory_data_length,
+            memory_offset,
+            data_length
+        );
         return Err(LighthouseError::OutOfRange.into());
     }
 
@@ -75,16 +82,18 @@ pub fn write<'info>(
             let source_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = source_account {
-                if (memory_offset + data_length) < memory_data_length {
+                if (memory_offset + data_length) <= memory_data_length {
                     let data = target_account.lamports();
                     let data_slice = &data.to_le_bytes();
 
                     memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
+                    msg!("Not enough memory to write account balance");
                     return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
+                msg!("No account to write balance from");
                 return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
@@ -129,19 +138,22 @@ pub fn write<'info>(
                     }
                 }
 
-                if (memory_offset + data_length) < memory_data_length {
-                    let data = target_account.try_borrow_data().map_err(|err| {
-                        msg!("Error: {:?}", err);
-                        LighthouseError::AccountBorrowFailed
-                    })?;
-                    let data_slice = &data[account_offset..(account_offset + data_length)];
+                let data = target_account.try_borrow_data().map_err(|err| {
+                    msg!("Error: {:?}", err);
+                    LighthouseError::AccountBorrowFailed
+                })?;
 
+                let data_slice = &data.get(account_offset..(account_offset + data_length));
+
+                if let Some(data_slice) = data_slice {
                     memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
+                    msg!("Not enough memory to write account data");
                     return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
+                msg!("No account to write data from");
                 return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
@@ -149,7 +161,7 @@ pub fn write<'info>(
             let target_account = ctx.remaining_accounts.first();
 
             if let Some(target_account) = target_account {
-                if (memory_offset + data_length) < memory_data_length {
+                if (memory_offset + data_length) <= memory_data_length {
                     let account_info = AccountInfoData {
                         key: *target_account.key,
                         is_signer: target_account.is_signer,
@@ -167,9 +179,11 @@ pub fn write<'info>(
                     memory_ref[memory_offset..(memory_offset + data_length)]
                         .copy_from_slice(data_slice.as_ref());
                 } else {
+                    msg!("Not enough memory to write account info");
                     return Err(LighthouseError::NotEnoughAccounts.into());
                 }
             } else {
+                msg!("No account to write info from");
                 return Err(LighthouseError::NotEnoughAccounts.into());
             }
         }
