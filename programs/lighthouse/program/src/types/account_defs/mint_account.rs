@@ -2,7 +2,7 @@ use anchor_lang::{
     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
     Owners, Result,
 };
-use anchor_spl::token_interface::{self, spl_token_2022::state::AccountState};
+use anchor_spl::token_interface::{self};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
 use crate::{

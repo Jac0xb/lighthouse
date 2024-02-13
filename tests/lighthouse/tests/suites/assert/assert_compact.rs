@@ -6,11 +6,10 @@ use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
 use crate::utils::context::TestContext;
-use crate::utils::utils::to_transaction_error;
-use crate::utils::{
-    create_mint, create_user, mint_to, process_transaction_assert_failure,
-    process_transaction_assert_success,
+use crate::utils::utils::{
+    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
+use crate::utils::{create_mint, create_user, mint_to};
 
 #[tokio::test]
 async fn test_basic() {

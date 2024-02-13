@@ -24,7 +24,7 @@ pub async fn process_transaction(
 pub async fn process_transaction_assert_success(
     context: &TestContext,
     tx: Transaction,
-) -> Result<(), Error> {
+) -> Result<BanksTransactionResultWithMetadata, Error> {
     let tx_metadata = process_transaction(context, &tx).await;
 
     if let Err(err) = tx_metadata {
@@ -47,7 +47,7 @@ pub async fn process_transaction_assert_success(
         )));
     }
 
-    Ok(())
+    Ok(tx_metadata)
 }
 
 pub async fn process_transaction_assert_failure(

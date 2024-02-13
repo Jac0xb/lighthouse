@@ -2,21 +2,17 @@ pub mod context;
 pub mod error;
 pub mod utils;
 
-use anchor_lang::{self, InstructionData, ToAccountMetas};
 use anchor_spl::{associated_token, token::Mint};
 use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
-// use bytemuck::PodCastError;
-use solana_program::{instruction::Instruction, pubkey::Pubkey, rent::Rent, system_instruction};
-use solana_program_test::{processor, BanksClientError, ProgramTest};
-use solana_sdk::{
-    signature::{Keypair, SignerError},
-    signer::Signer,
-    transaction::Transaction,
-};
+use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
+use solana_program_test::{BanksClientError, ProgramTest};
+use solana_sdk::{signature::Keypair, signer::Signer, transaction::Transaction};
 use std::result;
-pub use utils::{process_transaction_assert_failure, process_transaction_assert_success};
 
-use self::context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT};
+use self::{
+    context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},
+    utils::process_transaction_assert_success,
+};
 
 pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
@@ -49,7 +45,9 @@ pub async fn create_memory_account(
     tx.try_partial_sign(&[user], context.get_blockhash())
         .unwrap();
 
-    process_transaction_assert_success(context, tx).await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
     Ok(())
 }
 
@@ -168,7 +166,7 @@ pub async fn create_test_account(
     )
     .unwrap();
 
-    process_transaction_assert_success(ctx, tx).await;
+    process_transaction_assert_success(ctx, tx).await.unwrap();
 
     Ok(account_keypair)
 }

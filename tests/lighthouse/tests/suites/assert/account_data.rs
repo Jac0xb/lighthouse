@@ -1,5 +1,6 @@
 use crate::utils::context::TestContext;
-use crate::utils::{create_test_account, create_user, process_transaction_assert_success};
+use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::{create_test_account, create_user};
 use lighthouse::types::{Assertion, DataValue, Operator};
 use rust_sdk::LighthouseProgram;
 use solana_program_test::tokio;

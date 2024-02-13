@@ -68,18 +68,12 @@ mod tests {
 
         #[test]
         fn evaluate_clock() {
-            let slot = 69;
-            let epoch_start_timestamp = 420;
-            let epoch = 1337;
-            let leader_schedule_epoch = 9001;
-            let unix_timestamp = 123456789;
-
             let clock = solana_program::clock::Clock {
                 slot: 69,
                 epoch_start_timestamp: 420,
                 epoch: 1337,
                 leader_schedule_epoch: 9001,
-                unix_timestamp,
+                unix_timestamp: 123456789,
             };
 
             // Evaluate slot

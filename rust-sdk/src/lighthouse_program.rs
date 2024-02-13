@@ -322,6 +322,23 @@ impl<'a> LighthouseProgram {
         )
     }
 
+    pub fn close_memory_account(&mut self, payer: &Keypair, memory_index: u8) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::id(),
+                accounts: (lighthouse::accounts::CloseMemoryAccountV1 {
+                    signer: payer.pubkey(),
+                    system_program: system_program::id(),
+                    memory_account: find_memory_account(payer.pubkey(), memory_index).0,
+                    rent: sysvar::rent::id(),
+                })
+                .to_account_metas(None),
+                data: lighthouse::instruction::CloseMemoryAccountV1 { memory_index }.data(),
+            }],
+            payer.pubkey(),
+        )
+    }
+
     pub fn write_v1(
         &mut self,
         payer: &Keypair,

@@ -26,6 +26,13 @@ pub mod lighthouse {
         processor::v1::create_memory_account(ctx, memory_index, memory_account_size)
     }
 
+    pub fn close_memory_account_v1<'info>(
+        ctx: Context<'_, '_, '_, 'info, CloseMemoryAccountV1<'info>>,
+        memory_index: u8,
+    ) -> Result<()> {
+        processor::v1::close_memory_account(ctx, memory_index)
+    }
+
     pub fn write_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
         memory_index: u8,

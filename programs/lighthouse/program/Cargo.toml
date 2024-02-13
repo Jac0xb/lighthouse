@@ -1,6 +1,6 @@
 [package]
 name = "lighthouse"
-version = "0.0.1"
+version = "0.1.0"
 description = "Transaction guard rails"
 authors = ["Jac0xb"]
 repository = "https://github.com/jac0xb/lighthouse"
@@ -18,13 +18,11 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 test-sbf = []
 default = []
-rc = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
 bytemuck = {version = "1.4.0", features = ["derive", "min_const_generics"]}
-# mpl-token-metadata = { version = "2.0.0-beta.1", features = ["no-entrypoint"] }
 num-traits = "0.2.15"
 solana-program = "~1.18.1"
 spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }

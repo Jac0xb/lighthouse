@@ -4,7 +4,8 @@ use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
 use crate::utils::context::TestContext;
-use crate::utils::{create_user, process_transaction_assert_success};
+use crate::utils::create_user;
+use crate::utils::utils::process_transaction_assert_success;
 
 #[tokio::test]
 async fn test_basic() {

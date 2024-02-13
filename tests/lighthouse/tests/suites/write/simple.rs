@@ -1,12 +1,9 @@
+use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::{context::TestContext, create_memory_account, create_test_account, create_user};
 use lighthouse::types::{Assertion, DataValue, Operator, WriteType};
 use rust_sdk::{find_memory_account, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
-
-use crate::utils::{
-    context::TestContext, create_memory_account, create_test_account, create_user,
-    process_transaction_assert_success,
-};
 
 #[tokio::test]
 async fn test_write() {
