@@ -1,9 +1,6 @@
 use std::cell::Ref;
 
-use anchor_lang::{
-    error::Error,
-    prelude::borsh::{self, BorshDeserialize, BorshSerialize},
-};
+use anchor_lang::prelude::borsh::{self, BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
 use crate::error::LighthouseError;

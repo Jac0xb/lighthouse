@@ -64,6 +64,7 @@ impl TestContext {
     pub fn client(&self) -> BanksClient {
         self.program_context.banks_client.clone()
     }
+
     pub async fn fund_account(&mut self, address: Pubkey, lamports: u64) -> Result<()> {
         let payer = &self.program_context.payer;
 

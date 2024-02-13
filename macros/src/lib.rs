@@ -1,14 +1,9 @@
-#[macro_use]
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
 // use proc_macro::TokenStream;
 use quote::quote;
-use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, Data, DataStruct, DeriveInput, Field,
-    Fields,
-};
-// use syn::{parse_macro_input, DeriveInput};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 #[proc_macro_derive(Optionize)]
 pub fn optionize(input: TokenStream) -> TokenStream {

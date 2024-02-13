@@ -1,9 +1,8 @@
-use crate::utils::{
-    context::TestContext,
-    create_mint, create_user, mint_to, process_transaction_assert_failure,
-    process_transaction_assert_success,
-    utils::{build_tx, to_transaction_error},
+use crate::utils::utils::{
+    build_tx, process_transaction_assert_failure, process_transaction_assert_success,
+    to_transaction_error,
 };
+use crate::utils::{context::TestContext, create_mint, create_user, mint_to};
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::{
     error::LighthouseError,
@@ -59,7 +58,8 @@ async fn test_drain_solana() {
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
     )
-    .await;
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
@@ -101,5 +101,6 @@ async fn test_drain_token_account() {
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
     )
-    .await;
+    .await
+    .unwrap();
 }

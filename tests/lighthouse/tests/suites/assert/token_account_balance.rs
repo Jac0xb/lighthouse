@@ -5,7 +5,8 @@ use solana_program_test::tokio;
 use solana_sdk::signer::Signer;
 
 use crate::utils::context::TestContext;
-use crate::utils::{create_mint, create_user, mint_to, process_transaction_assert_success};
+use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::{create_mint, create_user, mint_to};
 
 #[tokio::test]
 async fn test_basic() {
