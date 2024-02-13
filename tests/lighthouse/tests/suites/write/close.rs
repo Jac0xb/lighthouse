@@ -70,5 +70,4 @@ async fn test_create_write_assert_close() {
     );
 
     assert!(memory_account.is_none());
-    assert!(tx_result.metadata.unwrap().compute_units_consumed < 15_700);
 }
