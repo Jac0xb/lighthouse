@@ -4,7 +4,7 @@
 
 ## Overview
 
-Lighthouse is a runtime state assertion Solana program designed to add guardrails on transactions that will fail the transaction when undesired state changes are found during assertion checks such as when a bad actor spoofs simulation results, there is overspending during the transaction, or an oracle account is in an undesired state. Typically a transaction builder would need their own program to make assertions on these changes—Lighthouse eliminates that need by making it simple to append assertion instructions to existing transaction building flows.
+Lighthouse is a Solana program that provides assertion instructions that can be added to transactions. If a bad actor spoofs simulation results, there is overspending during the transaction, or an oracle account is in an undesired state, the assertion will fail, and the transaction will also fail. Lighthouse makes it simple to append assertion instructions to existing transactions without needing to write new Solana programs.
 
 Lighthouse is an open source, public utility Solana program with an emphasis on security (multisig, verifiable build, non-upgradable releases, etc _coming soon_), composability (program-agnostic use cases), and community (open source, assist in integration with open source projects, incentivize contributions).
 
