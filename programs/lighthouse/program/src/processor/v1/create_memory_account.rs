@@ -16,7 +16,7 @@ pub struct CreateMemoryAccountV1<'info> {
             signer.key.as_ref(),
             &[memory_index],
         ],
-        bump, 
+        bump,
         payer=signer, 
         space= 8 + memory_account_size as usize
     )]

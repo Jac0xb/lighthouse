@@ -16,7 +16,7 @@ async fn test_create_write_assert_close() {
 
     let test_account = create_test_account(context, &user, false).await.unwrap();
 
-    let create_memory_account_ix = program.create_memory_account(&user, 0, 256).ixs;
+    let create_memory_account_ix = program.create_memory_account(&user, 0, 1).ixs;
 
     let write_account = find_memory_account(user.encodable_pubkey(), 0).0;
 
@@ -27,7 +27,7 @@ async fn test_create_write_assert_close() {
             0,
             lighthouse::types::WriteTypeParameter::WriteU8(
                 0,
-                WriteType::AccountData(8, Some(128), None),
+                WriteType::AccountData(8, Some(1), None),
             ),
         )
         .ixs;
@@ -64,6 +64,11 @@ async fn test_create_write_assert_close() {
 
     let memory_account = context.client().get_account(write_account).await.unwrap();
 
+    println!(
+        "{:?}",
+        tx_result.metadata.clone().unwrap().compute_units_consumed
+    );
+
     assert!(memory_account.is_none());
-    assert!(tx_result.metadata.unwrap().compute_units_consumed < 16_500);
+    assert!(tx_result.metadata.unwrap().compute_units_consumed < 15_700);
 }

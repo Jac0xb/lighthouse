@@ -323,17 +323,24 @@ impl<'a> LighthouseProgram {
     }
 
     pub fn close_memory_account(&mut self, payer: &Keypair, memory_index: u8) -> TxBuilder {
+        let (memory_account, memory_account_bump) =
+            find_memory_account(payer.pubkey(), memory_index);
+
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: (lighthouse::accounts::CloseMemoryAccountV1 {
                     signer: payer.pubkey(),
                     system_program: system_program::id(),
-                    memory_account: find_memory_account(payer.pubkey(), memory_index).0,
+                    memory_account,
                     rent: sysvar::rent::id(),
                 })
                 .to_account_metas(None),
-                data: lighthouse::instruction::CloseMemoryAccountV1 { memory_index }.data(),
+                data: lighthouse::instruction::CloseMemoryAccountV1 {
+                    memory_index,
+                    memory_bump: memory_account_bump,
+                }
+                .data(),
             }],
             payer.pubkey(),
         )
@@ -346,11 +353,14 @@ impl<'a> LighthouseProgram {
         memory_index: u8,
         write_type_parameter: WriteTypeParameter,
     ) -> TxBuilder {
+        let (memory_account, memory_account_bump) =
+            find_memory_account(payer.pubkey(), memory_index);
+
         let write_type_clone = write_type_parameter.clone();
         let mut ix_accounts = lighthouse::accounts::WriteV1 {
             system_program: system_program::id(),
             signer: payer.pubkey(),
-            memory_account: find_memory_account(payer.pubkey(), memory_index).0,
+            memory_account,
         }
         .to_account_metas(None);
         ix_accounts.append(&mut vec![AccountMeta::new(source_account, false)]);
@@ -362,6 +372,7 @@ impl<'a> LighthouseProgram {
                 data: (lighthouse::instruction::WriteV1 {
                     write_type: write_type_clone,
                     memory_index,
+                    memory_account_bump,
                 })
                 .data(),
             }],
