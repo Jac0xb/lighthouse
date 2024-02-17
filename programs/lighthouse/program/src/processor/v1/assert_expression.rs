@@ -1,4 +1,4 @@
-use crate::structs::{Assertion, AssertionConfigV1, AssertionState, Expression};
+use crate::types::{Assertion, AssertionConfigV1, AssertionExpression, AssertionState};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -12,7 +12,7 @@ pub struct AssertExpressionV1<'info> {
 pub fn assert_expression<'info>(
     ctx: Context<'_, '_, '_, 'info, AssertExpressionV1<'info>>,
     assertions: Vec<Assertion>,
-    logical_expression: Vec<Expression>,
+    logical_expression: Vec<AssertionExpression>,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let remaining_accounts = ctx.remaining_accounts;

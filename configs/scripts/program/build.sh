@@ -34,4 +34,6 @@ export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
 for p in ${PROGRAMS[@]}; do
     cd ${WORKING_DIR}/programs/${p}/program
     cargo build-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} $ARGS
+    anchor build
+    echo "Built ${p} ${WORKING_DIR}/${OUTPUT}"
 done
