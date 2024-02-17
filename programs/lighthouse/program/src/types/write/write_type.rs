@@ -1,34 +1,24 @@
-use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
-use crate::DataValue;
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub struct AccountValidation {
-    pub owner: Option<Pubkey>,
-    pub is_funded: Option<bool>,
-    pub discriminator: Option<Vec<u8>>,
-}
+use crate::types::DataValue;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {
     AccountBalance,
 
     // Account Data Offset, Data Length, Validation
-    AccountData(u16, Option<u16>, Option<AccountValidation>),
+    AccountData(u16, Option<u16>),
     AccountInfo,
     DataValue(DataValue),
     Program,
 }
 
 impl WriteType {
-    pub fn size(
-        &self,
-        account_info: Option<&anchor_lang::prelude::AccountInfo<'_>>,
-    ) -> Option<usize> {
+    pub fn size(&self, account_info: Option<&AccountInfo<'_>>) -> Option<usize> {
         match self {
             WriteType::AccountBalance => Some(8),
-            WriteType::AccountData(account_offset, data_length, _) => {
+            WriteType::AccountData(account_offset, data_length) => {
                 if let Some(data_length) = data_length {
                     Some(*data_length as usize)
                 } else {

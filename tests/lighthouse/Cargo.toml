@@ -41,6 +41,8 @@ rust_sdk = { path = "../../rust-sdk" }
 memoffset = "0.6"  # Ensure memoffset is also a dependency
 macros = { path = "../../macros" }
 solana-vote-program = "1.18.1"
+rand = "0.8.4"
+borsh = "=0.9.3"
 
 
 [dev-dependencies]

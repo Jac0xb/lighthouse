@@ -1,5 +1,5 @@
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::types::{Assertion, Operator, TokenAccountDataField};
+use lighthouse::types::{Assertion, Operator, TokenAccountField};
 use rust_sdk::LighthouseProgram;
 use solana_program_test::tokio;
 use solana_sdk::signer::Signer;
@@ -31,18 +31,15 @@ async fn test_basic() {
     let mut tx_builder = program.create_assert_multi(
         &user,
         vec![
-            Assertion::TokenAccountField(TokenAccountDataField::Amount(0), Operator::GreaterThan),
-            Assertion::TokenAccountField(TokenAccountDataField::Amount(101), Operator::LessThan),
+            Assertion::TokenAccountField(TokenAccountField::Amount(0), Operator::GreaterThan),
+            Assertion::TokenAccountField(TokenAccountField::Amount(101), Operator::LessThan),
+            Assertion::TokenAccountField(TokenAccountField::Amount(100), Operator::LessThanOrEqual),
             Assertion::TokenAccountField(
-                TokenAccountDataField::Amount(100),
-                Operator::LessThanOrEqual,
-            ),
-            Assertion::TokenAccountField(
-                TokenAccountDataField::Amount(100),
+                TokenAccountField::Amount(100),
                 Operator::GreaterThanOrEqual,
             ),
-            Assertion::TokenAccountField(TokenAccountDataField::Amount(100), Operator::Equal),
-            Assertion::TokenAccountField(TokenAccountDataField::Amount(99), Operator::NotEqual),
+            Assertion::TokenAccountField(TokenAccountField::Amount(100), Operator::Equal),
+            Assertion::TokenAccountField(TokenAccountField::Amount(99), Operator::NotEqual),
         ],
         vec![token_account],
     );

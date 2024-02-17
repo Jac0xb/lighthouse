@@ -21,7 +21,7 @@ let tx = blackhat_program
       &user,
       user_ata,
       Assertion::LegacyTokenAccountField(
-         LegacyTokenAccountDataField::Amount(90),
+         LegacyTokenAccountField::Amount(90),
          Operator::Equal,
       ),
    )
@@ -85,7 +85,7 @@ pub enum AccountInfoDataField {
 }
 
 // Used in LegacyTokenAccountField assertion to assert on token account data.
-pub enum LegacyTokenAccountDataField {
+pub enum LegacyTokenAccountField {
     Mint(Pubkey),
     Owner(Pubkey),
     Amount(u64),
@@ -99,7 +99,7 @@ pub enum LegacyTokenAccountDataField {
 pub enum Assertion {
     AccountInfoField(AccountInfoDataField, Operator),
     AccountData(u16, Operator, DataValue),
-    LegacyTokenAccountField(LegacyTokenAccountDataField, Operator),
+    LegacyTokenAccountField(LegacyTokenAccountField, Operator),
 }
 ```
 

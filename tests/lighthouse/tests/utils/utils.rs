@@ -1,6 +1,7 @@
 use super::context::TestContext;
 use super::error::Error;
 use lighthouse::error::LighthouseError;
+// use lighthouse::error::LighthouseError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_program::instruction::InstructionError;
 use solana_program::{instruction::Instruction, pubkey::Pubkey};
@@ -106,7 +107,7 @@ pub async fn process_transaction_assert_failure(
 }
 
 pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {
-    TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error.into()))
+    TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error as u32))
 }
 
 pub async fn build_tx(
