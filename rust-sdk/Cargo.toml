@@ -25,3 +25,5 @@ solana-banks-interface = "1.14.10"
 regex = "1.5.4"
 lighthouse = { path="../programs/lighthouse/program", features = ['no-entrypoint'] }
 blackhat = { path="../programs/blackhat/program", features = ["no-entrypoint"] }
+rand = "0.8.4"
+borsh = "=0.9.3"

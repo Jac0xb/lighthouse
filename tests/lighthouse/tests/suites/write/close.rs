@@ -1,5 +1,3 @@
-use core::panic;
-
 use lighthouse::types::{Assertion, DataValue, Operator, WriteType};
 use rust_sdk::{find_memory_account, LighthouseProgram};
 use solana_program_test::tokio;

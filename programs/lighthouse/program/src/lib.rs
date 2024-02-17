@@ -1,94 +1,93 @@
 #![allow(clippy::result_large_err)]
 #![allow(clippy::too_many_arguments)]
 
-use anchor_lang::prelude::*;
-use borsh::BorshDeserialize;
-
 pub mod error;
+pub mod instruction;
 pub mod processor;
-pub mod state;
 pub mod types;
 pub mod utils;
+pub mod validations;
 
-use crate::{processor::*, types::*};
+pub use crate::instruction::LighthouseInstruction;
+use solana_program::declare_id;
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
-#[program]
 pub mod lighthouse {
+    use borsh::BorshDeserialize;
+    use solana_program::{
+        account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey,
+    };
+
+    use crate::{
+        instruction::LighthouseInstruction,
+        processor::{
+            AssertContext, AssertMultiContext, CreateMemoryAccountContext,
+            CreateMemoryAccountParameters, WriteContext, WriteParameters,
+        },
+        types::{Assertion, AssertionConfigV1},
+    };
+
+    use self::error::LighthouseError;
     use super::*;
 
-    pub fn create_memory_account_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateMemoryAccountV1<'info>>,
-        memory_index: u8,
-        memory_account_size: u64,
-    ) -> Result<()> {
-        processor::v1::create_memory_account(ctx, memory_index, memory_account_size)
-    }
+    #[cfg(not(feature = "no-entrypoint"))]
+    solana_program::entrypoint!(process_instruction);
+    pub(crate) fn process_instruction(
+        _program_id: &Pubkey,
+        accounts: &[AccountInfo],
+        instruction_data: &[u8],
+    ) -> ProgramResult {
+        let (tag, data) = instruction_data
+            .split_first()
+            .ok_or(LighthouseError::InvalidInstructionData)?;
 
-    pub fn close_memory_account_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, CloseMemoryAccountV1<'info>>,
-        memory_index: u8,
-        memory_bump: u8,
-    ) -> Result<()> {
-        processor::v1::close_memory_account(ctx)
-    }
+        let instruction = LighthouseInstruction::try_from(*tag)
+            .or(Err(LighthouseError::InvalidInstructionData))?;
 
-    pub fn write_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, WriteV1<'info>>,
-        memory_index: u8,
-        memory_account_bump: u8,
-        write_type: WriteTypeParameter,
-    ) -> Result<()> {
-        processor::v1::write(ctx, memory_index, memory_account_bump, write_type)
-    }
+        msg!("Lighthouse instruction: {:?}", instruction);
 
-    pub fn assert_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, AssertV1<'info>>,
-        assertion: Assertion,
-        config: Option<AssertionConfigV1>,
-    ) -> Result<()> {
-        processor::v1::assert(&ctx.accounts.target_account, &assertion, config)
-    }
+        match instruction {
+            LighthouseInstruction::Assert => {
+                let context = AssertContext::load(&mut accounts.iter())?;
+                let assertion = Assertion::try_from_slice(data)
+                    .or(Err(LighthouseError::InvalidInstructionData))?;
 
-    pub fn assert_compact_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, AssertCompactV1<'info>>,
-        assertion: Assertion,
-    ) -> Result<()> {
-        processor::v1::assert(&ctx.accounts.target_account, &assertion, None)
-    }
+                processor::v1::assert(
+                    context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: true }),
+                )?;
+            }
+            LighthouseInstruction::MultiAssert => {
+                let context = AssertMultiContext::load(&mut accounts.iter())?;
+                let assertions: Vec<Assertion> = Vec::<Assertion>::try_from_slice(data)
+                    .or(Err(LighthouseError::InvalidInstructionData))?;
 
-    pub fn assert_multi_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, AssertMultiV1<'info>>,
-        assertions: Vec<Assertion>,
-        config: Option<AssertionConfigV1>,
-    ) -> Result<()> {
-        processor::v1::assert_multi(ctx.remaining_accounts, assertions.as_slice(), config)
-    }
+                processor::v1::assert_multi(
+                    context,
+                    &assertions,
+                    Some(AssertionConfigV1 { verbose: true }),
+                )?;
+            }
+            LighthouseInstruction::CreateMemoryAccount => {
+                let parameters = CreateMemoryAccountParameters::try_from_slice(data)
+                    .or(Err(LighthouseError::InvalidInstructionData))?;
+                let (context, bump_map) =
+                    CreateMemoryAccountContext::load(&mut accounts.iter(), &parameters)?;
 
-    pub fn assert_multi_compact_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, AssertMultiCompactV1<'info>>,
-        assertions: CompactAssertionArray,
-    ) -> Result<()> {
-        let assertions: &[Assertion] = match &assertions {
-            CompactAssertionArray::Size1(a) => a,
-            CompactAssertionArray::Size2(a) => a,
-            CompactAssertionArray::Size3(a) => a,
-            CompactAssertionArray::Size4(a) => a,
-            CompactAssertionArray::Size5(a) => a,
-            CompactAssertionArray::Size6(a) => a,
-            CompactAssertionArray::Size7(a) => a,
-            CompactAssertionArray::Size8(a) => a,
-            CompactAssertionArray::Size9(a) => a,
-            CompactAssertionArray::Size10(a) => a,
-            CompactAssertionArray::Size11(a) => a,
-            CompactAssertionArray::Size12(a) => a,
-            CompactAssertionArray::Size13(a) => a,
-            CompactAssertionArray::Size14(a) => a,
-            CompactAssertionArray::Size15(a) => a,
-            CompactAssertionArray::Size16(a) => a,
-        };
+                processor::v1::create_memory_account(context, parameters, bump_map)?;
+            }
+            LighthouseInstruction::Write => {
+                let parameters = WriteParameters::try_from_slice(data)
+                    .or(Err(LighthouseError::InvalidInstructionData))?;
 
-        processor::v1::assert_multi(ctx.remaining_accounts, assertions, None)
+                let context = WriteContext::load(&mut accounts.iter(), &parameters)?;
+
+                processor::v1::write(context, parameters)?;
+            }
+        }
+
+        Ok(())
     }
 }

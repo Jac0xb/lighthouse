@@ -17,10 +17,11 @@ async fn test_basic() {
     let mut program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
-    let mut tx_builder = program.create_assert_compact(
+    let mut tx_builder = program.create_assert(
         &user,
         user.encodable_pubkey(),
         Assertion::AccountInfoField(AccountInfoDataField::Lamports(0), Operator::GreaterThan),
+        None,
     );
 
     process_transaction_assert_success(
@@ -60,13 +61,14 @@ async fn test_compact_token_account() {
     let token_account =
         get_associated_token_address(&user.encodable_pubkey(), &mint.encodable_pubkey());
 
-    let mut tx_builder = program.create_assert_compact(
+    let mut tx_builder = program.create_assert(
         &user,
         token_account,
         Assertion::TokenAccountField(
-            lighthouse::types::TokenAccountDataField::Amount(100),
+            lighthouse::types::TokenAccountField::Amount(100),
             Operator::Equal,
         ),
+        None,
     );
 
     process_transaction_assert_success(
@@ -78,13 +80,14 @@ async fn test_compact_token_account() {
     .await
     .unwrap();
 
-    let mut tx_builder = program.create_assert_compact(
+    let mut tx_builder = program.create_assert(
         &user,
         token_account,
         Assertion::TokenAccountField(
-            lighthouse::types::TokenAccountDataField::Amount(100),
+            lighthouse::types::TokenAccountField::Amount(100),
             Operator::NotEqual,
         ),
+        None,
     );
 
     process_transaction_assert_failure(

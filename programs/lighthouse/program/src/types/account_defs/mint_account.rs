@@ -1,12 +1,17 @@
-use anchor_lang::{
-    prelude::borsh::{self, BorshDeserialize, BorshSerialize},
-    Owners, Result,
-};
-use anchor_spl::token_interface::{self};
+use anchor_spl::token_interface::spl_token_2022;
+use borsh::{BorshDeserialize, BorshSerialize};
+// use anchor_lang::{
+//     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
+//     Owners, Result,
+// };
+// use anchor_spl::token_interface::{self};
+use crate::utils::Result;
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
 use crate::{
-    error::LighthouseError, utils::unpack_coption_key, Assert, EvaluationResult, Operator,
+    error::LighthouseError,
+    types::{Assert, EvaluationResult, Operator},
+    utils::unpack_coption_key, //  Assert, EvaluationResult, Operator,
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
@@ -29,7 +34,7 @@ impl Assert<AccountInfo<'_>> for MintAccountField {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        if !token_interface::Mint::owners().contains(account.owner) {
+        if ![spl_token::ID, spl_token_2022::ID].contains(account.owner) {
             return Err(LighthouseError::OwnerMismatch.into());
         }
 
@@ -155,7 +160,7 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::{Assert, MintAccountField, Operator};
+        use crate::types::{Assert, MintAccountField, Operator};
 
         #[test]
         fn evaluate_mint_account_no_mint_authority_no_freeze_authority() {

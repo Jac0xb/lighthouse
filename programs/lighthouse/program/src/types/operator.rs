@@ -1,9 +1,6 @@
 use std::fmt::Debug;
 
-use anchor_lang::prelude::{
-    borsh,
-    borsh::{BorshDeserialize, BorshSerialize},
-};
+use borsh::{BorshDeserialize, BorshSerialize};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
 pub enum Operator {
