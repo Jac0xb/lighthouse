@@ -1,22 +1,32 @@
+use std::slice::Iter;
+
 use crate::{
     error::LighthouseError,
-    structs::{Assertion, AssertionConfigV1},
-    utils::print_assertion_result,
+    types::{Assertion, AssertionConfigV1}, // utils::print_assertion_result,
+    utils::{print_assertion_result, Result},
+    validations::Program,
 };
-use anchor_lang::prelude::*;
+use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    msg,
+};
 
-#[derive(Accounts)]
-pub struct AssertV1<'info> {
-    pub target_account: AccountInfo<'info>,
+pub(crate) struct AssertContext<'a, 'info> {
+    pub(crate) lighthouse_program: Program<'a, 'info>,
+    pub(crate) target_account: AccountInfo<'info>,
 }
 
-#[derive(Accounts)]
-pub struct AssertCompactV1<'info> {
-    pub target_account: AccountInfo<'info>,
+impl<'a, 'info> AssertContext<'a, 'info> {
+    pub(crate) fn load(account_iter: &mut Iter<'a, AccountInfo<'info>>) -> Result<Self> {
+        Ok(Self {
+            lighthouse_program: Program::new(next_account_info(account_iter)?, &crate::id())?,
+            target_account: next_account_info(account_iter)?.clone(),
+        })
+    }
 }
 
-pub fn assert(
-    target_account: &AccountInfo<'_>,
+pub(crate) fn assert(
+    assert_context: AssertContext,
     assertion: &Assertion,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
@@ -24,7 +34,7 @@ pub fn assert(
         Some(config) => config.verbose,
         None => false,
     };
-    let evaluation_result = assertion.evaluate(target_account, include_output)?;
+    let evaluation_result = assertion.evaluate(&assert_context.target_account, include_output)?;
 
     if include_output {
         msg!("[--] [-] Status | Assertion | Actual Value (Operator) Assertion Value");

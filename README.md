@@ -12,7 +12,7 @@ Lighthouse is an open source, public utility Solana program with an emphasis on 
 
 Solana at its core is a decentralized database (accounts) and assertion/mutation of that permissioned data (programs). Programs generally make assertions about account state before allowing data to be mutated, one of Anchor's innovations for preventing "footguns and attacks" was that it has common account state assertions baked into the framework. Currently performing even trivial assertions such as account balance checks requires one to deploy a Solana program. Lighthouse at a high-level seeks to be an composable way to make assertions on onchain state and the instruction-level delta of these state changes without the need to deploy additional Solana programs.
 
-**Guardrail Example**: A wallet simulates that a token account changes balance from ```100``` to ```90``` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
+**Guardrail Example**: A wallet simulates that a token account changes balance from `100` to `90` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
 
 ```rust
 let tx = blackhat_program
@@ -21,7 +21,7 @@ let tx = blackhat_program
       &user,
       user_ata,
       Assertion::LegacyTokenAccountField(
-         LegacyTokenAccountDataField::Amount(90),
+         LegacyTokenAccountField::Amount(90),
          Operator::Equal,
       ),
    )
@@ -30,7 +30,7 @@ let tx = blackhat_program
 
 (From the testing library, blackhat program is a test program designed to emulate existing drainer programs)
 
-The transaction is then sent to the Solana blockchain. The assertion fails because the token balance is found to be ```0``` instead of ```90``` during assertion instruction. Having failed the assertion, the Lighthouse program then fails the transaction.
+The transaction is then sent to the Solana blockchain. The assertion fails because the token balance is found to be `0` instead of `90` during assertion instruction. Having failed the assertion, the Lighthouse program then fails the transaction.
 
 **Guardrail Example**: A transaction builder puts a Lighthouse assertion instruction that consists of checking a BONK USD price oracle account and asserts that it needs to be above a certain value or the transaction will fail.
 
@@ -43,6 +43,7 @@ The transaction is then sent to the Solana blockchain. The assertion fails becau
 **Assertion Instructions (Primary)** - instructions which allow transaction builders to assert on data accessed at runtime during the assertion instruction.
 
 _Current Assertion Data Model_
+
 ```rust
 // Used in assertions during evaluation.
 pub enum Operator {
@@ -84,7 +85,7 @@ pub enum AccountInfoDataField {
 }
 
 // Used in LegacyTokenAccountField assertion to assert on token account data.
-pub enum LegacyTokenAccountDataField {
+pub enum LegacyTokenAccountField {
     Mint(Pubkey),
     Owner(Pubkey),
     Amount(u64),
@@ -98,11 +99,12 @@ pub enum LegacyTokenAccountDataField {
 pub enum Assertion {
     AccountInfoField(AccountInfoDataField, Operator),
     AccountData(u16, Operator, DataValue),
-    LegacyTokenAccountField(LegacyTokenAccountDataField, Operator),
+    LegacyTokenAccountField(LegacyTokenAccountField, Operator),
 }
 ```
 
 _Current Assertion Instructions_
+
 ```rust
 pub fn assert_v1<'info>(...) -> Result<()> {
    // Allows for logging (CU intensive but useful for debugging) and has more instruction data overhead (config struct)
@@ -123,9 +125,10 @@ pub fn assert_multi_compact_v1<'info>(...) -> Result<()> {
 
 **Write Instructions (Secondary)** - write account data, account info, and other data available at runtime into memory accounts to allow for assertion of inter-transaction state changes rather than just instruction data and data accessed at runtime during assertion instruction.
 
-**Memory Account** - PDA with seeds ```[b"memory".as_ref(), signer.key.as_ref(), &[memory_idx]]```. The memory account is used to store runtime data into memory accounts derived by the signer. Useful for asserting on the difference of changes between instructions.
+**Memory Account** - PDA with seeds `[b"memory".as_ref(), signer.key.as_ref(), &[memory_idx]]`. The memory account is used to store runtime data into memory accounts derived by the signer. Useful for asserting on the difference of changes between instructions.
 
 _Current Write Data Model_
+
 ```rust
 pub enum WriteTypeParameter {
     // Memory offset, write type
@@ -144,6 +147,7 @@ pub enum WriteType {
 ```
 
 _Current Write Instructions_
+
 ```rust
 pub fn create_memory_account_v1<'info>(..., memory_idx) -> Result<()> {
    // Create a memory account which can then be used to write data to.
@@ -229,3 +233,5 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
   - program logs concat
   - Do we even need logs :P
 - Assertion type: hash of account, for post-simulation account integrity
+- POD / Bytemuck / zerocopy rewrite of instruction data
+  - Maybe need to move to native implementation

