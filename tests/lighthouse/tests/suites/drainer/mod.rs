@@ -1,20 +1,17 @@
-use core::panic;
-
 use crate::utils::utils::{
     build_tx, process_transaction_assert_failure, process_transaction_assert_success,
     to_transaction_error,
 };
-use crate::utils::{context::TestContext, create_mint, create_user, mint_to};
+use crate::utils::CreateMintParameters;
+use crate::utils::{context::TestContext, create_mint, create_user};
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::{
-    error::LighthouseError,
-    types::{AccountInfoDataField, Assertion, Operator, TokenAccountField},
+use lighthouse::types::{
+    AccountInfoFieldAssertion, ComparableOperator, EquatableOperator, TokenAccountFieldAssertion,
 };
-use rand::{thread_rng, RngCore};
+use lighthouse::{error::LighthouseError, types::Assertion};
 use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::transaction::VersionedTransaction;
 use solana_sdk::{signature::Keypair, signer::Signer};
 
 #[tokio::test]
@@ -40,8 +37,10 @@ async fn test_drain_solana() {
         .create_assert_multi(
             &user,
             vec![Assertion::AccountInfoField(
-                AccountInfoDataField::Lamports(user_balance - 10_000),
-                Operator::GreaterThan,
+                AccountInfoFieldAssertion::Lamports(
+                    user_balance - 10_000,
+                    ComparableOperator::GreaterThan,
+                ),
             )],
             vec![user.encodable_pubkey()],
         )
@@ -75,14 +74,20 @@ async fn test_drain_token_account() {
     let drainer = Keypair::new();
     let user = create_user(context).await.unwrap();
 
-    let (tx, mint) = create_mint(context, &user).await.unwrap();
-    process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
+    let (tx, mint) = create_mint(
+        context,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: Some(Some(user.pubkey())),
+            freeze_authority: None,
+            mint_to: Some((user.pubkey(), 69_000)),
+            decimals: 9,
+        },
+    )
+    .await
+    .unwrap();
 
-    let tx = mint_to(context, &mint.pubkey(), &user, &user.pubkey(), 69_000)
-        .await
-        .unwrap();
     process_transaction_assert_success(context, tx)
         .await
         .unwrap();
@@ -94,13 +99,19 @@ async fn test_drain_token_account() {
         .append(lighthouse_program.create_assert(
             &user,
             user_ata,
-            Assertion::TokenAccountField(TokenAccountField::Amount(69_000), Operator::Equal),
+            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
+                69_000,
+                ComparableOperator::Equal,
+            )),
             None,
         ))
         .append(lighthouse_program.create_assert(
             &user,
             user_ata,
-            Assertion::TokenAccountField(TokenAccountField::Delegate(None), Operator::Equal),
+            Assertion::TokenAccountField(TokenAccountFieldAssertion::Delegate(
+                None,
+                EquatableOperator::Equal,
+            )),
             None,
         ))
         .to_transaction_and_sign(vec![&user], context.get_blockhash())
@@ -115,6 +126,11 @@ async fn test_drain_token_account() {
     .await
     .unwrap();
 }
+
+// TODO: Delegate attacher
+// TODO: Bitflip delegate attacher
+// TODO: Bitflip solana account drainer
+// TODO: Account owner attacher
 
 // #[tokio::test]
 // async fn test_bitflip_drain_token_account() {

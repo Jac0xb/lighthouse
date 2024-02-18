@@ -11,12 +11,12 @@ use solana_program::{
     msg,
 };
 
-pub(crate) struct AssertContext<'a, 'info> {
+pub(crate) struct AssertWithTargetContext<'a, 'info> {
     pub(crate) lighthouse_program: Program<'a, 'info>,
     pub(crate) target_account: AccountInfo<'info>,
 }
 
-impl<'a, 'info> AssertContext<'a, 'info> {
+impl<'a, 'info> AssertWithTargetContext<'a, 'info> {
     pub(crate) fn load(account_iter: &mut Iter<'a, AccountInfo<'info>>) -> Result<Self> {
         Ok(Self {
             lighthouse_program: Program::new(next_account_info(account_iter)?, &crate::id())?,
@@ -26,7 +26,7 @@ impl<'a, 'info> AssertContext<'a, 'info> {
 }
 
 pub(crate) fn assert(
-    assert_context: AssertContext,
+    assert_context: AssertWithTargetContext,
     assertion: &Assertion,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {

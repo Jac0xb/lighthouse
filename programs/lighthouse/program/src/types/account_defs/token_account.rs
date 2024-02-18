@@ -1,6 +1,6 @@
 use crate::{
     error::LighthouseError,
-    types::{Assert, EvaluationResult, Operator},
+    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::{unpack_coption_key, unpack_coption_u64, Result}, // Assert, EvaluationResult, Operator,
 };
 // use anchor_lang::{
@@ -12,15 +12,15 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum TokenAccountField {
-    Mint(Pubkey),
-    Owner(Pubkey),
-    Amount(u64),
-    Delegate(Option<Pubkey>),
-    State(u8),
-    IsNative(Option<u64>),
-    DelegatedAmount(u64),
-    CloseAuthority(Option<Pubkey>),
+pub enum TokenAccountFieldAssertion {
+    Mint(Pubkey, EquatableOperator),
+    Owner(Pubkey, EquatableOperator),
+    Amount(u64, ComparableOperator),
+    Delegate(Option<Pubkey>, EquatableOperator),
+    State(u8, ComparableOperator),
+    IsNative(Option<u64>, ComparableOperator),
+    DelegatedAmount(u64, ComparableOperator),
+    CloseAuthority(Option<Pubkey>, EquatableOperator),
 }
 
 pub fn account_state_from_u8(value: u8) -> AccountState {
@@ -40,11 +40,10 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
     }
 }
 
-impl Assert<AccountInfo<'_>> for TokenAccountField {
+impl Assert<AccountInfo<'_>> for TokenAccountFieldAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo,
-        operator: &Operator,
         include_output: bool,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
@@ -55,30 +54,28 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
             return Err(LighthouseError::OwnerMismatch.into());
         }
 
-        // TODO: Logic to assert on if account is a token account
-
         let data = account.try_borrow_mut_data().unwrap();
 
         let result = match self {
-            TokenAccountField::Mint(pubkey) => {
+            TokenAccountFieldAssertion::Mint(pubkey, operator) => {
                 let mint_slice = &data[0..32];
                 let mint = Pubkey::try_from(mint_slice).unwrap();
 
                 operator.evaluate(&mint, pubkey, include_output)
             }
-            TokenAccountField::Owner(pubkey) => {
+            TokenAccountFieldAssertion::Owner(pubkey, operator) => {
                 let owner_slice = &data[32..64];
                 let owner = Pubkey::try_from(owner_slice).unwrap();
 
                 operator.evaluate(&owner, pubkey, include_output)
             }
-            TokenAccountField::Amount(amount) => {
+            TokenAccountFieldAssertion::Amount(amount, operator) => {
                 let amount_slice = &data[64..72];
                 let actual_amount = u64::from_le_bytes(amount_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_amount, amount, include_output)
             }
-            TokenAccountField::Delegate(assertion_pubkey) => {
+            TokenAccountFieldAssertion::Delegate(assertion_pubkey, operator) => {
                 let delegate_slice = &data[72..108];
                 let delegate = unpack_coption_key(delegate_slice)?;
 
@@ -100,11 +97,11 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
                     }
                 }
             }
-            TokenAccountField::State(state) => {
+            TokenAccountFieldAssertion::State(state, operator) => {
                 let actual_state = data[108];
                 operator.evaluate(&actual_state, state, include_output)
             }
-            TokenAccountField::IsNative(is_native) => {
+            TokenAccountFieldAssertion::IsNative(is_native, operator) => {
                 let is_native_slice = &data[109..121];
                 let actual_is_native = unpack_coption_u64(is_native_slice)?;
 
@@ -126,16 +123,15 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
                     }
                 }
             }
-            TokenAccountField::DelegatedAmount(delegated_amount) => {
+            TokenAccountFieldAssertion::DelegatedAmount(delegated_amount, operator) => {
                 let delegated_amount_slice = &data[121..129];
                 let actual_delegated_amount =
                     u64::from_le_bytes(delegated_amount_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_delegated_amount, delegated_amount, include_output)
             }
-            TokenAccountField::CloseAuthority(pubkey) => {
+            TokenAccountFieldAssertion::CloseAuthority(pubkey, operator) => {
                 let close_authority_slice = &data[129..165];
-
                 let close_authority = unpack_coption_key(close_authority_slice)?;
 
                 match (close_authority, pubkey) {
@@ -177,7 +173,9 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //         use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
 //         use std::{cell::RefCell, rc::Rc};
 
-//         use crate::{Assert, Operator, TokenAccountField};
+//         use crate::types::{
+//             Assert, ComparableOperator, EquatableOperator, Operator, TokenAccountFieldAssertion,
+//         };
 
 //         #[test]
 //         fn evaluate_token_account_no_delegate_no_close_authority() {
@@ -221,8 +219,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             //
 //             // Assert on amount
 //             //
-//             let result =
-//                 TokenAccountField::Amount(69).evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::Amount(69, ComparableOperator::Equal)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -231,8 +229,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result =
-//                 TokenAccountField::Amount(1600).evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::Amount(1600, ComparableOperator::Equal)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -244,11 +242,9 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             //
 //             // Assert on mint
 //             //
-//             let result = TokenAccountField::Mint(mint.encodable_pubkey()).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result =
+//                 TokenAccountFieldAssertion::Mint(mint.encodable_pubkey(), EquatableOperator::Equal)
+//                     .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -260,11 +256,11 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             //
 //             // Assert on owner
 //             //
-//             let result = TokenAccountField::Owner(owner.encodable_pubkey()).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::Owner(
+//                 owner.encodable_pubkey(),
+//                 EquatableOperator::Equal,
+//             )
+//             .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -277,8 +273,7 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             // Assert on delegate
 //             //
 
-//             let result =
-//                 TokenAccountField::Delegate(None).evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::Delegate(None).evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -287,11 +282,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = TokenAccountField::Delegate(Some(owner.encodable_pubkey())).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::Delegate(Some(owner.encodable_pubkey()))
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -304,11 +296,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             // Assert on state
 //             //
 
-//             let result = TokenAccountField::State(AccountState::Initialized as u8).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::State(AccountState::Initialized as u8)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -317,11 +306,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = TokenAccountField::State(AccountState::Frozen as u8).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::State(AccountState::Frozen as u8)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -330,11 +316,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = TokenAccountField::State(AccountState::Uninitialized as u8).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::State(AccountState::Uninitialized as u8)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -347,11 +330,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             // Assert on is_native
 //             //
 
-//             let result = TokenAccountField::IsNative(Some(1)).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result =
+//                 TokenAccountFieldAssertion::IsNative(Some(1)).evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -363,11 +343,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             //
 //             // Assert on delegated_amount
 //             //
-//             let result = TokenAccountField::DelegatedAmount(42).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result =
+//                 TokenAccountFieldAssertion::DelegatedAmount(42).evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -380,11 +357,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             // Assert on close_authority
 //             //
 
-//             let result = TokenAccountField::CloseAuthority(None).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result =
+//                 TokenAccountFieldAssertion::CloseAuthority(None).evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -393,8 +367,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = TokenAccountField::CloseAuthority(Some(owner.encodable_pubkey()))
-//                 .evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::CloseAuthority(Some(owner.encodable_pubkey()))
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -449,8 +423,7 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             // Assert on delegate
 //             //
 
-//             let result =
-//                 TokenAccountField::Delegate(None).evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::Delegate(None).evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -459,11 +432,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = TokenAccountField::Delegate(Some(delegate.encodable_pubkey())).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::Delegate(Some(delegate.encodable_pubkey()))
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -475,11 +445,8 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //             //
 //             // Assert on close_authority
 //             //
-//             let result = TokenAccountField::CloseAuthority(None).evaluate(
-//                 &account_info,
-//                 &Operator::Equal,
-//                 true,
-//             );
+//             let result = TokenAccountFieldAssertion::CloseAuthority(None, EquatableOperator::Equal)
+//                 .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -488,9 +455,10 @@ impl Assert<AccountInfo<'_>> for TokenAccountField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result =
-//                 TokenAccountField::CloseAuthority(Some(close_authority.encodable_pubkey()))
-//                     .evaluate(&account_info, &Operator::Equal, true);
+//             let result = TokenAccountFieldAssertion::CloseAuthority(Some(
+//                 close_authority.encodable_pubkey(),
+//             ))
+//             .evaluate(&account_info, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);

@@ -1,7 +1,6 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
-
 use crate::types::DataValue;
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::account_info::AccountInfo;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {

@@ -1,6 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
+use crate::types::{ComparableOperator, EquatableOperator};
+
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct AccountInfoData {
     pub key: Pubkey,
@@ -13,21 +15,14 @@ pub struct AccountInfoData {
     pub executable: bool,
 }
 
-impl AccountInfoData {
-    // length constant
-    pub fn size() -> u64 {
-        32 + 8 + 8 + 32 + 8 + 1 + 1 + 1
-    }
-}
-
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum AccountInfoDataField {
-    Key(Pubkey),
-    Lamports(u64),
-    DataLength(u64),
-    Owner(Pubkey),
-    RentEpoch(u64),
-    IsSigner(bool),
-    IsWritable(bool),
-    Executable(bool),
+pub enum AccountInfoFieldAssertion {
+    Key(Pubkey, EquatableOperator),
+    Lamports(u64, ComparableOperator),
+    DataLength(u64, ComparableOperator),
+    Owner(Pubkey, EquatableOperator),
+    RentEpoch(u64, ComparableOperator),
+    IsSigner(bool, EquatableOperator),
+    IsWritable(bool, ComparableOperator),
+    Executable(bool, ComparableOperator),
 }

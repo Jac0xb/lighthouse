@@ -1,6 +1,6 @@
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::error::LighthouseError;
-use lighthouse::types::{Assertion, AssertionConfigV1, Operator};
+use lighthouse::types::{Assertion, AssertionConfigV1, EquatableOperator, Operator};
 use rust_sdk::LighthouseProgram;
 use solana_program::keccak;
 use solana_program_test::tokio;
@@ -10,7 +10,7 @@ use crate::utils::context::TestContext;
 use crate::utils::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use crate::utils::{create_mint, create_test_account, create_user, mint_to};
+use crate::utils::{create_mint, create_test_account, create_user, mint_to, CreateMintParameters};
 
 #[tokio::test]
 async fn test_basic() {
@@ -35,7 +35,7 @@ async fn test_basic() {
             .create_assert(
                 &user,
                 test_account.encodable_pubkey(),
-                Assertion::AccountDataHash(account_hash, Operator::Equal, None, None),
+                Assertion::AccountDataHash(account_hash, EquatableOperator::Equal, None, None),
                 Some(AssertionConfigV1 { verbose: true }),
             )
             .to_transaction_and_sign(vec![&user], ctx.get_blockhash())
@@ -44,16 +44,16 @@ async fn test_basic() {
     .await
     .unwrap();
 
-    let (tx, mint) = create_mint(ctx, &user).await.unwrap();
-
-    process_transaction_assert_success(ctx, tx).await.unwrap();
-
-    let tx = mint_to(
+    let (tx, mint) = create_mint(
         ctx,
-        &mint.encodable_pubkey(),
         &user,
-        &user.encodable_pubkey(),
-        100,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: None,
+            freeze_authority: None,
+            decimals: 9,
+            mint_to: Some((user.encodable_pubkey(), 100)),
+        },
     )
     .await
     .unwrap();
@@ -77,7 +77,7 @@ async fn test_basic() {
             .create_assert(
                 &user,
                 token_account,
-                Assertion::AccountDataHash(account_hash, Operator::Equal, None, None),
+                Assertion::AccountDataHash(account_hash, EquatableOperator::Equal, None, None),
                 Some(AssertionConfigV1 { verbose: true }),
             )
             .to_transaction_and_sign(vec![&user], ctx.get_blockhash())
@@ -94,7 +94,7 @@ async fn test_basic() {
             .create_assert(
                 &user,
                 token_account,
-                Assertion::AccountDataHash(account_hash, Operator::Equal, Some(30), None),
+                Assertion::AccountDataHash(account_hash, EquatableOperator::Equal, Some(30), None),
                 Some(AssertionConfigV1 { verbose: true }),
             )
             .to_transaction_and_sign(vec![&user], ctx.get_blockhash())
@@ -111,7 +111,7 @@ async fn test_basic() {
             .create_assert(
                 &user,
                 token_account,
-                Assertion::AccountDataHash(account_hash, Operator::Equal, Some(30), None),
+                Assertion::AccountDataHash(account_hash, EquatableOperator::Equal, Some(30), None),
                 Some(AssertionConfigV1 { verbose: true }),
             )
             .to_transaction_and_sign(vec![&user], ctx.get_blockhash())

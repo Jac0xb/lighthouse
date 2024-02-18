@@ -8,7 +8,6 @@ use thiserror::Error;
 pub enum LighthouseError {
     #[error("Invalid instruction")]
     InvalidInstructionData = 6000,
-
     #[error("Invalid market parameters error")]
     Unimplemented = 6001,
     #[error("AssertionFailed")]
@@ -23,31 +22,20 @@ pub enum LighthouseError {
     OutOfRange = 6006,
     #[error("AccountBorrowFailed")]
     AccountBorrowFailed = 6007,
-
     #[error("AccountNotTokenAccount")]
     OwnerMismatch = 6008,
-
     #[error("AccountNotInitialized")]
     AccountNotInitialized = 6009,
-
     #[error("UnauthorizedIxEntry")]
     UnauthorizedIxEntry = 6010,
-
     #[error("InvalidDataLength")]
     InvalidDataLength = 6011,
-
-    #[error("AccountOutOfRange")]
-    AccountOutOfRange = 6012,
-
     #[error("AccountOwnerValidationFailed")]
     AccountOwnerValidationFailed = 6013,
-
     #[error("AccountFundedValidationFailed")]
     AccountFundedValidationFailed = 6014,
-
     #[error("AccountDiscriminatorValidationFailed")]
     AccountDiscriminatorValidationFailed = 6015,
-
     #[error("AccountValidaitonFailed")]
     AccountValidaitonFailed = 6016,
 }
@@ -73,14 +61,7 @@ impl From<LighthouseError> for ProgramError {
 //     }
 // }
 
-// #[cfg(test)]
-// pub fn assert_is_program_error(err: Error, expected_error: ProgramError) {
-//     match err {
-//         Error::ProgramError(err) => {
-//             assert_eq!(err.program_error, expected_error);
-//         }
-//         Error::AnchorError(err) => {
-//             panic!("Expected ProgramError, got AnchorError");
-//         }
-//     }
-// }
+#[cfg(test)]
+pub fn assert_is_program_error(err: ProgramError, expected_error: ProgramError) {
+    assert_eq!(err, expected_error);
+}

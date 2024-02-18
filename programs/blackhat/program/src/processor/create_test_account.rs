@@ -24,6 +24,12 @@ pub struct TestAccountV1 {
     pub vec: Vec<u8>,
 }
 
+impl TestAccountV1 {
+    pub fn try_to_vec_override(&self) -> Vec<u8> {
+        self.try_to_vec().unwrap()
+    }
+}
+
 #[derive(Accounts)]
 pub struct CreateTestAccountV1<'info> {
     #[account(mut)]
