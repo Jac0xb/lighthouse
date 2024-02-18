@@ -6,24 +6,39 @@ use shank::ShankInstruction;
 #[rustfmt::skip]
 pub enum LighthouseInstruction {
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
-    Assert = 0,
-
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    MultiAssert = 1,
-
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account")]
     #[account(2, name = "memory_account", desc = "Memory account")]
     #[account(3, name = "system_program", desc = "System program")]
-    CreateMemoryAccount = 2,
+    CreateMemoryAccount = 0,
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account")]
     #[account(2, name = "memory_account", desc = "Memory account")]
     #[account(3, name = "source_account", desc = "System program")]
-    // #[account(4, name = "system_program", desc = "System program")]
-    Write = 3,
+    Write = 1,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(1, name = "target_account", desc = "Target account")]
+    AssertAccountData = 2,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(1, name = "target_account", desc = "Target account")]
+    AssertDataHash = 3,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(1, name = "target_account", desc = "Target account")]
+    AssertAccountInfo = 4,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(1, name = "target_account", desc = "Target account")]
+    AssertTokenAccountField = 5,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(1, name = "target_account", desc = "Target account")]
+    AssertMintAccountField = 6,
+
+    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    AssertSysvarClockField = 7,
 }
 
 impl LighthouseInstruction {

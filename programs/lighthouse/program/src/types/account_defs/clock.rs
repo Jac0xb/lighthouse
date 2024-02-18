@@ -1,32 +1,27 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::clock::Clock;
 
-use crate::types::{Assert, EvaluationResult, Operator};
+use crate::types::{Assert, ComparableOperator, EvaluationResult, Operator};
 use crate::utils::Result;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum ClockField {
-    Slot(u64),
-    EpochStartTimestamp(i64),
-    Epoch(u64),
-    LeaderScheduleEpoch(u64),
-    UnixTimestamp(i64),
+pub enum SysvarClockFieldAssertion {
+    Slot(u64, ComparableOperator),
+    EpochStartTimestamp(i64, ComparableOperator),
+    Epoch(u64, ComparableOperator),
+    LeaderScheduleEpoch(u64, ComparableOperator),
+    UnixTimestamp(i64, ComparableOperator),
 }
 
-impl Assert<Clock> for ClockField {
-    fn evaluate(
-        &self,
-        clock: &Clock,
-        operator: &Operator,
-        include_output: bool,
-    ) -> Result<Box<EvaluationResult>> {
+impl Assert<Clock> for SysvarClockFieldAssertion {
+    fn evaluate(&self, clock: &Clock, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
-            ClockField::Slot(slot) => {
+            SysvarClockFieldAssertion::Slot(slot, operator) => {
                 let actual_slot = clock.slot;
 
                 operator.evaluate(&actual_slot, slot, include_output)
             }
-            ClockField::EpochStartTimestamp(epoch_start_timestamp) => {
+            SysvarClockFieldAssertion::EpochStartTimestamp(epoch_start_timestamp, operator) => {
                 let actual_epoch_start_timestamp = clock.epoch_start_timestamp;
 
                 operator.evaluate(
@@ -35,12 +30,12 @@ impl Assert<Clock> for ClockField {
                     include_output,
                 )
             }
-            ClockField::Epoch(epoch) => {
+            SysvarClockFieldAssertion::Epoch(epoch, operator) => {
                 let actual_epoch = clock.epoch;
 
                 operator.evaluate(&actual_epoch, epoch, include_output)
             }
-            ClockField::LeaderScheduleEpoch(leader_schedule_epoch) => {
+            SysvarClockFieldAssertion::LeaderScheduleEpoch(leader_schedule_epoch, operator) => {
                 let actual_leader_schedule_epoch = clock.leader_schedule_epoch;
 
                 operator.evaluate(
@@ -49,7 +44,7 @@ impl Assert<Clock> for ClockField {
                     include_output,
                 )
             }
-            ClockField::UnixTimestamp(unix_timestamp) => {
+            SysvarClockFieldAssertion::UnixTimestamp(unix_timestamp, operator) => {
                 let actual_unix_timestamp = clock.unix_timestamp;
 
                 operator.evaluate(&actual_unix_timestamp, unix_timestamp, include_output)
@@ -63,7 +58,7 @@ impl Assert<Clock> for ClockField {
 // #[cfg(test)]
 // mod tests {
 //     mod evaluate {
-//         use crate::{Assert, ClockField, Operator};
+//         use crate::types::{Assert, Operator, SysvarClockFieldAssertion};
 
 //         #[test]
 //         fn evaluate_clock() {
@@ -77,7 +72,8 @@ impl Assert<Clock> for ClockField {
 
 //             // Evaluate slot
 
-//             let result = ClockField::Slot(69).evaluate(&clock, &Operator::Equal, true);
+//             let result =
+//                 SysvarClockFieldAssertion::Slot(69).evaluate(&clock, &Operator::Equal, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -86,7 +82,8 @@ impl Assert<Clock> for ClockField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = ClockField::Slot(1600).evaluate(&clock, &Operator::Equal, true);
+//             let result =
+//                 SysvarClockFieldAssertion::Slot(1600).evaluate(&clock, &Operator::Equal, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -97,8 +94,11 @@ impl Assert<Clock> for ClockField {
 
 //             // Evaluate epoch_start_timestamp
 
-//             let result =
-//                 ClockField::EpochStartTimestamp(420).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::EpochStartTimestamp(420).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -107,8 +107,11 @@ impl Assert<Clock> for ClockField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result =
-//                 ClockField::EpochStartTimestamp(1600).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::EpochStartTimestamp(1600).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -119,7 +122,8 @@ impl Assert<Clock> for ClockField {
 
 //             // Evaluate epoch
 
-//             let result = ClockField::Epoch(1337).evaluate(&clock, &Operator::Equal, true);
+//             let result =
+//                 SysvarClockFieldAssertion::Epoch(1337).evaluate(&clock, &Operator::Equal, true);
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -128,7 +132,8 @@ impl Assert<Clock> for ClockField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = ClockField::Epoch(1600).evaluate(&clock, &Operator::Equal, true);
+//             let result =
+//                 SysvarClockFieldAssertion::Epoch(1600).evaluate(&clock, &Operator::Equal, true);
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -139,8 +144,11 @@ impl Assert<Clock> for ClockField {
 
 //             // Evaluate leader_schedule_epoch
 
-//             let result =
-//                 ClockField::LeaderScheduleEpoch(9001).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::LeaderScheduleEpoch(9001).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -149,8 +157,11 @@ impl Assert<Clock> for ClockField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result =
-//                 ClockField::LeaderScheduleEpoch(1600).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::LeaderScheduleEpoch(1600).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
@@ -161,8 +172,11 @@ impl Assert<Clock> for ClockField {
 
 //             // Evaluate unix_timestamp
 
-//             let result =
-//                 ClockField::UnixTimestamp(123456789).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::UnixTimestamp(123456789).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(result.passed, "{:?}", result.output);
@@ -171,7 +185,11 @@ impl Assert<Clock> for ClockField {
 //                 panic!("{:?}", error);
 //             }
 
-//             let result = ClockField::UnixTimestamp(1600).evaluate(&clock, &Operator::Equal, true);
+//             let result = SysvarClockFieldAssertion::UnixTimestamp(1600).evaluate(
+//                 &clock,
+//                 &Operator::Equal,
+//                 true,
+//             );
 
 //             if let Ok(result) = result {
 //                 assert!(!result.passed, "{:?}", result.output);
