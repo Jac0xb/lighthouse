@@ -14,9 +14,9 @@ use crate::{
 };
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub(crate) struct CreateMemoryAccountParameters {
-    pub(crate) memory_index: u8,
-    pub(crate) memory_account_size: u64,
+pub struct CreateMemoryAccountParameters {
+    pub memory_index: u8,
+    pub memory_account_size: u64,
 }
 
 pub(crate) struct CreateMemoryAccountContext<'a, 'info> {

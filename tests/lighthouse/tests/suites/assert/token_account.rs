@@ -98,13 +98,6 @@ async fn test_basic() {
         vec![token_account],
     );
 
-    println!(
-        "tx size: {}",
-        tx_builder
-            .to_transaction_and_sign(vec![&user], context.get_blockhash())
-            .unwrap()
-    );
-
     process_transaction_assert_success(
         context,
         tx_builder
@@ -113,6 +106,4 @@ async fn test_basic() {
     )
     .await
     .unwrap();
-
-    panic!("test");
 }

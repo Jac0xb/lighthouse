@@ -1,6 +1,4 @@
-use lighthouse::types::{
-    AccountInfoFieldAssertion, Assertion, AssertionConfigV1, ComparableOperator,
-};
+use lighthouse::types::{AccountInfoFieldAssertion, AssertionConfigV1, ComparableOperator};
 use rust_sdk::LighthouseProgram;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -15,13 +13,10 @@ async fn test_basic() {
     let mut program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
-    let mut tx_builder = program.create_assert(
+    let mut tx_builder = program.assert_account_info(
         &user,
         user.encodable_pubkey(),
-        Assertion::AccountInfoField(AccountInfoFieldAssertion::Lamports(
-            0,
-            ComparableOperator::GreaterThan,
-        )),
+        AccountInfoFieldAssertion::Lamports(0, ComparableOperator::GreaterThan),
         Some(AssertionConfigV1 { verbose: true }),
     );
 

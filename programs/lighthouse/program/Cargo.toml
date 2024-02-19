@@ -34,6 +34,8 @@ borsh = "=0.9.3"
 num_enum = "=0.5.9"
 bytemuck = "^1.14.0"
 lib-sokoban = "=0.3.0" 
+kaigan = "=0.2.4"
+
 
 [dev-dependencies]
 async-trait = "0.1.71"
