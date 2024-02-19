@@ -24,26 +24,26 @@ pub enum LighthouseInstruction {
     #[account(3, name = "source_account", desc = "System program")]
     Write(WriteParameters),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountData(AccountDataAssertion),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
     AssertDataHash(AccountDataHashAssertionTuple),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountInfo(AccountInfoFieldAssertion),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
     AssertMintAccountField(MintAccountFieldAssertion),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "target_account", desc = "Target account")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
     AssertTokenAccountField(TokenAccountFieldAssertion),
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     AssertSysvarClockField(SysvarClockFieldAssertion),
 }
