@@ -1,5 +1,4 @@
 use solana_program::program_error::ProgramError;
-// use anchor_lang::prelude::*;
 use thiserror::Error;
 
 // IntoPrimitive
@@ -45,21 +44,6 @@ impl From<LighthouseError> for ProgramError {
         ProgramError::Custom(e as u32)
     }
 }
-
-// #[cfg(test)]
-// pub fn assert_is_anchor_error(err: Error, expected_error: LighthouseError) {
-//     match err {
-//         Error::ProgramError(err) => {
-//             assert_eq!(
-//                 err.program_error,
-//                 ProgramError::Custom(expected_error as u32 + 1)
-//             );
-//         }
-//         Error::AnchorError(err) => {
-//             assert_eq!(err.error_code_number, 6000 + expected_error as u32);
-//         }
-//     }
-// }
 
 #[cfg(test)]
 pub fn assert_is_program_error(err: ProgramError, expected_error: ProgramError) {

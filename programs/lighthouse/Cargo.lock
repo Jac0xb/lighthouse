@@ -2125,6 +2125,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kaigan"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e623cca1f0e2a0919032c1bdabbf81dd9aa34658d5066aca7bb90d608317ab91"
+dependencies = [
+ "borsh 0.10.3",
+]
+
+[[package]]
 name = "keccak"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2226,6 +2235,7 @@ dependencies = [
  "blackhat",
  "borsh 0.9.3",
  "bytemuck",
+ "kaigan",
  "lib-sokoban",
  "macros",
  "num_enum 0.5.9",

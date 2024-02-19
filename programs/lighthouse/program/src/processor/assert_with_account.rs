@@ -2,8 +2,9 @@ use std::slice::Iter;
 
 use crate::{
     error::LighthouseError,
-    types::{Assertion, AssertionConfigV1}, // utils::print_assertion_result,
-    utils::{print_assertion_result, Result},
+    types::{Assert, AssertionConfigV1},
+    utils::print_assertion_result,
+    utils::Result,
     validations::Program,
 };
 use solana_program::{
@@ -25,9 +26,9 @@ impl<'a, 'info> AssertWithTargetContext<'a, 'info> {
     }
 }
 
-pub(crate) fn assert(
-    assert_context: AssertWithTargetContext,
-    assertion: &Assertion,
+pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
+    assert_context: AssertWithTargetContext<'_, 'info>,
+    assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let include_output = match &config {

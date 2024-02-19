@@ -1,48 +1,49 @@
-use num_enum::TryFromPrimitive;
+use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankInstruction;
 
-#[repr(u8)]
-#[derive(TryFromPrimitive, Debug, Copy, Clone, ShankInstruction, PartialEq, Eq)]
+use crate::{
+    processor::{CreateMemoryAccountParameters, WriteParameters},
+    types::{
+        AccountDataAssertion, AccountDataHashAssertionTuple, AccountInfoFieldAssertion,
+        MintAccountFieldAssertion, SysvarClockFieldAssertion, TokenAccountFieldAssertion,
+    },
+};
+
+#[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction)]
 #[rustfmt::skip]
 pub enum LighthouseInstruction {
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account")]
     #[account(2, name = "memory_account", desc = "Memory account")]
     #[account(3, name = "system_program", desc = "System program")]
-    CreateMemoryAccount = 0,
+    CreateMemoryAccount(CreateMemoryAccountParameters),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account")]
     #[account(2, name = "memory_account", desc = "Memory account")]
     #[account(3, name = "source_account", desc = "System program")]
-    Write = 1,
+    Write(WriteParameters),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "target_account", desc = "Target account")]
-    AssertAccountData = 2,
+    AssertAccountData(AccountDataAssertion),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "target_account", desc = "Target account")]
-    AssertDataHash = 3,
+    AssertDataHash(AccountDataHashAssertionTuple),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "target_account", desc = "Target account")]
-    AssertAccountInfo = 4,
+    AssertAccountInfo(AccountInfoFieldAssertion),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "target_account", desc = "Target account")]
-    AssertTokenAccountField = 5,
+    AssertMintAccountField(MintAccountFieldAssertion),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "target_account", desc = "Target account")]
-    AssertMintAccountField = 6,
+    AssertTokenAccountField(TokenAccountFieldAssertion),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    AssertSysvarClockField = 7,
-}
-
-impl LighthouseInstruction {
-    pub fn to_vec(&self) -> Vec<u8> {
-        vec![*self as u8]
-    }
+    AssertSysvarClockField(SysvarClockFieldAssertion),
 }

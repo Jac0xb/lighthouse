@@ -14,10 +14,10 @@ use crate::validations::{
 };
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub(crate) struct WriteParameters {
-    pub(crate) memory_index: u8,
-    pub(crate) memory_account_bump: u8,
-    pub(crate) write_type: WriteTypeParameter,
+pub struct WriteParameters {
+    pub memory_index: u8,
+    pub memory_account_bump: u8,
+    pub write_type: WriteTypeParameter,
 }
 
 pub(crate) struct WriteContext<'a, 'info> {

@@ -1,4 +1,3 @@
-use anchor_lang::prelude::*;
 use borsh::BorshDeserialize;
 
 use crate::state::memory::MemoryAccount;

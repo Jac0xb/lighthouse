@@ -1,7 +1,14 @@
 use crate::TxBuilder;
 use anchor_lang::*;
 use borsh::BorshSerialize;
-use lighthouse::types::{Assertion, AssertionConfigV1, WriteTypeParameter};
+use lighthouse::{
+    processor::{create_memory_account::CreateMemoryAccountParameters, write::WriteParameters},
+    types::{
+        AccountDataAssertion, AccountInfoFieldAssertion, AssertionConfigV1,
+        MintAccountFieldAssertion, SysvarClockFieldAssertion, TokenAccountFieldAssertion,
+        WriteTypeParameter,
+    },
+};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
@@ -30,237 +37,369 @@ impl<'a> LighthouseProgram {
         )
     }
 
-    pub fn create_assert(
-        &'a mut self,
-        payer: &'a Keypair,
+    pub fn assert_account_data(
+        &mut self,
+        payer: &Keypair,
         target_account: Pubkey,
-        assertion: Assertion,
+        assertion: AccountDataAssertion,
         _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
-        match assertion {
-            Assertion::AccountInfoField(field) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertAccountInfo
-                        .to_vec()
-                        .into_iter()
-                        .chain((field).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-            Assertion::AccountData(offset, data_value) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertAccountData
-                        .to_vec()
-                        .into_iter()
-                        .chain((offset, data_value).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-            Assertion::MintAccountField(field) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertMintAccountField
-                        .to_vec()
-                        .into_iter()
-                        .chain((field).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-            Assertion::TokenAccountField(field) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertTokenAccountField
-                        .to_vec()
-                        .into_iter()
-                        .chain((field).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-            Assertion::SysvarClockField(field) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertSysvarClockField
-                        .to_vec()
-                        .into_iter()
-                        .chain((field).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-            Assertion::AccountDataHash(hash, operator, start, end) => self.tx_builder(
-                vec![Instruction {
-                    program_id: lighthouse::ID,
-                    accounts: vec![
-                        AccountMeta::new_readonly(lighthouse::ID, false),
-                        AccountMeta::new_readonly(target_account, false),
-                    ],
-                    data: lighthouse::LighthouseInstruction::AssertDataHash
-                        .to_vec()
-                        .into_iter()
-                        .chain((hash, operator, start, end).try_to_vec().unwrap())
-                        .collect(),
-                }],
-                payer.pubkey(),
-            ),
-        }
-
-        // self.tx_builder(
-        //     vec![Instruction {
-        //         program_id: lighthouse::id(),
-        //         accounts: vec![
-        //             AccountMeta::new_readonly(lighthouse::ID, true),
-        //             AccountMeta::new_readonly(target_account, false),
-        //         ],
-        //         data: lighthouse::LighthouseInstruction::AssertAccountInfo
-        //             .to_vec()
-        //             .into_iter()
-        //             .chain(assertion.try_to_vec().unwrap())
-        //             .collect(),
-        //     }],
-        //     payer.pubkey(),
-        // )
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![
+                    AccountMeta::new_readonly(lighthouse::ID, false),
+                    AccountMeta::new_readonly(target_account, false),
+                ],
+                data: lighthouse::LighthouseInstruction::AssertAccountData(assertion)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer.pubkey(),
+        )
     }
 
-    // pub fn create_assert_compact(
+    pub fn assert_account_info(
+        &mut self,
+        payer: &Keypair,
+        target_account: Pubkey,
+        assertion: AccountInfoFieldAssertion,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![
+                    AccountMeta::new_readonly(lighthouse::ID, false),
+                    AccountMeta::new_readonly(target_account, false),
+                ],
+                data: lighthouse::LighthouseInstruction::AssertAccountInfo(assertion)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer.pubkey(),
+        )
+    }
+
+    pub fn assert_mint_account_field(
+        &mut self,
+        payer: &Keypair,
+        target_account: Pubkey,
+        assertion: MintAccountFieldAssertion,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![
+                    AccountMeta::new_readonly(lighthouse::ID, false),
+                    AccountMeta::new_readonly(target_account, false),
+                ],
+                data: lighthouse::LighthouseInstruction::AssertMintAccountField(assertion)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer.pubkey(),
+        )
+    }
+
+    // pub fn assert_data_hash(
     //     &mut self,
     //     payer: &Keypair,
     //     target_account: Pubkey,
-    //     assertion: Assertion,
+    //     assertion: AccountDataAssertion,
+    //     _config: Option<AssertionConfigV1>,
     // ) -> TxBuilder {
     //     self.tx_builder(
     //         vec![Instruction {
-    //             program_id: lighthouse::id(),
-    //             accounts: (lighthouse::accounts::AssertCompactV1 { target_account })
-    //                 .to_account_metas(None),
-    //             data: lighthouse::instruction::AssertCompactV1 { assertion }.data(),
+    //             program_id: lighthouse::ID,
+    //             accounts: vec![
+    //                 AccountMeta::new_readonly(lighthouse::ID, false),
+    //                 AccountMeta::new_readonly(target_account, false),
+    //             ],
+    //             data: lighthouse::LighthouseInstruction::AssertDataHash(assertion)
+    //                 .try_to_vec()
+    //                 .unwrap(),
     //         }],
     //         payer.pubkey(),
     //     )
     // }
 
-    pub fn create_assert_multi(
+    pub fn assert_token_account_field(
         &mut self,
         payer: &Keypair,
-        assertions: Vec<Assertion>,
-        additional_accounts: Vec<Pubkey>,
+        target_account: Pubkey,
+        assertion: TokenAccountFieldAssertion,
+        _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
-        // append additional_accounts to accounts
-        // accounts.append(
-        //     &mut additional_accounts
-        //         .into_iter()
-        //         .map(|pubkey| AccountMeta::new_readonly(pubkey, false))
-        //         .collect(),
-        // );
-
-        let mut ixs = vec![];
-
-        for (i, assertion) in assertions.into_iter().enumerate() {
-            let accounts = vec![
-                AccountMeta::new_readonly(lighthouse::id(), false),
-                AccountMeta::new_readonly(
-                    additional_accounts[i % additional_accounts.len()],
-                    false,
-                ),
-            ];
-
-            match assertion {
-                Assertion::AccountData(offset, data_value) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertAccountData
-                            .to_vec()
-                            .into_iter()
-                            .chain((offset, data_value).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-                Assertion::AccountInfoField(field) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertAccountInfo
-                            .to_vec()
-                            .into_iter()
-                            .chain((field).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-                Assertion::MintAccountField(field) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertMintAccountField
-                            .to_vec()
-                            .into_iter()
-                            .chain((field).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-                Assertion::TokenAccountField(field) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertTokenAccountField
-                            .to_vec()
-                            .into_iter()
-                            .chain((field).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-                Assertion::SysvarClockField(field) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertSysvarClockField
-                            .to_vec()
-                            .into_iter()
-                            .chain((field).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-                Assertion::AccountDataHash(hash, operator, start, end) => {
-                    ixs.push(Instruction {
-                        program_id: lighthouse::id(),
-                        accounts: accounts.clone(),
-                        data: lighthouse::LighthouseInstruction::AssertDataHash
-                            .to_vec()
-                            .into_iter()
-                            .chain((hash, operator, start, end).try_to_vec().unwrap())
-                            .collect(),
-                    });
-                }
-            }
-        }
-
-        self.tx_builder(ixs, payer.pubkey())
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![
+                    AccountMeta::new_readonly(lighthouse::ID, false),
+                    AccountMeta::new_readonly(target_account, false),
+                ],
+                data: lighthouse::LighthouseInstruction::AssertTokenAccountField(assertion)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer.pubkey(),
+        )
     }
+
+    pub fn assert_sysvar_clock_field(
+        &mut self,
+        payer: &Keypair,
+        target_account: Pubkey,
+        assertion: SysvarClockFieldAssertion,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![
+                    AccountMeta::new_readonly(lighthouse::ID, false),
+                    AccountMeta::new_readonly(target_account, false),
+                ],
+                data: lighthouse::LighthouseInstruction::AssertSysvarClockField(assertion)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer.pubkey(),
+        )
+    }
+
+    // pub fn create_assert<Assert>(
+    //     &'a mut self,
+    //     payer: &'a Keypair,
+    //     target_account: Pubkey,
+    //     assertion: Assertion,
+    //     _config: Option<AssertionConfigV1>,
+    // ) -> TxBuilder {
+    //     match assertion {
+    //         Assertion::AccountInfoField(field) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertAccountInfo
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((field).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //         Assertion::AccountData(offset, data_value) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertAccountData
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((offset, data_value).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //         Assertion::MintAccountField(field) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertMintAccountField
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((field).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //         Assertion::TokenAccountField(field) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertTokenAccountField
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((field).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //         Assertion::SysvarClockField(field) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertSysvarClockField
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((field).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //         Assertion::AccountDataHash(hash, operator, start, end) => self.tx_builder(
+    //             vec![Instruction {
+    //                 program_id: lighthouse::ID,
+    //                 accounts: vec![
+    //                     AccountMeta::new_readonly(lighthouse::ID, false),
+    //                     AccountMeta::new_readonly(target_account, false),
+    //                 ],
+    //                 data: lighthouse::LighthouseInstruction::AssertDataHash
+    //                     .to_vec()
+    //                     .into_iter()
+    //                     .chain((hash, operator, start, end).try_to_vec().unwrap())
+    //                     .collect(),
+    //             }],
+    //             payer.pubkey(),
+    //         ),
+    //     }
+
+    //     // self.tx_builder(
+    //     //     vec![Instruction {
+    //     //         program_id: lighthouse::id(),
+    //     //         accounts: vec![
+    //     //             AccountMeta::new_readonly(lighthouse::ID, true),
+    //     //             AccountMeta::new_readonly(target_account, false),
+    //     //         ],
+    //     //         data: lighthouse::LighthouseInstruction::AssertAccountInfo
+    //     //             .to_vec()
+    //     //             .into_iter()
+    //     //             .chain(assertion.try_to_vec().unwrap())
+    //     //             .collect(),
+    //     //     }],
+    //     //     payer.pubkey(),
+    //     // )
+    // }
+
+    // // pub fn create_assert_compact(
+    // //     &mut self,
+    // //     payer: &Keypair,
+    // //     target_account: Pubkey,
+    // //     assertion: Assertion,
+    // // ) -> TxBuilder {
+    // //     self.tx_builder(
+    // //         vec![Instruction {
+    // //             program_id: lighthouse::id(),
+    // //             accounts: (lighthouse::accounts::AssertCompactV1 { target_account })
+    // //                 .to_account_metas(None),
+    // //             data: lighthouse::instruction::AssertCompactV1 { assertion }.data(),
+    // //         }],
+    // //         payer.pubkey(),
+    // //     )
+    // // }
+
+    // pub fn create_assert_multi(
+    //     &mut self,
+    //     payer: &Keypair,
+    //     assertions: Vec<Assertion>,
+    //     additional_accounts: Vec<Pubkey>,
+    // ) -> TxBuilder {
+    //     // append additional_accounts to accounts
+    //     // accounts.append(
+    //     //     &mut additional_accounts
+    //     //         .into_iter()
+    //     //         .map(|pubkey| AccountMeta::new_readonly(pubkey, false))
+    //     //         .collect(),
+    //     // );
+
+    //     let mut ixs = vec![];
+
+    //     for (i, assertion) in assertions.into_iter().enumerate() {
+    //         let accounts = vec![
+    //             AccountMeta::new_readonly(lighthouse::id(), false),
+    //             AccountMeta::new_readonly(
+    //                 additional_accounts[i % additional_accounts.len()],
+    //                 false,
+    //             ),
+    //         ];
+
+    //         match assertion {
+    //             Assertion::AccountData(offset, data_value) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertAccountData
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((offset, data_value).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //             Assertion::AccountInfoField(field) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertAccountInfo
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((field).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //             Assertion::MintAccountField(field) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertMintAccountField
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((field).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //             Assertion::TokenAccountField(field) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertTokenAccountField
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((field).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //             Assertion::SysvarClockField(field) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertSysvarClockField
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((field).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //             Assertion::AccountDataHash(hash, operator, start, end) => {
+    //                 ixs.push(Instruction {
+    //                     program_id: lighthouse::id(),
+    //                     accounts: accounts.clone(),
+    //                     data: lighthouse::LighthouseInstruction::AssertDataHash
+    //                         .to_vec()
+    //                         .into_iter()
+    //                         .chain((hash, operator, start, end).try_to_vec().unwrap())
+    //                         .collect(),
+    //                 });
+    //             }
+    //         }
+    //     }
+
+    //     self.tx_builder(ixs, payer.pubkey())
+    // }
 
     // pub fn create_assert_multi_compact(
     //     &mut self,
@@ -476,12 +615,14 @@ impl<'a> LighthouseProgram {
                     AccountMeta::new(find_memory_account(payer.pubkey(), memory_index).0, false),
                     AccountMeta::new_readonly(system_program::ID, false),
                 ],
-                data: lighthouse::LighthouseInstruction::CreateMemoryAccount
-                    .to_vec()
-                    .into_iter()
-                    .chain(vec![memory_index])
-                    .chain(memory_account_size.to_le_bytes().to_vec())
-                    .collect(),
+                data: lighthouse::LighthouseInstruction::CreateMemoryAccount(
+                    CreateMemoryAccountParameters {
+                        memory_index,
+                        memory_account_size,
+                    },
+                )
+                .try_to_vec()
+                .unwrap(),
             }],
             payer.pubkey(),
         )
@@ -531,13 +672,13 @@ impl<'a> LighthouseProgram {
                     AccountMeta::new_readonly(source_account, false),
                     AccountMeta::new_readonly(system_program::ID, false),
                 ],
-                data: lighthouse::LighthouseInstruction::Write
-                    .to_vec()
-                    .into_iter()
-                    .chain(vec![memory_index])
-                    .chain(vec![memory_account_bump])
-                    .chain(write_type_parameter.try_to_vec().unwrap())
-                    .collect(),
+                data: lighthouse::LighthouseInstruction::Write(WriteParameters {
+                    memory_index,
+                    memory_account_bump,
+                    write_type: write_type_parameter,
+                })
+                .try_to_vec()
+                .unwrap(),
             }],
             payer.pubkey(),
         )

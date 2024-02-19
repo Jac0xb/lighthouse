@@ -1,21 +1,14 @@
 #![allow(non_snake_case)]
 
-// use anchor_lang::{
-//     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
-//     Key, Lamports, Result,
-// };
-use solana_program::{account_info::AccountInfo, clock::Clock, keccak, sysvar::Sysvar};
-
-use crate::types::{
-    operator::EvaluationResult, AccountInfoFieldAssertion, DataValueAssertion,
-    MintAccountFieldAssertion, SysvarClockFieldAssertion, TokenAccountFieldAssertion,
-};
-use crate::types::{EquatableOperator, Operator};
+use crate::types::EquatableOperator;
+use crate::types::{DataValueAssertion, EvaluationResult};
 use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::account_info::AccountInfo;
 
 pub trait Assert<T> {
-    fn evaluate(&self, account: &T, include_output: bool) -> Result<Box<EvaluationResult>>;
+    fn evaluate(&self, parameters: &T, include_output: bool) -> Result<Box<EvaluationResult>>;
+    fn format(&self) -> String;
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
@@ -23,126 +16,97 @@ pub struct AssertionConfigV1 {
     pub verbose: bool,
 }
 
-pub type AccountDataAssertionTuple = (u16, DataValueAssertion);
 pub type AccountDataHashAssertionTuple = ([u8; 32], EquatableOperator, Option<u16>, Option<u16>);
 
-#[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
-pub enum Assertion {
-    AccountInfoField(AccountInfoFieldAssertion),
+// #[derive(Debug)]
+// pub enum Assertion {
+//     AccountInfoField(AccountInfoFieldAssertion),
 
-    // Account data offset, Borsh type, Operator
-    AccountData(u16, DataValueAssertion),
-    AccountDataHash([u8; 32], EquatableOperator, Option<u16>, Option<u16>),
-    TokenAccountField(TokenAccountFieldAssertion),
-    MintAccountField(MintAccountFieldAssertion),
-    SysvarClockField(SysvarClockFieldAssertion),
-}
+//     // Account data offset, Borsh type, ComparableOperator
+//     AccountData(AccountDataAssertionParameters),
+//     AccountDataHash([u8; 32], EquatableOperator, Option<u16>, Option<u16>),
+//     TokenAccountField(TokenAccountFieldAssertion),
+//     MintAccountField(MintAccountFieldAssertion),
+//     SysvarClockField(SysvarClockFieldAssertion),
+// }
 
-impl Assertion {
-    pub fn format(&self) -> String {
-        match self {
-            Assertion::AccountData(offset, value) => {
-                format!("AccountData[{}|{:?}]", offset, value)
-            }
-            Assertion::AccountDataHash(hash, operator, start, end) => {
-                format!(
-                    "AccountDataHash[{:?}|{:?}|({:?},{:?})]",
-                    hash, operator, start, end
-                )
-            }
-            Assertion::TokenAccountField(field) => {
-                format!("TokenAccountField[{:?}]", field)
-            }
-            Assertion::MintAccountField(field) => {
-                format!("MintAccountField[{:?}]", field)
-            }
-            Assertion::SysvarClockField(field) => {
-                format!("SysvarClockField[{:?}]", field)
-            }
-            Assertion::AccountInfoField(fields) => {
-                format!("AccountInfoField[{:?}]", fields)
-            }
-        }
-    }
+// impl Assertion {
+//     pub fn format(&self) -> String {
+//         match self {
+//             Assertion::AccountData(offset, value) => {
+//                 format!("AccountData[{}|{:?}]", offset, value)
+//             }
+//             Assertion::AccountDataHash(hash, ComparableOperator, start, end) => {
+//                 format!(
+//                     "AccountDataHash[{:?}|{:?}|({:?},{:?})]",
+//                     hash, ComparableOperator, start, end
+//                 )
+//             }
+//             Assertion::TokenAccountField(field) => {
+//                 format!("TokenAccountField[{:?}]", field)
+//             }
+//             Assertion::MintAccountField(field) => {
+//                 format!("MintAccountField[{:?}]", field)
+//             }
+//             Assertion::SysvarClockField(field) => {
+//                 format!("SysvarClockField[{:?}]", field)
+//             }
+//             Assertion::AccountInfoField(fields) => {
+//                 format!("AccountInfoField[{:?}]", fields)
+//             }
+//         }
+//     }
 
-    pub fn evaluate(
-        &self,
-        target_account: &AccountInfo,
-        include_output: bool,
-    ) -> Result<Box<EvaluationResult>> {
-        match &self {
-            Assertion::AccountData(account_offset, memory_value) => {
-                let account_data = target_account.try_borrow_data()?;
+//     pub fn evaluate(
+//         &self,
+//         target_account: &AccountInfo,
+//         include_output: bool,
+//     ) -> Result<Vec<EvaluationResult>> {
+//         let mut results = Vec::new();
 
-                Ok(memory_value.evaluate_from_data_slice(
-                    account_data,
-                    (*account_offset) as usize,
-                    include_output,
-                )?)
-            }
-            Assertion::AccountDataHash(account_hash_value, operator, start, end) => {
-                let account_data = target_account.try_borrow_data()?;
+//         match &self {
+//             Assertion::AccountData({
+//                 offset,
+//                 assertion
+//             }) => {
+//                 let account_data = target_account.try_borrow_data()?;
 
-                let start = start.unwrap_or(0);
-                let end = end.unwrap_or(account_data.len() as u16);
+//                 Ok(vec![memory_value.evaluate_from_data_slice(
+//                     account_data,
+//                     (*account_offset) as usize,
+//                     include_output,
+//                 )?])
+//             }
+//             Assertion::AccountDataHash(account_hash_value, operator, start, end) => {
+//                 let account_data = target_account.try_borrow_data()?;
 
-                let account_data = &account_data[start as usize..end as usize];
-                let account_hash = keccak::hashv(&[&account_data]).0;
+//                 let start = start.unwrap_or(0);
+//                 let end = end.unwrap_or(account_data.len() as u16);
 
-                Ok(operator.evaluate(&account_hash, account_hash_value, include_output))
-            }
-            Assertion::TokenAccountField(token_account_field) => {
-                let result = token_account_field.evaluate(target_account, include_output)?;
+//                 let account_data = &account_data[start as usize..end as usize];
+//                 let account_hash = keccak::hashv(&[&account_data]).0;
 
-                Ok(result)
-            }
-            Assertion::MintAccountField(mint_account_field) => {
-                let result = mint_account_field.evaluate(target_account, include_output)?;
-
-                Ok(result)
-            }
-            Assertion::SysvarClockField(clock_field) => {
-                let result = clock_field.evaluate(&Clock::get()?, include_output)?;
-
-                Ok(result)
-            }
-            Assertion::AccountInfoField(account_info_field) => {
-                let operator_result =
-                    match account_info_field {
-                        AccountInfoFieldAssertion::Key(pubkey, operator) => {
-                            operator.evaluate(target_account.unsigned_key(), pubkey, include_output)
-                        }
-                        AccountInfoFieldAssertion::Owner(pubkey, operator) => {
-                            operator.evaluate(target_account.owner, pubkey, include_output)
-                        }
-                        AccountInfoFieldAssertion::Lamports(lamports, operator) => operator
-                            .evaluate(&target_account.try_lamports()?, lamports, include_output),
-                        AccountInfoFieldAssertion::DataLength(data_length, operator) => operator
-                            .evaluate(
-                                &(target_account.data_len() as u64),
-                                data_length,
-                                include_output,
-                            ),
-                        AccountInfoFieldAssertion::Executable(executable, operator) => operator
-                            .evaluate(&target_account.executable, executable, include_output),
-                        AccountInfoFieldAssertion::IsSigner(is_signer, operator) => {
-                            operator.evaluate(&target_account.is_signer, is_signer, include_output)
-                        }
-                        AccountInfoFieldAssertion::IsWritable(is_writable, operator) => operator
-                            .evaluate(&target_account.is_writable, is_writable, include_output),
-                        AccountInfoFieldAssertion::RentEpoch(rent_epoch, operator) => operator
-                            .evaluate(
-                                &target_account.rent_epoch as &u64,
-                                rent_epoch,
-                                include_output,
-                            ),
-                    };
-
-                Ok(operator_result)
-            }
-        }
-    }
-}
+//                 Ok(vec![operator.evaluate(
+//                     &account_hash,
+//                     account_hash_value,
+//                     include_output,
+//                 )])
+//             }
+//             Assertion::TokenAccountField(token_account_field) => Ok(vec![
+//                 token_account_field.evaluate(target_account, include_output)?
+//             ]),
+//             Assertion::MintAccountField(mint_account_field) => Ok(vec![
+//                 mint_account_field.evaluate(target_account, include_output)?
+//             ]),
+//             Assertion::SysvarClockField(clock_field) => {
+//                 Ok(vec![clock_field.evaluate(&Clock::get()?, include_output)?])
+//             }
+//             Assertion::AccountInfoField(account_info_field) => Ok(vec![
+//                 account_info_field.evaluate(target_account, include_output)?
+//             ]),
+//         }
+//     }
+// }
 
 // #[cfg(test)]
 // mod tests {
@@ -154,7 +118,10 @@ impl Assertion {
 
 //     use crate::{
 //         error::{assert_is_program_error, LighthouseError},
-//         types::{AccountInfoFieldAssertion, Assertion, DataValue, Operator},
+//         types::{
+//             AccountInfoFieldAssertion, Assertion, ComparableOperator, DataValueAssertion,
+//             EquatableOperator,
+//         },
 //     };
 
 //     #[test]
@@ -177,7 +144,7 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountDataHash(data_hash, Operator::Equal, None, None);
+//         let assertion = Assertion::AccountDataHash(data_hash, EquatableOperator::Equal, None, None);
 //         let result = assertion.evaluate(&account_info, false).unwrap();
 //         assert!(result.passed);
 //     }
@@ -200,7 +167,8 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountData(0, Operator::Equal, DataValueAssertion::U64(0));
+//         let assertion =
+//             Assertion::AccountData(0, DataValueAssertion::U64(0, ComparableOperator::Equal));
 //         let result = assertion.evaluate(&account_info, false);
 
 //         assert_is_program_error(result.err().unwrap(), LighthouseError::OutOfRange.into());
@@ -227,7 +195,8 @@ impl Assertion {
 
 //         let borrowed = account_info.try_borrow_mut_data().unwrap();
 
-//         let assertion = Assertion::AccountData(0, Operator::Equal, DataValueAssertion::U64(0));
+//         let assertion =
+//             Assertion::AccountData(0, DataValueAssertion::U64(0, ComparableOperator::Equal));
 //         let result = assertion.evaluate(&account_info, false);
 
 //         drop(borrowed);
@@ -253,11 +222,13 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountData(0, Operator::Equal, DataValueAssertion::U8(69));
+//         let assertion =
+//             Assertion::AccountData(0, DataValueAssertion::U8(69, ComparableOperator::Equal));
 //         let result = assertion.evaluate(&account_info, false).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountData(0, Operator::Equal, DataValueAssertion::U8(70));
+//         let assertion =
+//             Assertion::AccountData(0, DataValueAssertion::U8(70, ComparableOperator::Equal));
 //         let result = assertion.evaluate(&account_info, false).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -282,12 +253,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Key(key), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Key(
+//             key,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Key(Pubkey::default()), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Key(
+//             Pubkey::default(),
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -312,14 +288,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Owner(key), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Owner(
+//             key,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoFieldAssertion(
-//             AccountInfoFieldAssertion::Owner(Pubkey::default()),
-//             Operator::Equal,
-//         );
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Owner(
+//             Pubkey::default(),
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -342,12 +321,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Lamports(69), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Lamports(
+//             69,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Lamports(1), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Lamports(
+//             1,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -370,13 +354,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::DataLength(128), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::DataLength(
+//             128,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::DataLength(129), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::DataLength(
+//             129,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -399,13 +387,17 @@ impl Assertion {
 //             data,
 //             executable: true,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Executable(true), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Executable(
+//             true,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::Executable(false), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Executable(
+//             false,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -428,13 +420,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::IsSigner(true), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsSigner(
+//             true,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::IsSigner(false), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsSigner(
+//             false,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -457,13 +453,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::IsWritable(true), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsWritable(
+//             true,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::IsWritable(false), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsWritable(
+//             false,
+//             EquatableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
@@ -486,13 +486,17 @@ impl Assertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::RentEpoch(69), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::RentEpoch(
+//             69,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion =
-//             Assertion::AccountInfoFieldAssertion(AccountInfoFieldAssertion::RentEpoch(1), Operator::Equal);
+//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::RentEpoch(
+//             1,
+//             ComparableOperator::Equal,
+//         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(!result.passed);
 //     }
