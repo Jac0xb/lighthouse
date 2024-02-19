@@ -18,7 +18,7 @@ pub mod lighthouse {
     use crate::{
         instruction::LighthouseInstruction,
         processor::{AssertWithTargetContext, CreateMemoryAccountContext, WriteContext},
-        types::{AssertionConfigV1, SysvarClockFieldAssertion},
+        types::AssertionConfigV1,
     };
     use borsh::BorshDeserialize;
     use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
@@ -98,11 +98,7 @@ pub mod lighthouse {
                 )?;
             }
             LighthouseInstruction::AssertSysvarClockField(assertion) => {
-                // processor::assert(
-                //     context,
-                //     &assertion,
-                //     Some(AssertionConfigV1 { verbose: false }),
-                // )?;
+                processor::assert(&assertion, Some(AssertionConfigV1 { verbose: false }))?;
             }
         }
 
