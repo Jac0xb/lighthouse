@@ -47,10 +47,7 @@ impl<'a> LighthouseProgram {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
-                accounts: vec![
-                    AccountMeta::new_readonly(lighthouse::ID, false),
-                    AccountMeta::new_readonly(target_account, false),
-                ],
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
                 data: lighthouse::LighthouseInstruction::AssertAccountData(assertion)
                     .try_to_vec()
                     .unwrap(),
@@ -69,10 +66,7 @@ impl<'a> LighthouseProgram {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
-                accounts: vec![
-                    AccountMeta::new_readonly(lighthouse::ID, false),
-                    AccountMeta::new_readonly(target_account, false),
-                ],
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
                 data: lighthouse::LighthouseInstruction::AssertAccountInfo(assertion)
                     .try_to_vec()
                     .unwrap(),
@@ -91,10 +85,7 @@ impl<'a> LighthouseProgram {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
-                accounts: vec![
-                    AccountMeta::new_readonly(lighthouse::ID, false),
-                    AccountMeta::new_readonly(target_account, false),
-                ],
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
                 data: lighthouse::LighthouseInstruction::AssertMintAccountField(assertion)
                     .try_to_vec()
                     .unwrap(),
@@ -135,10 +126,7 @@ impl<'a> LighthouseProgram {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
-                accounts: vec![
-                    AccountMeta::new_readonly(lighthouse::ID, false),
-                    AccountMeta::new_readonly(target_account, false),
-                ],
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
                 data: lighthouse::LighthouseInstruction::AssertTokenAccountField(assertion)
                     .try_to_vec()
                     .unwrap(),
@@ -157,10 +145,7 @@ impl<'a> LighthouseProgram {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
-                accounts: vec![
-                    AccountMeta::new_readonly(lighthouse::ID, false),
-                    AccountMeta::new_readonly(target_account, false),
-                ],
+                accounts: vec![],
                 data: lighthouse::LighthouseInstruction::AssertSysvarClockField(assertion)
                     .try_to_vec()
                     .unwrap(),

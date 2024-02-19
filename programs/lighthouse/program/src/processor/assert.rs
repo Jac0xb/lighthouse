@@ -5,27 +5,28 @@ use crate::{
     types::{Assert, AssertionConfigV1},
     utils::print_assertion_result,
     utils::Result,
+    validations::Program,
 };
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     msg,
 };
 
-pub(crate) struct AssertWithTargetContext<'info> {
-    // pub(crate) lighthouse_program: Program<'a, 'info>,
+pub(crate) struct AssertWithTargetContext<'a, 'info> {
+    pub(crate) lighthouse_program: Program<'a, 'info>,
     pub(crate) target_account: AccountInfo<'info>,
 }
 
-impl<'info> AssertWithTargetContext<'info> {
-    pub(crate) fn load(account_iter: &mut Iter<AccountInfo<'info>>) -> Result<Self> {
+impl<'a, 'info> AssertContext<'a, 'info> {
+    pub(crate) fn load(account_iter: &mut Iter<'a, AccountInfo<'info>>) -> Result<Self> {
         Ok(Self {
-            target_account: next_account_info(account_iter)?.clone(),
+            lighthouse_program: Program::new(next_account_info(account_iter)?, &crate::id())?,
         })
     }
 }
 
 pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
-    assert_context: AssertWithTargetContext<'info>,
+    assert_context: AssertWithTargetContext<'_, 'info>,
     assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
