@@ -1,8 +1,6 @@
 use anchor_lang::*;
 use anchor_spl::associated_token;
-use rand::{thread_rng, RngCore};
 use solana_program::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
-use solana_sdk::signature::{Keypair, Signer};
 use spl_associated_token_account::get_associated_token_address;
 use spl_token::instruction::AuthorityType;
 
@@ -19,10 +17,10 @@ impl BlackhatProgram {
         }
     }
 
-    pub fn create_test_account(&self, payer: &Pubkey, account: Pubkey, random: bool) -> TxBuilder {
+    pub fn create_test_account(&self, signer: Pubkey, account: Pubkey, random: bool) -> TxBuilder {
         let accounts = blackhat::accounts::CreateTestAccountV1 {
             system_program: system_program::id(),
-            signer: *payer,
+            signer,
             test_account: account,
             rent: sysvar::rent::id(),
             slot_hashes: sysvar::slot_hashes::id(),
@@ -36,18 +34,18 @@ impl BlackhatProgram {
                 accounts: accounts.to_account_metas(None),
                 data: data.data(),
             }],
-            *payer,
+            signer,
         )
     }
 
-    pub fn drain_solana(&mut self, victim: Pubkey, bad_actor: &Pubkey) -> TxBuilder {
+    pub fn drain_solana(&mut self, victim: Pubkey, bad_actor: Pubkey) -> TxBuilder {
         self.tx_builder(
             vec![Instruction {
                 program_id: blackhat::id(),
                 accounts: blackhat::accounts::DrainAccount {
                     system_program: system_program::id(),
-                    victim: victim,
-                    bad_actor: *bad_actor,
+                    victim,
+                    bad_actor,
                 }
                 .to_account_metas(None),
                 data: blackhat::instruction::DrainAccount {}.data(),
@@ -59,16 +57,16 @@ impl BlackhatProgram {
     pub fn drain_token_account(
         &mut self,
         victim: Pubkey,
-        bad_actor: &Pubkey,
-        mint: &Pubkey,
+        bad_actor: Pubkey,
+        mint: Pubkey,
     ) -> TxBuilder {
         let accounts = blackhat::accounts::DrainTokenAccount {
             system_program: system_program::id(),
-            mint: *mint,
-            victim: victim,
-            victim_ata: get_associated_token_address(&victim, mint),
-            bad_actor: *bad_actor,
-            bad_actor_ata: get_associated_token_address(bad_actor, mint),
+            mint,
+            victim,
+            victim_ata: get_associated_token_address(&victim, &mint),
+            bad_actor,
+            bad_actor_ata: get_associated_token_address(&bad_actor, &mint),
             associated_token_program: associated_token::ID,
             token_program: spl_token::id(),
         };
@@ -110,17 +108,17 @@ impl BlackhatProgram {
     pub fn bitflip_drain_token_account(
         &mut self,
         victim: Pubkey,
-        bad_actor: &Pubkey,
-        mint: &Pubkey,
+        bad_actor: Pubkey,
+        mint: Pubkey,
         pda_bytes: [u8; 32],
     ) -> TxBuilder {
         let accounts = blackhat::accounts::BitflipDrainTokenAccount {
-            victim: victim,
-            bad_actor: *bad_actor,
+            victim,
+            bad_actor,
             bit_flipper: find_bit_flipper(pda_bytes).0,
-            mint: *mint,
-            victim_ata: get_associated_token_address(&victim, mint),
-            bad_actor_ata: get_associated_token_address(bad_actor, mint),
+            mint,
+            victim_ata: get_associated_token_address(&victim, &mint),
+            bad_actor_ata: get_associated_token_address(&bad_actor, &mint),
             system_program: system_program::id(),
             token_program: spl_token::id(),
             associated_token_program: associated_token::ID,

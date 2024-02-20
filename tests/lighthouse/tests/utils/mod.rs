@@ -274,8 +274,11 @@ pub async fn create_test_account(
     let account_keypair = Keypair::new();
     let program = BlackhatProgram {};
 
-    let mut tx_builder =
-        program.create_test_account(&payer.pubkey(), account_keypair.encodable_pubkey(), random);
+    let mut tx_builder = program.create_test_account(
+        payer.encodable_pubkey(),
+        account_keypair.encodable_pubkey(),
+        random,
+    );
     let mut tx = tx_builder.to_transaction().unwrap();
 
     tx.try_partial_sign(

@@ -1,11 +1,10 @@
 use crate::{
     error::LighthouseError,
-    types::{Assert, ComparableOperator, DataValue, EquatableOperator, EvaluationResult, Operator},
+    types::{Assert, DataValue, EquatableOperator, EvaluationResult, IntegerOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
-use std::cell::Ref;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct AccountDataAssertion {
@@ -16,16 +15,16 @@ pub struct AccountDataAssertion {
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValueAssertion {
     Bool(bool, EquatableOperator),
-    U8(u8, ComparableOperator),
-    I8(i8, ComparableOperator),
-    U16(u16, ComparableOperator),
-    I16(i16, ComparableOperator),
-    U32(u32, ComparableOperator),
-    I32(i32, ComparableOperator),
-    U64(u64, ComparableOperator),
-    I64(i64, ComparableOperator),
-    U128(u128, ComparableOperator),
-    I128(i128, ComparableOperator),
+    U8(u8, IntegerOperator),
+    I8(i8, IntegerOperator),
+    U16(u16, IntegerOperator),
+    I16(i16, IntegerOperator),
+    U32(u32, IntegerOperator),
+    I32(i32, IntegerOperator),
+    U64(u64, IntegerOperator),
+    I64(i64, IntegerOperator),
+    U128(u128, IntegerOperator),
+    I128(i128, IntegerOperator),
     Bytes(Vec<u8>, EquatableOperator),
     Pubkey(Pubkey, EquatableOperator),
 }

@@ -1,15 +1,12 @@
-use core::panic;
-
 use crate::utils::context::TestContext;
 use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{create_test_account, create_user};
 use lighthouse::types::{
-    AccountDataAssertion, ComparableOperator, DataValueAssertion, EquatableOperator,
+    AccountDataAssertion, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
 use rust_sdk::{LighthouseProgram, TxBuilder};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::transaction::Transaction;
 
 ///
 /// Tests all data types using the `AccountData` assertion.
@@ -30,7 +27,7 @@ async fn test_borsh_account_data() {
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 8,
-                        assertion: DataValueAssertion::U8(1, ComparableOperator::Equal),
+                        assertion: DataValueAssertion::U8(1, IntegerOperator::Equal),
                     },
                     None,
                 )
@@ -41,7 +38,7 @@ async fn test_borsh_account_data() {
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 9,
-                        assertion: DataValueAssertion::I8(-1, ComparableOperator::Equal),
+                        assertion: DataValueAssertion::I8(-1, IntegerOperator::Equal),
                     },
                     None,
                 )
@@ -54,7 +51,7 @@ async fn test_borsh_account_data() {
                         offset: 10,
                         assertion: DataValueAssertion::U16(
                             (u8::MAX as u16) + 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -68,7 +65,7 @@ async fn test_borsh_account_data() {
                         offset: 12,
                         assertion: DataValueAssertion::I16(
                             (i8::MIN as i16) - 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -82,7 +79,7 @@ async fn test_borsh_account_data() {
                         offset: 14,
                         assertion: DataValueAssertion::U32(
                             (u16::MAX as u32) + 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -96,7 +93,7 @@ async fn test_borsh_account_data() {
                         offset: 18,
                         assertion: DataValueAssertion::I32(
                             (i16::MIN as i32) - 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -110,7 +107,7 @@ async fn test_borsh_account_data() {
                         offset: 22,
                         assertion: DataValueAssertion::U64(
                             (u32::MAX as u64) + 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -124,7 +121,7 @@ async fn test_borsh_account_data() {
                         offset: 30,
                         assertion: DataValueAssertion::I64(
                             (i32::MIN as i64) - 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -138,7 +135,7 @@ async fn test_borsh_account_data() {
                         offset: 38,
                         assertion: DataValueAssertion::U128(
                             (u64::MAX as u128) + 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -152,7 +149,7 @@ async fn test_borsh_account_data() {
                         offset: 54,
                         assertion: DataValueAssertion::I128(
                             (i64::MIN as i128) - 1,
-                            ComparableOperator::Equal,
+                            IntegerOperator::Equal,
                         ),
                     },
                     None,
@@ -213,42 +210,42 @@ async fn test_borsh_account_data() {
     //         .create_assert_multi(
     //             user.encodable_pubkey(),
     //             vec![
-    //                 Assertion::AccountData(8, DataValueAssertion::U8(1, ComparableOperator::Equal)),
+    //                 Assertion::AccountData(8, DataValueAssertion::U8(1, IntegerOperator::Equal)),
     //                 Assertion::AccountData(
     //                     9,
-    //                     DataValueAssertion::I8(-1, ComparableOperator::Equal),
+    //                     DataValueAssertion::I8(-1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     10,
-    //                     DataValueAssertion::U16((u8::MAX as u16) + 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::U16((u8::MAX as u16) + 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     12,
-    //                     DataValueAssertion::I16((i8::MIN as i16) - 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::I16((i8::MIN as i16) - 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     14,
-    //                     DataValueAssertion::U32((u16::MAX as u32) + 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::U32((u16::MAX as u32) + 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     18,
-    //                     DataValueAssertion::I32((i16::MIN as i32) - 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::I32((i16::MIN as i32) - 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     22,
-    //                     DataValueAssertion::U64((u32::MAX as u64) + 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::U64((u32::MAX as u64) + 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     30,
-    //                     DataValueAssertion::I64((i32::MIN as i64) - 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::I64((i32::MIN as i64) - 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     38,
-    //                     DataValueAssertion::U128((u64::MAX as u128) + 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::U128((u64::MAX as u128) + 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     54,
-    //                     DataValueAssertion::I128((i64::MIN as i128) - 1, ComparableOperator::Equal),
+    //                     DataValueAssertion::I128((i64::MIN as i128) - 1, IntegerOperator::Equal),
     //                 ),
     //                 Assertion::AccountData(
     //                     70,

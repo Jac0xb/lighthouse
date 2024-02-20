@@ -1,11 +1,12 @@
 use borsh::{BorshDeserialize, BorshSerialize};
+use kaigan::types::RemainderVec;
 use shank::ShankInstruction;
 
 use crate::{
     processor::{CreateMemoryAccountParameters, WriteParameters},
     types::{
-        AccountDataAssertion, AccountDataHashAssertion, AccountInfoFieldAssertion,
-        MintAccountFieldAssertion, SysvarClockFieldAssertion, TokenAccountFieldAssertion,
+        AccountDataAssertion, AccountDataHashAssertion, AccountInfoAssertion, MintAccountAssertion,
+        SysvarClockAssertion, TokenAccountAssertion,
     },
 };
 
@@ -31,20 +32,21 @@ pub enum LighthouseInstruction {
     AssertDataHash(AccountDataHashAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertAccountInfo(AccountInfoFieldAssertion),
+    AssertAccountInfo(AccountInfoAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertMintAccountField(MintAccountFieldAssertion),
+    AssertMintAccount(MintAccountAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertMintAccountFieldMulti(Vec<MintAccountFieldAssertion>),
+    AssertMintAccountMulti(RemainderVec<MintAccountAssertion>),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertTokenAccountField(TokenAccountFieldAssertion),
+    AssertTokenAccount(TokenAccountAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertTokenAccountFieldMulti(Vec<TokenAccountFieldAssertion>),
+    #[account(1, name = "lighthouse_program", desc = "Lighthouse Program")]
+    AssertTokenAccountMulti(RemainderVec::<TokenAccountAssertion>),
 
     // No accounts
-    AssertSysvarClockField(SysvarClockFieldAssertion),
+    AssertSysvarClock(SysvarClockAssertion),
 }
