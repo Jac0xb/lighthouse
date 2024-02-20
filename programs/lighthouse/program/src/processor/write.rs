@@ -20,6 +20,7 @@ pub struct WriteParameters {
     pub write_type: WriteTypeParameter,
 }
 
+#[allow(dead_code)]
 pub(crate) struct WriteContext<'a, 'info> {
     pub lighthouse_program: Program<'a, 'info>,
     pub payer: Signer<'a, 'info>,

@@ -13,10 +13,7 @@ use solana_program::declare_id;
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
 pub mod lighthouse {
-    use self::{
-        error::LighthouseError,
-        // types::{RemainderVec, TokenAccountAssertion},
-    };
+    use self::error::LighthouseError;
     use super::*;
     use crate::{
         instruction::LighthouseInstruction,
@@ -68,15 +65,6 @@ pub mod lighthouse {
                 )?;
             }
             LighthouseInstruction::AssertAccountInfo(assertion) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
-
-                processor::assert_with_account(
-                    &context,
-                    &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
-                )?;
-            }
-            LighthouseInstruction::AssertDataHash(assertion) => {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(

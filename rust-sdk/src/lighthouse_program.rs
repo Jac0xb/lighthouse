@@ -100,7 +100,7 @@ impl LighthouseProgram {
         _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
         let mut remainder_assertions =
-            RemainderVec::<MintAccountAssertion>::try_from_slice(&vec![]).unwrap();
+            RemainderVec::<MintAccountAssertion>::try_from_slice(&[]).unwrap();
 
         for assertion in assertions {
             remainder_assertions.push(assertion);
@@ -169,7 +169,7 @@ impl LighthouseProgram {
         _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
         let mut remainder_assertions =
-            RemainderVec::<TokenAccountAssertion>::try_from_slice(&vec![]).unwrap();
+            RemainderVec::<TokenAccountAssertion>::try_from_slice(&[]).unwrap();
 
         for assertion in assertions {
             remainder_assertions.push(assertion);
