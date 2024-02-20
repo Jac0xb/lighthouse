@@ -6,7 +6,7 @@ use crate::utils::{create_test_account, create_user};
 use lighthouse::types::{
     AccountDataAssertion, ComparableOperator, DataValueAssertion, EquatableOperator,
 };
-use rust_sdk::LighthouseProgram;
+use rust_sdk::{LighthouseProgram, TxBuilder};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::transaction::Transaction;
@@ -22,8 +22,8 @@ async fn test_borsh_account_data() {
 
     let test_account = create_test_account(context, &user, false).await.unwrap();
 
-    let mut tx = Transaction::new_with_payer(
-        &[
+    let mut tx = TxBuilder {
+        ixs: vec![
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -34,10 +34,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -48,10 +45,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -65,10 +59,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -82,10 +73,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -99,10 +87,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -116,10 +101,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -133,10 +115,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -150,10 +129,7 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -167,10 +143,21 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
+            program
+                .assert_account_data(
+                    user.encodable_pubkey(),
+                    test_account.encodable_pubkey(),
+                    AccountDataAssertion {
+                        offset: 54,
+                        assertion: DataValueAssertion::I128(
+                            (i64::MIN as i128) - 1,
+                            ComparableOperator::Equal,
+                        ),
+                    },
+                    None,
+                )
+                .ix(),
             program
                 .assert_account_data(
                     user.encodable_pubkey(),
@@ -184,18 +171,41 @@ async fn test_borsh_account_data() {
                     },
                     None,
                 )
-                .ixs
-                .first()
-                .unwrap()
-                .clone(),
+                .ix(),
+            program
+                .assert_account_data(
+                    user.encodable_pubkey(),
+                    test_account.encodable_pubkey(),
+                    AccountDataAssertion {
+                        offset: 102,
+                        assertion: DataValueAssertion::Bool(true, EquatableOperator::Equal),
+                    },
+                    None,
+                )
+                .ix(),
+            program
+                .assert_account_data(
+                    user.encodable_pubkey(),
+                    test_account.encodable_pubkey(),
+                    AccountDataAssertion {
+                        offset: 103,
+                        assertion: DataValueAssertion::Bool(false, EquatableOperator::Equal),
+                    },
+                    None,
+                )
+                .ix(),
         ],
-        Some(&user.encodable_pubkey()),
-    );
-    tx.message.recent_blockhash = context.get_blockhash();
+        payer: user.encodable_pubkey(),
+        look_up_tables: None,
+    };
 
-    process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
+    process_transaction_assert_success(
+        context,
+        tx.to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .unwrap(),
+    )
+    .await
+    .unwrap();
 
     // process_transaction_assert_success(
     //     context,
