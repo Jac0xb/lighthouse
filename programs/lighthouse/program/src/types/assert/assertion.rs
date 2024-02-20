@@ -1,10 +1,11 @@
 #![allow(non_snake_case)]
 
-use crate::types::EquatableOperator;
 use crate::types::{DataValueAssertion, EvaluationResult};
+use crate::types::{EquatableOperator, Operator};
 use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::account_info::AccountInfo;
+use solana_program::keccak;
 
 pub trait Assert<T> {
     fn evaluate(&self, parameters: &T, include_output: bool) -> Result<Box<EvaluationResult>>;
@@ -16,97 +17,45 @@ pub struct AssertionConfigV1 {
     pub verbose: bool,
 }
 
-pub type AccountDataHashAssertionTuple = ([u8; 32], EquatableOperator, Option<u16>, Option<u16>);
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+pub struct AccountDataHashAssertion {
+    pub hash: [u8; 32],
+    pub operator: EquatableOperator,
+    pub start: Option<u16>,
+    pub end: Option<u16>,
+}
 
-// #[derive(Debug)]
-// pub enum Assertion {
-//     AccountInfoField(AccountInfoFieldAssertion),
+impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
+    fn format(&self) -> String {
+        format!(
+            "AccountDataHashAssertion[{:?}|{:?}|({:?},{:?})]",
+            self.hash, self.operator, self.start, self.end
+        )
+    }
 
-//     // Account data offset, Borsh type, ComparableOperator
-//     AccountData(AccountDataAssertionParameters),
-//     AccountDataHash([u8; 32], EquatableOperator, Option<u16>, Option<u16>),
-//     TokenAccountField(TokenAccountFieldAssertion),
-//     MintAccountField(MintAccountFieldAssertion),
-//     SysvarClockField(SysvarClockFieldAssertion),
-// }
+    fn evaluate(
+        &self,
+        account: &AccountInfo,
+        include_output: bool,
+    ) -> Result<Box<EvaluationResult>> {
+        let AccountDataHashAssertion {
+            hash: account_hash_value,
+            operator,
+            start,
+            end,
+        } = self;
 
-// impl Assertion {
-//     pub fn format(&self) -> String {
-//         match self {
-//             Assertion::AccountData(offset, value) => {
-//                 format!("AccountData[{}|{:?}]", offset, value)
-//             }
-//             Assertion::AccountDataHash(hash, ComparableOperator, start, end) => {
-//                 format!(
-//                     "AccountDataHash[{:?}|{:?}|({:?},{:?})]",
-//                     hash, ComparableOperator, start, end
-//                 )
-//             }
-//             Assertion::TokenAccountField(field) => {
-//                 format!("TokenAccountField[{:?}]", field)
-//             }
-//             Assertion::MintAccountField(field) => {
-//                 format!("MintAccountField[{:?}]", field)
-//             }
-//             Assertion::SysvarClockField(field) => {
-//                 format!("SysvarClockField[{:?}]", field)
-//             }
-//             Assertion::AccountInfoField(fields) => {
-//                 format!("AccountInfoField[{:?}]", fields)
-//             }
-//         }
-//     }
+        let account_data = account.try_borrow_data()?;
 
-//     pub fn evaluate(
-//         &self,
-//         target_account: &AccountInfo,
-//         include_output: bool,
-//     ) -> Result<Vec<EvaluationResult>> {
-//         let mut results = Vec::new();
+        let start = start.unwrap_or(0);
+        let end = end.unwrap_or(account_data.len() as u16);
 
-//         match &self {
-//             Assertion::AccountData({
-//                 offset,
-//                 assertion
-//             }) => {
-//                 let account_data = target_account.try_borrow_data()?;
+        let account_data = &account_data[start as usize..end as usize];
+        let account_hash = keccak::hashv(&[&account_data]).0;
 
-//                 Ok(vec![memory_value.evaluate_from_data_slice(
-//                     account_data,
-//                     (*account_offset) as usize,
-//                     include_output,
-//                 )?])
-//             }
-//             Assertion::AccountDataHash(account_hash_value, operator, start, end) => {
-//                 let account_data = target_account.try_borrow_data()?;
-
-//                 let start = start.unwrap_or(0);
-//                 let end = end.unwrap_or(account_data.len() as u16);
-
-//                 let account_data = &account_data[start as usize..end as usize];
-//                 let account_hash = keccak::hashv(&[&account_data]).0;
-
-//                 Ok(vec![operator.evaluate(
-//                     &account_hash,
-//                     account_hash_value,
-//                     include_output,
-//                 )])
-//             }
-//             Assertion::TokenAccountField(token_account_field) => Ok(vec![
-//                 token_account_field.evaluate(target_account, include_output)?
-//             ]),
-//             Assertion::MintAccountField(mint_account_field) => Ok(vec![
-//                 mint_account_field.evaluate(target_account, include_output)?
-//             ]),
-//             Assertion::SysvarClockField(clock_field) => {
-//                 Ok(vec![clock_field.evaluate(&Clock::get()?, include_output)?])
-//             }
-//             Assertion::AccountInfoField(account_info_field) => Ok(vec![
-//                 account_info_field.evaluate(target_account, include_output)?
-//             ]),
-//         }
-//     }
-// }
+        Ok(operator.evaluate(&account_hash, account_hash_value, include_output))
+    }
+}
 
 // #[cfg(test)]
 // mod tests {

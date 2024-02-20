@@ -14,7 +14,7 @@ async fn test_basic() {
     let user = create_user(context).await.unwrap();
 
     let mut tx_builder = program.assert_account_info(
-        &user,
+        user.encodable_pubkey(),
         user.encodable_pubkey(),
         AccountInfoFieldAssertion::Lamports(0, ComparableOperator::GreaterThan),
         Some(AssertionConfigV1 { verbose: true }),

@@ -56,7 +56,7 @@ pub mod lighthouse {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
-                    context,
+                    &context,
                     &assertion,
                     Some(AssertionConfigV1 { verbose: false }),
                 )?;
@@ -65,7 +65,7 @@ pub mod lighthouse {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
-                    context,
+                    &context,
                     &assertion,
                     Some(AssertionConfigV1 { verbose: false }),
                 )?;
@@ -73,29 +73,51 @@ pub mod lighthouse {
             LighthouseInstruction::AssertDataHash(assertion) => {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
-                // processor::assert(
-                //     context,
-                //     &Assertion::AccountDataHash(hash, operator, start, end),
-                //     Some(AssertionConfigV1 { verbose: false }),
-                // )?;
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
             }
             LighthouseInstruction::AssertMintAccountField(assertion) => {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
-                    context,
+                    &context,
                     &assertion,
                     Some(AssertionConfigV1 { verbose: false }),
                 )?;
+            }
+            LighthouseInstruction::AssertMintAccountFieldMulti(assertions) => {
+                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+
+                for assertion in assertions {
+                    processor::assert_with_account(
+                        &context,
+                        &assertion,
+                        Some(AssertionConfigV1 { verbose: false }),
+                    )?;
+                }
             }
             LighthouseInstruction::AssertTokenAccountField(assertion) => {
                 let context = AssertWithTargetContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
-                    context,
+                    &context,
                     &assertion,
                     Some(AssertionConfigV1 { verbose: false }),
                 )?;
+            }
+            LighthouseInstruction::AssertTokenAccountFieldMulti(assertions) => {
+                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+
+                for assertion in assertions {
+                    processor::assert_with_account(
+                        &context,
+                        &assertion,
+                        Some(AssertionConfigV1 { verbose: false }),
+                    )?;
+                }
             }
             LighthouseInstruction::AssertSysvarClockField(assertion) => {
                 processor::assert(&assertion, Some(AssertionConfigV1 { verbose: false }))?;

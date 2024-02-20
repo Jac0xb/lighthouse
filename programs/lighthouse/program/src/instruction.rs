@@ -4,7 +4,7 @@ use shank::ShankInstruction;
 use crate::{
     processor::{CreateMemoryAccountParameters, WriteParameters},
     types::{
-        AccountDataAssertion, AccountDataHashAssertionTuple, AccountInfoFieldAssertion,
+        AccountDataAssertion, AccountDataHashAssertion, AccountInfoFieldAssertion,
         MintAccountFieldAssertion, SysvarClockFieldAssertion, TokenAccountFieldAssertion,
     },
 };
@@ -24,26 +24,27 @@ pub enum LighthouseInstruction {
     #[account(3, name = "source_account", desc = "System program")]
     Write(WriteParameters),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountData(AccountDataAssertion),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertDataHash(AccountDataHashAssertionTuple),
+    AssertDataHash(AccountDataHashAssertion),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountInfo(AccountInfoFieldAssertion),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(0, name = "target_account", desc = "Target account")]
     AssertMintAccountField(MintAccountFieldAssertion),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
+    AssertMintAccountFieldMulti(Vec<MintAccountFieldAssertion>),
+
     #[account(0, name = "target_account", desc = "Target account")]
     AssertTokenAccountField(TokenAccountFieldAssertion),
 
-    // #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "target_account", desc = "Target account")]
+    AssertTokenAccountFieldMulti(Vec<TokenAccountFieldAssertion>),
+
+    // No accounts
     AssertSysvarClockField(SysvarClockFieldAssertion),
 }

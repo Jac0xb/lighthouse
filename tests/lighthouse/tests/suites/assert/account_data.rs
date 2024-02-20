@@ -26,7 +26,7 @@ async fn test_borsh_account_data() {
         &[
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 8,
@@ -40,7 +40,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 9,
@@ -54,7 +54,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 10,
@@ -71,7 +71,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 12,
@@ -88,7 +88,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 14,
@@ -105,7 +105,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 18,
@@ -122,7 +122,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 22,
@@ -139,7 +139,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 30,
@@ -156,7 +156,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 38,
@@ -173,7 +173,7 @@ async fn test_borsh_account_data() {
                 .clone(),
             program
                 .assert_account_data(
-                    &user,
+                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 70,
@@ -197,12 +197,11 @@ async fn test_borsh_account_data() {
         .await
         .unwrap();
 
-    panic!("ass");
     // process_transaction_assert_success(
     //     context,
     //     program
     //         .create_assert_multi(
-    //             &user,
+    //             user.encodable_pubkey(),
     //             vec![
     //                 Assertion::AccountData(8, DataValueAssertion::U8(1, ComparableOperator::Equal)),
     //                 Assertion::AccountData(

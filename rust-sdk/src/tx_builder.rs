@@ -6,7 +6,7 @@ use crate::Error;
 pub struct TxBuilder {
     pub payer: Pubkey,
     pub ixs: Vec<Instruction>,
-    pub look_up_tables: Vec<Pubkey>,
+    pub look_up_tables: Option<Vec<Pubkey>>,
 }
 
 impl TxBuilder {
@@ -14,6 +14,22 @@ impl TxBuilder {
         let tx = &mut Transaction::new_with_payer(&self.ixs, Some(&self.payer));
 
         Ok(tx.clone())
+    }
+
+    pub fn change_fee_payer(&mut self, new_payer: Pubkey) -> &mut Self {
+        self.payer = new_payer;
+
+        self
+    }
+
+    pub fn ix(&self) -> Instruction {
+        if self.ixs.is_empty() {
+            panic!("No instructions to build transaction");
+        } else if self.ixs.len() > 1 {
+            panic!("More than one instruction to build transaction");
+        }
+
+        self.ixs[0].clone()
     }
 
     pub fn to_transaction_and_sign(
