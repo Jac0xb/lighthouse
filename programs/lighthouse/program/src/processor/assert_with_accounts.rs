@@ -1,5 +1,3 @@
-use std::slice::Iter;
-
 use crate::{
     error::LighthouseError,
     types::{Assert, AssertionConfigV1},
@@ -10,21 +8,24 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     msg,
 };
+use std::slice::Iter;
 
-pub(crate) struct AssertWithAccountContext<'info> {
-    pub(crate) target_account: AccountInfo<'info>,
+pub(crate) struct AssertWithAccountsContext<'info> {
+    pub(crate) left_account: AccountInfo<'info>,
+    pub(crate) right_account: AccountInfo<'info>,
 }
 
-impl<'info> AssertWithAccountContext<'info> {
+impl<'info> AssertWithAccountsContext<'info> {
     pub(crate) fn load(account_iter: &mut Iter<AccountInfo<'info>>) -> Result<Self> {
         Ok(Self {
-            target_account: next_account_info(account_iter)?.clone(),
+            left_account: next_account_info(account_iter)?.clone(),
+            right_account: next_account_info(account_iter)?.clone(),
         })
     }
 }
 
-pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
-    assert_context: &AssertWithAccountContext<'info>,
+pub(crate) fn assert_with_accounts<'info, T: Assert<(AccountInfo<'info>, AccountInfo<'info>)>>(
+    assert_context: &AssertWithAccountsContext<'info>,
     assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
@@ -32,7 +33,13 @@ pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
         Some(config) => config.verbose,
         None => false,
     };
-    let evaluation_result = assertion.evaluate(&assert_context.target_account, include_output)?;
+    let evaluation_result = assertion.evaluate(
+        &(
+            assert_context.left_account.clone(),
+            assert_context.right_account.clone(),
+        ),
+        include_output,
+    )?;
 
     if include_output {
         msg!("[--] [-] Status | Assertion | Actual Value (Operator) Assertion Value");
