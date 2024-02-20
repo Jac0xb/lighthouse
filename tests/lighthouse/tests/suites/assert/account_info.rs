@@ -5,7 +5,7 @@ use crate::utils::utils::{
 };
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{
-    AccountInfoFieldAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
+    AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
 };
 use rust_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
 use solana_program::system_program;
@@ -56,7 +56,7 @@ async fn test_hijack_account_ownership() {
                 .assert_account_info(
                     protected_user.pubkey(),
                     protected_user.pubkey(),
-                    lighthouse::types::AccountInfoFieldAssertion::Owner(
+                    lighthouse::types::AccountInfoAssertion::Owner(
                         system_program::id(),
                         EquatableOperator::Equal,
                     ),
@@ -93,7 +93,7 @@ async fn test_account_balance() {
     let mut tx_builder = program.assert_account_info(
         user.encodable_pubkey(),
         user.encodable_pubkey(),
-        AccountInfoFieldAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
+        AccountInfoAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
         Some(AssertionConfigV1 { verbose: true }),
     );
 

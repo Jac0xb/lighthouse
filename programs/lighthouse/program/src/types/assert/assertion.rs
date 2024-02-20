@@ -68,7 +68,7 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //     use crate::{
 //         error::{assert_is_program_error, LighthouseError},
 //         types::{
-//             AccountInfoFieldAssertion, Assertion, ComparableOperator, DataValueAssertion,
+//             AccountInfoAssertion, Assertion, ComparableOperator, DataValueAssertion,
 //             EquatableOperator,
 //         },
 //     };
@@ -202,14 +202,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Key(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Key(
 //             key,
 //             EquatableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Key(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Key(
 //             Pubkey::default(),
 //             EquatableOperator::Equal,
 //         ));
@@ -237,14 +237,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Owner(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Owner(
 //             key,
 //             EquatableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Owner(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Owner(
 //             Pubkey::default(),
 //             EquatableOperator::Equal,
 //         ));
@@ -270,14 +270,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Lamports(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Lamports(
 //             69,
 //             ComparableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Lamports(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Lamports(
 //             1,
 //             ComparableOperator::Equal,
 //         ));
@@ -303,14 +303,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::DataLength(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::DataLength(
 //             128,
 //             ComparableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::DataLength(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::DataLength(
 //             129,
 //             ComparableOperator::Equal,
 //         ));
@@ -336,14 +336,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: true,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Executable(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Executable(
 //             true,
 //             EquatableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::Executable(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::Executable(
 //             false,
 //             EquatableOperator::Equal,
 //         ));
@@ -369,14 +369,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsSigner(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::IsSigner(
 //             true,
 //             EquatableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsSigner(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::IsSigner(
 //             false,
 //             EquatableOperator::Equal,
 //         ));
@@ -402,14 +402,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsWritable(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::IsWritable(
 //             true,
 //             EquatableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::IsWritable(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::IsWritable(
 //             false,
 //             EquatableOperator::Equal,
 //         ));
@@ -435,14 +435,14 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 //             data,
 //             executable: false,
 //         };
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::RentEpoch(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::RentEpoch(
 //             69,
 //             ComparableOperator::Equal,
 //         ));
 //         let result = assertion.evaluate(&account_info, true).unwrap();
 //         assert!(result.passed);
 
-//         let assertion = Assertion::AccountInfoField(AccountInfoFieldAssertion::RentEpoch(
+//         let assertion = Assertion::AccountInfo(AccountInfoAssertion::RentEpoch(
 //             1,
 //             ComparableOperator::Equal,
 //         ));
@@ -456,16 +456,16 @@ impl Assert<AccountInfo<'_>> for AccountDataHashAssertion {
 // // AccountData
 
 // // AccountDataOption
-// // TokenAccountField
-// // AccountInfoFieldAssertion
-// // AccountInfoFieldAssertion::Key
-// // AccountInfoFieldAssertion::Owner
-// // AccountInfoFieldAssertion::Lamports
-// // AccountInfoFieldAssertion::DataLength
-// // AccountInfoFieldAssertion::Executable
-// // AccountInfoFieldAssertion::IsSigner
-// // AccountInfoFieldAssertion::IsWritable
-// // AccountInfoFieldAssertion::RentEpoch
+// // TokenAccount
+// // AccountInfoAssertion
+// // AccountInfoAssertion::Key
+// // AccountInfoAssertion::Owner
+// // AccountInfoAssertion::Lamports
+// // AccountInfoAssertion::DataLength
+// // AccountInfoAssertion::Executable
+// // AccountInfoAssertion::IsSigner
+// // AccountInfoAssertion::IsWritable
+// // AccountInfoAssertion::RentEpoch
 
 // // Test edge cases
 // // AccountDataOption does not exist

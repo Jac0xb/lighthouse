@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum MintAccountFieldAssertion {
+pub enum MintAccountAssertion {
     MintAuthority(Option<Pubkey>, EquatableOperator),
     Supply(u64, ComparableOperator),
     Decimals(u8, ComparableOperator),
@@ -21,9 +21,9 @@ pub enum MintAccountFieldAssertion {
     FreezeAuthority(Option<Pubkey>, EquatableOperator),
 }
 
-impl Assert<AccountInfo<'_>> for MintAccountFieldAssertion {
+impl Assert<AccountInfo<'_>> for MintAccountAssertion {
     fn format(&self) -> String {
-        format!("MintAccountFieldAssertion[{:?}]", self)
+        format!("MintAccountAssertion[{:?}]", self)
     }
 
     fn evaluate(
@@ -43,7 +43,7 @@ impl Assert<AccountInfo<'_>> for MintAccountFieldAssertion {
         let data = account.try_borrow_mut_data().unwrap();
 
         let result = match self {
-            MintAccountFieldAssertion::MintAuthority(pubkey, operator) => {
+            MintAccountAssertion::MintAuthority(pubkey, operator) => {
                 let mint_authority_slice = &data[0..36];
                 let mint_authority = unpack_coption_key(mint_authority_slice)?;
 
@@ -65,24 +65,24 @@ impl Assert<AccountInfo<'_>> for MintAccountFieldAssertion {
                     }
                 }
             }
-            MintAccountFieldAssertion::Supply(supply, operator) => {
+            MintAccountAssertion::Supply(supply, operator) => {
                 let supply_slice = &data[36..44];
                 let actual_supply = u64::from_le_bytes(supply_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_supply, supply, include_output)
             }
-            MintAccountFieldAssertion::Decimals(decimals, operator) => {
+            MintAccountAssertion::Decimals(decimals, operator) => {
                 let decimals_slice = &data[44..45];
                 let actual_decimals = u8::from_le_bytes(decimals_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_decimals, decimals, include_output)
             }
-            MintAccountFieldAssertion::IsInitialized(is_initialized, operator) => {
+            MintAccountAssertion::IsInitialized(is_initialized, operator) => {
                 let actual_is_initialized = (data[45]) != 0;
 
                 operator.evaluate(&actual_is_initialized, is_initialized, include_output)
             }
-            MintAccountFieldAssertion::FreezeAuthority(pubkey, operator) => {
+            MintAccountAssertion::FreezeAuthority(pubkey, operator) => {
                 let freeze_authority_slice = &data[46..82];
 
                 let freeze_authority = unpack_coption_key(freeze_authority_slice)?;
@@ -122,9 +122,7 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{
-            Assert, ComparableOperator, EquatableOperator, MintAccountFieldAssertion,
-        };
+        use crate::types::{Assert, ComparableOperator, EquatableOperator, MintAccountAssertion};
 
         #[test]
         fn evaluate_mint_account_no_mint_authority_no_freeze_authority() {
@@ -163,7 +161,7 @@ mod tests {
             // Assert on mint_authority
             //
 
-            let result = MintAccountFieldAssertion::MintAuthority(None, EquatableOperator::Equal)
+            let result = MintAccountAssertion::MintAuthority(None, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -173,7 +171,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::MintAuthority(
+            let result = MintAccountAssertion::MintAuthority(
                 Some(Keypair::new().encodable_pubkey()),
                 EquatableOperator::Equal,
             )
@@ -190,7 +188,7 @@ mod tests {
             // Assert on supply
             //
 
-            let result = MintAccountFieldAssertion::Supply(69, ComparableOperator::Equal)
+            let result = MintAccountAssertion::Supply(69, ComparableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -200,7 +198,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::Supply(1600, ComparableOperator::Equal)
+            let result = MintAccountAssertion::Supply(1600, ComparableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -214,7 +212,7 @@ mod tests {
             // Assert on decimals
             //
 
-            let result = MintAccountFieldAssertion::Decimals(2, ComparableOperator::Equal)
+            let result = MintAccountAssertion::Decimals(2, ComparableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -224,7 +222,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::Decimals(3, ComparableOperator::Equal)
+            let result = MintAccountAssertion::Decimals(3, ComparableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -238,7 +236,7 @@ mod tests {
             // Assert on is_initialized
             //
 
-            let result = MintAccountFieldAssertion::IsInitialized(true, EquatableOperator::Equal)
+            let result = MintAccountAssertion::IsInitialized(true, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -248,7 +246,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::IsInitialized(false, EquatableOperator::Equal)
+            let result = MintAccountAssertion::IsInitialized(false, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -262,7 +260,7 @@ mod tests {
             // Assert on freeze_authority
             //
 
-            let result = MintAccountFieldAssertion::FreezeAuthority(None, EquatableOperator::Equal)
+            let result = MintAccountAssertion::FreezeAuthority(None, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -272,7 +270,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::FreezeAuthority(
+            let result = MintAccountAssertion::FreezeAuthority(
                 Some(Keypair::new().encodable_pubkey()),
                 EquatableOperator::Equal,
             )
@@ -325,7 +323,7 @@ mod tests {
             // Assert on mint_authority
             //
 
-            let result = MintAccountFieldAssertion::MintAuthority(None, EquatableOperator::Equal)
+            let result = MintAccountAssertion::MintAuthority(None, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -335,7 +333,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::MintAuthority(
+            let result = MintAccountAssertion::MintAuthority(
                 Some(freeze_authority.encodable_pubkey()),
                 EquatableOperator::Equal,
             )
@@ -352,7 +350,7 @@ mod tests {
             // Assert on freeze_authority
             //
 
-            let result = MintAccountFieldAssertion::FreezeAuthority(None, EquatableOperator::Equal)
+            let result = MintAccountAssertion::FreezeAuthority(None, EquatableOperator::Equal)
                 .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -362,7 +360,7 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountFieldAssertion::FreezeAuthority(
+            let result = MintAccountAssertion::FreezeAuthority(
                 Some(mint_authority.encodable_pubkey()),
                 EquatableOperator::Equal,
             )

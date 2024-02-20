@@ -1,4 +1,4 @@
-use lighthouse::types::{AccountInfoFieldAssertion, AssertionConfigV1, ComparableOperator};
+use lighthouse::types::{AccountInfoAssertion, AssertionConfigV1, ComparableOperator};
 use rust_sdk::LighthouseProgram;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -16,7 +16,7 @@ async fn test_basic() {
     let mut tx_builder = program.assert_account_info(
         user.encodable_pubkey(),
         user.encodable_pubkey(),
-        AccountInfoFieldAssertion::Lamports(0, ComparableOperator::GreaterThan),
+        AccountInfoAssertion::Lamports(0, ComparableOperator::GreaterThan),
         Some(AssertionConfigV1 { verbose: true }),
     );
 
