@@ -1,6 +1,5 @@
-use core::panic;
-
 use anchor_spl::associated_token::get_associated_token_address;
+use lighthouse::error::LighthouseError;
 use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountFieldAssertion};
 use rust_sdk::{blackhat_program, LighthouseProgram};
 use solana_program::program_pack::Pack;
@@ -11,7 +10,10 @@ use solana_sdk::transaction::Transaction;
 use spl_token::state::AccountState as TokenAccountState;
 
 use crate::utils::context::TestContext;
-use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::utils::{
+    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
+    to_transaction_error_u8,
+};
 use crate::utils::{create_mint, create_user, CreateMintParameters};
 
 #[tokio::test]
@@ -67,10 +69,10 @@ async fn test_basic() {
     .unwrap();
 }
 
+// This tests the assumption that non-native accounts cannot be closed by a malicious actor.
 #[tokio::test]
 async fn set_token_close_authority() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
     let mut blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
@@ -133,7 +135,14 @@ async fn set_token_close_authority() {
         context.get_blockhash(),
     );
 
-    // TODO should fail
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error_u8(1, spl_token::error::TokenError::NonNativeHasBalance as u32),
+        None,
+    )
+    .await
+    .unwrap();
 }
 
 #[tokio::test]
@@ -143,23 +152,6 @@ async fn set_token_close_authority_native() {
     let mut blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
-
-    // let (tx, mint) = create_mint(
-    //     context,
-    //     user.encodable_pubkey(),
-    //     CreateMintParameters {
-    //         token_program: spl_token::id(),
-    //         mint_authority: None,
-    //         freeze_authority: None,
-    //         mint_to: Some((user.pubkey(), 100)),
-    //         decimals: 9,
-    //     },
-    // )
-    // .await
-    // .unwrap();
-    // process_transaction_assert_success(context, tx)
-    //     .await
-    //     .unwrap();
 
     let native_token_account =
         get_associated_token_address(&user.pubkey(), &spl_token::native_mint::id());
@@ -200,15 +192,6 @@ async fn set_token_close_authority_native() {
 
     assert_eq!(token_account_data.amount, 100_000);
 
-    // process_transaction_assert_success(
-    //     context,
-
-    //         .to_transaction_and_sign(vec![&user], context.get_blockhash())
-    //         .unwrap(),
-    // )
-    // .await
-    // .unwrap();
-
     // close token account to bad actor
     let tx = blackhat_program
         .switch_token_account_authority(
@@ -217,7 +200,7 @@ async fn set_token_close_authority_native() {
             native_token_account,
             spl_token::instruction::AuthorityType::CloseAccount,
         )
-        .to_transaction()
+        .to_transaction_and_sign(vec![&user], context.get_blockhash())
         .unwrap();
 
     process_transaction_assert_success(context, tx)
@@ -240,6 +223,14 @@ async fn set_token_close_authority_native() {
                 &[],
             )
             .unwrap(),
+            program
+                .assert_token_account_field(
+                    bad_actor.encodable_pubkey(),
+                    bad_actor_token_account,
+                    TokenAccountFieldAssertion::Amount(100_000, ComparableOperator::Equal),
+                    None,
+                )
+                .ix(),
         ],
         Some(&bad_actor.pubkey()),
         &[&bad_actor],
@@ -248,7 +239,12 @@ async fn set_token_close_authority_native() {
 
     tx.message.recent_blockhash = context.get_blockhash();
 
-    process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(2, LighthouseError::AssertionFailed),
+        None,
+    )
+    .await
+    .unwrap();
 }

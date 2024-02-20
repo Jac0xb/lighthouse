@@ -1,19 +1,16 @@
-use core::panic;
-
-use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountFieldAssertion};
-use rust_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
-use solana_program::program_pack::Pack;
-use solana_program::system_instruction::transfer;
-use solana_program_test::tokio;
-use solana_sdk::fee;
-use solana_sdk::signer::{EncodableKeypair, Signer};
-use solana_sdk::transaction::Transaction;
-use spl_token::state::AccountState as TokenAccountState;
-
 use crate::utils::context::TestContext;
-use crate::utils::utils::process_transaction_assert_success;
-use crate::utils::{create_mint, create_user, CreateMintParameters};
+use crate::utils::create_user;
+use crate::utils::utils::{
+    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
+};
+use lighthouse::error::LighthouseError;
+use lighthouse::types::{
+    AccountInfoFieldAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
+};
+use rust_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
+use solana_program::system_program;
+use solana_program_test::tokio;
+use solana_sdk::signer::{EncodableKeypair, Signer};
 
 #[tokio::test]
 async fn test_hijack_account_ownership() {
@@ -46,6 +43,7 @@ async fn test_hijack_account_ownership() {
 
     assert_eq!(user_account.owner, blackhat::ID);
 
+    // User asserts that their account is owned by the system program after the attack, which should fail.
     let protected_user = create_user(context).await.unwrap();
     let tx = TxBuilder {
         payer: protected_user.pubkey(),
@@ -59,7 +57,7 @@ async fn test_hijack_account_ownership() {
                     protected_user.pubkey(),
                     protected_user.pubkey(),
                     lighthouse::types::AccountInfoFieldAssertion::Owner(
-                        system_program.pubkey(),
+                        system_program::id(),
                         EquatableOperator::Equal,
                     ),
                     None,
@@ -70,7 +68,41 @@ async fn test_hijack_account_ownership() {
     .to_transaction_and_sign(vec![&protected_user], context.get_blockhash())
     .unwrap();
 
-    process_transaction_assert_success(context, tx)
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(1, LighthouseError::AssertionFailed),
+        None,
+    )
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn test_account_balance() {
+    let context = &mut TestContext::new().await.unwrap();
+    let mut program = LighthouseProgram {};
+    let user = create_user(context).await.unwrap();
+
+    let user_balance = context
+        .client()
+        .get_balance(user.encodable_pubkey())
         .await
         .unwrap();
+
+    let mut tx_builder = program.assert_account_info(
+        user.encodable_pubkey(),
+        user.encodable_pubkey(),
+        AccountInfoFieldAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
+        Some(AssertionConfigV1 { verbose: true }),
+    );
+
+    process_transaction_assert_success(
+        context,
+        tx_builder
+            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .unwrap(),
+    )
+    .await
+    .unwrap();
 }
