@@ -13,13 +13,15 @@ use solana_program::declare_id;
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
 pub mod lighthouse {
-    use self::error::LighthouseError;
-    use super::*;
-    use crate::{
-        instruction::LighthouseInstruction,
-        processor::{AssertWithTargetContext, CreateMemoryAccountContext, WriteContext},
-        types::AssertionConfigV1,
+    use self::{
+        error::LighthouseError,
+        processor::{
+            AssertWithAccountContext, AssertWithAccountsContext, CreateMemoryAccountContext,
+            WriteContext,
+        },
     };
+    use super::*;
+    use crate::{instruction::LighthouseInstruction, types::AssertionConfigV1};
     use borsh::{BorshDeserialize, BorshSerialize};
     use solana_program::{
         account_info::AccountInfo,
@@ -56,7 +58,7 @@ pub mod lighthouse {
                 processor::write(context, parameters)?;
             }
             LighthouseInstruction::AssertAccountData(assertion) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
                     &context,
@@ -64,8 +66,17 @@ pub mod lighthouse {
                     Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
+            LighthouseInstruction::AssertAccountDataDiff(assertion) => {
+                let context = AssertWithAccountsContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_accounts(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
             LighthouseInstruction::AssertAccountInfo(assertion) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
                     &context,
@@ -74,7 +85,7 @@ pub mod lighthouse {
                 )?;
             }
             LighthouseInstruction::AssertMintAccount(assertion) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
                     &context,
@@ -83,7 +94,7 @@ pub mod lighthouse {
                 )?;
             }
             LighthouseInstruction::AssertMintAccountMulti(assertions) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 for assertion in assertions.iter() {
                     invoke(
@@ -102,7 +113,7 @@ pub mod lighthouse {
                 }
             }
             LighthouseInstruction::AssertTokenAccount(assertion) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 processor::assert_with_account(
                     &context,
@@ -111,7 +122,7 @@ pub mod lighthouse {
                 )?;
             }
             LighthouseInstruction::AssertTokenAccountMulti(assertions) => {
-                let context = AssertWithTargetContext::load(&mut accounts.iter())?;
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
                 for assertion in assertions.iter() {
                     invoke(

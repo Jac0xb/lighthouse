@@ -5,8 +5,8 @@ use shank::ShankInstruction;
 use crate::{
     processor::{CreateMemoryAccountParameters, WriteParameters},
     types::{
-        AccountDataAssertion, AccountInfoAssertion, MintAccountAssertion, SysvarClockAssertion,
-        TokenAccountAssertion,
+        AccountDataAssertion, AccountDataDiffAssertion, AccountInfoAssertion, MintAccountAssertion,
+        SysvarClockAssertion, TokenAccountAssertion,
     },
 };
 
@@ -27,6 +27,10 @@ pub enum LighthouseInstruction {
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountData(AccountDataAssertion),
+
+    #[account(0, name = "left_account", desc = "Left account")]
+    #[account(1, name = "right_account", desc = "Right account")]
+    AssertAccountDataDiff(AccountDataDiffAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountInfo(AccountInfoAssertion),
