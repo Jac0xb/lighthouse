@@ -1,10 +1,13 @@
+use core::panic;
+
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::types::{
-    Assertion, ComparableOperator, EquatableOperator, TokenAccountFieldAssertion,
-};
-use rust_sdk::LighthouseProgram;
+use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountFieldAssertion};
+use rust_sdk::{blackhat_program, LighthouseProgram};
+use solana_program::program_pack::Pack;
+use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
-use solana_sdk::signer::Signer;
+use solana_sdk::signer::{EncodableKeypair, Signer};
+use solana_sdk::transaction::Transaction;
 use spl_token::state::AccountState as TokenAccountState;
 
 use crate::utils::context::TestContext;
@@ -35,67 +38,23 @@ async fn test_basic() {
         .unwrap();
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
-    let mut tx_builder = program.create_assert_multi(
-        &user,
+    let mut tx_builder = program.assert_token_account_field_multi(
+        user.encodable_pubkey(),
+        token_account,
         vec![
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                0,
-                ComparableOperator::GreaterThan,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                101,
-                ComparableOperator::LessThan,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                100,
-                ComparableOperator::LessThanOrEqual,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                100,
-                ComparableOperator::GreaterThanOrEqual,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                100,
-                ComparableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Amount(
-                99,
-                ComparableOperator::NotEqual,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Delegate(
-                None,
-                EquatableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::CloseAuthority(
-                None,
-                EquatableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Mint(
-                mint.pubkey(),
-                EquatableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::Owner(
-                user.pubkey(),
-                EquatableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::State(
-                TokenAccountState::Initialized as u8,
-                ComparableOperator::Equal,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::State(
+            (TokenAccountFieldAssertion::Mint(mint.pubkey(), EquatableOperator::Equal)),
+            (TokenAccountFieldAssertion::Owner(user.pubkey(), EquatableOperator::Equal)),
+            (TokenAccountFieldAssertion::Amount(100, ComparableOperator::Equal)),
+            (TokenAccountFieldAssertion::Delegate(None, EquatableOperator::Equal)),
+            (TokenAccountFieldAssertion::State(
                 TokenAccountState::Frozen as u8,
                 ComparableOperator::NotEqual,
             )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::DelegatedAmount(
-                0,
-                ComparableOperator::LessThanOrEqual,
-            )),
-            Assertion::TokenAccountField(TokenAccountFieldAssertion::IsNative(
-                None,
-                ComparableOperator::Equal,
-            )),
+            (TokenAccountFieldAssertion::IsNative(None, ComparableOperator::Equal)),
+            (TokenAccountFieldAssertion::DelegatedAmount(0, ComparableOperator::LessThanOrEqual)),
+            (TokenAccountFieldAssertion::CloseAuthority(None, EquatableOperator::Equal)),
         ],
-        vec![token_account],
+        None,
     );
 
     process_transaction_assert_success(
@@ -106,4 +65,190 @@ async fn test_basic() {
     )
     .await
     .unwrap();
+}
+
+#[tokio::test]
+async fn set_token_close_authority() {
+    let context = &mut TestContext::new().await.unwrap();
+    let mut program = LighthouseProgram {};
+    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let user = create_user(context).await.unwrap();
+    let bad_actor = create_user(context).await.unwrap();
+
+    let (tx, mint) = create_mint(
+        context,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: None,
+            freeze_authority: None,
+            mint_to: Some((user.pubkey(), 100)),
+            decimals: 9,
+        },
+    )
+    .await
+    .unwrap();
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
+    let mut tx_builder = blackhat_program.switch_token_account_authority(
+        user.encodable_pubkey(),
+        Some(bad_actor.pubkey()),
+        token_account,
+        spl_token::instruction::AuthorityType::CloseAccount,
+    );
+
+    process_transaction_assert_success(
+        context,
+        tx_builder
+            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .unwrap(),
+    )
+    .await
+    .unwrap();
+
+    // close token account to bad actor
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            spl_associated_token_account::instruction::create_associated_token_account(
+                &bad_actor.pubkey(),
+                &bad_actor.pubkey(),
+                &mint.pubkey(),
+                &spl_token::id(),
+            ),
+            spl_token::instruction::close_account(
+                &spl_token::id(),
+                &token_account,
+                &bad_actor.pubkey(),
+                &bad_actor.pubkey(),
+                &[],
+            )
+            .unwrap(),
+        ],
+        Some(&bad_actor.pubkey()),
+        &[&bad_actor],
+        context.get_blockhash(),
+    );
+
+    // TODO should fail
+}
+
+#[tokio::test]
+async fn set_token_close_authority_native() {
+    let context = &mut TestContext::new().await.unwrap();
+    let mut program = LighthouseProgram {};
+    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let user = create_user(context).await.unwrap();
+    let bad_actor = create_user(context).await.unwrap();
+
+    // let (tx, mint) = create_mint(
+    //     context,
+    //     user.encodable_pubkey(),
+    //     CreateMintParameters {
+    //         token_program: spl_token::id(),
+    //         mint_authority: None,
+    //         freeze_authority: None,
+    //         mint_to: Some((user.pubkey(), 100)),
+    //         decimals: 9,
+    //     },
+    // )
+    // .await
+    // .unwrap();
+    // process_transaction_assert_success(context, tx)
+    //     .await
+    //     .unwrap();
+
+    let native_token_account =
+        get_associated_token_address(&user.pubkey(), &spl_token::native_mint::id());
+
+    let bad_actor_token_account =
+        get_associated_token_address(&bad_actor.pubkey(), &spl_token::native_mint::id());
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            spl_associated_token_account::instruction::create_associated_token_account(
+                &user.pubkey(),
+                &user.pubkey(),
+                &spl_token::native_mint::id(),
+                &spl_token::id(),
+            ),
+            transfer(&user.pubkey(), &native_token_account, 100_000),
+            spl_token::instruction::sync_native(&spl_token::ID, &native_token_account).unwrap(),
+        ],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash(),
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let token_account_data = spl_token::state::Account::unpack(
+        &context
+            .client()
+            .get_account(native_token_account)
+            .await
+            .unwrap()
+            .unwrap()
+            .data,
+    )
+    .unwrap();
+
+    assert_eq!(token_account_data.amount, 100_000);
+
+    // process_transaction_assert_success(
+    //     context,
+
+    //         .to_transaction_and_sign(vec![&user], context.get_blockhash())
+    //         .unwrap(),
+    // )
+    // .await
+    // .unwrap();
+
+    // close token account to bad actor
+    let tx = blackhat_program
+        .switch_token_account_authority(
+            user.encodable_pubkey(),
+            Some(bad_actor.pubkey()),
+            native_token_account,
+            spl_token::instruction::AuthorityType::CloseAccount,
+        )
+        .to_transaction()
+        .unwrap();
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let mut tx = Transaction::new_signed_with_payer(
+        &[
+            spl_associated_token_account::instruction::create_associated_token_account(
+                &bad_actor.pubkey(),
+                &bad_actor.pubkey(),
+                &spl_token::native_mint::id(),
+                &spl_token::id(),
+            ),
+            spl_token::instruction::close_account(
+                &spl_token::id(),
+                &native_token_account,
+                &bad_actor_token_account,
+                &bad_actor.pubkey(),
+                &[],
+            )
+            .unwrap(),
+        ],
+        Some(&bad_actor.pubkey()),
+        &[&bad_actor],
+        context.get_blockhash(),
+    );
+
+    tx.message.recent_blockhash = context.get_blockhash();
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 }

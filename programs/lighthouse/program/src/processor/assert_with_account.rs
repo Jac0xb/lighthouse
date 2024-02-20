@@ -25,7 +25,7 @@ impl<'info> AssertWithTargetContext<'info> {
 }
 
 pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
-    assert_context: AssertWithTargetContext<'info>,
+    assert_context: &AssertWithTargetContext<'info>,
     assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {

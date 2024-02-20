@@ -100,9 +100,6 @@ impl Assert<AccountInfo<'_>> for TokenAccountFieldAssertion {
             TokenAccountFieldAssertion::State(state, operator) => {
                 let actual_state = data[108];
 
-                msg!("actual_state: {:?}", actual_state);
-                msg!("state: {:?}", state);
-
                 operator.evaluate(&actual_state, state, include_output)
             }
             TokenAccountFieldAssertion::IsNative(is_native, operator) => {

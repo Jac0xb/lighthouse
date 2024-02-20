@@ -22,24 +22,24 @@ impl<'a> LighthouseProgram {
         TxBuilder {
             payer,
             ixs,
-            look_up_tables: vec![],
+            look_up_tables: None,
         }
     }
 
-    pub fn entrypoint(&mut self, payer: &Keypair) -> TxBuilder {
+    pub fn entrypoint(&mut self, payer: Pubkey) -> TxBuilder {
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::ID,
                 accounts: vec![],
                 data: vec![],
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 
     pub fn assert_account_data(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         target_account: Pubkey,
         assertion: AccountDataAssertion,
         _config: Option<AssertionConfigV1>,
@@ -52,13 +52,13 @@ impl<'a> LighthouseProgram {
                     .try_to_vec()
                     .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 
     pub fn assert_account_info(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         target_account: Pubkey,
         assertion: AccountInfoFieldAssertion,
         _config: Option<AssertionConfigV1>,
@@ -71,13 +71,13 @@ impl<'a> LighthouseProgram {
                     .try_to_vec()
                     .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 
     pub fn assert_mint_account_field(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         target_account: Pubkey,
         assertion: MintAccountFieldAssertion,
         _config: Option<AssertionConfigV1>,
@@ -90,13 +90,32 @@ impl<'a> LighthouseProgram {
                     .try_to_vec()
                     .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
+        )
+    }
+
+    pub fn assert_mint_account_field_multi(
+        &mut self,
+        payer: Pubkey,
+        target_account: Pubkey,
+        assertions: Vec<MintAccountFieldAssertion>,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
+                data: lighthouse::LighthouseInstruction::AssertMintAccountFieldMulti(assertions)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer,
         )
     }
 
     // pub fn assert_data_hash(
     //     &mut self,
-    //     payer: &Keypair,
+    //     payer: Pubkey,
     //     target_account: Pubkey,
     //     assertion: AccountDataAssertion,
     //     _config: Option<AssertionConfigV1>,
@@ -112,13 +131,13 @@ impl<'a> LighthouseProgram {
     //                 .try_to_vec()
     //                 .unwrap(),
     //         }],
-    //         payer.pubkey(),
+    //         payer,
     //     )
     // }
 
     pub fn assert_token_account_field(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         target_account: Pubkey,
         assertion: TokenAccountFieldAssertion,
         _config: Option<AssertionConfigV1>,
@@ -131,13 +150,32 @@ impl<'a> LighthouseProgram {
                     .try_to_vec()
                     .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
+        )
+    }
+
+    pub fn assert_token_account_field_multi(
+        &mut self,
+        payer: Pubkey,
+        target_account: Pubkey,
+        assertions: Vec<TokenAccountFieldAssertion>,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(
+            vec![Instruction {
+                program_id: lighthouse::ID,
+                accounts: vec![AccountMeta::new_readonly(target_account, false)],
+                data: lighthouse::LighthouseInstruction::AssertTokenAccountFieldMulti(assertions)
+                    .try_to_vec()
+                    .unwrap(),
+            }],
+            payer,
         )
     }
 
     pub fn assert_sysvar_clock_field(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         target_account: Pubkey,
         assertion: SysvarClockFieldAssertion,
         _config: Option<AssertionConfigV1>,
@@ -150,7 +188,7 @@ impl<'a> LighthouseProgram {
                     .try_to_vec()
                     .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 
@@ -175,7 +213,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((field).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //         Assertion::AccountData(offset, data_value) => self.tx_builder(
     //             vec![Instruction {
@@ -190,7 +228,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((offset, data_value).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //         Assertion::MintAccountField(field) => self.tx_builder(
     //             vec![Instruction {
@@ -205,7 +243,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((field).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //         Assertion::TokenAccountField(field) => self.tx_builder(
     //             vec![Instruction {
@@ -220,7 +258,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((field).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //         Assertion::SysvarClockField(field) => self.tx_builder(
     //             vec![Instruction {
@@ -235,7 +273,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((field).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //         Assertion::AccountDataHash(hash, operator, start, end) => self.tx_builder(
     //             vec![Instruction {
@@ -250,7 +288,7 @@ impl<'a> LighthouseProgram {
     //                     .chain((hash, operator, start, end).try_to_vec().unwrap())
     //                     .collect(),
     //             }],
-    //             payer.pubkey(),
+    //             payer,
     //         ),
     //     }
 
@@ -267,13 +305,13 @@ impl<'a> LighthouseProgram {
     //     //             .chain(assertion.try_to_vec().unwrap())
     //     //             .collect(),
     //     //     }],
-    //     //     payer.pubkey(),
+    //     //     payer,
     //     // )
     // }
 
     // // pub fn create_assert_compact(
     // //     &mut self,
-    // //     payer: &Keypair,
+    // //     payer: Pubkey,
     // //     target_account: Pubkey,
     // //     assertion: Assertion,
     // // ) -> TxBuilder {
@@ -284,13 +322,13 @@ impl<'a> LighthouseProgram {
     // //                 .to_account_metas(None),
     // //             data: lighthouse::instruction::AssertCompactV1 { assertion }.data(),
     // //         }],
-    // //         payer.pubkey(),
+    // //         payer,
     // //     )
     // // }
 
     // pub fn create_assert_multi(
     //     &mut self,
-    //     payer: &Keypair,
+    //     payer: Pubkey,
     //     assertions: Vec<Assertion>,
     //     additional_accounts: Vec<Pubkey>,
     // ) -> TxBuilder {
@@ -383,12 +421,12 @@ impl<'a> LighthouseProgram {
     //         }
     //     }
 
-    //     self.tx_builder(ixs, payer.pubkey())
+    //     self.tx_builder(ixs, payer)
     // }
 
     // pub fn create_assert_multi_compact(
     //     &mut self,
-    //     payer: &Keypair,
+    //     payer: Pubkey,
     //     assertions: Vec<Assertion>,
     //     additional_accounts: Vec<Pubkey>,
     // ) -> TxBuilder {
@@ -581,13 +619,13 @@ impl<'a> LighthouseProgram {
     //             })
     //             .data(),
     //         }],
-    //         payer.pubkey(),
+    //         payer,
     //     )
     // }
 
     pub fn create_memory_account(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         memory_index: u8,
         memory_account_size: u64,
     ) -> TxBuilder {
@@ -596,8 +634,8 @@ impl<'a> LighthouseProgram {
                 program_id: lighthouse::id(),
                 accounts: vec![
                     AccountMeta::new_readonly(lighthouse::id(), false),
-                    AccountMeta::new(payer.pubkey(), true),
-                    AccountMeta::new(find_memory_account(payer.pubkey(), memory_index).0, false),
+                    AccountMeta::new(payer, true),
+                    AccountMeta::new(find_memory_account(payer, memory_index).0, false),
                     AccountMeta::new_readonly(system_program::ID, false),
                 ],
                 data: lighthouse::LighthouseInstruction::CreateMemoryAccount(
@@ -609,19 +647,19 @@ impl<'a> LighthouseProgram {
                 .try_to_vec()
                 .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 
-    // pub fn close_memory_account(&mut self, payer: &Keypair, memory_index: u8) -> TxBuilder {
+    // pub fn close_memory_account(&mut self, payer: Pubkey, memory_index: u8) -> TxBuilder {
     //     let (memory_account, memory_account_bump) =
-    //         find_memory_account(payer.pubkey(), memory_index);
+    //         find_memory_account(payer, memory_index);
 
     //     self.tx_builder(
     //         vec![Instruction {
     //             program_id: lighthouse::id(),
     //             accounts: (lighthouse::accounts::CloseMemoryAccountV1 {
-    //                 signer: payer.pubkey(),
+    //                 signer: payer,
     //                 system_program: system_program::id(),
     //                 memory_account,
     //                 rent: sysvar::rent::id(),
@@ -633,26 +671,25 @@ impl<'a> LighthouseProgram {
     //             }
     //             .data(),
     //         }],
-    //         payer.pubkey(),
+    //         payer,
     //     )
     // }
 
     pub fn write_v1(
         &mut self,
-        payer: &Keypair,
+        payer: Pubkey,
         source_account: Pubkey,
         memory_index: u8,
         write_type_parameter: WriteTypeParameter,
     ) -> TxBuilder {
-        let (memory_account, memory_account_bump) =
-            find_memory_account(payer.pubkey(), memory_index);
+        let (memory_account, memory_account_bump) = find_memory_account(payer, memory_index);
 
         self.tx_builder(
             vec![Instruction {
                 program_id: lighthouse::id(),
                 accounts: vec![
                     AccountMeta::new_readonly(lighthouse::id(), false),
-                    AccountMeta::new(payer.pubkey(), true),
+                    AccountMeta::new(payer, true),
                     AccountMeta::new(memory_account, false),
                     AccountMeta::new_readonly(source_account, false),
                     AccountMeta::new_readonly(system_program::ID, false),
@@ -665,7 +702,7 @@ impl<'a> LighthouseProgram {
                 .try_to_vec()
                 .unwrap(),
             }],
-            payer.pubkey(),
+            payer,
         )
     }
 }

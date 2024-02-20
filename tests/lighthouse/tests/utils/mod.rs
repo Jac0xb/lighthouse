@@ -6,7 +6,11 @@ use anchor_spl::{associated_token, token::Mint};
 use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
-use solana_sdk::{signature::Keypair, signer::Signer, transaction::Transaction};
+use solana_sdk::{
+    signature::Keypair,
+    signer::{EncodableKeypair, Signer},
+    transaction::Transaction,
+};
 use std::result;
 
 use self::{
@@ -39,7 +43,7 @@ pub async fn create_memory_account(
     size: u64,
 ) -> Result<()> {
     let mut program = LighthouseProgram {};
-    let mut tx_builder = program.create_memory_account(user, 0, size);
+    let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), 0, size);
     let mut tx = tx_builder.to_transaction().unwrap();
 
     tx.try_partial_sign(&[user], context.get_blockhash())
@@ -270,7 +274,8 @@ pub async fn create_test_account(
     let account_keypair = Keypair::new();
     let program = BlackhatProgram {};
 
-    let mut tx_builder = program.create_test_account(&payer.pubkey(), &account_keypair, random);
+    let mut tx_builder =
+        program.create_test_account(&payer.pubkey(), account_keypair.encodable_pubkey(), random);
     let mut tx = tx_builder.to_transaction().unwrap();
 
     tx.try_partial_sign(

