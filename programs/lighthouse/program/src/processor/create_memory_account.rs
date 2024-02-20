@@ -20,6 +20,7 @@ pub struct CreateMemoryAccountParameters {
 }
 
 pub(crate) struct CreateMemoryAccountContext<'a, 'info> {
+    #[allow(dead_code)]
     pub(crate) lighthouse_program: Program<'a, 'info>,
     pub(crate) payer: Signer<'a, 'info>,
     pub(crate) memory_account: MemoryAccount<'info>,
