@@ -7,6 +7,9 @@ pub mod types;
 pub mod utils;
 pub mod validations;
 
+#[cfg(test)]
+pub mod test_utils;
+
 pub use crate::instruction::LighthouseInstruction;
 use solana_program::declare_id;
 

@@ -191,6 +191,17 @@ async fn test_borsh_account_data() {
                     None,
                 )
                 .ix(),
+            program
+                .assert_account_data(
+                    user.encodable_pubkey(),
+                    test_account.encodable_pubkey(),
+                    AccountDataAssertion {
+                        offset: 105,
+                        assertion: DataValueAssertion::U8(u8::MAX, IntegerOperator::Equal),
+                    },
+                    None,
+                )
+                .ix(),
         ],
         payer: user.encodable_pubkey(),
         look_up_tables: None,

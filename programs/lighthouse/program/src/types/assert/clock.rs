@@ -62,7 +62,7 @@ impl Assert<Clock> for SysvarClockAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use crate::types::{Assert, ComparableOperator, Operator, SysvarClockAssertion};
+        use crate::types::{Assert, ComparableOperator, SysvarClockAssertion};
 
         #[test]
         fn evaluate_clock() {

@@ -40,4 +40,3 @@ rand = "0.8.4"
 borsh = "^0.10.0"
 
 [dev-dependencies]
-macros = { path = "../../macros" }

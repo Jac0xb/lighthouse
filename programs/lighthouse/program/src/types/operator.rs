@@ -117,7 +117,12 @@ impl<T: PrimInt + BitAnd + Debug + Eq> Operator<T> for IntegerOperator {
                 }
             },
             output: if output {
-                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
+                format!(
+                    "{:?} (actual) {} {:?} (expected)",
+                    actual_value,
+                    self.format(),
+                    assertion_value
+                )
             } else {
                 "".to_string()
             },

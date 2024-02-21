@@ -441,6 +441,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "blackhat"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "solana-program",
+]
+
+[[package]]
 name = "blake3"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1231,6 +1241,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-spl",
  "bincode",
+ "blackhat",
  "borsh 0.10.3",
  "bytemuck",
  "kaigan",
