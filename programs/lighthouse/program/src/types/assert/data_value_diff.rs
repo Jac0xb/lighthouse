@@ -204,6 +204,8 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
                     _ => return Err(LighthouseError::DataValueMismatch.into()),
                 };
 
+                msg!("left_value: {}, right_value: {}", left_value, right_value);
+
                 let diff_value = left_value as i16 - right_value as i16;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
@@ -307,6 +309,223 @@ impl DataValueDiffAssertion {
             DataValueDiffAssertion::I64(value, operator) => {
                 format!("I64[{}, {:?}]", value, operator)
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod evaluate_from_data_slice {
+        use solana_sdk::{account_info::AccountInfo, msg, system_program};
+
+        use crate::{
+            test_utils::create_test_account,
+            types::{AccountDataDiffAssertion, Assert, DataValueDiffAssertion, IntegerOperator},
+        };
+
+        #[test]
+        fn evaluate_diff_u8() {
+            let key = system_program::id();
+            let (lamports_l, lamports_r) = (&mut 0, &mut 0);
+            let left_data: &mut [u8] = &mut [0u8; 171];
+            left_data.copy_from_slice(create_test_account().try_to_vec_override().as_ref());
+            let left_account_info =
+                AccountInfo::new(&key, false, false, lamports_l, left_data, &key, false, 0);
+
+            let right_data: &mut [u8] = &mut [0u8; 1];
+            let right_u8 = u8::MAX;
+            right_data.copy_from_slice(right_u8.to_le_bytes().as_ref());
+            let right_account_info =
+                AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
+
+            let assertion = AccountDataDiffAssertion {
+                offset_left: 0,
+                offset_right: 0,
+                assertion: DataValueDiffAssertion::U8(
+                    1i16 - (u8::MAX as i16),
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = assertion
+                .evaluate(
+                    &(left_account_info.clone(), right_account_info.clone()),
+                    true,
+                )
+                .unwrap();
+
+            assert!(result.passed);
+
+            let reverse_assertion = AccountDataDiffAssertion {
+                offset_left: 0,
+                offset_right: 0,
+                assertion: DataValueDiffAssertion::U8(
+                    (u8::MAX as i16) - 1i16,
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = reverse_assertion
+                .evaluate(&(right_account_info, left_account_info), true)
+                .unwrap();
+
+            assert!(result.passed);
+        }
+
+        #[test]
+        fn evaluate_diff_i8() {
+            let key = system_program::id();
+            let (lamports_l, lamports_r) = (&mut 0, &mut 0);
+            let left_data: &mut [u8] = &mut [0u8; 171];
+            let test_account = create_test_account();
+            left_data.copy_from_slice(create_test_account().try_to_vec_override().as_ref());
+            let left_account_info =
+                AccountInfo::new(&key, false, false, lamports_l, left_data, &key, false, 0);
+
+            let right_data: &mut [u8] = &mut [0u8; 1];
+            let right_i8 = i8::MIN;
+            right_data.copy_from_slice(right_i8.to_le_bytes().as_ref());
+            let right_account_info =
+                AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
+
+            let assertion = AccountDataDiffAssertion {
+                offset_left: 1,
+                offset_right: 0,
+                assertion: DataValueDiffAssertion::I8(
+                    (test_account.i8 as i16) - (i8::MIN as i16),
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = assertion
+                .evaluate(
+                    &(left_account_info.clone(), right_account_info.clone()),
+                    true,
+                )
+                .unwrap();
+
+            msg!("{:?}", result.output);
+
+            assert!(result.passed);
+
+            let reverse_assertion = AccountDataDiffAssertion {
+                offset_left: 0,
+                offset_right: 1,
+                assertion: DataValueDiffAssertion::I8(
+                    (i8::MIN as i16) - (test_account.i8 as i16),
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = reverse_assertion
+                .evaluate(&(right_account_info, left_account_info), true)
+                .unwrap();
+
+            assert!(result.passed);
+        }
+
+        #[test]
+        fn evaluate_diff_u16() {
+            let key = system_program::id();
+            let (lamports_l, lamports_r) = (&mut 0, &mut 0);
+            let left_data: &mut [u8] = &mut [0u8; 171];
+            let test_account = create_test_account();
+            left_data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+            let left_account_info =
+                AccountInfo::new(&key, false, false, lamports_l, left_data, &key, false, 0);
+
+            let right_data: &mut [u8] = &mut [0u8; 2];
+            let right_u16 = u16::MAX;
+            right_data.copy_from_slice(right_u16.to_le_bytes().as_ref());
+            let right_account_info =
+                AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
+
+            let assertion = AccountDataDiffAssertion {
+                offset_left: 2,
+                offset_right: 0,
+                assertion: DataValueDiffAssertion::U16(
+                    (test_account.u16 as i32) - (u16::MAX as i32),
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = assertion
+                .evaluate(
+                    &(left_account_info.clone(), right_account_info.clone()),
+                    true,
+                )
+                .unwrap();
+
+            msg!("{:?}", result.output);
+
+            assert!(result.passed);
+
+            let reverse_assertion = AccountDataDiffAssertion {
+                offset_left: 0,
+                offset_right: 2,
+                assertion: DataValueDiffAssertion::U16(
+                    (u16::MAX as i32) - (test_account.u16 as i32),
+                    IntegerOperator::Equal,
+                ),
+            };
+
+            let result = reverse_assertion
+                .evaluate(&(right_account_info, left_account_info), true)
+                .unwrap();
+
+            assert!(result.passed);
+        }
+
+        #[test]
+        fn evaluate_diff_i16() {
+            let key = system_program::id();
+            let (lamports_l, lamports_r) = (&mut 0, &mut 0);
+            let left_data: &mut [u8] = &mut [0u8; 171];
+            let test_account = create_test_account();
+            left_data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+            let left_account_info =
+                AccountInfo::new(&key, false, false, lamports_l, left_data, &key, false, 0);
+
+            let right_data: &mut [u8] = &mut [0u8; 2];
+            let right_i16 = i16::MIN;
+            right_data.copy_from_slice(right_i16.to_le_bytes().as_ref());
+            let right_account_info =
+                AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
+
+            let assertion = AccountDataDiffAssertion {
+                offset_left: 4,
+                offset_right: 0,
+                assertion: DataValueDiffAssertion::I16(
+                    (test_account.i16 as i32) - (i16::MIN as i32) - 10,
+                    IntegerOperator::GreaterThan,
+                ),
+            };
+
+            let result = assertion
+                .evaluate(
+                    &(left_account_info.clone(), right_account_info.clone()),
+                    true,
+                )
+                .unwrap();
+
+            msg!("{:?}", result.output);
+
+            assert!(result.passed);
+
+            let reverse_assertion = AccountDataDiffAssertion {
+                offset_left: 0,
+                offset_right: 4,
+                assertion: DataValueDiffAssertion::I16(
+                    (i16::MIN as i32) - (test_account.i16 as i32) + 10,
+                    IntegerOperator::LessThan,
+                ),
+            };
+
+            let result = reverse_assertion
+                .evaluate(&(right_account_info, left_account_info), true)
+                .unwrap();
+
+            assert!(result.passed);
         }
     }
 }

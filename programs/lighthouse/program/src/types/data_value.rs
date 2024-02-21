@@ -1,11 +1,5 @@
-use super::{
-    operator::{EvaluationResult, Operator},
-    ComparableOperator, EquatableOperator,
-};
-use crate::{error::LighthouseError, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{msg, pubkey::Pubkey};
-use std::cell::Ref;
+use solana_program::pubkey::Pubkey;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValue {

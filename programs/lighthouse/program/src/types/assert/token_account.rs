@@ -183,6 +183,7 @@ mod tests {
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
         };
         use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
+        use spl_associated_token_account::get_associated_token_address_with_program_id;
         use std::{cell::RefCell, rc::Rc};
 
         use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
@@ -423,8 +424,6 @@ mod tests {
             )
             .unwrap();
 
-            println!("{:?}", serialized_token_account);
-
             let lamports_data: &mut u64 = &mut 0;
             let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
 
@@ -492,6 +491,106 @@ mod tests {
             } else {
                 let error = result.err().unwrap();
                 panic!("{:?}", error);
+            }
+        }
+
+        #[test]
+        fn evaluate_token_account_address_is_derived() {
+            let mint = Keypair::new();
+            let owner = Keypair::new();
+            let delegate = Keypair::new();
+            let close_authority = Keypair::new();
+
+            // Owner is derived
+            {
+                let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+                Account::pack(
+                    Account {
+                        mint: mint.encodable_pubkey(),
+                        owner: owner.encodable_pubkey(),
+                        amount: 69,
+                        delegate: COption::Some(delegate.encodable_pubkey()),
+                        state: AccountState::Initialized,
+                        is_native: COption::Some(1),
+                        delegated_amount: 42,
+                        close_authority: COption::Some(close_authority.encodable_pubkey()),
+                    },
+                    serialized_token_account,
+                )
+                .unwrap();
+
+                let lamports_data: &mut u64 = &mut 0;
+                let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+                let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+                let account_info = AccountInfo {
+                    key: &get_associated_token_address_with_program_id(
+                        &owner.encodable_pubkey(),
+                        &mint.encodable_pubkey(),
+                        &spl_token_2022::ID,
+                    ),
+                    is_signer: false,
+                    is_writable: false,
+                    owner: &spl_token_2022::ID,
+                    lamports: Rc::new(lamports),
+                    rent_epoch: 0,
+                    data,
+                    executable: false,
+                };
+
+                // assert on TokenAccountOwnerIsDerived
+                let result =
+                    TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
+
+                if let Ok(result) = result {
+                    assert!(result.passed, "{:?}", result.output);
+                } else {
+                    let error = result.err().unwrap();
+                    panic!("{:?}", error);
+                }
+            }
+
+            // None derived owner
+            {
+                let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+                Account::pack(
+                    Account {
+                        mint: mint.encodable_pubkey(),
+                        owner: Keypair::new().encodable_pubkey(),
+                        amount: 69,
+                        delegate: COption::Some(delegate.encodable_pubkey()),
+                        state: AccountState::Initialized,
+                        is_native: COption::Some(1),
+                        delegated_amount: 42,
+                        close_authority: COption::Some(close_authority.encodable_pubkey()),
+                    },
+                    serialized_token_account,
+                )
+                .unwrap();
+
+                let lamports_data: &mut u64 = &mut 0;
+                let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+                let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+                let account_info = AccountInfo {
+                    key: &Pubkey::default(),
+                    is_signer: false,
+                    is_writable: false,
+                    owner: &spl_token_2022::ID,
+                    lamports: Rc::new(lamports),
+                    rent_epoch: 0,
+                    data,
+                    executable: false,
+                };
+
+                // assert on TokenAccountOwnerIsDerived
+                let result =
+                    TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
+
+                if let Ok(result) = result {
+                    assert!(!result.passed, "{:?}", result.output);
+                } else {
+                    let error = result.err().unwrap();
+                    panic!("{:?}", error);
+                }
             }
         }
     }

@@ -21,6 +21,7 @@ pub struct TestAccountV1 {
     pub option_u8_none: Option<u8>,
     pub option_u16: Option<u16>,
     pub option_u16_none: Option<u16>,
+    pub pubkey: Pubkey,
     pub vec: Vec<u8>,
 }
 
@@ -81,6 +82,7 @@ pub fn create_test_account<'info>(
             option_u8_none: None,
             option_u16: Some(((seed.wrapping_mul(47)) % 65536) as u16),
             option_u16_none: None,
+            pubkey: *ctx.accounts.signer.key,
             vec: vec![(seed.wrapping_mul(53)) as u8; 32],
         };
 
@@ -104,6 +106,7 @@ pub fn create_test_account<'info>(
             option_u8_none: None,
             option_u16: Some(u16::MAX),
             option_u16_none: None,
+            pubkey: *ctx.accounts.signer.key,
             vec: vec![u8::MAX; 32],
         };
 

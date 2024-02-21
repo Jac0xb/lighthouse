@@ -1,7 +1,6 @@
 {
   "rust-analyzer.linkedProjects": [
     "./programs/lighthouse/Cargo.toml",
-    "./programs/lighthouse/program/Cargo.toml",
     "./programs/blackhat/Cargo.toml",
     "./rust-sdk/Cargo.toml",
     "./tests/lighthouse/Cargo.toml"

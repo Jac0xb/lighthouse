@@ -336,177 +336,133 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     mod evaluate_from_data_slice {
-//         use blackhat::processor::TestAccountV1;
-//         use std::{cell::RefCell, rc::Rc};
+#[cfg(test)]
+mod tests {
+    use solana_sdk::{
+        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
+    };
 
-//         use crate::{
-//             error::LighthouseError,
-//             types::{DataValue, Operator},
-//         };
+    use crate::{
+        test_utils::create_test_account,
+        types::{
+            AccountDataAssertion, Assert, DataValueAssertion, EquatableOperator, IntegerOperator,
+        },
+    };
 
-//         #[test]
-//         fn evaluate_bool() {
-//             let data_src: &mut [u8] = &mut [0u8; 128];
+    #[test]
+    fn evaluate() {
+        let key = system_program::id();
+        let lamports = &mut 0;
+        let test_account = create_test_account();
+        let data: &mut [u8] = &mut [0u8; 171];
+        data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
-//             data_src[16] = 1;
+        // Test all operators
+        let assertions = vec![
+            (DataValueAssertion::U8(1, IntegerOperator::Equal), true),
+            (DataValueAssertion::U8(1, IntegerOperator::NotEqual), false),
+            (
+                DataValueAssertion::U8(0, IntegerOperator::GreaterThan),
+                true,
+            ),
+            (
+                DataValueAssertion::U8(1, IntegerOperator::GreaterThanOrEqual),
+                true,
+            ),
+            (DataValueAssertion::U8(2, IntegerOperator::LessThan), true),
+            (
+                DataValueAssertion::U8(1, IntegerOperator::LessThanOrEqual),
+                true,
+            ),
+        ];
 
-//             let data_ref: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(data_src));
-//             let data_value_true = DataValue::Bool(true);
+        for (assertion, should_pass) in assertions {
+            let assertion = AccountDataAssertion {
+                offset: 0,
+                assertion,
+            };
 
-//             let operator_and_expected_result: Vec<(dyn Operator, Option<bool>)> = vec![
-//                 (Operator::Equal, Some(true)),
-//                 (Operator::NotEqual, Some(false)),
-//                 (Operator::GreaterThan, None),
-//                 (Operator::GreaterThanOrEqual, None),
-//                 (Operator::LessThan, None),
-//                 (Operator::LessThanOrEqual, None),
-//                 (Operator::Exists, None),
-//                 (Operator::DoesNotExist, None),
-//             ];
+            let result = assertion.evaluate(&account_info, true).unwrap();
 
-//             for (operator, expected_result) in operator_and_expected_result {
-//                 let result = data_value_true.evaluate_from_data_slice(
-//                     data_ref.borrow(),
-//                     16,
-//                     &operator,
-//                     true,
-//                 );
+            assert_eq!(
+                result.passed, should_pass,
+                "{:?} {:?}",
+                assertion, result.output
+            );
+        }
 
-//                 if let Some(expected_result) = expected_result {
-//                     let result = result.unwrap();
-//                     assert_eq!(result.passed, expected_result, "{:?}", result.output);
-//                 } else {
-//                     let error = result.err().unwrap();
-//                     assert_eq!(error, LighthouseError::UnsupportedOperator.into())
-//                 }
-//             }
+        let assertions = vec![
+            (DataValueAssertion::I8(-1, IntegerOperator::Equal), true),
+            (DataValueAssertion::I8(-1, IntegerOperator::NotEqual), false),
+            (
+                DataValueAssertion::I8(-2, IntegerOperator::GreaterThan),
+                true,
+            ),
+            (
+                DataValueAssertion::I8(-1, IntegerOperator::GreaterThanOrEqual),
+                true,
+            ),
+            (DataValueAssertion::I8(0, IntegerOperator::LessThan), true),
+            (
+                DataValueAssertion::I8(-1, IntegerOperator::LessThanOrEqual),
+                true,
+            ),
+        ];
 
-//             let data_value_false = DataValue::Bool(false);
+        for (assertion, should_pass) in assertions {
+            let assertion = AccountDataAssertion {
+                offset: 1,
+                assertion,
+            };
 
-//             let operator_and_expected_result: Vec<(Operator, Option<bool>)> = vec![
-//                 (Operator::Equal, Some(true)),
-//                 (Operator::NotEqual, Some(false)),
-//                 (Operator::GreaterThan, None),
-//                 (Operator::GreaterThanOrEqual, None),
-//                 (Operator::LessThan, None),
-//                 (Operator::LessThanOrEqual, None),
-//                 (Operator::Exists, None),
-//                 (Operator::DoesNotExist, None),
-//             ];
+            let result = assertion.evaluate(&account_info, true).unwrap();
 
-//             for (operator, expected_result) in operator_and_expected_result {
-//                 let result = data_value_false.evaluate_from_data_slice(
-//                     data_ref.borrow(),
-//                     17,
-//                     &operator,
-//                     true,
-//                 );
+            assert_eq!(
+                result.passed, should_pass,
+                "{:?} {:?}",
+                assertion, result.output
+            );
+        }
 
-//                 if let Some(expected_result) = expected_result {
-//                     let result = result.unwrap();
-//                     assert_eq!(
-//                         result.passed, expected_result,
-//                         "Output: {:?}",
-//                         result.output
-//                     );
-//                 } else {
-//                     let error = result.err().unwrap();
-//                     assert_eq!(error, LighthouseError::UnsupportedOperator.into())
-//                 }
-//             }
-//         }
+        let assertions = vec![
+            (
+                DataValueAssertion::Pubkey(test_account.pubkey, EquatableOperator::Equal),
+                true,
+            ),
+            (
+                DataValueAssertion::Pubkey(test_account.pubkey, EquatableOperator::NotEqual),
+                false,
+            ),
+            (
+                DataValueAssertion::Pubkey(
+                    Keypair::new().encodable_pubkey(),
+                    EquatableOperator::Equal,
+                ),
+                false,
+            ),
+            (
+                DataValueAssertion::Pubkey(
+                    Keypair::new().encodable_pubkey(),
+                    EquatableOperator::NotEqual,
+                ),
+                true,
+            ),
+        ];
 
-//         #[test]
-//         fn evaluate() {
-//             let data_src: &mut [u8] = &mut [0u8; 139];
+        for (assertion, should_pass) in assertions {
+            let assertion = AccountDataAssertion {
+                offset: 103,
+                assertion,
+            };
 
-//             data_src.copy_from_slice(create_test_account().try_to_vec_override().as_ref());
+            let result = assertion.evaluate(&account_info, true).unwrap();
 
-//             let data_ref: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(data_src));
-
-//             let operator_and_expected_result: Vec<(DataValue, Operator, Option<bool>)> = vec![
-//                 (DataValue::U8(1), Operator::Equal, Some(true)),
-//                 (DataValue::U8(0), Operator::NotEqual, Some(true)),
-//                 (DataValue::U8(5), Operator::GreaterThan, Some(false)),
-//                 (DataValue::U8(1), Operator::GreaterThanOrEqual, Some(true)),
-//                 (DataValue::U8(0), Operator::LessThan, Some(false)),
-//                 (DataValue::U8(5), Operator::LessThanOrEqual, Some(true)),
-//                 (DataValue::U8(1), Operator::Exists, None),
-//                 (DataValue::U8(1), Operator::DoesNotExist, None),
-//                 (DataValue::I8(-1), Operator::Equal, Some(true)),
-//                 (DataValue::I8(0), Operator::NotEqual, Some(true)),
-//                 (DataValue::I8(-5), Operator::GreaterThan, Some(true)),
-//                 (DataValue::I8(-1), Operator::GreaterThanOrEqual, Some(true)),
-//                 (DataValue::I8(0), Operator::LessThan, Some(true)),
-//                 (DataValue::I8(-5), Operator::LessThanOrEqual, Some(false)),
-//                 (DataValue::I8(-1), Operator::Exists, None),
-//                 (DataValue::I8(-1), Operator::DoesNotExist, None),
-//                 (DataValue::U16(256), Operator::Equal, Some(true)),
-//                 (DataValue::U16(0), Operator::NotEqual, Some(true)),
-//                 (
-//                     DataValue::U16(u8::MAX as u16 * 2),
-//                     Operator::GreaterThan,
-//                     Some(false),
-//                 ),
-//                 (
-//                     DataValue::U16(256),
-//                     Operator::GreaterThanOrEqual,
-//                     Some(true),
-//                 ),
-//                 (DataValue::U16(0), Operator::LessThan, Some(false)),
-//                 (DataValue::U16(260), Operator::LessThanOrEqual, Some(true)),
-//                 (DataValue::U16(256), Operator::Exists, None),
-//                 (DataValue::U16(256), Operator::DoesNotExist, None),
-//             ];
-
-//             for (data_value, operator, expected_result) in operator_and_expected_result {
-//                 let offset: usize = match &data_value {
-//                     DataValue::U8(_) => 0,
-//                     DataValue::I8(_) => 1,
-//                     DataValue::U16(_) => 2,
-//                     DataValue::I16(_) => 4,
-//                     _ => panic!("Unsupported data value"),
-//                 };
-
-//                 println!("{:?} {:?} {:?}", data_value, operator, expected_result);
-
-//                 let result =
-//                     data_value.evaluate_from_data_slice(data_ref.borrow(), offset, &operator, true);
-
-//                 if let Some(expected_result) = expected_result {
-//                     let result = result.unwrap();
-//                     assert_eq!(result.passed, expected_result, "{:?}", result.output);
-//                 } else {
-//                     let error = result.err().unwrap();
-//                     assert_eq!(error, LighthouseError::UnsupportedOperator.into())
-//                 }
-//             }
-//         }
-
-//         pub fn create_test_account() -> TestAccountV1 {
-//             TestAccountV1 {
-//                 u8: 1,
-//                 i8: -1,
-//                 u16: (u8::MAX as u16) + 1,
-//                 i16: (i8::MIN as i16) - 1,
-//                 u32: (u16::MAX as u32) + 1,
-//                 i32: (i16::MIN as i32) - 1,
-//                 u64: (u32::MAX as u64) + 1,
-//                 i64: (i32::MIN as i64) - 1,
-//                 u128: (u64::MAX as u128) + 1,
-//                 i128: (i64::MIN as i128) - 1,
-//                 bytes: [u8::MAX; 32],
-//                 true_: true,
-//                 false_: false,
-//                 option_u8: Some(u8::MAX),
-//                 option_u8_none: None,
-//                 option_u16: Some(u16::MAX),
-//                 option_u16_none: None,
-//                 vec: vec![u8::MAX; 32],
-//             }
-//         }
-//     }
-// }
+            assert_eq!(
+                result.passed, should_pass,
+                "{:?} {:?}",
+                assertion, result.output
+            );
+        }
+    }
+}

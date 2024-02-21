@@ -2254,7 +2254,6 @@ dependencies = [
  "blackhat",
  "borsh 0.10.3",
  "lighthouse",
- "macros",
  "rand 0.8.5",
  "regex",
  "rust_sdk",
@@ -2319,16 +2318,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "macros"
-version = "0.1.0"
-dependencies = [
- "memoffset 0.6.5",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "memchr"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2341,15 +2330,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "83faa42c0a078c393f6b29d5db232d8be22776a891f8f56e5284faee4a20b327"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "memoffset"
-version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
-dependencies = [
- "autocfg",
 ]
 
 [[package]]
