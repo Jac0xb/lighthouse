@@ -1,5 +1,3 @@
-#![allow(clippy::too_many_arguments)]
-
 pub mod error;
 pub mod instruction;
 pub mod processor;
@@ -10,7 +8,6 @@ pub mod validations;
 #[cfg(test)]
 pub mod test_utils;
 
-pub use crate::instruction::LighthouseInstruction;
 use solana_program::declare_id;
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
