@@ -4,12 +4,11 @@ use crate::{
     types::{ComparableOperator, EquatableOperator, IntegerOperator},
     utils::Result,
 };
-use anchor_spl::token_interface::spl_token_2022;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::AccountInfo,
     pubkey::Pubkey,
-    stake::state::{Meta, Stake, StakeStateV2},
+    stake::{state::{Meta, Stake, StakeStateV2}}
 };
 
 use crate::{
@@ -39,13 +38,13 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        if ![spl_token::ID, spl_token_2022::ID].contains(account.owner) {
+        if ![solana_program::stake::program::id()].contains(account.owner) {
             return Err(LighthouseError::OwnerMismatch.into());
         }
 
         // TODO: Logic to assert on if account is a mint account
         let data = account.try_borrow_data()?;
-        let stake_account = StakeStateV2::try_from_slice(data.as_ref())?;
+        let stake_account = StakeStateV2::deserialize(&mut data.as_ref())?;
 
         let result = match self {
             StakeAccountAssertion::State(state, operator) => {
@@ -97,11 +96,11 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum MetaAssertion {
-    RentExemptReserve(u64, IntegerOperator),
+    RentExemptReserve(u64, ComparableOperator),
     AuthorizedStaker(Pubkey, EquatableOperator),
     AuthorizedWithdrawer(Pubkey, EquatableOperator),
-    LockupUnixTimestamp(i64, IntegerOperator),
-    LockupEpoch(u64, IntegerOperator),
+    LockupUnixTimestamp(i64, ComparableOperator),
+    LockupEpoch(u64, ComparableOperator),
     LockupCustodian(Pubkey, EquatableOperator),
 }
 
@@ -147,9 +146,9 @@ impl Assert<Meta> for MetaAssertion {
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum StakeAssertion {
     DelegationVoterPubkey(Pubkey, EquatableOperator),
-    DelegationStake(u64, IntegerOperator),
-    DelegationActivationEpoch(u64, IntegerOperator),
-    DelegationDeactivationEpoch(u64, IntegerOperator),
+    DelegationStake(u64, ComparableOperator),
+    DelegationActivationEpoch(u64, ComparableOperator),
+    DelegationDeactivationEpoch(u64, ComparableOperator),
     DelegationWarmupCooldownRate(f64, ComparableOperator),
 
     /// stake account's credits observed at the time of delegation
