@@ -1,0 +1,17 @@
+[package]
+name = "lighthouse_test_client"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jac0xb"]
+description = "A simple CLI application to test Lighthouse on Solana network"
+
+# Define your dependencies here
+[dependencies]
+clap = { version = "^4.5.1", features = ["derive"] }
+solana-sdk = "~1.18.1"
+lighthouse = { path = "../programs/lighthouse/program", features = ["no-entrypoint"] }
+rust_sdk = { path = "../rust-sdk" }
+serde_json = "1.0.114"
+solana-program = "~1.18.1"
+solana-client = "~1.18.1"
+rayon = "1.8.1"

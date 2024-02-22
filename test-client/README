@@ -1,0 +1,4 @@
+
+Run CLI
+
+cargo run -- --keypair <keypair_path> safe-send

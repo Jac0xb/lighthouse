@@ -2,7 +2,9 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
 
 use crate::{
-    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::{
+        Assert, ComparableOperator, EquatableOperator, EvaluationResult, KnownProgram, Operator,
+    },
     utils::Result,
 };
 
@@ -24,6 +26,7 @@ pub enum AccountInfoAssertion {
     Lamports(u64, ComparableOperator),
     DataLength(u64, ComparableOperator),
     Owner(Pubkey, EquatableOperator),
+    KnownOwner(KnownProgram, EquatableOperator),
     RentEpoch(u64, ComparableOperator),
     IsSigner(bool, EquatableOperator),
     IsWritable(bool, EquatableOperator),
@@ -76,6 +79,9 @@ impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
                 EquatableOperator::Equal.evaluate(&actual_hash, expected_hash, include_output)
+            }
+            AccountInfoAssertion::KnownOwner(program, operator) => {
+                operator.evaluate(account.owner, &program.to_pubkey(), include_output)
             }
         };
 
