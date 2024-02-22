@@ -140,6 +140,15 @@ pub mod lighthouse {
                     )?;
                 }
             }
+            LighthouseInstruction::AssertStakeAccount(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
             LighthouseInstruction::AssertSysvarClock(assertion) => {
                 processor::assert(&assertion, Some(AssertionConfigV1 { verbose: false }))?;
             }

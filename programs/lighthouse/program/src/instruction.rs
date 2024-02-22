@@ -6,7 +6,7 @@ use crate::{
     processor::{CreateMemoryAccountParameters, WriteParameters},
     types::{
         AccountDataAssertion, AccountDataDiffAssertion, AccountInfoAssertion, MintAccountAssertion,
-        SysvarClockAssertion, TokenAccountAssertion,
+        StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion,
     },
 };
 
@@ -47,6 +47,9 @@ pub enum LighthouseInstruction {
     #[account(0, name = "target_account", desc = "Target account")]
     #[account(1, name = "lighthouse_program", desc = "Lighthouse Program")]
     AssertTokenAccountMulti(RemainderVec::<TokenAccountAssertion>),
+
+    #[account(0, name = "target_account", desc = "Target account")]
+    AssertStakeAccount(StakeAccountAssertion),
 
     // No accounts
     AssertSysvarClock(SysvarClockAssertion),

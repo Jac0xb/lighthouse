@@ -2333,7 +2333,6 @@ dependencies = [
  "num-traits",
  "shank",
  "solana-program",
- "solana-sdk",
  "spl-associated-token-account",
  "spl-token",
  "thiserror",
@@ -2343,6 +2342,7 @@ dependencies = [
 name = "lighthouse_test_client"
 version = "0.1.0"
 dependencies = [
+ "borsh 0.10.3",
  "clap 4.5.1",
  "lighthouse",
  "rayon",

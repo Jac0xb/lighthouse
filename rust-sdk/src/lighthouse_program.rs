@@ -6,7 +6,7 @@ use lighthouse::{
     processor::{create_memory_account::CreateMemoryAccountParameters, write::WriteParameters},
     types::{
         AccountDataAssertion, AccountInfoAssertion, AssertionConfigV1, MintAccountAssertion,
-        SysvarClockAssertion, TokenAccountAssertion, WriteTypeParameter,
+        StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion, WriteTypeParameter,
     },
 };
 use solana_program::{
@@ -57,6 +57,21 @@ impl LighthouseProgram {
             program_id: lighthouse::ID,
             accounts: vec![AccountMeta::new_readonly(target_account, false)],
             data: LighthouseInstruction::AssertAccountInfo(assertion)
+                .try_to_vec()
+                .unwrap(),
+        }])
+    }
+
+    pub fn assert_stake_account(
+        &self,
+        target_account: Pubkey,
+        assertion: StakeAccountAssertion,
+        _config: Option<AssertionConfigV1>,
+    ) -> TxBuilder {
+        self.tx_builder(vec![Instruction {
+            program_id: lighthouse::ID,
+            accounts: vec![AccountMeta::new_readonly(target_account, false)],
+            data: LighthouseInstruction::AssertStakeAccount(assertion)
                 .try_to_vec()
                 .unwrap(),
         }])
