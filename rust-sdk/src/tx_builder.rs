@@ -4,24 +4,11 @@ use solana_sdk::{signature::Keypair, transaction::Transaction};
 use crate::Error;
 
 pub struct TxBuilder {
-    pub payer: Pubkey,
     pub ixs: Vec<Instruction>,
     pub look_up_tables: Option<Vec<Pubkey>>,
 }
 
 impl TxBuilder {
-    pub fn to_transaction(&mut self) -> Result<Transaction, Error> {
-        let tx = &mut Transaction::new_with_payer(&self.ixs, Some(&self.payer));
-
-        Ok(tx.clone())
-    }
-
-    pub fn change_fee_payer(&mut self, new_payer: Pubkey) -> &mut Self {
-        self.payer = new_payer;
-
-        self
-    }
-
     pub fn ix(&self) -> Instruction {
         if self.ixs.is_empty() {
             panic!("No instructions to build transaction");
@@ -35,9 +22,10 @@ impl TxBuilder {
     pub fn to_transaction_and_sign(
         &mut self,
         signers: Vec<&Keypair>,
+        payer: Pubkey,
         recent_blockhash: Hash,
     ) -> Result<Transaction, Error> {
-        let tx = &mut Transaction::new_with_payer(&self.ixs, Some(&self.payer));
+        let tx = &mut Transaction::new_with_payer(&self.ixs, Some(&payer));
         tx.partial_sign(&signers, recent_blockhash);
 
         Ok(tx.clone())

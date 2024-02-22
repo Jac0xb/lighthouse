@@ -43,7 +43,6 @@ async fn test_basic() {
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
     let mut tx_builder = program.assert_token_account_multi(
-        user.encodable_pubkey(),
         token_account,
         vec![
             (TokenAccountAssertion::Mint(mint.pubkey(), EquatableOperator::Equal)),
@@ -65,7 +64,11 @@ async fn test_basic() {
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .to_transaction_and_sign(
+                vec![&user],
+                user.encodable_pubkey(),
+                context.get_blockhash(),
+            )
             .unwrap(),
     )
     .await
@@ -108,7 +111,11 @@ async fn set_token_close_authority() {
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .to_transaction_and_sign(
+                vec![&user],
+                user.encodable_pubkey(),
+                context.get_blockhash(),
+            )
             .unwrap(),
     )
     .await
@@ -203,7 +210,11 @@ async fn set_token_close_authority_native() {
             native_token_account,
             spl_token::instruction::AuthorityType::CloseAccount,
         )
-        .to_transaction_and_sign(vec![&user], context.get_blockhash())
+        .to_transaction_and_sign(
+            vec![&user],
+            user.encodable_pubkey(),
+            context.get_blockhash(),
+        )
         .unwrap();
 
     process_transaction_assert_success(context, tx)
@@ -228,7 +239,6 @@ async fn set_token_close_authority_native() {
             .unwrap(),
             program
                 .assert_token_account(
-                    bad_actor.encodable_pubkey(),
                     bad_actor_token_account,
                     TokenAccountAssertion::Amount(100_000, ComparableOperator::Equal),
                     None,
@@ -293,17 +303,19 @@ async fn set_token_owner_attack_assert_owner_equal() {
                     .ix(),
                 program
                     .assert_token_account(
-                        user.encodable_pubkey(),
                         token_account,
                         TokenAccountAssertion::Owner(user.pubkey(), EquatableOperator::Equal),
                         None,
                     )
                     .ix(),
             ],
-            payer: user.pubkey(),
             look_up_tables: None,
         }
-        .to_transaction_and_sign(vec![&user], context.get_blockhash())
+        .to_transaction_and_sign(
+            vec![&user],
+            user.encodable_pubkey(),
+            context.get_blockhash(),
+        )
         .unwrap(),
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
@@ -353,17 +365,19 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
                     .ix(),
                 program
                     .assert_token_account(
-                        user.encodable_pubkey(),
                         token_account,
                         TokenAccountAssertion::TokenAccountOwnerIsDerived,
                         None,
                     )
                     .ix(),
             ],
-            payer: user.pubkey(),
             look_up_tables: None,
         }
-        .to_transaction_and_sign(vec![&user], context.get_blockhash())
+        .to_transaction_and_sign(
+            vec![&user],
+            user.encodable_pubkey(),
+            context.get_blockhash(),
+        )
         .unwrap(),
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
@@ -408,18 +422,20 @@ async fn test_drain_token_account() {
             mint.pubkey(),
         )
         .append(lighthouse_program.assert_token_account(
-            user.encodable_pubkey(),
             user_ata,
             TokenAccountAssertion::Amount(69_000, ComparableOperator::Equal),
             None,
         ))
         .append(lighthouse_program.assert_token_account(
-            user.encodable_pubkey(),
             user_ata,
             TokenAccountAssertion::Delegate(None, EquatableOperator::Equal),
             None,
         ))
-        .to_transaction_and_sign(vec![&user], context.get_blockhash())
+        .to_transaction_and_sign(
+            vec![&user],
+            user.encodable_pubkey(),
+            context.get_blockhash(),
+        )
         .unwrap();
 
     process_transaction_assert_failure(

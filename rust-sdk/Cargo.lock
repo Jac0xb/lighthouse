@@ -2239,6 +2239,7 @@ dependencies = [
  "num-traits",
  "shank",
  "solana-program",
+ "solana-sdk",
  "spl-associated-token-account",
  "spl-token",
  "thiserror",

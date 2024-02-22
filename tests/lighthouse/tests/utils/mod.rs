@@ -42,11 +42,10 @@ pub async fn create_memory_account(
     user: &Keypair,
     size: u64,
 ) -> Result<()> {
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), 0, size);
-    let mut tx = tx_builder.to_transaction().unwrap();
-
-    tx.try_partial_sign(&[user], context.get_blockhash())
+    let tx = tx_builder
+        .to_transaction_and_sign(vec![user], user.encodable_pubkey(), context.get_blockhash())
         .unwrap();
 
     process_transaction_assert_success(context, tx)
@@ -274,18 +273,14 @@ pub async fn create_test_account(
     let account_keypair = Keypair::new();
     let program = BlackhatProgram {};
 
-    let mut tx_builder = program.create_test_account(
-        payer.encodable_pubkey(),
-        account_keypair.encodable_pubkey(),
-        random,
-    );
-    let mut tx = tx_builder.to_transaction().unwrap();
-
-    tx.try_partial_sign(
-        &[payer, &account_keypair],
-        ctx.client().get_latest_blockhash().await.unwrap(),
-    )
-    .unwrap();
+    let tx = program
+        .create_test_account(
+            payer.encodable_pubkey(),
+            account_keypair.encodable_pubkey(),
+            random,
+        )
+        .to_transaction_and_sign(vec![payer], payer.encodable_pubkey(), ctx.get_blockhash())
+        .unwrap();
 
     process_transaction_assert_success(ctx, tx).await.unwrap();
 

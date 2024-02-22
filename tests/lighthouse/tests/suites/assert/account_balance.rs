@@ -15,7 +15,6 @@ async fn test_basic() {
 
     let mut tx_builder = program.assert_account_info(
         user.encodable_pubkey(),
-        user.encodable_pubkey(),
         AccountInfoAssertion::Lamports(0, ComparableOperator::GreaterThan),
         Some(AssertionConfigV1 { verbose: true }),
     );
@@ -23,7 +22,11 @@ async fn test_basic() {
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .to_transaction_and_sign(
+                vec![&user],
+                user.encodable_pubkey(),
+                context.get_blockhash(),
+            )
             .unwrap(),
     )
     .await

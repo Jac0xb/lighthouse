@@ -23,9 +23,9 @@ async fn test_hijack_account_ownership() {
     // User loses control of their account to malicious actor.
     let tx = blackhat_program
         .hijack_account_ownership(unprotected_user.pubkey())
-        .change_fee_payer(bad_fee_payer.pubkey())
         .to_transaction_and_sign(
             vec![&unprotected_user, &bad_fee_payer],
+            bad_fee_payer.encodable_pubkey(),
             context.get_blockhash(),
         )
         .unwrap();
@@ -46,7 +46,6 @@ async fn test_hijack_account_ownership() {
     // User asserts that their account is owned by the system program after the attack, which should fail.
     let protected_user = create_user(context).await.unwrap();
     let tx = TxBuilder {
-        payer: protected_user.pubkey(),
         look_up_tables: None,
         ixs: vec![
             blackhat_program
@@ -54,7 +53,6 @@ async fn test_hijack_account_ownership() {
                 .ix(),
             program
                 .assert_account_info(
-                    protected_user.pubkey(),
                     protected_user.pubkey(),
                     lighthouse::types::AccountInfoAssertion::Owner(
                         system_program::id(),
@@ -65,7 +63,11 @@ async fn test_hijack_account_ownership() {
                 .ix(),
         ],
     }
-    .to_transaction_and_sign(vec![&protected_user], context.get_blockhash())
+    .to_transaction_and_sign(
+        vec![&protected_user],
+        protected_user.encodable_pubkey(),
+        context.get_blockhash(),
+    )
     .unwrap();
 
     process_transaction_assert_failure(
@@ -92,7 +94,6 @@ async fn test_account_balance() {
 
     let mut tx_builder = program.assert_account_info(
         user.encodable_pubkey(),
-        user.encodable_pubkey(),
         AccountInfoAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
         Some(AssertionConfigV1 { verbose: true }),
     );
@@ -100,7 +101,11 @@ async fn test_account_balance() {
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(vec![&user], context.get_blockhash())
+            .to_transaction_and_sign(
+                vec![&user],
+                user.encodable_pubkey(),
+                context.get_blockhash(),
+            )
             .unwrap(),
     )
     .await

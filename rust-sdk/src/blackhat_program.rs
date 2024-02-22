@@ -11,7 +11,6 @@ pub struct BlackhatProgram {}
 impl BlackhatProgram {
     fn tx_builder(&self, ixs: Vec<Instruction>, payer: Pubkey) -> TxBuilder {
         TxBuilder {
-            payer,
             ixs,
             look_up_tables: None,
         }

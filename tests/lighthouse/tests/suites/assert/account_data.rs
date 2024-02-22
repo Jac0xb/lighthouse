@@ -23,7 +23,6 @@ async fn test_borsh_account_data() {
         ixs: vec![
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 8,
@@ -34,7 +33,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 9,
@@ -45,7 +43,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 10,
@@ -59,7 +56,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 12,
@@ -73,7 +69,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 14,
@@ -87,7 +82,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 18,
@@ -101,7 +95,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 22,
@@ -115,7 +108,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 30,
@@ -129,7 +121,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 38,
@@ -143,7 +134,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 54,
@@ -157,7 +147,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 70,
@@ -171,7 +160,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 102,
@@ -182,7 +170,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 103,
@@ -193,7 +180,6 @@ async fn test_borsh_account_data() {
                 .ix(),
             program
                 .assert_account_data(
-                    user.encodable_pubkey(),
                     test_account.encodable_pubkey(),
                     AccountDataAssertion {
                         offset: 105,
@@ -203,14 +189,17 @@ async fn test_borsh_account_data() {
                 )
                 .ix(),
         ],
-        payer: user.encodable_pubkey(),
         look_up_tables: None,
     };
 
     process_transaction_assert_success(
         context,
-        tx.to_transaction_and_sign(vec![&user], context.get_blockhash())
-            .unwrap(),
+        tx.to_transaction_and_sign(
+            vec![&user],
+            user.encodable_pubkey(),
+            context.get_blockhash(),
+        )
+        .unwrap(),
     )
     .await
     .unwrap();
