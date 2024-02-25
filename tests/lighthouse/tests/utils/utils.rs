@@ -10,7 +10,7 @@ use solana_sdk::signature::Keypair;
 use solana_sdk::transaction::{Transaction, TransactionError};
 
 pub async fn process_transaction(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: &Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
     let result: solana_banks_interface::BanksTransactionResultWithMetadata = context
@@ -23,7 +23,7 @@ pub async fn process_transaction(
 }
 
 pub async fn process_transaction_assert_success(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
     let tx_metadata = process_transaction(context, &tx).await;
@@ -52,7 +52,7 @@ pub async fn process_transaction_assert_success(
 }
 
 pub async fn process_transaction_assert_failure(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: Transaction,
     expected_tx_error: TransactionError,
     log_match_regex: Option<&[String]>,

@@ -19,14 +19,12 @@ async fn test_basic() {
         Some(AssertionConfigV1 { verbose: true }),
     );
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(
-                vec![&user],
-                user.encodable_pubkey(),
-                context.get_blockhash(),
-            )
+            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
     )
     .await

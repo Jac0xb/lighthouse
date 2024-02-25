@@ -61,14 +61,12 @@ async fn test_basic() {
         None,
     );
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(
-                vec![&user],
-                user.encodable_pubkey(),
-                context.get_blockhash(),
-            )
+            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
     )
     .await
@@ -108,14 +106,12 @@ async fn set_token_close_authority() {
         spl_token::instruction::AuthorityType::CloseAccount,
     );
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(
-                vec![&user],
-                user.encodable_pubkey(),
-                context.get_blockhash(),
-            )
+            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
     )
     .await
@@ -142,7 +138,7 @@ async fn set_token_close_authority() {
         ],
         Some(&bad_actor.pubkey()),
         &[&bad_actor],
-        context.get_blockhash(),
+        context.get_blockhash().await,
     );
 
     process_transaction_assert_failure(
@@ -182,7 +178,7 @@ async fn set_token_close_authority_native() {
         ],
         Some(&user.pubkey()),
         &[&user],
-        context.get_blockhash(),
+        context.get_blockhash().await,
     );
 
     process_transaction_assert_success(context, tx)
@@ -213,7 +209,7 @@ async fn set_token_close_authority_native() {
         .to_transaction_and_sign(
             vec![&user],
             user.encodable_pubkey(),
-            context.get_blockhash(),
+            context.get_blockhash().await,
         )
         .unwrap();
 
@@ -247,10 +243,10 @@ async fn set_token_close_authority_native() {
         ],
         Some(&bad_actor.pubkey()),
         &[&bad_actor],
-        context.get_blockhash(),
+        context.get_blockhash().await,
     );
 
-    tx.message.recent_blockhash = context.get_blockhash();
+    tx.message.recent_blockhash = context.get_blockhash().await;
 
     process_transaction_assert_failure(
         context,
@@ -289,6 +285,8 @@ async fn set_token_owner_attack_assert_owner_equal() {
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_failure(
         context,
         TxBuilder {
@@ -311,11 +309,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
             ],
             look_up_tables: None,
         }
-        .to_transaction_and_sign(
-            vec![&user],
-            user.encodable_pubkey(),
-            context.get_blockhash(),
-        )
+        .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
         .unwrap(),
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
@@ -350,6 +344,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
         .unwrap();
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
+    let blockhash = context.get_blockhash().await;
 
     process_transaction_assert_failure(
         context,
@@ -373,11 +368,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
             ],
             look_up_tables: None,
         }
-        .to_transaction_and_sign(
-            vec![&user],
-            user.encodable_pubkey(),
-            context.get_blockhash(),
-        )
+        .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
         .unwrap(),
         to_transaction_error(1, LighthouseError::AssertionFailed),
         None,
@@ -434,7 +425,7 @@ async fn test_drain_token_account() {
         .to_transaction_and_sign(
             vec![&user],
             user.encodable_pubkey(),
-            context.get_blockhash(),
+            context.get_blockhash().await,
         )
         .unwrap();
 

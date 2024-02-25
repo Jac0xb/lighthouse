@@ -2258,6 +2258,7 @@ dependencies = [
  "regex",
  "rust_sdk",
  "solana-banks-interface",
+ "solana-client",
  "solana-program",
  "solana-program-test",
  "solana-sdk",

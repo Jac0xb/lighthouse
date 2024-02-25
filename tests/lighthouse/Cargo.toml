@@ -38,5 +38,6 @@ rust_sdk = { path = "../../rust-sdk" }
 solana-vote-program = "1.18.1"
 rand = "0.8.4"
 borsh = "^0.10.0"
+solana-client = "~1.18.1"
 
 [dev-dependencies]

@@ -1,6 +1,6 @@
 use crate::utils::context::TestContext;
 use crate::utils::utils::process_transaction_assert_success;
-use crate::utils::{create_test_account, create_user};
+use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse::types::{
     AccountDataAssertion, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
@@ -14,8 +14,10 @@ use solana_sdk::signer::EncodableKeypair;
 #[tokio::test]
 async fn test_borsh_account_data() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
-    let user = create_user(context).await.unwrap();
+    let program = LighthouseProgram {};
+    let user = create_user_with_balance(context, 10e9 as u64)
+        .await
+        .unwrap();
 
     let test_account = create_test_account(context, &user, false).await.unwrap();
 
@@ -192,79 +194,13 @@ async fn test_borsh_account_data() {
         look_up_tables: None,
     };
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_success(
         context,
-        tx.to_transaction_and_sign(
-            vec![&user],
-            user.encodable_pubkey(),
-            context.get_blockhash(),
-        )
-        .unwrap(),
+        tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
+            .unwrap(),
     )
     .await
     .unwrap();
-
-    // process_transaction_assert_success(
-    //     context,
-    //     program
-    //         .create_assert_multi(
-    //             user.encodable_pubkey(),
-    //             vec![
-    //                 Assertion::AccountData(8, DataValueAssertion::U8(1, IntegerOperator::Equal)),
-    //                 Assertion::AccountData(
-    //                     9,
-    //                     DataValueAssertion::I8(-1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     10,
-    //                     DataValueAssertion::U16((u8::MAX as u16) + 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     12,
-    //                     DataValueAssertion::I16((i8::MIN as i16) - 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     14,
-    //                     DataValueAssertion::U32((u16::MAX as u32) + 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     18,
-    //                     DataValueAssertion::I32((i16::MIN as i32) - 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     22,
-    //                     DataValueAssertion::U64((u32::MAX as u64) + 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     30,
-    //                     DataValueAssertion::I64((i32::MIN as i64) - 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     38,
-    //                     DataValueAssertion::U128((u64::MAX as u128) + 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     54,
-    //                     DataValueAssertion::I128((i64::MIN as i128) - 1, IntegerOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     70,
-    //                     DataValueAssertion::Bytes(vec![u8::MAX; 32], EquatableOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     102,
-    //                     DataValueAssertion::Bool(true, EquatableOperator::Equal),
-    //                 ),
-    //                 Assertion::AccountData(
-    //                     103,
-    //                     DataValueAssertion::Bool(false, EquatableOperator::Equal),
-    //                 ),
-    //             ],
-    //             vec![test_account.encodable_pubkey()],
-    //         )
-    //         .to_transaction_and_sign(vec![&user], context.get_blockhash())
-    //         .unwrap(),
-    // )
-    // .await
-    // .unwrap();
 }
