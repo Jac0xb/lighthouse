@@ -2180,17 +2180,11 @@ dependencies = [
 name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
- "anchor-lang",
- "anchor-spl",
- "async-trait",
- "bytemuck",
+ "borsh 0.10.3",
  "kaigan",
  "lighthouse",
- "num-traits",
  "solana-program",
  "solana-sdk",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]

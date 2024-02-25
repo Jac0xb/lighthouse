@@ -1,5 +1,5 @@
 use crate::TxBuilder;
-use anchor_lang::*;
+use borsh::{BorshDeserialize, BorshSerialize};
 use kaigan::types::RemainderVec;
 use lighthouse::{
     instruction::LighthouseInstruction,
@@ -13,6 +13,7 @@ use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
 };
+use solana_sdk::system_program;
 
 pub struct LighthouseProgram {}
 
