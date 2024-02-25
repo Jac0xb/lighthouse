@@ -3,7 +3,7 @@ pub mod error;
 pub mod utils;
 
 use anchor_spl::{associated_token, token::Mint};
-use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
+use lighthouse_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::{

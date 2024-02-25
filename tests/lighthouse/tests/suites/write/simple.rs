@@ -1,14 +1,14 @@
 use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_memory_account, create_test_account, create_user};
 use lighthouse::types::{Assertion, ComparableOperator, DataValueAssertion, WriteType};
-use rust_sdk::{find_memory_account, LighthouseProgram};
+use lighthouse_sdk::{find_memory_account, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
 #[tokio::test]
 async fn test_write() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     // Create test account

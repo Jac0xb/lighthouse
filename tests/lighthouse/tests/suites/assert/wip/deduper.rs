@@ -175,7 +175,7 @@ async fn test_pattern() {
 #[tokio::test]
 async fn test_dedupe() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = Program::new(context.client());
+    let program = Program::new(context.client());
     let user = create_user(context).await.unwrap();
 
     let keypair_a = Keypair::new();

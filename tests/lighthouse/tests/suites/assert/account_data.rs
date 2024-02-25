@@ -4,7 +4,7 @@ use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse::types::{
     AccountDataAssertion, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
-use rust_sdk::{LighthouseProgram, TxBuilder};
+use lighthouse_sdk::{LighthouseProgram, TxBuilder};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
