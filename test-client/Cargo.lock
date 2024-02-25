@@ -2339,14 +2339,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "lighthouse-sdk"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "async-trait",
+ "blackhat",
+ "borsh 0.9.3",
+ "bytemuck",
+ "kaigan",
+ "lighthouse",
+ "num-traits",
+ "rand 0.8.5",
+ "solana-banks-interface",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "lighthouse_test_client"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
  "clap 4.5.1",
  "lighthouse",
+ "lighthouse-sdk",
  "rayon",
- "rust_sdk",
  "serde_json",
  "solana-client",
  "solana-program",
@@ -3381,28 +3403,6 @@ checksum = "c247d24e63230cdb56463ae328478bd5eac8b8faa8c69461a77e8e323afac90e"
 dependencies = [
  "libc",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "rust_sdk"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "async-trait",
- "blackhat",
- "borsh 0.9.3",
- "bytemuck",
- "kaigan",
- "lighthouse",
- "num-traits",
- "rand 0.8.5",
- "solana-banks-interface",
- "solana-program",
- "solana-program-test",
- "solana-sdk",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]

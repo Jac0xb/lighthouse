@@ -7,7 +7,7 @@ use lighthouse::error::LighthouseError;
 use lighthouse::types::{
     AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
 };
-use rust_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
+use lighthouse_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
 use solana_program::system_program;
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
@@ -15,8 +15,8 @@ use solana_sdk::signer::{EncodableKeypair, Signer};
 #[tokio::test]
 async fn test_hijack_account_ownership() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
-    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let program = LighthouseProgram {};
+    let blackhat_program = blackhat_program::BlackhatProgram {};
     let unprotected_user = create_user(context).await.unwrap();
     let bad_fee_payer = create_user(context).await.unwrap();
 
@@ -83,7 +83,7 @@ async fn test_hijack_account_ownership() {
 #[tokio::test]
 async fn test_account_balance() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let user_balance = context
