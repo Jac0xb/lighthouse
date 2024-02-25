@@ -373,17 +373,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 
 [[package]]
-name = "async-trait"
-version = "0.1.77"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c980ee35e870bd1a4d2c8294d4c04d0499e67bca1e4b5cefcc693c2fa00caea9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.48",
-]
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1258,17 +1247,11 @@ dependencies = [
 name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
- "anchor-lang",
- "anchor-spl",
- "async-trait",
- "bytemuck",
+ "borsh 0.10.3",
  "kaigan",
  "lighthouse",
- "num-traits",
  "solana-program",
  "solana-sdk",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]
