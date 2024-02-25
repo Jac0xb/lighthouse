@@ -1,8 +1,8 @@
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
-use rust_sdk::blackhat_program::BlackhatProgram;
-use rust_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
+use lighthouse_sdk::blackhat_program::BlackhatProgram;
+use lighthouse_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
@@ -21,7 +21,7 @@ use crate::utils::{create_mint, create_user, CreateMintParameters};
 #[tokio::test]
 async fn test_basic() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let (tx, mint) = create_mint(
@@ -77,7 +77,7 @@ async fn test_basic() {
 #[tokio::test]
 async fn set_token_close_authority() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -154,8 +154,8 @@ async fn set_token_close_authority() {
 #[tokio::test]
 async fn set_token_close_authority_native() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
-    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let program = LighthouseProgram {};
+    let blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -261,8 +261,8 @@ async fn set_token_close_authority_native() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_owner_equal() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
-    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let program = LighthouseProgram {};
+    let blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -321,8 +321,8 @@ async fn set_token_owner_attack_assert_owner_equal() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_token_owner_derived() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
-    let mut blackhat_program = blackhat_program::BlackhatProgram {};
+    let program = LighthouseProgram {};
+    let blackhat_program = blackhat_program::BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -380,8 +380,8 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
 #[tokio::test]
 async fn test_drain_token_account() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut lighthouse_program = LighthouseProgram {};
-    let mut blackhat_program = BlackhatProgram {};
+    let lighthouse_program = LighthouseProgram {};
+    let blackhat_program = BlackhatProgram {};
 
     let drainer = Keypair::new();
     let user = create_user(context).await.unwrap();

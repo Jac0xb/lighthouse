@@ -9,7 +9,7 @@ use lighthouse::types::{
     AccountInfoAssertion, ComparableOperator, EquatableOperator, TokenAccountAssertion,
 };
 use lighthouse::{error::LighthouseError, types::Assertion};
-use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
+use lighthouse_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::{signature::Keypair, signer::Signer};
@@ -23,7 +23,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 // async fn test_bitflip_drain_token_account() {
 //     let context = &mut TestContext::new().await.unwrap();
 //     let mut lighthouse_program = LighthouseProgram {};
-//     let mut blackhat_program = BlackhatProgram {};
+//     let blackhat_program = BlackhatProgram {};
 
 //     let drainer = Keypair::new();
 //     let user = create_user(context).await.unwrap();

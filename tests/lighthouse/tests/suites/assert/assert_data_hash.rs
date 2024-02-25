@@ -1,7 +1,7 @@
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{Assertion, AssertionConfigV1, EquatableOperator, Operator};
-use rust_sdk::LighthouseProgram;
+use lighthouse_sdk::LighthouseProgram;
 use solana_program::keccak;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -15,7 +15,7 @@ use crate::utils::{create_mint, create_test_account, create_user, mint_to, Creat
 #[tokio::test]
 async fn test_basic() {
     let ctx = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let user = create_user(ctx).await.unwrap();
 
     let test_account = create_test_account(ctx, &user, false).await.unwrap();

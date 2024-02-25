@@ -1,7 +1,8 @@
 #!/bin/bash
 
-EXTERNAL_ID=("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s" "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK" "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV")
-EXTERNAL_SO=("mpl_token_metadata.so" "spl_account_compression.so" "spl_noop.so")
+EXTERNAL_ID=("")
+EXTERNAL_SO=("")
+
 
 # output colours
 RED() { echo $'\e[1;31m'$1$'\e[0m'; }

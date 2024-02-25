@@ -2245,6 +2245,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "lighthouse-sdk"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "async-trait",
+ "blackhat",
+ "borsh 0.9.3",
+ "bytemuck",
+ "kaigan",
+ "lighthouse",
+ "num-traits",
+ "rand 0.8.5",
+ "solana-banks-interface",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "linux-raw-sys"
 version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3271,28 +3293,6 @@ checksum = "c247d24e63230cdb56463ae328478bd5eac8b8faa8c69461a77e8e323afac90e"
 dependencies = [
  "libc",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "rust_sdk"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "async-trait",
- "blackhat",
- "borsh 0.9.3",
- "bytemuck",
- "kaigan",
- "lighthouse",
- "num-traits",
- "rand 0.8.5",
- "solana-banks-interface",
- "solana-program",
- "solana-program-test",
- "solana-sdk",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]

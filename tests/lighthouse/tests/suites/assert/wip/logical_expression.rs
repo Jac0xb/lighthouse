@@ -16,7 +16,7 @@ use crate::utils::{
 #[tokio::test]
 async fn test_logical_expression() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = Program::new(context.client());
+    let program = Program::new(context.client());
     let user = create_user(context).await.unwrap();
 
     create_test_account(context, &user).await.unwrap();

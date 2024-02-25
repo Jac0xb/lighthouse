@@ -24,7 +24,7 @@ impl LighthouseProgram {
         }
     }
 
-    pub fn entrypoint(&self, payer: Pubkey) -> TxBuilder {
+    pub fn entrypoint(&self) -> TxBuilder {
         self.tx_builder(vec![Instruction {
             program_id: lighthouse::ID,
             accounts: vec![],

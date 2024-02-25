@@ -7,7 +7,7 @@ use lighthouse::types::{
     AccountInfoAssertion, ComparableOperator, EquatableOperator, KnownProgram, MetaAssertion,
     StakeAccountAssertion, StakeAssertion,
 };
-use rust_sdk::LighthouseProgram;
+use lighthouse_sdk::LighthouseProgram;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_program::system_instruction;
@@ -71,7 +71,6 @@ fn main() {
     let stake_account = StakeStateV2::deserialize(stake_data).unwrap();
 
     println!("Vote account data: {:?}", vote_account);
-
     println!("Stake account data: {:?}", stake_account);
 
     // StakeStateV2::try_from(account_data.data.as_slice()).unwrap();
@@ -271,7 +270,7 @@ fn build_assert_stake_transaction(
             )
         }
         StakeStateV2::RewardsPool => panic!("Stake account is a rewards pool."),
-        StakeStateV2::Stake(meta, stake, stake_flags) => {
+        StakeStateV2::Stake(meta, stake, _stake_flags) => {
             let lighthouse_program = LighthouseProgram {};
 
             Transaction::new_signed_with_payer(

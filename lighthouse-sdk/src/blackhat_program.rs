@@ -9,7 +9,7 @@ use crate::TxBuilder;
 pub struct BlackhatProgram {}
 
 impl BlackhatProgram {
-    fn tx_builder(&self, ixs: Vec<Instruction>, payer: Pubkey) -> TxBuilder {
+    fn tx_builder(&self, ixs: Vec<Instruction>) -> TxBuilder {
         TxBuilder {
             ixs,
             look_up_tables: None,
@@ -27,34 +27,28 @@ impl BlackhatProgram {
 
         let data = blackhat::instruction::CreateTestAccountV1 { random };
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            signer,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 
-    pub fn drain_solana(&mut self, victim: Pubkey, bad_actor: Pubkey) -> TxBuilder {
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: blackhat::accounts::DrainAccount {
-                    system_program: system_program::id(),
-                    victim,
-                    bad_actor,
-                }
-                .to_account_metas(None),
-                data: blackhat::instruction::DrainAccount {}.data(),
-            }],
-            victim,
-        )
+    pub fn drain_solana(&self, victim: Pubkey, bad_actor: Pubkey) -> TxBuilder {
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: blackhat::accounts::DrainAccount {
+                system_program: system_program::id(),
+                victim,
+                bad_actor,
+            }
+            .to_account_metas(None),
+            data: blackhat::instruction::DrainAccount {}.data(),
+        }])
     }
 
     pub fn drain_token_account(
-        &mut self,
+        &self,
         victim: Pubkey,
         bad_actor: Pubkey,
         mint: Pubkey,
@@ -72,17 +66,14 @@ impl BlackhatProgram {
 
         let data = blackhat::instruction::DrainTokenAccount {};
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            victim,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 
-    pub fn enable_bitflip(&mut self, payer: Pubkey, pda_bytes: [u8; 32]) -> TxBuilder {
+    pub fn enable_bitflip(&self, payer: Pubkey, pda_bytes: [u8; 32]) -> TxBuilder {
         let bit_flipper = find_bit_flipper(pda_bytes).0;
 
         let accounts = blackhat::accounts::EnableBitflip {
@@ -94,18 +85,15 @@ impl BlackhatProgram {
 
         let data = blackhat::instruction::EnableBitflip { pda_bytes };
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            bit_flipper,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 
     pub fn bitflip_drain_token_account(
-        &mut self,
+        &self,
         victim: Pubkey,
         bad_actor: Pubkey,
         mint: Pubkey,
@@ -125,18 +113,15 @@ impl BlackhatProgram {
 
         let data = blackhat::instruction::BitflipDrainTokenAccount {};
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            victim,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 
     pub fn switch_token_account_authority(
-        &mut self,
+        &self,
         victim: Pubkey,
         new_authority: Option<Pubkey>,
         token_program_owned_account: Pubkey,
@@ -153,17 +138,14 @@ impl BlackhatProgram {
             new_authority,
         };
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            victim,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 
-    pub fn hijack_account_ownership(&mut self, victim: Pubkey) -> TxBuilder {
+    pub fn hijack_account_ownership(&self, victim: Pubkey) -> TxBuilder {
         let accounts = blackhat::accounts::HijackAccountOwnership {
             victim,
             program: blackhat::id(),
@@ -172,14 +154,11 @@ impl BlackhatProgram {
 
         let data = blackhat::instruction::HijackAccountOwnership {};
 
-        self.tx_builder(
-            vec![Instruction {
-                program_id: blackhat::id(),
-                accounts: accounts.to_account_metas(None),
-                data: data.data(),
-            }],
-            victim,
-        )
+        self.tx_builder(vec![Instruction {
+            program_id: blackhat::id(),
+            accounts: accounts.to_account_metas(None),
+            data: data.data(),
+        }])
     }
 }
 
