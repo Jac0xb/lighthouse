@@ -24,21 +24,21 @@ rc = []
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
-solana-program = "~1.18.1"
+solana-program = "1.17.23"
 spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }
 spl-token = { version = ">= 3.5.0, < 5.0", features = ["no-entrypoint"] }
 async-trait = "0.1.71"
-solana-program-test = "~1.18.1"
-solana-sdk = "~1.18.1"
+solana-program-test = "1.17.23"
+solana-sdk = "1.17.23"
 solana-banks-interface = "1.14.10"
 regex = "1.5.4"
 lighthouse = { path = "../../programs/lighthouse/program" }
 blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }
 lighthouse-sdk = { path = "../../lighthouse-sdk" }
 blackhat-sdk = { path = "../../blackhat-sdk" }
-solana-vote-program = "1.18.1"
+solana-vote-program = "1.17.23"
 rand = "0.8.4"
 borsh = "^0.10.0"
-solana-client = "~1.18.1"
+solana-client = "1.17.23"
 
 [dev-dependencies]

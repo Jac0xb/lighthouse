@@ -8,11 +8,11 @@ description = "A simple CLI application to test Lighthouse on Solana network"
 # Define your dependencies here
 [dependencies]
 clap = { version = "^4.5.1", features = ["derive"] }
-solana-sdk = "~1.18.1"
+solana-sdk = "1.17.23"
 lighthouse = { path = "../programs/lighthouse/program" }
 lighthouse-sdk = { path = "../lighthouse-sdk" }
 serde_json = "1.0.114"
-solana-program = "~1.18.1"
-solana-client = "~1.18.1"
+solana-program = "1.17.23"
+solana-client = "1.17.23"
 rayon = "1.8.1"
 borsh = "^0.10.0"
