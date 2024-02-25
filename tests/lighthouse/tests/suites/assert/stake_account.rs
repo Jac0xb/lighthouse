@@ -1,10 +1,10 @@
 use crate::utils::context::TestContext;
+use crate::utils::create_user_with_balance;
 use crate::utils::utils::process_transaction_assert_success;
-use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse::types::{
     ComparableOperator, EquatableOperator, MetaAssertion, StakeAccountAssertion, StakeAccountState,
 };
-use rust_sdk::LighthouseProgram;
+use lighthouse_sdk::LighthouseProgram;
 use solana_client::rpc_client::RpcClient;
 use solana_program_test::tokio;
 use solana_program_test::tokio::task::spawn_blocking;

@@ -1,11 +1,11 @@
 [package]
-name = "rust_sdk"
+name = "lighthouse-sdk"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <youremail@example.com>"]
-description = "A Rust SDK for something."
-repository = "https://github.com/yourusername/rust_sdk"
-license = "MIT OR Apache-2.0"
+authors = ["Jac0xb"]
+description = "A sdk to build transactions for lighthouse protocol"
+repository = "https://github.com/Jac0xb/lighthouse"
+license-file = "../LICENSE"
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }

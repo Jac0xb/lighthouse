@@ -1,5 +1,5 @@
 use lighthouse::types::{Assertion, DataValue, Operator, WriteType};
-use rust_sdk::{find_memory_account, LighthouseProgram};
+use lighthouse_sdk::{find_memory_account, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::{signer::EncodableKeypair, transaction::Transaction};
 
@@ -9,7 +9,7 @@ use crate::utils::{context::TestContext, create_test_account, create_user};
 #[tokio::test]
 async fn test_create_write_assert_close() {
     let context = &mut TestContext::new().await.unwrap();
-    let mut program = LighthouseProgram {};
+    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let test_account = create_test_account(context, &user, false).await.unwrap();
