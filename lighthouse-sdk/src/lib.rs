@@ -1,4 +1,3 @@
-pub mod blackhat_program;
 pub mod error;
 pub mod lighthouse_program;
 pub mod tx_builder;
