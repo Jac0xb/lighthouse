@@ -47,8 +47,9 @@ fn main() {
     let rpc_url = String::from("https://api.devnet.solana.com");
     let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
 
-    let vote = "HRACkkKxJHZ22QRfky7QEsSRgxiskQVdK23XS13tjEGM";
-    let vote_pubkey = solana_sdk::pubkey::Pubkey::from_str(vote).unwrap();
+    let vote_pubkey =
+        solana_sdk::pubkey::Pubkey::from_str("HRACkkKxJHZ22QRfky7QEsSRgxiskQVdK23XS13tjEGM")
+            .unwrap();
 
     let account_data = connection
         .get_account(&vote_pubkey)
@@ -57,7 +58,6 @@ fn main() {
     let vote_account = VoteState::deserialize(account_data.data.as_slice()).unwrap();
 
     let stake_pubkey = "AnmMkv5yfHVszKAsTYjjNp2xj71zjt6NoUYu2ebkVztc";
-
     let stake_pubkey = solana_sdk::pubkey::Pubkey::from_str(stake_pubkey).unwrap();
 
     let account_data = connection

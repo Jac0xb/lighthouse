@@ -45,7 +45,11 @@ pub async fn create_memory_account(
     let program = LighthouseProgram {};
     let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), 0, size);
     let tx = tx_builder
-        .to_transaction_and_sign(vec![user], user.encodable_pubkey(), context.get_blockhash())
+        .to_transaction_and_sign(
+            vec![user],
+            user.encodable_pubkey(),
+            context.get_blockhash().await,
+        )
         .unwrap();
 
     process_transaction_assert_success(context, tx)
@@ -59,6 +63,13 @@ pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {
     let _ = ctx
         .fund_account(user.pubkey(), DEFAULT_LAMPORTS_FUND_AMOUNT)
         .await;
+
+    Ok(user)
+}
+
+pub async fn create_user_with_balance(ctx: &mut TestContext, balance: u64) -> Result<Keypair> {
+    let user = Keypair::new();
+    let _ = ctx.fund_account(user.pubkey(), balance).await;
 
     Ok(user)
 }
@@ -279,7 +290,11 @@ pub async fn create_test_account(
             account_keypair.encodable_pubkey(),
             random,
         )
-        .to_transaction_and_sign(vec![payer], payer.encodable_pubkey(), ctx.get_blockhash())
+        .to_transaction_and_sign(
+            vec![payer],
+            payer.encodable_pubkey(),
+            ctx.get_blockhash().await,
+        )
         .unwrap();
 
     process_transaction_assert_success(ctx, tx).await.unwrap();

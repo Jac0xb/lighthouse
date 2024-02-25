@@ -26,7 +26,7 @@ async fn test_hijack_account_ownership() {
         .to_transaction_and_sign(
             vec![&unprotected_user, &bad_fee_payer],
             bad_fee_payer.encodable_pubkey(),
-            context.get_blockhash(),
+            context.get_blockhash().await,
         )
         .unwrap();
 
@@ -66,7 +66,7 @@ async fn test_hijack_account_ownership() {
     .to_transaction_and_sign(
         vec![&protected_user],
         protected_user.encodable_pubkey(),
-        context.get_blockhash(),
+        context.get_blockhash().await,
     )
     .unwrap();
 
@@ -98,14 +98,12 @@ async fn test_account_balance() {
         Some(AssertionConfigV1 { verbose: true }),
     );
 
+    let blockhash = context.get_blockhash().await;
+
     process_transaction_assert_success(
         context,
         tx_builder
-            .to_transaction_and_sign(
-                vec![&user],
-                user.encodable_pubkey(),
-                context.get_blockhash(),
-            )
+            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
     )
     .await

@@ -1,20 +1,26 @@
-use core::panic;
-
+use crate::{
+    error::LighthouseError,
+    types::{Assert, EvaluationResult, Operator},
+};
 use crate::{
     types::{ComparableOperator, EquatableOperator, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use core::panic;
 use solana_program::{
     account_info::AccountInfo,
     pubkey::Pubkey,
-    stake::{state::{Meta, Stake, StakeStateV2}}
+    stake::state::{Meta, Stake, StakeStateV2},
 };
 
-use crate::{
-    error::LighthouseError,
-    types::{Assert, EvaluationResult, Operator},
-};
+#[repr(u8)]
+pub enum StakeAccountState {
+    Uninitialized = 0,
+    Initialized = 1,
+    Stake = 2,
+    RewardsPool = 3,
+}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum StakeAccountAssertion {
