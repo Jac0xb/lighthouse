@@ -32,7 +32,7 @@ solana-program-test = "~1.18.1"
 solana-sdk = "~1.18.1"
 solana-banks-interface = "1.14.10"
 regex = "1.5.4"
-lighthouse = { path = "../../programs/lighthouse/program", features = ["no-entrypoint"] }
+lighthouse = { path = "../../programs/lighthouse/program" }
 blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }
 lighthouse-sdk = { path = "../../lighthouse-sdk" }
 blackhat-sdk = { path = "../../blackhat-sdk" }
