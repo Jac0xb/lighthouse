@@ -1,11 +1,9 @@
+use crate::{
+    types::{ComparableOperator, EquatableOperator},
+    utils::Result,
+};
 use anchor_spl::token_interface::spl_token_2022;
 use borsh::{BorshDeserialize, BorshSerialize};
-// use anchor_lang::{
-//     prelude::borsh::{self, BorshDeserialize, BorshSerialize},
-//     Owners, Result,
-// };
-// use anchor_spl::token_interface::{self};
-use crate::utils::Result;
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
 use crate::{
@@ -15,19 +13,22 @@ use crate::{
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum MintAccountField {
-    MintAuthority(Option<Pubkey>),
-    Supply(u64),
-    Decimals(u8),
-    IsInitialized(bool),
-    FreezeAuthority(Option<Pubkey>),
+pub enum MintAccountAssertion {
+    MintAuthority(Option<Pubkey>, EquatableOperator),
+    Supply(u64, ComparableOperator),
+    Decimals(u8, ComparableOperator),
+    IsInitialized(bool, EquatableOperator),
+    FreezeAuthority(Option<Pubkey>, EquatableOperator),
 }
 
-impl Assert<AccountInfo<'_>> for MintAccountField {
+impl Assert<AccountInfo<'_>> for MintAccountAssertion {
+    fn format(&self) -> String {
+        format!("MintAccountAssertion[{:?}]", self)
+    }
+
     fn evaluate(
         &self,
         account: &AccountInfo,
-        operator: &Operator,
         include_output: bool,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
@@ -39,25 +40,10 @@ impl Assert<AccountInfo<'_>> for MintAccountField {
         }
 
         // TODO: Logic to assert on if account is a mint account
-
         let data = account.try_borrow_mut_data().unwrap();
 
-        // let (mint, owner, amount, delegate, state, is_native, delegated_amount, close_authority) =
-        //     array_refs![src, 32, 32, 8, 36, 1, 12, 8, 36];
-        // Ok(Account {
-        //     mint: Pubkey::new_from_array(*mint),
-        //     owner: Pubkey::new_from_array(*owner),
-        //     amount: u64::from_le_bytes(*amount),
-        //     delegate: unpack_coption_key(delegate)?,
-        //     state: AccountState::try_from_primitive(state[0])
-        //         .or(Err(ProgramError::InvalidAccountData))?,
-        //     is_native: unpack_coption_u64(is_native)?,
-        //     delegated_amount: u64::from_le_bytes(*delegated_amount),
-        //     close_authority: unpack_coption_key(close_authority)?,
-        // });
-
         let result = match self {
-            MintAccountField::MintAuthority(pubkey) => {
+            MintAccountAssertion::MintAuthority(pubkey, operator) => {
                 let mint_authority_slice = &data[0..36];
                 let mint_authority = unpack_coption_key(mint_authority_slice)?;
 
@@ -79,24 +65,24 @@ impl Assert<AccountInfo<'_>> for MintAccountField {
                     }
                 }
             }
-            MintAccountField::Supply(supply) => {
+            MintAccountAssertion::Supply(supply, operator) => {
                 let supply_slice = &data[36..44];
                 let actual_supply = u64::from_le_bytes(supply_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_supply, supply, include_output)
             }
-            MintAccountField::Decimals(decimals) => {
+            MintAccountAssertion::Decimals(decimals, operator) => {
                 let decimals_slice = &data[44..45];
                 let actual_decimals = u8::from_le_bytes(decimals_slice.try_into().unwrap());
 
                 operator.evaluate(&actual_decimals, decimals, include_output)
             }
-            MintAccountField::IsInitialized(is_initialized) => {
+            MintAccountAssertion::IsInitialized(is_initialized, operator) => {
                 let actual_is_initialized = (data[45]) != 0;
 
                 operator.evaluate(&actual_is_initialized, is_initialized, include_output)
             }
-            MintAccountField::FreezeAuthority(pubkey) => {
+            MintAccountAssertion::FreezeAuthority(pubkey, operator) => {
                 let freeze_authority_slice = &data[46..82];
 
                 let freeze_authority = unpack_coption_key(freeze_authority_slice)?;
@@ -125,30 +111,6 @@ impl Assert<AccountInfo<'_>> for MintAccountField {
     }
 }
 
-// pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
-//     let tag = &src[0..4];
-//     let body = &src[4..36];
-
-//     match *tag {
-//         [0, 0, 0, 0] => Ok(COption::None),
-//         [1, 0, 0, 0] => Ok(COption::Some(Pubkey::new_from_array(
-//             body.try_into().unwrap(),
-//         ))),
-//         _ => Err(LighthouseError::AccountNotInitialized.into()),
-//     }
-// }
-
-// pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
-//     let tag = &src[0..4];
-//     let body = &src[4..12];
-
-//     match *tag {
-//         [0, 0, 0, 0] => Ok(COption::None),
-//         [1, 0, 0, 0] => Ok(COption::Some(u64::from_le_bytes(body.try_into().unwrap()))),
-//         _ => Err(LighthouseError::AccountNotInitialized.into()),
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     mod evaluate {
@@ -160,7 +122,7 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{Assert, MintAccountField, Operator};
+        use crate::types::{Assert, ComparableOperator, EquatableOperator, MintAccountAssertion};
 
         #[test]
         fn evaluate_mint_account_no_mint_authority_no_freeze_authority() {
@@ -199,11 +161,8 @@ mod tests {
             // Assert on mint_authority
             //
 
-            let result = MintAccountField::MintAuthority(None).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::MintAuthority(None, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -212,8 +171,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountField::MintAuthority(Some(Keypair::new().encodable_pubkey()))
-                .evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::MintAuthority(
+                Some(Keypair::new().encodable_pubkey()),
+                EquatableOperator::Equal,
+            )
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -226,8 +188,8 @@ mod tests {
             // Assert on supply
             //
 
-            let result =
-                MintAccountField::Supply(69).evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::Supply(69, ComparableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -236,8 +198,8 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result =
-                MintAccountField::Supply(1600).evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::Supply(1600, ComparableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -250,8 +212,8 @@ mod tests {
             // Assert on decimals
             //
 
-            let result =
-                MintAccountField::Decimals(2).evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::Decimals(2, ComparableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -260,8 +222,8 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result =
-                MintAccountField::Decimals(3).evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::Decimals(3, ComparableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -274,11 +236,8 @@ mod tests {
             // Assert on is_initialized
             //
 
-            let result = MintAccountField::IsInitialized(true).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::IsInitialized(true, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -287,11 +246,8 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountField::IsInitialized(false).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::IsInitialized(false, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -304,11 +260,8 @@ mod tests {
             // Assert on freeze_authority
             //
 
-            let result = MintAccountField::FreezeAuthority(None).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::FreezeAuthority(None, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -317,8 +270,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountField::FreezeAuthority(Some(Keypair::new().encodable_pubkey()))
-                .evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::FreezeAuthority(
+                Some(Keypair::new().encodable_pubkey()),
+                EquatableOperator::Equal,
+            )
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -367,11 +323,8 @@ mod tests {
             // Assert on mint_authority
             //
 
-            let result = MintAccountField::MintAuthority(None).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::MintAuthority(None, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -380,8 +333,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountField::MintAuthority(Some(freeze_authority.encodable_pubkey()))
-                .evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::MintAuthority(
+                Some(freeze_authority.encodable_pubkey()),
+                EquatableOperator::Equal,
+            )
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -394,11 +350,8 @@ mod tests {
             // Assert on freeze_authority
             //
 
-            let result = MintAccountField::FreezeAuthority(None).evaluate(
-                &account_info,
-                &Operator::Equal,
-                true,
-            );
+            let result = MintAccountAssertion::FreezeAuthority(None, EquatableOperator::Equal)
+                .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -407,8 +360,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = MintAccountField::FreezeAuthority(Some(mint_authority.encodable_pubkey()))
-                .evaluate(&account_info, &Operator::Equal, true);
+            let result = MintAccountAssertion::FreezeAuthority(
+                Some(mint_authority.encodable_pubkey()),
+                EquatableOperator::Equal,
+            )
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

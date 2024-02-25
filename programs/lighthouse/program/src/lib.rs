@@ -1,6 +1,3 @@
-#![allow(clippy::result_large_err)]
-#![allow(clippy::too_many_arguments)]
-
 pub mod error;
 pub mod instruction;
 pub mod processor;
@@ -8,83 +5,152 @@ pub mod types;
 pub mod utils;
 pub mod validations;
 
-pub use crate::instruction::LighthouseInstruction;
+#[cfg(test)]
+pub mod test_utils;
+
 use solana_program::declare_id;
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 
 pub mod lighthouse {
-    use borsh::BorshDeserialize;
-    use solana_program::{
-        account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey,
-    };
-
-    use crate::{
-        instruction::LighthouseInstruction,
+    use self::{
+        error::LighthouseError,
         processor::{
-            AssertContext, AssertMultiContext, CreateMemoryAccountContext,
-            CreateMemoryAccountParameters, WriteContext, WriteParameters,
+            AssertWithAccountContext, AssertWithAccountsContext, CreateMemoryAccountContext,
+            WriteContext,
         },
-        types::{Assertion, AssertionConfigV1},
     };
-
-    use self::error::LighthouseError;
     use super::*;
+    use crate::{instruction::LighthouseInstruction, types::AssertionConfigV1};
+    use borsh::{BorshDeserialize, BorshSerialize};
+    use solana_program::{
+        account_info::AccountInfo,
+        entrypoint::ProgramResult,
+        instruction::{AccountMeta, Instruction},
+        program::invoke,
+        pubkey::Pubkey,
+    };
 
     #[cfg(not(feature = "no-entrypoint"))]
     solana_program::entrypoint!(process_instruction);
-    pub(crate) fn process_instruction(
+    pub fn process_instruction(
         _program_id: &Pubkey,
         accounts: &[AccountInfo],
         instruction_data: &[u8],
     ) -> ProgramResult {
-        let (tag, data) = instruction_data
-            .split_first()
-            .ok_or(LighthouseError::InvalidInstructionData)?;
-
-        let instruction = LighthouseInstruction::try_from(*tag)
+        let mut remaining_instruction_data = instruction_data;
+        let instruction = LighthouseInstruction::deserialize(&mut remaining_instruction_data)
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
-        msg!("Lighthouse instruction: {:?}", instruction);
+        // TODO: printing the instruction name is 500 Compute Units, lets think about that.
+        // msg!("Lighthouse instruction: {:?}", instruction);
 
         match instruction {
-            LighthouseInstruction::Assert => {
-                let context = AssertContext::load(&mut accounts.iter())?;
-                let assertion = Assertion::try_from_slice(data)
-                    .or(Err(LighthouseError::InvalidInstructionData))?;
-
-                processor::v1::assert(
-                    context,
-                    &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
-                )?;
-            }
-            LighthouseInstruction::MultiAssert => {
-                let context = AssertMultiContext::load(&mut accounts.iter())?;
-                let assertions: Vec<Assertion> = Vec::<Assertion>::try_from_slice(data)
-                    .or(Err(LighthouseError::InvalidInstructionData))?;
-
-                processor::v1::assert_multi(
-                    context,
-                    &assertions,
-                    Some(AssertionConfigV1 { verbose: true }),
-                )?;
-            }
-            LighthouseInstruction::CreateMemoryAccount => {
-                let parameters = CreateMemoryAccountParameters::try_from_slice(data)
-                    .or(Err(LighthouseError::InvalidInstructionData))?;
+            LighthouseInstruction::CreateMemoryAccount(parameters) => {
                 let (context, bump_map) =
                     CreateMemoryAccountContext::load(&mut accounts.iter(), &parameters)?;
 
-                processor::v1::create_memory_account(context, parameters, bump_map)?;
+                processor::create_memory_account(context, parameters, bump_map)?;
             }
-            LighthouseInstruction::Write => {
-                let parameters = WriteParameters::try_from_slice(data)
-                    .or(Err(LighthouseError::InvalidInstructionData))?;
-
+            LighthouseInstruction::Write(parameters) => {
                 let context = WriteContext::load(&mut accounts.iter(), &parameters)?;
 
-                processor::v1::write(context, parameters)?;
+                processor::write(context, parameters)?;
+            }
+            LighthouseInstruction::AssertAccountData(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertAccountDataDiff(assertion) => {
+                let context = AssertWithAccountsContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_accounts(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertAccountInfo(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertMintAccount(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertMintAccountMulti(assertions) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                for assertion in assertions.iter() {
+                    invoke(
+                        &Instruction {
+                            program_id: crate::ID,
+                            accounts: vec![AccountMeta::new_readonly(
+                                *context.target_account.key,
+                                false,
+                            )],
+                            data: LighthouseInstruction::AssertMintAccount(assertion.clone())
+                                .try_to_vec()
+                                .unwrap(),
+                        },
+                        accounts,
+                    )?;
+                }
+            }
+            LighthouseInstruction::AssertTokenAccount(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertTokenAccountMulti(assertions) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                for assertion in assertions.iter() {
+                    invoke(
+                        &Instruction {
+                            program_id: crate::ID,
+                            accounts: vec![AccountMeta::new_readonly(
+                                *context.target_account.key,
+                                false,
+                            )],
+                            data: LighthouseInstruction::AssertTokenAccount(assertion.clone())
+                                .try_to_vec()
+                                .unwrap(),
+                        },
+                        accounts,
+                    )?;
+                }
+            }
+            LighthouseInstruction::AssertStakeAccount(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertSysvarClock(assertion) => {
+                processor::assert(&assertion, Some(AssertionConfigV1 { verbose: false }))?;
             }
         }
 
