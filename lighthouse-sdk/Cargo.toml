@@ -8,8 +8,8 @@ repository = "https://github.com/Jac0xb/lighthouse"
 license-file = "../LICENSE"
 
 [dependencies]
-solana-program = "~1.18.1"
-solana-sdk = "~1.18.1"
+solana-program = "1.17.23"
+solana-sdk = "1.17.23"
 lighthouse = { version = "0.1.0", path="../programs/lighthouse/program" }
 kaigan = "=0.2.4"
 borsh = "^0.10.0"
