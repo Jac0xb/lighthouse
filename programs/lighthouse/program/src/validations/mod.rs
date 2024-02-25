@@ -2,45 +2,11 @@ pub mod account;
 
 pub use account::*;
 
-// use crate::program::error::assert_with_msg;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program_error::ProgramError,
-    pubkey::Pubkey, system_program,
+    pubkey::Pubkey,
 };
-use std::{any::Any, ops::Deref};
-
-// #[derive(Clone)]
-// pub struct PDA<'a, 'info> {
-//     info: &'a AccountInfo<'info>,
-// }
-
-// impl<'a, 'info> PDA<'a, 'info> {
-//     pub fn new(
-//         info: &'a AccountInfo<'info>,
-//         known_address: &Pubkey,
-//     ) -> Result<PDA<'a, 'info>, ProgramError> {
-//         assert_with_msg(
-//             info.key == known_address,
-//             ProgramError::InvalidInstructionData,
-//             "Incorrect account key",
-//         )?;
-//         Ok(Self { info })
-//     }
-// }
-
-// impl<'a, 'info> AsRef<AccountInfo<'info>> for PDA<'a, 'info> {
-//     fn as_ref(&self) -> &AccountInfo<'info> {
-//         self.info
-//     }
-// }
-
-// impl<'a, 'info> Deref for PDA<'a, 'info> {
-//     type Target = AccountInfo<'info>;
-
-//     fn deref(&self) -> &Self::Target {
-//         self.info
-//     }
-// }
+use std::ops::Deref;
 
 #[derive(Clone)]
 pub struct Program<'a, 'info> {
@@ -57,6 +23,12 @@ impl<'a, 'info> Program<'a, 'info> {
             ProgramError::IncorrectProgramId,
             "Incorrect program id",
         )?;
+        assert_with_msg(
+            info.executable,
+            ProgramError::IncorrectProgramId,
+            "Isn't a program",
+        )?;
+
         Ok(Self { info })
     }
 }
@@ -131,41 +103,6 @@ impl<'a, 'info> Deref for Signer<'a, 'info> {
         self.info
     }
 }
-
-// #[derive(Clone)]
-// pub struct EmptyAccount<'a, 'info> {
-//     info: &'a AccountInfo<'info>,
-// }
-
-// impl<'a, 'info> EmptyAccount<'a, 'info> {
-//     pub fn new(info: &'a AccountInfo<'info>) -> Result<EmptyAccount<'a, 'info>, ProgramError> {
-//         assert_with_msg(
-//             info.data_is_empty(),
-//             ProgramError::InvalidAccountData,
-//             "Account must be uninitialized",
-//         )?;
-//         assert_with_msg(
-//             info.owner == &system_program::id(),
-//             ProgramError::IllegalOwner,
-//             "Empty accounts must be owned by the system program",
-//         )?;
-//         Ok(Self { info })
-//     }
-// }
-
-// impl<'a, 'info> AsRef<AccountInfo<'info>> for EmptyAccount<'a, 'info> {
-//     fn as_ref(&self) -> &AccountInfo<'info> {
-//         self.info
-//     }
-// }
-
-// impl<'a, 'info> Deref for EmptyAccount<'a, 'info> {
-//     type Target = AccountInfo<'info>;
-
-//     fn deref(&self) -> &Self::Target {
-//         self.info
-//     }
-// }
 
 #[track_caller]
 #[inline(always)]

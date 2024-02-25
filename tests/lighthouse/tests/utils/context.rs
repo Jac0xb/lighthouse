@@ -8,8 +8,8 @@ use solana_sdk::{
 };
 
 pub struct TestContext {
-    program_context: ProgramTestContext,
-    user_accounts: Vec<Keypair>,
+    pub program_context: ProgramTestContext,
+    pub user_accounts: Vec<Keypair>,
 }
 
 pub const DEFAULT_LAMPORTS_FUND_AMOUNT: u64 = 1_000_000_000;
@@ -32,8 +32,11 @@ impl TestContext {
         self.program_context.warp_to_slot(slot)
     }
 
-    pub fn get_blockhash(&self) -> Hash {
-        self.program_context.last_blockhash
+    pub async fn get_blockhash(&mut self) -> Hash {
+        self.program_context
+            .get_new_latest_blockhash()
+            .await
+            .unwrap()
     }
 
     pub async fn new() -> Result<Self> {

@@ -10,7 +10,7 @@ use solana_sdk::signature::Keypair;
 use solana_sdk::transaction::{Transaction, TransactionError};
 
 pub async fn process_transaction(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: &Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
     let result: solana_banks_interface::BanksTransactionResultWithMetadata = context
@@ -23,7 +23,7 @@ pub async fn process_transaction(
 }
 
 pub async fn process_transaction_assert_success(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
     let tx_metadata = process_transaction(context, &tx).await;
@@ -52,9 +52,9 @@ pub async fn process_transaction_assert_success(
 }
 
 pub async fn process_transaction_assert_failure(
-    context: &TestContext,
+    context: &mut TestContext,
     tx: Transaction,
-    expected_error_code: TransactionError,
+    expected_tx_error: TransactionError,
     log_match_regex: Option<&[String]>,
 ) -> Result<(), Error> {
     let tx_metadata = process_transaction(context, &tx).await.unwrap();
@@ -70,10 +70,44 @@ pub async fn process_transaction_assert_failure(
         ));
     }
 
-    let err = tx_metadata.result.unwrap_err();
+    let actual_tx_error = tx_metadata.result.unwrap_err();
 
-    if err != expected_error_code {
-        return Err(Error::UnexpectedErrorCode);
+    if actual_tx_error != expected_tx_error {
+        match &actual_tx_error {
+            TransactionError::InstructionError(ix_index, program_error) => {
+                match &expected_tx_error {
+                    TransactionError::InstructionError(
+                        expected_ix_index,
+                        expected_program_error,
+                    ) => {
+                        if ix_index != expected_ix_index || program_error != expected_program_error
+                        {
+                            return Err(Error::TransactionExpectedFailure(format!(
+                                "Expected error code: {:?}, got: {:?}",
+                                expected_tx_error, &actual_tx_error
+                            )));
+                        }
+                    }
+                    _ => {
+                        return Err(Error::TransactionExpectedFailure(format!(
+                            "Expected error code: {:?}, got: {:?}",
+                            expected_tx_error, actual_tx_error
+                        )));
+                    }
+                }
+
+                return Err(Error::TransactionExpectedFailure(format!(
+                    "Expected error code: {:?}, got: {:?}",
+                    expected_tx_error, program_error
+                )));
+            }
+            _ => {
+                return Err(Error::TransactionExpectedFailure(format!(
+                    "Expected error code: {:?}, got: {:?}",
+                    expected_tx_error, actual_tx_error
+                )));
+            }
+        }
     }
 
     if let Some(log_regex) = log_match_regex {
@@ -108,6 +142,10 @@ pub async fn process_transaction_assert_failure(
 
 pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {
     TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error as u32))
+}
+
+pub fn to_transaction_error_u8(ix_index: u8, program_error: u32) -> TransactionError {
+    TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error))
 }
 
 pub async fn build_tx(

@@ -1,6 +1,6 @@
 use crate::{
     error::LighthouseError,
-    types::{operator::EvaluationResult, Assertion},
+    types::{operator::EvaluationResult, Assert},
 };
 use solana_program::{
     account_info::AccountInfo,
@@ -16,8 +16,8 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
-pub fn print_assertion_result(
-    assertion: &Assertion,
+pub fn print_assertion_result<U, T: Assert<U>>(
+    assertion: &T,
     assertion_index: usize,
     evaluation_result: &EvaluationResult,
 ) {

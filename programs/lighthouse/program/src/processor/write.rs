@@ -9,15 +9,18 @@ use crate::error::LighthouseError;
 
 use crate::types::{AccountInfoData, WriteType, WriteTypeParameter};
 use crate::utils::Result;
-use crate::validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer};
+use crate::validations::{
+    to_checked_account, AccountValidation, CheckedAccount, MemoryAccount, Program, Signer,
+};
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub(crate) struct WriteParameters {
-    pub(crate) memory_index: u8,
-    pub(crate) memory_account_bump: u8,
-    pub(crate) write_type: WriteTypeParameter,
+pub struct WriteParameters {
+    pub memory_index: u8,
+    pub memory_account_bump: u8,
+    pub write_type: WriteTypeParameter,
 }
 
+#[allow(dead_code)]
 pub(crate) struct WriteContext<'a, 'info> {
     pub lighthouse_program: Program<'a, 'info>,
     pub payer: Signer<'a, 'info>,
@@ -52,6 +55,11 @@ impl<'a, 'info> WriteContext<'a, 'info> {
         )?;
         let source_account = next_account_info(account_iter)?.clone();
 
+        if source_account.key.eq(&memory_account.key()) {
+            // TODO: return with better error
+            return Err(LighthouseError::UnauthorizedIxEntry.into());
+        }
+
         Ok(Self {
             lighthouse_program,
             payer,
@@ -61,10 +69,7 @@ impl<'a, 'info> WriteContext<'a, 'info> {
     }
 }
 
-pub(crate) fn write<'info>(
-    context: WriteContext<'_, 'info>,
-    parameters: WriteParameters,
-) -> Result<()> {
+pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Result<()> {
     if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {
         msg!("Stack height is greater than transaction level stack height");
         return Err(LighthouseError::UnauthorizedIxEntry.into());
@@ -98,51 +103,46 @@ pub(crate) fn write<'info>(
         }
     };
 
-    msg!("Memory Data Length {}", memory_data_length);
+    // let data_length = write_type
+    //     .size(Some(&source_account))
+    //     .ok_or(LighthouseError::OutOfRange)?;
 
-    // memory_offset = memory_offset.checked_add(8).ok_or_else(|| {
-    //     msg!("Memory offset overflow");
-    //     LighthouseError::OutOfRange
-    // })?;
-
-    let data_length = write_type.size(Some(&source_account)).ok_or_else(|| {
-        msg!("Write type size is None");
-        LighthouseError::OutOfRange
-    })?;
-
-    if memory_data_length < (memory_offset + data_length) {
-        msg!(
-            "Memory offset overflowed {} < {} + {}",
-            memory_data_length,
-            memory_offset,
-            data_length
-        );
-        return Err(LighthouseError::OutOfRange.into());
-    }
+    // if memory_data_length < (memory_offset + data_length) {
+    //     return Err(LighthouseError::OutOfRange.into());
+    // }
 
     match write_type {
         WriteType::Program => {
             return Err(LighthouseError::Unimplemented.into());
         }
         WriteType::DataValue(borsh_value) => {
-            let data_slice = &(borsh_value.serialize())[0..data_length];
+            let bytes = borsh_value.serialize();
+
+            if (memory_offset + bytes.len()) <= memory_data_length {
+                memory_ref[memory_offset..(memory_offset + bytes.len())].copy_from_slice(&bytes);
+            } else {
+                msg!("DataValue write out of range");
+                return Err(LighthouseError::OutOfRange.into());
+            }
+        }
+        WriteType::AccountBalance => {
+            let data = source_account.lamports();
+            let data_slice = &data.to_le_bytes();
+            let data_length = data_slice.len();
+
             memory_ref[memory_offset..(memory_offset + data_length)]
                 .copy_from_slice(data_slice.as_ref());
         }
-        WriteType::AccountBalance => {
-            if (memory_offset + data_length) <= memory_data_length {
-                let data = source_account.lamports();
-                let data_slice = &data.to_le_bytes();
-
-                memory_ref[memory_offset..(memory_offset + data_length)]
-                    .copy_from_slice(data_slice.as_ref());
-            } else {
-                msg!("Not enough memory to write account balance");
-                return Err(LighthouseError::NotEnoughAccounts.into());
-            }
-        }
-        WriteType::AccountData(account_offset, _) => {
+        WriteType::AccountData(account_offset, data_length) => {
             let account_offset = account_offset as usize;
+            let data_length = if let Some(data_length) = data_length {
+                data_length as usize
+            } else {
+                source_account
+                    .data_len()
+                    .checked_sub(account_offset)
+                    .ok_or(LighthouseError::OutOfRange)?
+            };
 
             let data = source_account.try_borrow_data().map_err(|err| {
                 msg!("Error: {:?}", err);
@@ -154,34 +154,32 @@ pub(crate) fn write<'info>(
                 memory_ref[memory_offset..(memory_offset + data_length)]
                     .copy_from_slice(data_slice);
             } else {
-                msg!("Not enough memory to write account data");
-                return Err(LighthouseError::NotEnoughAccounts.into());
+                return Err(LighthouseError::OutOfRange.into());
             }
         }
         WriteType::AccountInfo => {
-            if (memory_offset + data_length) <= memory_data_length {
-                let account_info = AccountInfoData {
-                    key: *source_account.key,
-                    is_signer: source_account.is_signer,
-                    is_writable: source_account.is_writable,
-                    executable: source_account.executable,
-                    lamports: **source_account.try_borrow_lamports()?, // TODO: make this unwrap nicer
-                    data_length: source_account.try_borrow_data()?.len() as u64, // TODO: make this unwrap nicer
-                    owner: *source_account.owner,
-                    rent_epoch: source_account.rent_epoch,
-                };
+            let account_info = AccountInfoData {
+                key: *source_account.key,
+                is_signer: source_account.is_signer,
+                is_writable: source_account.is_writable,
+                executable: source_account.executable,
+                lamports: **source_account.try_borrow_lamports()?, // TODO: make this unwrap nicer
+                data_length: source_account.try_borrow_data()?.len() as u64, // TODO: make this unwrap nicer
+                owner: *source_account.owner,
+                rent_epoch: source_account.rent_epoch,
+            };
 
-                let data = account_info.try_to_vec()?; // TODO: map this unwrap error
-                let data_slice = &data[0..data_length];
+            let data = account_info.try_to_vec()?; // TODO: map this unwrap error
+            let data_length = data.len();
 
-                memory_ref[memory_offset..(memory_offset + data_length)]
-                    .copy_from_slice(data_slice.as_ref());
-            } else {
-                msg!("Not enough memory to write account info");
-                return Err(LighthouseError::NotEnoughAccounts.into());
-            }
+            let data_slice = &data[0..data_length];
+
+            memory_ref[memory_offset..(memory_offset + data_length)]
+                .copy_from_slice(data_slice.as_ref());
         }
     };
 
     Ok(())
 }
+
+// TODO write tests

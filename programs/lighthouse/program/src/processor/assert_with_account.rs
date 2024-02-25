@@ -2,32 +2,30 @@ use std::slice::Iter;
 
 use crate::{
     error::LighthouseError,
-    types::{Assertion, AssertionConfigV1}, // utils::print_assertion_result,
-    utils::{print_assertion_result, Result},
-    validations::Program,
+    types::{Assert, AssertionConfigV1},
+    utils::print_assertion_result,
+    utils::Result,
 };
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     msg,
 };
 
-pub(crate) struct AssertContext<'a, 'info> {
-    pub(crate) lighthouse_program: Program<'a, 'info>,
+pub(crate) struct AssertWithAccountContext<'info> {
     pub(crate) target_account: AccountInfo<'info>,
 }
 
-impl<'a, 'info> AssertContext<'a, 'info> {
-    pub(crate) fn load(account_iter: &mut Iter<'a, AccountInfo<'info>>) -> Result<Self> {
+impl<'info> AssertWithAccountContext<'info> {
+    pub(crate) fn load(account_iter: &mut Iter<AccountInfo<'info>>) -> Result<Self> {
         Ok(Self {
-            lighthouse_program: Program::new(next_account_info(account_iter)?, &crate::id())?,
             target_account: next_account_info(account_iter)?.clone(),
         })
     }
 }
 
-pub(crate) fn assert(
-    assert_context: AssertContext,
-    assertion: &Assertion,
+pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
+    assert_context: &AssertWithAccountContext<'info>,
+    assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
     let include_output = match &config {

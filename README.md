@@ -73,7 +73,7 @@ pub enum DataValue {
 }
 
 // Used in AccountInfoField assertion to assert about account info.
-pub enum AccountInfoDataField {
+pub enum AccountInfoField {
     Key(Pubkey),
     Lamports(u64),
     DataLength(u64),
@@ -97,7 +97,7 @@ pub enum LegacyTokenAccountField {
 }
 
 pub enum Assertion {
-    AccountInfoField(AccountInfoDataField, Operator),
+    AccountInfoField(AccountInfoField, Operator),
     AccountData(u16, Operator, DataValue),
     LegacyTokenAccountField(LegacyTokenAccountField, Operator),
 }

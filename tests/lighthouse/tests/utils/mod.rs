@@ -6,7 +6,11 @@ use anchor_spl::{associated_token, token::Mint};
 use rust_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
-use solana_sdk::{signature::Keypair, signer::Signer, transaction::Transaction};
+use solana_sdk::{
+    signature::Keypair,
+    signer::{EncodableKeypair, Signer},
+    transaction::Transaction,
+};
 use std::result;
 
 use self::{
@@ -38,11 +42,14 @@ pub async fn create_memory_account(
     user: &Keypair,
     size: u64,
 ) -> Result<()> {
-    let mut program = LighthouseProgram {};
-    let mut tx_builder = program.create_memory_account(user, 0, size);
-    let mut tx = tx_builder.to_transaction().unwrap();
-
-    tx.try_partial_sign(&[user], context.get_blockhash())
+    let program = LighthouseProgram {};
+    let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), 0, size);
+    let tx = tx_builder
+        .to_transaction_and_sign(
+            vec![user],
+            user.encodable_pubkey(),
+            context.get_blockhash().await,
+        )
         .unwrap();
 
     process_transaction_assert_success(context, tx)
@@ -60,29 +67,89 @@ pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {
     Ok(user)
 }
 
-pub async fn create_mint(ctx: &mut TestContext, payer: &Keypair) -> Result<(Transaction, Keypair)> {
+pub async fn create_user_with_balance(ctx: &mut TestContext, balance: u64) -> Result<Keypair> {
+    let user = Keypair::new();
+    let _ = ctx.fund_account(user.pubkey(), balance).await;
+
+    Ok(user)
+}
+
+pub struct CreateMintParameters {
+    pub token_program: Pubkey,
+    pub mint_authority: Option<Option<Pubkey>>,
+    pub freeze_authority: Option<Pubkey>,
+    pub decimals: u8,
+    pub mint_to: Option<(Pubkey, u64)>,
+}
+
+pub async fn create_mint(
+    ctx: &mut TestContext,
+    payer: &Keypair,
+    parameters: CreateMintParameters,
+) -> Result<(Transaction, Keypair)> {
     let mint = Keypair::new();
 
     let mint_rent = Rent::default().minimum_balance(Mint::LEN);
+
+    let mut ixs = Vec::new();
+
     let create_ix = system_instruction::create_account(
         &payer.pubkey(),
         &mint.pubkey(),
         mint_rent,
         Mint::LEN as u64,
-        &spl_token::id(),
+        &parameters.token_program,
     );
-
     let mint_ix = spl_token::instruction::initialize_mint2(
-        &spl_token::id(),
+        &parameters.token_program,
         &mint.pubkey(),
         &payer.pubkey(),
-        None,
-        100,
+        parameters.freeze_authority.as_ref(),
+        parameters.decimals,
     )
     .unwrap();
 
-    let mut tx = Transaction::new_with_payer(&[create_ix, mint_ix], Some(&payer.pubkey()));
+    ixs.push(create_ix);
+    ixs.push(mint_ix);
 
+    if let Some((dest, amount)) = parameters.mint_to {
+        let token_account = associated_token::get_associated_token_address(&dest, &mint.pubkey());
+        let create_account_ix =
+            spl_associated_token_account::instruction::create_associated_token_account(
+                &payer.pubkey(),
+                &dest,
+                &mint.pubkey(),
+                &spl_token::id(),
+            );
+
+        let mint_to_ix = spl_token::instruction::mint_to(
+            &spl_token::id(),
+            &mint.pubkey(),
+            &token_account,
+            &payer.pubkey(),
+            &[],
+            amount,
+        )
+        .unwrap();
+
+        ixs.push(create_account_ix);
+        ixs.push(mint_to_ix);
+    }
+
+    if let Some(mint_authority) = parameters.mint_authority {
+        let set_authority_ix = spl_token::instruction::set_authority(
+            &parameters.token_program,
+            &mint.pubkey(),
+            mint_authority.as_ref(),
+            spl_token::instruction::AuthorityType::MintTokens,
+            &payer.pubkey(),
+            &[],
+        )
+        .unwrap();
+        ixs.push(set_authority_ix);
+    }
+
+    let mut tx = Transaction::new_with_payer(&ixs, Some(&payer.pubkey()));
     let signers: &[Keypair; 2] = &[payer.insecure_clone(), mint.insecure_clone()];
 
     // print all the accounts in tx and is_signer
@@ -107,6 +174,66 @@ pub async fn create_mint(ctx: &mut TestContext, payer: &Keypair) -> Result<(Tran
     .unwrap();
 
     Ok((tx, mint))
+}
+
+pub async fn set_authority_mint(
+    ctx: &mut TestContext,
+    mint: &Pubkey,
+    authority: &Keypair,
+    new_authority: Option<Pubkey>,
+    authority_type: spl_token::instruction::AuthorityType,
+) -> Result<Transaction> {
+    let ix = spl_token::instruction::set_authority(
+        &spl_token::id(),
+        mint,
+        new_authority.as_ref(),
+        authority_type,
+        &authority.pubkey(),
+        &[],
+    )
+    .unwrap();
+
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&authority.pubkey()));
+
+    let signers: &[Keypair; 1] = &[authority.insecure_clone()];
+
+    tx.try_partial_sign(
+        &signers.iter().collect::<Vec<_>>(),
+        ctx.client().get_latest_blockhash().await.unwrap(),
+    )
+    .unwrap();
+
+    Ok(tx)
+}
+
+pub async fn set_authority_token_account(
+    ctx: &mut TestContext,
+    token_account: &Pubkey,
+    authority: &Keypair,
+    new_authority: Option<Pubkey>,
+    authority_type: spl_token::instruction::AuthorityType,
+) -> Result<Transaction> {
+    let ix = spl_token::instruction::set_authority(
+        &spl_token::id(),
+        token_account,
+        new_authority.as_ref(),
+        authority_type,
+        &authority.pubkey(),
+        &[],
+    )
+    .unwrap();
+
+    let mut tx = Transaction::new_with_payer(&[ix], Some(&authority.pubkey()));
+
+    let signers: &[Keypair; 1] = &[authority.insecure_clone()];
+
+    tx.try_partial_sign(
+        &signers.iter().collect::<Vec<_>>(),
+        ctx.client().get_latest_blockhash().await.unwrap(),
+    )
+    .unwrap();
+
+    Ok(tx)
 }
 
 pub async fn mint_to(
@@ -157,14 +284,18 @@ pub async fn create_test_account(
     let account_keypair = Keypair::new();
     let program = BlackhatProgram {};
 
-    let mut tx_builder = program.create_test_account(&payer.pubkey(), &account_keypair, random);
-    let mut tx = tx_builder.to_transaction().unwrap();
-
-    tx.try_partial_sign(
-        &[payer, &account_keypair],
-        ctx.client().get_latest_blockhash().await.unwrap(),
-    )
-    .unwrap();
+    let tx = program
+        .create_test_account(
+            payer.encodable_pubkey(),
+            account_keypair.encodable_pubkey(),
+            random,
+        )
+        .to_transaction_and_sign(
+            vec![payer],
+            payer.encodable_pubkey(),
+            ctx.get_blockhash().await,
+        )
+        .unwrap();
 
     process_transaction_assert_success(ctx, tx).await.unwrap();
 
