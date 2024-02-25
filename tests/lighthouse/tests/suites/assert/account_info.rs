@@ -3,11 +3,12 @@ use crate::utils::create_user;
 use crate::utils::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
+use blackhat_sdk::blackhat_program::BlackhatProgram;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{
     AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
 };
-use lighthouse_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
+use lighthouse_sdk::{LighthouseProgram, TxBuilder};
 use solana_program::system_program;
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
@@ -16,7 +17,7 @@ use solana_sdk::signer::{EncodableKeypair, Signer};
 async fn test_hijack_account_ownership() {
     let context = &mut TestContext::new().await.unwrap();
     let program = LighthouseProgram {};
-    let blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = BlackhatProgram {};
     let unprotected_user = create_user(context).await.unwrap();
     let bad_fee_payer = create_user(context).await.unwrap();
 

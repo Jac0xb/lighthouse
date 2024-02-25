@@ -647,6 +647,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "blackhat-sdk"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "async-trait",
+ "blackhat",
+ "lighthouse-sdk",
+ "solana-program",
+ "solana-sdk",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "blake3"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2251,16 +2266,11 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "async-trait",
- "blackhat",
- "borsh 0.9.3",
  "bytemuck",
  "kaigan",
  "lighthouse",
  "num-traits",
- "rand 0.8.5",
- "solana-banks-interface",
  "solana-program",
- "solana-program-test",
  "solana-sdk",
  "spl-associated-token-account",
  "spl-token",
@@ -2274,6 +2284,7 @@ dependencies = [
  "anchor-spl",
  "async-trait",
  "blackhat",
+ "blackhat-sdk",
  "borsh 0.10.3",
  "lighthouse",
  "lighthouse-sdk",

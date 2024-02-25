@@ -1,8 +1,8 @@
 use anchor_spl::associated_token::get_associated_token_address;
+use blackhat_sdk::blackhat_program::BlackhatProgram;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
-use lighthouse_sdk::blackhat_program::BlackhatProgram;
-use lighthouse_sdk::{blackhat_program, LighthouseProgram, TxBuilder};
+use lighthouse_sdk::{LighthouseProgram, TxBuilder};
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
@@ -77,7 +77,7 @@ async fn test_basic() {
 #[tokio::test]
 async fn set_token_close_authority() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -155,7 +155,7 @@ async fn set_token_close_authority() {
 async fn set_token_close_authority_native() {
     let context = &mut TestContext::new().await.unwrap();
     let program = LighthouseProgram {};
-    let blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -262,7 +262,7 @@ async fn set_token_close_authority_native() {
 async fn set_token_owner_attack_assert_owner_equal() {
     let context = &mut TestContext::new().await.unwrap();
     let program = LighthouseProgram {};
-    let blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -322,7 +322,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
 async fn set_token_owner_attack_assert_token_owner_derived() {
     let context = &mut TestContext::new().await.unwrap();
     let program = LighthouseProgram {};
-    let blackhat_program = blackhat_program::BlackhatProgram {};
+    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
