@@ -9,7 +9,6 @@ use solana_sdk::{
 
 pub struct TestContext {
     pub program_context: ProgramTestContext,
-    pub user_accounts: Vec<Keypair>,
 }
 
 pub const DEFAULT_LAMPORTS_FUND_AMOUNT: u64 = 1_000_000_000;
@@ -41,31 +40,19 @@ impl TestContext {
 
     pub async fn new() -> Result<Self> {
         let program_context = program_test().start_with_context().await;
-
-        let mut ctx = TestContext {
-            program_context,
-            user_accounts: vec![],
-        };
-
-        let user_accounts = vec![
-            Keypair::new(),
-            Keypair::new(),
-            Keypair::new(),
-            Keypair::new(),
-        ];
-
-        for user in user_accounts.iter() {
-            ctx.fund_account(user.pubkey(), DEFAULT_LAMPORTS_FUND_AMOUNT)
-                .await?;
-        }
-
-        ctx.user_accounts = user_accounts;
-
-        Ok(ctx)
+        Ok(TestContext { program_context })
     }
 
     pub fn client(&self) -> BanksClient {
         self.program_context.banks_client.clone()
+    }
+
+    pub async fn get_account(&mut self, pubkey: Pubkey) -> Option<solana_sdk::account::Account> {
+        self.program_context
+            .banks_client
+            .get_account(pubkey)
+            .await
+            .unwrap()
     }
 
     pub async fn fund_account(&mut self, address: Pubkey, lamports: u64) -> Result<()> {

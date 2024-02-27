@@ -15,8 +15,6 @@ pub struct AccountInfoData {
     pub data_length: u64,
     pub owner: Pubkey,
     pub rent_epoch: u64,
-    pub is_signer: bool,
-    pub is_writable: bool,
     pub executable: bool,
 }
 

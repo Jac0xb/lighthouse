@@ -22,6 +22,9 @@ default = []
 rc = []
 
 [dependencies]
+
+
+[dev-dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
 solana-program = "1.17.23"
@@ -33,12 +36,11 @@ solana-sdk = "1.17.23"
 solana-banks-interface = "1.14.10"
 regex = "1.5.4"
 lighthouse = { path = "../../programs/lighthouse/program" }
+test-program = { path = "../../programs/test-program/program", features = ["no-entrypoint"] }
 blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }
 lighthouse-sdk = { path = "../../lighthouse-sdk" }
-blackhat-sdk = { path = "../../blackhat-sdk" }
+lighthouse-client = { path = "../../clients/rust" }
 solana-vote-program = "1.17.23"
 rand = "0.8.4"
 borsh = "^0.10.0"
 solana-client = "1.17.23"
-
-[dev-dependencies]

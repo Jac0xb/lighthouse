@@ -1,4 +1,3 @@
-.anchor
 .DS_Store
 **/.DS_Store
 **/target
@@ -10,4 +9,5 @@ dist
 .crates
 test-programs
 programs/.bin
-.env
+/.env-local
+configs/.programs

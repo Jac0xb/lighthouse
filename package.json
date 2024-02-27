@@ -1,25 +1,25 @@
 {
   "private": true,
   "scripts": {
-    "programs:build": "./configs/scripts/program/build.sh",
-    "programs:test": "RUST_LOG=error ./configs/scripts/program/test.sh",
-    "programs:debug": "./configs/scripts/program/test.sh",
-    "programs:clean": "./configs/scripts/program/clean.sh",
-    "clients:rust:test": "./configs/scripts/client/test-rust.sh",
-    "clients:js:test": "./configs/sripts/client/test-js.sh",
-    "generate": "pnpm generate:idls && pnpm generate:clients",
-    "generate:idls": "node ./configs/shank.cjs",
-    "generate:clients": "node ./configs/kinobi.cjs",
-    "validator": "CI=1 amman start --config ./configs/validator.cjs",
-    "validator:debug": "amman start --config ./configs/validator.cjs",
-    "validator:logs": "CI=1 amman logs",
-    "validator:stop": "amman stop"
+    "programs:build": "bash configs/scripts/env-run.sh ./configs/scripts/program/build.sh",
+    "programs:test": "bash configs/scripts/env-run.sh  ./configs/scripts/program/test.sh",
+    "programs:clean": "bash configs/scripts/env-run.sh ./configs/scripts/program/clean.sh",
+    "clients:rust:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-rust.sh",
+    "clients:js:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-js.sh",
+    "generate": "pnpm run generate:idls && pnpm run generate:clients",
+    "generate:idls": "bash configs/scripts/env-run.sh node ./configs/shank.cjs",
+    "generate:clients": "bash configs/scripts/env-run.sh node ./configs/kinobi.cjs",
+    "validator": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
+    "validator:debug": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
+    "validator:logs": "bash configs/scripts/env-run.sh amman logs",
+    "validator:stop": "bash configs/scripts/env-run.sh -- amman stop"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^0.20.2",
     "@metaplex-foundation/amman": "^0.12.1",
-    "@metaplex-foundation/kinobi": "^0.16.0",
+    "@metaplex-foundation/kinobi": "^0.17.4",
     "@metaplex-foundation/shank-js": "^0.1.5",
-    "typescript": "^4.9.4"
+    "typescript": "^5.3.3"
   },
-  "packageManager": "pnpm@8.2.0"
+  "packageManager": "pnpm@8.9.0"
 }

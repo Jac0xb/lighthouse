@@ -1,5 +1,4 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use kaigan::types::RemainderVec;
 use shank::ShankInstruction;
 
 use crate::{
@@ -10,18 +9,18 @@ use crate::{
     },
 };
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction, Debug)]
 #[rustfmt::skip]
 pub enum LighthouseInstruction {
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "payer", desc = "Payer account")]
-    #[account(2, name = "memory_account", desc = "Memory account")]
+    #[account(1, name = "payer", desc = "Payer account", signer)]
+    #[account(2, name = "memory_account", desc = "Memory account", writable)]
     #[account(3, name = "system_program", desc = "System program")]
     CreateMemoryAccount(CreateMemoryAccountParameters),
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "payer", desc = "Payer account")]
-    #[account(2, name = "memory_account", desc = "Memory account")]
+    #[account(1, name = "payer", desc = "Payer account", signer)]
+    #[account(2, name = "memory_account", desc = "Memory account", writable)]
     #[account(3, name = "source_account", desc = "System program")]
     Write(WriteParameters),
 
@@ -39,14 +38,14 @@ pub enum LighthouseInstruction {
     AssertMintAccount(MintAccountAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
-    AssertMintAccountMulti(RemainderVec<MintAccountAssertion>),
+    AssertMintAccountMulti(Vec<MintAccountAssertion>),
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertTokenAccount(TokenAccountAssertion),
 
     #[account(0, name = "target_account", desc = "Target account")]
     #[account(1, name = "lighthouse_program", desc = "Lighthouse Program")]
-    AssertTokenAccountMulti(RemainderVec::<TokenAccountAssertion>),
+    AssertTokenAccountMulti(Vec<TokenAccountAssertion>),
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertStakeAccount(StakeAccountAssertion),

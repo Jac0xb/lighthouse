@@ -1,9 +1,9 @@
+use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::context::TestContext;
 use crate::utils::create_user;
 use crate::utils::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use blackhat_sdk::blackhat_program::BlackhatProgram;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{
     AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,

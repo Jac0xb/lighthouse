@@ -7,7 +7,6 @@ use crate::{
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use core::panic;
 use solana_program::{
     account_info::AccountInfo,
     pubkey::Pubkey,
@@ -155,8 +154,7 @@ pub enum StakeAssertion {
     DelegationStake(u64, ComparableOperator),
     DelegationActivationEpoch(u64, ComparableOperator),
     DelegationDeactivationEpoch(u64, ComparableOperator),
-    DelegationWarmupCooldownRate(f64, ComparableOperator),
-
+    // DelegationWarmupCooldownRate(f64, ComparableOperator),
     /// stake account's credits observed at the time of delegation
     CreditsObserved(u64, ComparableOperator),
 }
@@ -186,9 +184,9 @@ impl Assert<Stake> for StakeAssertion {
                     deactivation_epoch,
                     include_output,
                 ),
-            StakeAssertion::DelegationWarmupCooldownRate(_warmup_cooldown_rate, _operator) => {
-                panic!("Not implemented");
-            }
+            // StakeAssertion::DelegationWarmupCooldownRate(_warmup_cooldown_rate, _operator) => {
+            //     panic!("Not implemented");
+            // }
             StakeAssertion::CreditsObserved(credits_observed, operator) => {
                 operator.evaluate(&stake.credits_observed, credits_observed, include_output)
             }

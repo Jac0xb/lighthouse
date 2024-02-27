@@ -1,9 +1,10 @@
+use std::collections::HashMap;
 use std::slice::Iter;
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::account_info::{next_account_info, AccountInfo};
 use solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
-use solana_program::msg;
+use solana_program::{msg, pubkey::Pubkey};
 
 use crate::error::LighthouseError;
 
@@ -36,22 +37,19 @@ impl<'a, 'info> WriteContext<'a, 'info> {
         let lighthouse_program = Program::new(next_account_info(account_iter)?, &crate::id())?;
         let payer = Signer::new(next_account_info(account_iter)?)?;
 
-        let memory_account_seeds = [
-            b"memory".as_ref(),
-            payer.key.as_ref(),
-            &[parameters.memory_index],
-        ];
-
-        let (memory_account, _) = to_checked_account::<MemoryAccount>(
-            next_account_info(account_iter)?.clone(),
-            &vec![
+        let bump_map = &mut HashMap::<Pubkey, u8>::new();
+        let memory_account = to_checked_account::<MemoryAccount>(
+            next_account_info(account_iter)?,
+            vec![
                 AccountValidation::IsWritable,
+                AccountValidation::IsInited,
                 AccountValidation::IsProgramDerivedAddress(
-                    &memory_account_seeds,
+                    MemoryAccount::get_seeds(payer.key, parameters.memory_index, None),
                     *lighthouse_program.key,
                     Some(parameters.memory_account_bump),
                 ),
             ],
+            bump_map,
         )?;
         let source_account = next_account_info(account_iter)?.clone();
 
@@ -88,28 +86,28 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
         write_type,
     } = parameters;
 
+    msg!("Memory key: {:?}", memory_account.account_info);
+    msg!(
+        "Account data len: {:?}",
+        memory_account.account_info.data_len()
+    );
     let memory_ref = &mut memory_account.account_info.try_borrow_mut_data()?;
     let memory_data_length = memory_ref.len();
 
     let (memory_offset, write_type) = match write_type {
-        WriteTypeParameter::WriteU8(memory_offset, write_type) => {
-            (memory_offset as usize, write_type)
-        }
-        WriteTypeParameter::WriteU16(memory_offset, write_type) => {
-            (memory_offset as usize, write_type)
-        }
-        WriteTypeParameter::WriteU32(memory_offset, write_type) => {
-            (memory_offset as usize, write_type)
-        }
+        WriteTypeParameter::WriteU8 {
+            offset: memory_offset,
+            write_type,
+        } => (memory_offset as usize, write_type),
+        WriteTypeParameter::WriteU16 {
+            offset: memory_offset,
+            write_type,
+        } => (memory_offset as usize, write_type),
+        WriteTypeParameter::WriteU32 {
+            offset: memory_offset,
+            write_type,
+        } => (memory_offset as usize, write_type),
     };
-
-    // let data_length = write_type
-    //     .size(Some(&source_account))
-    //     .ok_or(LighthouseError::OutOfRange)?;
-
-    // if memory_data_length < (memory_offset + data_length) {
-    //     return Err(LighthouseError::OutOfRange.into());
-    // }
 
     match write_type {
         WriteType::Program => {
@@ -133,7 +131,10 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
             memory_ref[memory_offset..(memory_offset + data_length)]
                 .copy_from_slice(data_slice.as_ref());
         }
-        WriteType::AccountData(account_offset, data_length) => {
+        WriteType::AccountData {
+            offset: account_offset,
+            data_length,
+        } => {
             let account_offset = account_offset as usize;
             let data_length = if let Some(data_length) = data_length {
                 data_length as usize
@@ -141,7 +142,10 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
                 source_account
                     .data_len()
                     .checked_sub(account_offset)
-                    .ok_or(LighthouseError::OutOfRange)?
+                    .ok_or_else(|| {
+                        msg!("Account offset greater than account data length");
+                        LighthouseError::OutOfRange
+                    })?
             };
 
             let data = source_account.try_borrow_data().map_err(|err| {
@@ -154,22 +158,29 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
                 memory_ref[memory_offset..(memory_offset + data_length)]
                     .copy_from_slice(data_slice);
             } else {
+                msg!(
+                    "Account data write out of range {} memory data length {}",
+                    data_length,
+                    memory_data_length
+                );
                 return Err(LighthouseError::OutOfRange.into());
             }
         }
         WriteType::AccountInfo => {
             let account_info = AccountInfoData {
                 key: *source_account.key,
-                is_signer: source_account.is_signer,
-                is_writable: source_account.is_writable,
                 executable: source_account.executable,
-                lamports: **source_account.try_borrow_lamports()?, // TODO: make this unwrap nicer
-                data_length: source_account.try_borrow_data()?.len() as u64, // TODO: make this unwrap nicer
+                lamports: **source_account.try_borrow_lamports()?,
+                data_length: source_account.try_borrow_data()?.len() as u64,
                 owner: *source_account.owner,
                 rent_epoch: source_account.rent_epoch,
             };
 
-            let data = account_info.try_to_vec()?; // TODO: map this unwrap error
+            let data = account_info.try_to_vec().map_err(|err| {
+                msg!("Unable to serialize account info {:?}", err);
+                LighthouseError::SerializationFailed
+            })?;
+
             let data_length = data.len();
 
             let data_slice = &data[0..data_length];

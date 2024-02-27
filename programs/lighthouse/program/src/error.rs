@@ -37,6 +37,10 @@ pub enum LighthouseError {
     AccountDiscriminatorValidationFailed = 6015,
     #[error("AccountValidaitonFailed")]
     AccountValidaitonFailed = 6016,
+    #[error("InvalidProgramAddress")]
+    InvalidProgramAddress = 6017,
+    #[error("SerializationFailed")]
+    SerializationFailed = 6018,
 }
 
 impl From<LighthouseError> for ProgramError {
