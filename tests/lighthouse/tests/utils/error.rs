@@ -7,9 +7,6 @@ pub enum Error {
     AccountNotFound(Pubkey),
     Anchor(anchor_lang::error::Error),
     BanksClient(BanksClientError),
-    // BytemuckPod(PodCastError),
-    // The on-chain (via banks) and locally computed roots for a tree do not match.
-    RootMismatch,
     Signer(SignerError),
     TransactionFailed(String),
     TransactionExpectedFailure(String),

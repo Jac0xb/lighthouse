@@ -1,12 +1,12 @@
 use std::mem;
 
+use crate::utils::find_memory_account;
 use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_memory_account, create_test_account, create_user};
 use lighthouse_client::instructions::{AssertAccountDataBuilder, WriteBuilder};
 use lighthouse_client::types::{
     DataValueAssertion, EquatableOperator, IntegerOperator, WriteType, WriteTypeParameter,
 };
-use lighthouse_sdk::find_memory_account;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::transaction::Transaction;

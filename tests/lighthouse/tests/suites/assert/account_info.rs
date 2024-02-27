@@ -1,22 +1,23 @@
 use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::context::TestContext;
 use crate::utils::create_user;
+use crate::utils::tx_builder::TxBuilder;
 use crate::utils::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use lighthouse::error::LighthouseError;
-use lighthouse::types::{
-    AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
+use lighthouse_client::errors::LighthouseError;
+use lighthouse_client::instructions::{
+    AssertAccountDataBuilder, AssertAccountInfoBuilder, AssertAccountInfoCpiBuilder,
 };
-use lighthouse_sdk::{LighthouseProgram, TxBuilder};
+use lighthouse_client::types::{AccountInfoAssertion, ComparableOperator, EquatableOperator};
 use solana_program::system_program;
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
+use solana_sdk::transaction::Transaction;
 
 #[tokio::test]
 async fn test_hijack_account_ownership() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
     let unprotected_user = create_user(context).await.unwrap();
     let bad_fee_payer = create_user(context).await.unwrap();
@@ -52,16 +53,13 @@ async fn test_hijack_account_ownership() {
             blackhat_program
                 .hijack_account_ownership(protected_user.pubkey())
                 .ix(),
-            program
-                .assert_account_info(
-                    protected_user.pubkey(),
-                    lighthouse::types::AccountInfoAssertion::Owner(
-                        system_program::id(),
-                        EquatableOperator::Equal,
-                    ),
-                    None,
-                )
-                .ix(),
+            AssertAccountInfoBuilder::new()
+                .target_account(protected_user.pubkey())
+                .account_info_assertion(AccountInfoAssertion::Owner(
+                    system_program::id(),
+                    EquatableOperator::Equal,
+                ))
+                .instruction(),
         ],
     }
     .to_transaction_and_sign(
@@ -84,7 +82,6 @@ async fn test_hijack_account_ownership() {
 #[tokio::test]
 async fn test_account_balance() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let user_balance = context
@@ -93,20 +90,20 @@ async fn test_account_balance() {
         .await
         .unwrap();
 
-    let mut tx_builder = program.assert_account_info(
-        user.encodable_pubkey(),
-        AccountInfoAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
-        Some(AssertionConfigV1 { verbose: true }),
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(user.encodable_pubkey())
+            .account_info_assertion(AccountInfoAssertion::Lamports(
+                user_balance - 5000,
+                ComparableOperator::Equal,
+            ))
+            .instruction()],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
     );
 
-    let blockhash = context.get_blockhash().await;
-
-    process_transaction_assert_success(
-        context,
-        tx_builder
-            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
-            .unwrap(),
-    )
-    .await
-    .unwrap();
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 }

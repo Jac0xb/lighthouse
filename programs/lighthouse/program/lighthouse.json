@@ -962,6 +962,26 @@
       }
     },
     {
+      "name": "StakeAccountState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Initialized"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "RewardsPool"
+          }
+        ]
+      }
+    },
+    {
       "name": "StakeAccountAssertion",
       "type": {
         "kind": "enum",
