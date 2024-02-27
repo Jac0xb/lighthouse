@@ -1,5 +1,5 @@
-use blackhat::processor::TestAccountV1;
 use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
+use test_program::processor::TestAccountV1;
 
 pub fn create_test_account() -> TestAccountV1 {
     TestAccountV1 {
@@ -14,8 +14,8 @@ pub fn create_test_account() -> TestAccountV1 {
         u128: (u64::MAX as u128) + 1,              // 30 bytes
         i128: (i64::MIN as i128) - 1,              // 46 bytes
         bytes: [u8::MAX; 32],                      // 62
-        true_: true,                               // 94
-        false_: false,                             // 95
+        true_field: true,                          // 94
+        false_field: false,                        // 95
         option_u8: Some(u8::MAX),                  // 96
         option_u8_none: None,                      // 99
         option_u16: Some(u16::MAX),                // 100

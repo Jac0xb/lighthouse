@@ -3,10 +3,10 @@ use crate::{
     types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::{unpack_coption_key, unpack_coption_u64, Result}, // Assert, EvaluationResult, Operator,
 };
-use anchor_spl::token_interface::spl_token_2022::{self, state::AccountState};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
+use spl_token_2022::state::AccountState;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum TokenAccountAssertion {
@@ -175,18 +175,14 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use anchor_spl::token_interface::spl_token_2022::{
-            self,
-            state::{Account, AccountState},
-        };
+        use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
         };
         use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
         use spl_associated_token_account::get_associated_token_address_with_program_id;
+        use spl_token_2022::state::{Account, AccountState};
         use std::{cell::RefCell, rc::Rc};
-
-        use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
 
         #[test]
         fn evaluate_token_account_no_delegate_no_close_authority() {

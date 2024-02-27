@@ -16,19 +16,9 @@ declare_id!("Drainer1111111111111111111111111111111111111");
 
 #[program]
 pub mod blackhat {
-
-    use core::panic;
-
-    use anchor_spl::token::spl_token::instruction::AuthorityType;
-
     use super::*;
-
-    pub fn create_test_account_v1<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
-        random: bool,
-    ) -> Result<()> {
-        processor::create_test_account(ctx, random)
-    }
+    use anchor_spl::token::spl_token::instruction::AuthorityType;
+    use core::panic;
 
     pub fn drain_account<'info>(
         ctx: Context<'_, '_, '_, 'info, DrainAccount<'info>>,

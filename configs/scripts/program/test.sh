@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# Import utils.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-OUTPUT="./programs/.bin"
-# saves external programs binaries to the output directory
-# source ${SCRIPT_DIR}/dump.sh ${OUTPUT}
-# go to parent folder
-cd $(dirname $(dirname $(dirname $SCRIPT_DIR)))
+source $(dirname $SCRIPT_DIR)/utils.sh
+
+# Save external programs binaries to the output directory.
+source ${SCRIPT_DIR}/dump.sh
+
+# Go to the working directory.
+cd $WORKING_DIR
 
 if [ ! -z "$PROGRAM" ]; then
     PROGRAMS='["'${PROGRAM}'"]'
@@ -15,7 +18,7 @@ if [ -z "$PROGRAMS" ]; then
     PROGRAMS="$(cat .github/.env | grep "PROGRAMS" | cut -d '=' -f 2)"
 fi
 
-# default to input from the command-line
+# Get all command-line arguments.
 ARGS=$*
 
 # command-line arguments override env variable
@@ -30,6 +33,7 @@ PROGRAMS=$(echo $PROGRAMS | jq -c '.[]' | sed 's/"//g')
 WORKING_DIR=$(pwd)
 SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
+# npm run programs:build && npm run programs:test
 
 # for p in ${PROGRAMS[@]}; do
 #     cd ${WORKING_DIR}/programs/${p}

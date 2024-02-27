@@ -1,0 +1,240 @@
+{
+  "version": "0.0.1",
+  "name": "blackhat",
+  "instructions": [
+    {
+      "name": "drainAccount",
+      "accounts": [
+        {
+          "name": "victim",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "badActor",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "drainTokenAccount",
+      "accounts": [
+        {
+          "name": "victim",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "badActor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "victimAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "badActorAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "bitflipDrainTokenAccount",
+      "accounts": [
+        {
+          "name": "victim",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "badActor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bitFlipper",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "victimAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "badActorAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "switchTokenAccountAuthority",
+      "accounts": [
+        {
+          "name": "tokenProgramOwnedAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "currentAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "authorityType",
+          "type": "u8"
+        },
+        {
+          "name": "newAuthority",
+          "type": {
+            "option": "publicKey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "hijackAccountOwnership",
+      "accounts": [
+        {
+          "name": "victim",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "enableBitflip",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bitFipper",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "pdaBytes",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BitFlipper",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unimplemented",
+      "msg": "Unimplemented"
+    },
+    {
+      "code": 6001,
+      "name": "NumericalOverflowError",
+      "msg": "NumericalOverflowError"
+    }
+  ],
+  "metadata": {
+    "address": "\"Drainer1111111111111111111111111111111111111",
+    "origin": "anchor",
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
+  }
+}

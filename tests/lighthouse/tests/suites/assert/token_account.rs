@@ -1,5 +1,5 @@
+use crate::utils::blackhat_program::BlackhatProgram;
 use anchor_spl::associated_token::get_associated_token_address;
-use blackhat_sdk::blackhat_program::BlackhatProgram;
 use lighthouse::error::LighthouseError;
 use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
 use lighthouse_sdk::{LighthouseProgram, TxBuilder};

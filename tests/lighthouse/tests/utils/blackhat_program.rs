@@ -15,24 +15,6 @@ impl BlackhatProgram {
         }
     }
 
-    pub fn create_test_account(&self, signer: Pubkey, account: Pubkey, random: bool) -> TxBuilder {
-        let accounts = blackhat::accounts::CreateTestAccountV1 {
-            system_program: system_program::id(),
-            signer,
-            test_account: account,
-            rent: sysvar::rent::id(),
-            slot_hashes: sysvar::slot_hashes::id(),
-        };
-
-        let data = blackhat::instruction::CreateTestAccountV1 { random };
-
-        self.tx_builder(vec![Instruction {
-            program_id: blackhat::id(),
-            accounts: accounts.to_account_metas(None),
-            data: data.data(),
-        }])
-    }
-
     pub fn drain_solana(&self, victim: Pubkey, bad_actor: Pubkey) -> TxBuilder {
         self.tx_builder(vec![Instruction {
             program_id: blackhat::id(),

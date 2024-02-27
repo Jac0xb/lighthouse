@@ -27,6 +27,7 @@ pub mod lighthouse {
         account_info::AccountInfo,
         entrypoint::ProgramResult,
         instruction::{AccountMeta, Instruction},
+        msg,
         program::invoke,
         pubkey::Pubkey,
     };
@@ -42,7 +43,7 @@ pub mod lighthouse {
         let instruction = LighthouseInstruction::deserialize(&mut remaining_instruction_data)
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
-        // TODO: printing the instruction name is 500 Compute Units, lets think about that.
+        // TODO: printing the instruction name is 1000's Compute Units, lets think about that.
         // msg!("Lighthouse instruction: {:?}", instruction);
 
         match instruction {
@@ -60,11 +61,11 @@ pub mod lighthouse {
             LighthouseInstruction::AssertAccountData(assertion) => {
                 let context = AssertWithAccountContext::load(&mut accounts.iter())?;
 
-                processor::assert_with_account(
-                    &context,
-                    &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
-                )?;
+                // processor::assert_with_account(
+                //     &context,
+                //     &assertion,
+                //     Some(AssertionConfigV1 { verbose: false }),
+                // )?;
             }
             LighthouseInstruction::AssertAccountDataDiff(assertion) => {
                 let context = AssertWithAccountsContext::load(&mut accounts.iter())?;

@@ -1,6 +1,5 @@
 use crate::TxBuilder;
 use borsh::{BorshDeserialize, BorshSerialize};
-use kaigan::types::RemainderVec;
 use lighthouse::{
     instruction::LighthouseInstruction,
     processor::{create_memory_account::CreateMemoryAccountParameters, write::WriteParameters},
@@ -99,17 +98,16 @@ impl LighthouseProgram {
         assertions: Vec<MintAccountAssertion>,
         _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
-        let mut remainder_assertions =
-            RemainderVec::<MintAccountAssertion>::try_from_slice(&[]).unwrap();
+        // let mut remainder_assertions = Vec::<MintAccountAssertion>::try_from_slice(&[]).unwrap();
 
-        for assertion in assertions {
-            remainder_assertions.push(assertion);
-        }
+        // for assertion in assertions {
+        //     remainder_assertions.push(assertion);
+        // }
 
         self.tx_builder(vec![Instruction {
             program_id: lighthouse::ID,
             accounts: vec![AccountMeta::new_readonly(target_account, false)],
-            data: LighthouseInstruction::AssertMintAccountMulti(remainder_assertions)
+            data: LighthouseInstruction::AssertMintAccountMulti(assertions)
                 .try_to_vec()
                 .unwrap(),
         }])
@@ -136,12 +134,11 @@ impl LighthouseProgram {
         assertions: Vec<TokenAccountAssertion>,
         _config: Option<AssertionConfigV1>,
     ) -> TxBuilder {
-        let mut remainder_assertions =
-            RemainderVec::<TokenAccountAssertion>::try_from_slice(&[]).unwrap();
+        // let mut remainder_assertions = Vec::<TokenAccountAssertion>::try_from_slice(&vec![]).unwrap();
 
-        for assertion in assertions {
-            remainder_assertions.push(assertion);
-        }
+        // for assertion in assertions {
+        //     remainder_assertions.push(assertion);
+        // }
 
         self.tx_builder(vec![Instruction {
             program_id: lighthouse::ID,
@@ -149,7 +146,7 @@ impl LighthouseProgram {
                 AccountMeta::new_readonly(target_account, false),
                 AccountMeta::new_readonly(lighthouse::ID, false),
             ],
-            data: LighthouseInstruction::AssertTokenAccountMulti(remainder_assertions)
+            data: LighthouseInstruction::AssertTokenAccountMulti(assertions)
                 .try_to_vec()
                 .unwrap(),
         }])

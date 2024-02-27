@@ -2,7 +2,6 @@ use crate::{
     types::{ComparableOperator, EquatableOperator},
     utils::Result,
 };
-use anchor_spl::token_interface::spl_token_2022;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
@@ -114,7 +113,6 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use anchor_spl::token_interface::spl_token_2022::{self};
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack,
         };

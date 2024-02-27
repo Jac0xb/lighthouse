@@ -32,20 +32,22 @@ impl<'a, 'info> CreateMemoryAccountContext<'a, 'info> {
         account_iter: &mut Iter<'a, AccountInfo<'info>>,
         parameters: &CreateMemoryAccountParameters,
     ) -> Result<(Self, HashMap<Pubkey, u8>)> {
+        let mut bump_map = HashMap::<Pubkey, u8>::new();
+
         let lighthouse_program = Program::new(next_account_info(account_iter)?, &crate::id())?;
         let payer = Signer::new(next_account_info(account_iter)?)?;
-
-        let (memory_account, bump_map) = to_checked_account(
-            next_account_info(account_iter)?.clone(),
-            &vec![
-                AccountValidation::IsEmpty,
+        let memory_account = to_checked_account(
+            next_account_info(account_iter)?,
+            vec![
+                AccountValidation::IsNotInited,
                 AccountValidation::IsWritable,
                 AccountValidation::IsProgramDerivedAddress(
-                    &[b"memory", payer.key.as_ref(), &[parameters.memory_index]],
+                    MemoryAccount::get_seeds(payer.key, parameters.memory_index, None),
                     crate::id(),
                     None,
                 ),
             ],
+            &mut bump_map,
         )?;
 
         Ok((
@@ -90,11 +92,7 @@ pub(crate) fn create_memory_account(
         &crate::id(),
         &Rent::get().unwrap(),
         memory_account_size,
-        vec![
-            b"memory".to_vec(),
-            payer.key.try_to_vec().unwrap(),
-            vec![memory_index, bump],
-        ],
+        MemoryAccount::get_seeds(payer.key, memory_index, Some(bump)),
     )?;
 
     Ok(())

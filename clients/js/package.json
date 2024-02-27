@@ -1,0 +1,82 @@
+{
+  "name": "@acme/counter",
+  "version": "0.1.0",
+  "description": "Counters on-chain",
+  "sideEffects": false,
+  "module": "dist/src/index.mjs",
+  "main": "dist/src/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.mjs",
+      "require": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "./dist/src",
+    "./dist/types"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
+    "build:docs": "typedoc",
+    "test": "ava",
+    "lint": "eslint --ext js,ts,tsx src",
+    "lint:fix": "eslint --fix --ext js,ts,tsx src",
+    "format": "prettier --check src test",
+    "format:fix": "prettier --write src test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": "https://github.com/lorisleiva/kinobi-template.git",
+  "author": "Loris Leiva",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/accounts": "2.0.0-experimental.a7a613a",
+    "@solana/addresses": "2.0.0-experimental.a7a613a",
+    "@solana/codecs-core": "2.0.0-experimental.a7a613a",
+    "@solana/codecs-data-structures": "2.0.0-experimental.a7a613a",
+    "@solana/codecs-numbers": "2.0.0-experimental.a7a613a",
+    "@solana/codecs-strings": "2.0.0-experimental.a7a613a",
+    "@solana/instructions": "2.0.0-experimental.a7a613a",
+    "@solana/keys": "2.0.0-experimental.a7a613a",
+    "@solana/options": "2.0.0-experimental.a7a613a",
+    "@solana/programs": "2.0.0-experimental.a7a613a",
+    "@solana/signers": "2.0.0-experimental.a7a613a",
+    "@solana/transactions": "2.0.0-experimental.a7a613a"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^4.1.0",
+    "@solana/web3.js": "2.0.0-experimental.a7a613a",
+    "@solana/webcrypto-ed25519-polyfill": "2.0.0-experimental.a7a613a",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "ava": "^6.1.1",
+    "eslint": "^8.0.1",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.5.1",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.2",
+    "typedoc": "^0.25.8",
+    "typedoc-plugin-expand-object-like-types": "^0.1.2",
+    "typedoc-plugin-missing-exports": "^2.2.0",
+    "typescript": "^5.3.3"
+  },
+  "ava": {
+    "require": [
+      "@solana/webcrypto-ed25519-polyfill"
+    ],
+    "typescript": {
+      "compile": false,
+      "rewritePaths": {
+        "test/": "dist/test/"
+      }
+    }
+  },
+  "packageManager": "pnpm@8.2.0"
+}
