@@ -2173,17 +2173,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
-version = "0.1.0"
-dependencies = [
- "borsh 0.10.3",
- "kaigan",
- "lighthouse",
- "solana-program",
- "solana-sdk",
-]
-
-[[package]]
 name = "lighthouse_tests"
 version = "0.0.1"
 dependencies = [
@@ -2194,7 +2183,6 @@ dependencies = [
  "borsh 0.10.3",
  "lighthouse",
  "lighthouse-client",
- "lighthouse-sdk",
  "rand 0.8.5",
  "regex",
  "solana-banks-interface",

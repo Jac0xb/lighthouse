@@ -19,6 +19,7 @@ export * from './knownProgram';
 export * from './metaAssertion';
 export * from './mintAccountAssertion';
 export * from './stakeAccountAssertion';
+export * from './stakeAccountState';
 export * from './stakeAssertion';
 export * from './sysvarClockAssertion';
 export * from './tokenAccountAssertion';

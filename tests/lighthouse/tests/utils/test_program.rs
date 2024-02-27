@@ -1,8 +1,9 @@
 use anchor_lang::*;
-use lighthouse_sdk::TxBuilder;
 use solana_program::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
 
 pub use test_program::id;
+
+use super::tx_builder::TxBuilder;
 
 pub struct TestProgram {}
 

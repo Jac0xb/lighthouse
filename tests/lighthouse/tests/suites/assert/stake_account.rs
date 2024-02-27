@@ -1,10 +1,10 @@
 use crate::utils::context::TestContext;
 use crate::utils::create_user_with_balance;
 use crate::utils::utils::process_transaction_assert_success;
-use lighthouse::types::{
+use lighthouse_client::instructions::AssertStakeAccountBuilder;
+use lighthouse_client::types::{
     ComparableOperator, EquatableOperator, MetaAssertion, StakeAccountAssertion, StakeAccountState,
 };
-use lighthouse_sdk::LighthouseProgram;
 use solana_client::rpc_client::RpcClient;
 use solana_program_test::tokio;
 use solana_program_test::tokio::task::spawn_blocking;
@@ -25,7 +25,6 @@ use std::str::FromStr;
 #[tokio::test]
 async fn test_borsh_account_data() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
         .unwrap();
@@ -94,26 +93,22 @@ async fn test_borsh_account_data() {
 
     let tx: Transaction = Transaction::new_signed_with_payer(
         &[
-            program
-                .assert_stake_account(
-                    derived_account,
-                    StakeAccountAssertion::State(
-                        StakeAccountState::Stake as u8,
-                        ComparableOperator::Equal,
-                    ),
-                    None,
-                )
-                .ix(),
-            program
-                .assert_stake_account(
-                    derived_account,
-                    StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedWithdrawer(
+            AssertStakeAccountBuilder::new()
+                .target_account(derived_account)
+                .stake_account_assertion(StakeAccountAssertion::State(
+                    StakeAccountState::Stake as u8,
+                    ComparableOperator::Equal,
+                ))
+                .instruction(),
+            AssertStakeAccountBuilder::new()
+                .target_account(derived_account)
+                .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    MetaAssertion::AuthorizedStaker(
                         user.encodable_pubkey(),
                         EquatableOperator::Equal,
-                    )),
-                    None,
-                )
-                .ix(),
+                    ),
+                ))
+                .instruction(),
         ],
         Some(&user.encodable_pubkey()),
         &[&user],

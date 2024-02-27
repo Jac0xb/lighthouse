@@ -1,7 +1,7 @@
 use solana_program::{hash::Hash, instruction::Instruction, pubkey::Pubkey};
 use solana_sdk::{signature::Keypair, transaction::Transaction};
 
-use crate::Error;
+use super::error::Error;
 
 pub struct TxBuilder {
     pub ixs: Vec<Instruction>,

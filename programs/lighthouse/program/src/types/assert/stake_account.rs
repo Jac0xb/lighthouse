@@ -13,6 +13,7 @@ use solana_program::{
     stake::state::{Meta, Stake, StakeStateV2},
 };
 
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 #[repr(u8)]
 pub enum StakeAccountState {
     Uninitialized = 0,

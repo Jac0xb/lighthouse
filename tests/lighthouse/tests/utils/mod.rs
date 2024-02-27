@@ -2,11 +2,11 @@ pub mod blackhat_program;
 pub mod context;
 pub mod error;
 pub mod test_program;
+pub mod tx_builder;
 pub mod utils;
 
 use anchor_spl::{associated_token, token::Mint};
 use lighthouse_client::instructions::CreateMemoryAccountBuilder;
-use lighthouse_sdk::find_memory_account;
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::{
@@ -15,6 +15,17 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use std::result;
+
+pub fn find_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+    solana_program::pubkey::Pubkey::find_program_address(
+        &[
+            "memory".to_string().as_ref(),
+            user.as_ref(),
+            &[memory_index],
+        ],
+        &lighthouse::ID,
+    )
+}
 
 use self::{
     context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},

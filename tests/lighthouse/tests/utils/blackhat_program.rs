@@ -1,9 +1,10 @@
 use anchor_lang::*;
 use anchor_spl::associated_token;
-use lighthouse_sdk::TxBuilder;
 use solana_program::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
 use spl_associated_token_account::get_associated_token_address;
 use spl_token::instruction::AuthorityType;
+
+use super::tx_builder::TxBuilder;
 
 pub struct BlackhatProgram {}
 
