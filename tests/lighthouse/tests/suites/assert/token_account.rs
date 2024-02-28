@@ -47,18 +47,39 @@ async fn test_basic() {
             .target_account(token_account)
             .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
             .args(vec![
-                (TokenAccountAssertion::Mint(mint.pubkey(), EquatableOperator::Equal)),
-                (TokenAccountAssertion::Owner(user.pubkey(), EquatableOperator::Equal)),
-                (TokenAccountAssertion::Amount(100, ComparableOperator::Equal)),
-                (TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)),
-                (TokenAccountAssertion::State(
-                    TokenAccountState::Frozen as u8,
-                    ComparableOperator::NotEqual,
-                )),
-                (TokenAccountAssertion::IsNative(None, ComparableOperator::Equal)),
-                (TokenAccountAssertion::DelegatedAmount(0, ComparableOperator::LessThanOrEqual)),
-                (TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)),
-                (TokenAccountAssertion::TokenAccountOwnerIsDerived),
+                TokenAccountAssertion::Mint {
+                    value: mint.pubkey(),
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::Owner {
+                    value: user.pubkey(),
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::Amount {
+                    value: 100,
+                    operator: ComparableOperator::Equal,
+                },
+                TokenAccountAssertion::Delegate {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::State {
+                    value: TokenAccountState::Frozen as u8,
+                    operator: ComparableOperator::NotEqual,
+                },
+                TokenAccountAssertion::IsNative {
+                    value: None,
+                    operator: ComparableOperator::Equal,
+                },
+                TokenAccountAssertion::DelegatedAmount {
+                    value: 0,
+                    operator: ComparableOperator::LessThanOrEqual,
+                },
+                TokenAccountAssertion::CloseAuthority {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::TokenAccountOwnerIsDerived,
             ])
             .instruction()],
         Some(&user.pubkey()),
@@ -232,10 +253,10 @@ async fn set_token_close_authority_native() {
             .unwrap(),
             AssertTokenAccountBuilder::new()
                 .target_account(bad_actor_token_account)
-                .token_account_assertion(TokenAccountAssertion::Amount(
-                    100_000,
-                    ComparableOperator::Equal,
-                ))
+                .token_account_assertion(TokenAccountAssertion::Amount {
+                    value: 100_000,
+                    operator: ComparableOperator::Equal,
+                })
                 .instruction(),
         ],
         Some(&bad_actor.pubkey()),
@@ -297,10 +318,10 @@ async fn set_token_owner_attack_assert_owner_equal() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .token_account_assertion(TokenAccountAssertion::Owner(
-                        user.pubkey(),
-                        EquatableOperator::Equal,
-                    ))
+                    .token_account_assertion(TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    })
                     .instruction(),
             ],
             look_up_tables: None,
@@ -408,17 +429,17 @@ async fn test_drain_token_account() {
                 .ix(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .token_account_assertion(TokenAccountAssertion::Amount(
-                    69_000,
-                    ComparableOperator::Equal,
-                ))
+                .token_account_assertion(TokenAccountAssertion::Amount {
+                    value: 69_000,
+                    operator: ComparableOperator::Equal,
+                })
                 .instruction(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .token_account_assertion(TokenAccountAssertion::Delegate(
-                    None,
-                    EquatableOperator::Equal,
-                ))
+                .token_account_assertion(TokenAccountAssertion::Delegate {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                })
                 .instruction(),
         ],
         Some(&user.pubkey()),

@@ -95,10 +95,10 @@ async fn test_borsh_account_data() {
         &[
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
-                .stake_account_assertion(StakeAccountAssertion::State(
-                    StakeAccountState::Stake as u8,
-                    ComparableOperator::Equal,
-                ))
+                .stake_account_assertion(StakeAccountAssertion::State {
+                    value: StakeAccountState::Stake as u8,
+                    operator: ComparableOperator::Equal,
+                })
                 .instruction(),
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)

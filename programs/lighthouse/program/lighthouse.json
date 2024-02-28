@@ -468,36 +468,60 @@
           {
             "name": "Key",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "Lamports",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "DataLength",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "Owner",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
@@ -505,46 +529,76 @@
             "name": "KnownOwner",
             "fields": [
               {
-                "defined": "KnownProgram"
+                "name": "value",
+                "type": {
+                  "defined": "KnownProgram"
+                }
               },
               {
-                "defined": "EquatableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "RentEpoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "IsSigner",
             "fields": [
-              "bool",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "IsWritable",
             "fields": [
-              "bool",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "Executable",
             "fields": [
-              "bool",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
@@ -552,16 +606,25 @@
             "name": "VerifyDatahash",
             "fields": [
               {
-                "array": [
-                  "u8",
-                  32
-                ]
+                "name": "expected_hash",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
               },
               {
-                "option": "u16"
+                "name": "start",
+                "type": {
+                  "option": "u16"
+                }
               },
               {
-                "option": "u16"
+                "name": "length",
+                "type": {
+                  "option": "u16"
+                }
               }
             ]
           }
@@ -630,7 +693,7 @@
             "name": "Bool",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "bool"
               },
               {
@@ -645,7 +708,7 @@
             "name": "U8",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "u8"
               },
               {
@@ -660,7 +723,7 @@
             "name": "I8",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "i8"
               },
               {
@@ -675,7 +738,7 @@
             "name": "U16",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "u16"
               },
               {
@@ -690,7 +753,7 @@
             "name": "I16",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "i16"
               },
               {
@@ -705,7 +768,7 @@
             "name": "U32",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "u32"
               },
               {
@@ -720,7 +783,7 @@
             "name": "I32",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "i32"
               },
               {
@@ -735,7 +798,7 @@
             "name": "U64",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "u64"
               },
               {
@@ -750,7 +813,7 @@
             "name": "I64",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "i64"
               },
               {
@@ -765,7 +828,7 @@
             "name": "U128",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "u128"
               },
               {
@@ -780,7 +843,7 @@
             "name": "I128",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "i128"
               },
               {
@@ -795,7 +858,7 @@
             "name": "Bytes",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "bytes"
               },
               {
@@ -810,7 +873,7 @@
             "name": "Pubkey",
             "fields": [
               {
-                "name": "expected_value",
+                "name": "value",
                 "type": "publicKey"
               },
               {
@@ -913,37 +976,61 @@
             "name": "MintAuthority",
             "fields": [
               {
-                "option": "publicKey"
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
               },
               {
-                "defined": "EquatableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "Supply",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "Decimals",
             "fields": [
-              "u8",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "IsInitialized",
             "fields": [
-              "bool",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
@@ -951,10 +1038,16 @@
             "name": "FreezeAuthority",
             "fields": [
               {
-                "option": "publicKey"
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
               },
               {
-                "defined": "EquatableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           }
@@ -989,9 +1082,15 @@
           {
             "name": "State",
             "fields": [
-              "u8",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
@@ -1014,9 +1113,15 @@
           {
             "name": "StakeFlags",
             "fields": [
-              "u8",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           }
@@ -1146,27 +1251,45 @@
           {
             "name": "Mint",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "Owner",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "Amount",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
@@ -1174,19 +1297,31 @@
             "name": "Delegate",
             "fields": [
               {
-                "option": "publicKey"
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
               },
               {
-                "defined": "EquatableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "State",
             "fields": [
-              "u8",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
@@ -1194,19 +1329,31 @@
             "name": "IsNative",
             "fields": [
               {
-                "option": "u64"
+                "name": "value",
+                "type": {
+                  "option": "u64"
+                }
               },
               {
-                "defined": "ComparableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "DelegatedAmount",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
@@ -1214,10 +1361,16 @@
             "name": "CloseAuthority",
             "fields": [
               {
-                "option": "publicKey"
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
               },
               {
-                "defined": "EquatableOperator"
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
@@ -1554,7 +1707,7 @@
     },
     {
       "code": 6008,
-      "name": "OwnerMismatch",
+      "name": "AccountOwnerMismatch",
       "msg": "AccountNotTokenAccount"
     },
     {
@@ -1571,6 +1724,11 @@
       "code": 6011,
       "name": "InvalidDataLength",
       "msg": "InvalidDataLength"
+    },
+    {
+      "code": 6012,
+      "name": "FailedToDeserialize",
+      "msg": "FailedToDeserialize"
     },
     {
       "code": 6013,

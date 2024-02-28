@@ -72,7 +72,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::U8 {
-                    expected_value: 1,
+                    value: 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(0)
@@ -80,7 +80,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::I8 {
-                    expected_value: -1,
+                    value: -1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(1)
@@ -88,7 +88,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::U16 {
-                    expected_value: (u8::MAX as u16) + 1,
+                    value: (u8::MAX as u16) + 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(2)
@@ -96,7 +96,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::I16 {
-                    expected_value: (i8::MIN as i16) - 1,
+                    value: (i8::MIN as i16) - 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(4)
@@ -104,7 +104,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::U32 {
-                    expected_value: (u16::MAX as u32) + 1,
+                    value: (u16::MAX as u32) + 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(6)
@@ -112,7 +112,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::I32 {
-                    expected_value: (i16::MIN as i32) - 1,
+                    value: (i16::MIN as i32) - 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(10)
@@ -120,7 +120,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::U64 {
-                    expected_value: (u32::MAX as u64) + 1,
+                    value: (u32::MAX as u64) + 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(14)
@@ -128,7 +128,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::I64 {
-                    expected_value: (i32::MIN as i64) - 1,
+                    value: (i32::MIN as i64) - 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(22)
@@ -136,7 +136,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::U128 {
-                    expected_value: (u64::MAX as u128) + 1,
+                    value: (u64::MAX as u128) + 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(30)
@@ -144,7 +144,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::I128 {
-                    expected_value: (i64::MIN as i128) - 1,
+                    value: (i64::MIN as i128) - 1,
                     operator: IntegerOperator::Equal,
                 })
                 .offset(46)
@@ -152,7 +152,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::Bytes {
-                    expected_value: vec![u8::MAX; 32],
+                    value: vec![u8::MAX; 32],
                     operator: EquatableOperator::Equal,
                 })
                 .offset(62)
@@ -160,7 +160,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::Pubkey {
-                    expected_value: user.encodable_pubkey(),
+                    value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
                 })
                 .offset(94)
@@ -168,7 +168,7 @@ async fn test_write() {
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::Bool {
-                    expected_value: false,
+                    value: false,
                     operator: EquatableOperator::Equal,
                 })
                 .offset(95)
@@ -177,7 +177,7 @@ async fn test_write() {
                 .target_account(test_account.encodable_pubkey())
                 .offset(146)
                 .assertion(DataValueAssertion::U8 {
-                    expected_value: u8::MAX,
+                    value: u8::MAX,
                     operator: IntegerOperator::Equal,
                 })
                 .instruction(),

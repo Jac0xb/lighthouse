@@ -23,8 +23,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
 } from '@solana/codecs-data-structures';
 import {
   getU16Decoder,
@@ -54,33 +52,53 @@ import {
 } from '.';
 
 export type AccountInfoAssertion =
-  | { __kind: 'Key'; fields: [Address, EquatableOperator] }
-  | { __kind: 'Lamports'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'DataLength'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'Owner'; fields: [Address, EquatableOperator] }
-  | { __kind: 'KnownOwner'; fields: [KnownProgram, EquatableOperator] }
-  | { __kind: 'RentEpoch'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'IsSigner'; fields: [boolean, EquatableOperator] }
-  | { __kind: 'IsWritable'; fields: [boolean, EquatableOperator] }
-  | { __kind: 'Executable'; fields: [boolean, EquatableOperator] }
+  | { __kind: 'Key'; value: Address; operator: EquatableOperator }
+  | { __kind: 'Lamports'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
+  | { __kind: 'KnownOwner'; value: KnownProgram; operator: EquatableOperator }
+  | { __kind: 'RentEpoch'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperator }
+  | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperator }
+  | { __kind: 'Executable'; value: boolean; operator: EquatableOperator }
   | {
       __kind: 'VerifyDatahash';
-      fields: [Uint8Array, Option<number>, Option<number>];
+      expectedHash: Uint8Array;
+      start: Option<number>;
+      length: Option<number>;
     };
 
 export type AccountInfoAssertionArgs =
-  | { __kind: 'Key'; fields: [Address, EquatableOperatorArgs] }
-  | { __kind: 'Lamports'; fields: [number | bigint, ComparableOperatorArgs] }
-  | { __kind: 'DataLength'; fields: [number | bigint, ComparableOperatorArgs] }
-  | { __kind: 'Owner'; fields: [Address, EquatableOperatorArgs] }
-  | { __kind: 'KnownOwner'; fields: [KnownProgramArgs, EquatableOperatorArgs] }
-  | { __kind: 'RentEpoch'; fields: [number | bigint, ComparableOperatorArgs] }
-  | { __kind: 'IsSigner'; fields: [boolean, EquatableOperatorArgs] }
-  | { __kind: 'IsWritable'; fields: [boolean, EquatableOperatorArgs] }
-  | { __kind: 'Executable'; fields: [boolean, EquatableOperatorArgs] }
+  | { __kind: 'Key'; value: Address; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'Lamports';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | {
+      __kind: 'DataLength';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'KnownOwner';
+      value: KnownProgramArgs;
+      operator: EquatableOperatorArgs;
+    }
+  | {
+      __kind: 'RentEpoch';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperatorArgs }
+  | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperatorArgs }
+  | { __kind: 'Executable'; value: boolean; operator: EquatableOperatorArgs }
   | {
       __kind: 'VerifyDatahash';
-      fields: [Uint8Array, OptionOrNullable<number>, OptionOrNullable<number>];
+      expectedHash: Uint8Array;
+      start: OptionOrNullable<number>;
+      length: OptionOrNullable<number>;
     };
 
 export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
@@ -88,98 +106,72 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
     [
       'Key',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Lamports',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'DataLength',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'Owner',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'KnownOwner',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getKnownProgramEncoder(),
-            getEquatableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getKnownProgramEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'RentEpoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'IsSigner',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getBooleanEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getBooleanEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'IsWritable',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getBooleanEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getBooleanEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Executable',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getBooleanEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getBooleanEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'VerifyDatahash',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getBytesEncoder({ size: 32 }),
-            getOptionEncoder(getU16Encoder()),
-            getOptionEncoder(getU16Encoder()),
-          ]),
-        ],
+        ['expectedHash', getBytesEncoder({ size: 32 })],
+        ['start', getOptionEncoder(getU16Encoder())],
+        ['length', getOptionEncoder(getU16Encoder())],
       ]),
     ],
   ]);
@@ -190,98 +182,72 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
     [
       'Key',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Lamports',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'DataLength',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'Owner',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'KnownOwner',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getKnownProgramDecoder(),
-            getEquatableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getKnownProgramDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'RentEpoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'IsSigner',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getBooleanDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getBooleanDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'IsWritable',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getBooleanDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getBooleanDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Executable',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getBooleanDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getBooleanDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'VerifyDatahash',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getBytesDecoder({ size: 32 }),
-            getOptionDecoder(getU16Decoder()),
-            getOptionDecoder(getU16Decoder()),
-          ]),
-        ],
+        ['expectedHash', getBytesDecoder({ size: 32 })],
+        ['start', getOptionDecoder(getU16Decoder())],
+        ['length', getOptionDecoder(getU16Decoder())],
       ]),
     ],
   ]);
@@ -300,46 +266,43 @@ export function getAccountInfoAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function accountInfoAssertion(
   kind: 'Key',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Key'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Key'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'Key'>;
 export function accountInfoAssertion(
   kind: 'Lamports',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Lamports'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Lamports'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'Lamports'>;
 export function accountInfoAssertion(
   kind: 'DataLength',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'DataLength'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'DataLength'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'DataLength'>;
 export function accountInfoAssertion(
   kind: 'Owner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Owner'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Owner'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'Owner'>;
 export function accountInfoAssertion(
   kind: 'KnownOwner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'KnownOwner'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'KnownOwner'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'KnownOwner'>;
 export function accountInfoAssertion(
   kind: 'RentEpoch',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'RentEpoch'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'RentEpoch'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'RentEpoch'>;
 export function accountInfoAssertion(
   kind: 'IsSigner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsSigner'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsSigner'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'IsSigner'>;
 export function accountInfoAssertion(
   kind: 'IsWritable',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsWritable'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsWritable'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'IsWritable'>;
 export function accountInfoAssertion(
   kind: 'Executable',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Executable'>['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Executable'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'Executable'>;
 export function accountInfoAssertion(
   kind: 'VerifyDatahash',
-  data: GetDataEnumKindContent<
-    AccountInfoAssertionArgs,
-    'VerifyDatahash'
-  >['fields']
+  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'VerifyDatahash'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'VerifyDatahash'>;
 export function accountInfoAssertion<
   K extends AccountInfoAssertionArgs['__kind']

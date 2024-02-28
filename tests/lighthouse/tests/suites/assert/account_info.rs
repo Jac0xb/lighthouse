@@ -8,11 +8,10 @@ use crate::utils::{create_mint, create_test_account, create_user, CreateMintPara
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertAccountInfoBuilder;
 use lighthouse_client::types::{AccountInfoAssertion, ComparableOperator, EquatableOperator};
-use solana_program::system_program;
 use solana_program_test::tokio;
-use solana_sdk::keccak;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
+use solana_sdk::{keccak, system_program};
 use spl_associated_token_account::get_associated_token_address;
 
 #[tokio::test]
@@ -55,10 +54,10 @@ async fn test_hijack_account_ownership() {
                 .ix(),
             AssertAccountInfoBuilder::new()
                 .target_account(protected_user.pubkey())
-                .account_info_assertion(AccountInfoAssertion::Owner(
-                    system_program::id(),
-                    EquatableOperator::Equal,
-                ))
+                .account_info_assertion(AccountInfoAssertion::Owner {
+                    value: system_program::id(),
+                    operator: EquatableOperator::Equal,
+                })
                 .instruction(),
         ],
     }
@@ -93,10 +92,10 @@ async fn test_account_balance() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(user.encodable_pubkey())
-            .account_info_assertion(AccountInfoAssertion::Lamports(
-                user_balance - 5000,
-                ComparableOperator::Equal,
-            ))
+            .account_info_assertion(AccountInfoAssertion::Lamports {
+                value: user_balance - 5000,
+                operator: ComparableOperator::Equal,
+            })
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -127,11 +126,11 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(test_account.encodable_pubkey())
-            .account_info_assertion(AccountInfoAssertion::VerifyDatahash(
-                account_hash,
-                None,
-                None,
-            ))
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: None,
+                length: None,
+            })
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -170,11 +169,11 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .account_info_assertion(AccountInfoAssertion::VerifyDatahash(
-                account_hash,
-                None,
-                None,
-            ))
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: None,
+                length: None,
+            })
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -188,11 +187,11 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .account_info_assertion(AccountInfoAssertion::VerifyDatahash(
-                account_hash,
-                Some(30),
-                None,
-            ))
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: Some(30),
+                length: None,
+            })
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -206,11 +205,11 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .account_info_assertion(AccountInfoAssertion::VerifyDatahash(
-                account_hash,
-                Some(30),
-                None,
-            ))
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: Some(30),
+                length: None,
+            })
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],

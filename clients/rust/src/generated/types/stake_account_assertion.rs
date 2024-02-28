@@ -15,8 +15,14 @@ use borsh::BorshSerialize;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StakeAccountAssertion {
-    State(u8, ComparableOperator),
+    State {
+        value: u8,
+        operator: ComparableOperator,
+    },
     MetaAssertion(MetaAssertion),
     StakeAssertion(StakeAssertion),
-    StakeFlags(u8, IntegerOperator),
+    StakeFlags {
+        value: u8,
+        operator: IntegerOperator,
+    },
 }

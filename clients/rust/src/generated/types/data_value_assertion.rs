@@ -15,51 +15,51 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DataValueAssertion {
     Bool {
-        expected_value: bool,
+        value: bool,
         operator: EquatableOperator,
     },
     U8 {
-        expected_value: u8,
+        value: u8,
         operator: IntegerOperator,
     },
     I8 {
-        expected_value: i8,
+        value: i8,
         operator: IntegerOperator,
     },
     U16 {
-        expected_value: u16,
+        value: u16,
         operator: IntegerOperator,
     },
     I16 {
-        expected_value: i16,
+        value: i16,
         operator: IntegerOperator,
     },
     U32 {
-        expected_value: u32,
+        value: u32,
         operator: IntegerOperator,
     },
     I32 {
-        expected_value: i32,
+        value: i32,
         operator: IntegerOperator,
     },
     U64 {
-        expected_value: u64,
+        value: u64,
         operator: IntegerOperator,
     },
     I64 {
-        expected_value: i64,
+        value: i64,
         operator: IntegerOperator,
     },
     U128 {
-        expected_value: u128,
+        value: u128,
         operator: IntegerOperator,
     },
     I128 {
-        expected_value: i128,
+        value: i128,
         operator: IntegerOperator,
     },
     Bytes {
-        expected_value: Vec<u8>,
+        value: Vec<u8>,
         operator: EquatableOperator,
     },
     Pubkey {
@@ -67,7 +67,7 @@ pub enum DataValueAssertion {
             feature = "serde",
             serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
         )]
-        expected_value: Pubkey,
+        value: Pubkey,
         operator: EquatableOperator,
     },
 }

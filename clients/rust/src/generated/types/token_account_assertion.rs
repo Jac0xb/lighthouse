@@ -14,13 +14,45 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TokenAccountAssertion {
-    Mint(Pubkey, EquatableOperator),
-    Owner(Pubkey, EquatableOperator),
-    Amount(u64, ComparableOperator),
-    Delegate(Option<Pubkey>, EquatableOperator),
-    State(u8, ComparableOperator),
-    IsNative(Option<u64>, ComparableOperator),
-    DelegatedAmount(u64, ComparableOperator),
-    CloseAuthority(Option<Pubkey>, EquatableOperator),
+    Mint {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    Owner {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    Amount {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    Delegate {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
+    State {
+        value: u8,
+        operator: ComparableOperator,
+    },
+    IsNative {
+        value: Option<u64>,
+        operator: ComparableOperator,
+    },
+    DelegatedAmount {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    CloseAuthority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
     TokenAccountOwnerIsDerived,
 }

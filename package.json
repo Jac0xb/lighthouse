@@ -18,8 +18,7 @@
     "@dotenvx/dotenvx": "^0.20.2",
     "@metaplex-foundation/amman": "^0.12.1",
     "@metaplex-foundation/kinobi": "^0.17.4",
-    "@metaplex-foundation/shank-js": "^0.1.5",
-    "typescript": "^5.3.3"
+    "@metaplex-foundation/shank-js": "^0.1.5"
   },
   "packageManager": "pnpm@8.9.0"
 }

@@ -36,7 +36,7 @@ pub enum LighthouseError {
     AccountBorrowFailed,
     /// 6008 (0x1778) - AccountNotTokenAccount
     #[error("AccountNotTokenAccount")]
-    OwnerMismatch,
+    AccountOwnerMismatch,
     /// 6009 (0x1779) - AccountNotInitialized
     #[error("AccountNotInitialized")]
     AccountNotInitialized,
@@ -46,6 +46,9 @@ pub enum LighthouseError {
     /// 6011 (0x177B) - InvalidDataLength
     #[error("InvalidDataLength")]
     InvalidDataLength,
+    /// 6012 (0x177C) - FailedToDeserialize
+    #[error("FailedToDeserialize")]
+    FailedToDeserialize,
     /// 6013 (0x177D) - AccountOwnerValidationFailed
     #[error("AccountOwnerValidationFailed")]
     AccountOwnerValidationFailed,

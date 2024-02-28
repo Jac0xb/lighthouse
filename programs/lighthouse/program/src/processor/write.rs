@@ -54,7 +54,6 @@ impl<'a, 'info> WriteContext<'a, 'info> {
         let source_account = next_account_info(account_iter)?.clone();
 
         if source_account.key.eq(&memory_account.key()) {
-            // TODO: return with better error
             return Err(LighthouseError::UnauthorizedIxEntry.into());
         }
 
@@ -86,11 +85,6 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
         write_type,
     } = parameters;
 
-    msg!("Memory key: {:?}", memory_account.account_info);
-    msg!(
-        "Account data len: {:?}",
-        memory_account.account_info.data_len()
-    );
     let memory_ref = &mut memory_account.account_info.try_borrow_mut_data()?;
     let memory_data_length = memory_ref.len();
 
@@ -114,7 +108,7 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
             return Err(LighthouseError::Unimplemented.into());
         }
         WriteType::DataValue(borsh_value) => {
-            let bytes = borsh_value.serialize();
+            let bytes = borsh_value.serialize()?;
 
             if (memory_offset + bytes.len()) <= memory_data_length {
                 memory_ref[memory_offset..(memory_offset + bytes.len())].copy_from_slice(&bytes);
