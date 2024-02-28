@@ -21,8 +21,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
 } from '@solana/codecs-data-structures';
 import {
   getU64Decoder,
@@ -37,34 +35,44 @@ import {
   getOptionEncoder,
 } from '@solana/options';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type MintAccountAssertion =
-  | { __kind: 'MintAuthority'; fields: [Option<Address>, EquatableOperator] }
-  | { __kind: 'Supply'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'Decimals'; fields: [number, ComparableOperator] }
-  | { __kind: 'IsInitialized'; fields: [boolean, EquatableOperator] }
-  | { __kind: 'FreezeAuthority'; fields: [Option<Address>, EquatableOperator] };
+  | {
+      __kind: 'MintAuthority';
+      value: Option<Address>;
+      operator: EquatableOperator;
+    }
+  | { __kind: 'Supply'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'Decimals'; value: number; operator: IntegerOperator }
+  | { __kind: 'IsInitialized'; value: boolean; operator: EquatableOperator }
+  | {
+      __kind: 'FreezeAuthority';
+      value: Option<Address>;
+      operator: EquatableOperator;
+    };
 
 export type MintAccountAssertionArgs =
   | {
       __kind: 'MintAuthority';
-      fields: [OptionOrNullable<Address>, EquatableOperatorArgs];
+      value: OptionOrNullable<Address>;
+      operator: EquatableOperatorArgs;
     }
-  | { __kind: 'Supply'; fields: [number | bigint, ComparableOperatorArgs] }
-  | { __kind: 'Decimals'; fields: [number, ComparableOperatorArgs] }
-  | { __kind: 'IsInitialized'; fields: [boolean, EquatableOperatorArgs] }
+  | { __kind: 'Supply'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'Decimals'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'IsInitialized'; value: boolean; operator: EquatableOperatorArgs }
   | {
       __kind: 'FreezeAuthority';
-      fields: [OptionOrNullable<Address>, EquatableOperatorArgs];
+      value: OptionOrNullable<Address>;
+      operator: EquatableOperatorArgs;
     };
 
 export function getMintAccountAssertionEncoder(): Encoder<MintAccountAssertionArgs> {
@@ -72,52 +80,36 @@ export function getMintAccountAssertionEncoder(): Encoder<MintAccountAssertionAr
     [
       'MintAuthority',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getAddressEncoder()),
-            getEquatableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getOptionEncoder(getAddressEncoder())],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Supply',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'Decimals',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU8Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU8Encoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'IsInitialized',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getBooleanEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getBooleanEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'FreezeAuthority',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getAddressEncoder()),
-            getEquatableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getOptionEncoder(getAddressEncoder())],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
   ]);
@@ -128,52 +120,36 @@ export function getMintAccountAssertionDecoder(): Decoder<MintAccountAssertion> 
     [
       'MintAuthority',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getAddressDecoder()),
-            getEquatableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getOptionDecoder(getAddressDecoder())],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Supply',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'Decimals',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU8Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU8Decoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'IsInitialized',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getBooleanDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getBooleanDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'FreezeAuthority',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getAddressDecoder()),
-            getEquatableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getOptionDecoder(getAddressDecoder())],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
   ]);
@@ -192,32 +168,23 @@ export function getMintAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function mintAccountAssertion(
   kind: 'MintAuthority',
-  data: GetDataEnumKindContent<
-    MintAccountAssertionArgs,
-    'MintAuthority'
-  >['fields']
+  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'MintAuthority'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'MintAuthority'>;
 export function mintAccountAssertion(
   kind: 'Supply',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Supply'>['fields']
+  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Supply'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'Supply'>;
 export function mintAccountAssertion(
   kind: 'Decimals',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Decimals'>['fields']
+  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Decimals'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'Decimals'>;
 export function mintAccountAssertion(
   kind: 'IsInitialized',
-  data: GetDataEnumKindContent<
-    MintAccountAssertionArgs,
-    'IsInitialized'
-  >['fields']
+  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'IsInitialized'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'IsInitialized'>;
 export function mintAccountAssertion(
   kind: 'FreezeAuthority',
-  data: GetDataEnumKindContent<
-    MintAccountAssertionArgs,
-    'FreezeAuthority'
-  >['fields']
+  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'FreezeAuthority'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'FreezeAuthority'>;
 export function mintAccountAssertion<
   K extends MintAccountAssertionArgs['__kind']

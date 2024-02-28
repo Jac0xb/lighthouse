@@ -19,8 +19,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
   getUnitDecoder,
   getUnitEncoder,
 } from '@solana/codecs-data-structures';
@@ -48,36 +46,48 @@ import {
 } from '.';
 
 export type TokenAccountAssertion =
-  | { __kind: 'Mint'; fields: [Address, EquatableOperator] }
-  | { __kind: 'Owner'; fields: [Address, EquatableOperator] }
-  | { __kind: 'Amount'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'Delegate'; fields: [Option<Address>, EquatableOperator] }
-  | { __kind: 'State'; fields: [number, ComparableOperator] }
-  | { __kind: 'IsNative'; fields: [Option<bigint>, ComparableOperator] }
-  | { __kind: 'DelegatedAmount'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'CloseAuthority'; fields: [Option<Address>, EquatableOperator] }
+  | { __kind: 'Mint'; value: Address; operator: EquatableOperator }
+  | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
+  | { __kind: 'Amount'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'Delegate'; value: Option<Address>; operator: EquatableOperator }
+  | { __kind: 'State'; value: number; operator: ComparableOperator }
+  | { __kind: 'IsNative'; value: Option<bigint>; operator: ComparableOperator }
+  | { __kind: 'DelegatedAmount'; value: bigint; operator: ComparableOperator }
+  | {
+      __kind: 'CloseAuthority';
+      value: Option<Address>;
+      operator: EquatableOperator;
+    }
   | { __kind: 'TokenAccountOwnerIsDerived' };
 
 export type TokenAccountAssertionArgs =
-  | { __kind: 'Mint'; fields: [Address, EquatableOperatorArgs] }
-  | { __kind: 'Owner'; fields: [Address, EquatableOperatorArgs] }
-  | { __kind: 'Amount'; fields: [number | bigint, ComparableOperatorArgs] }
+  | { __kind: 'Mint'; value: Address; operator: EquatableOperatorArgs }
+  | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'Amount';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
   | {
       __kind: 'Delegate';
-      fields: [OptionOrNullable<Address>, EquatableOperatorArgs];
+      value: OptionOrNullable<Address>;
+      operator: EquatableOperatorArgs;
     }
-  | { __kind: 'State'; fields: [number, ComparableOperatorArgs] }
+  | { __kind: 'State'; value: number; operator: ComparableOperatorArgs }
   | {
       __kind: 'IsNative';
-      fields: [OptionOrNullable<number | bigint>, ComparableOperatorArgs];
+      value: OptionOrNullable<number | bigint>;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'DelegatedAmount';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'CloseAuthority';
-      fields: [OptionOrNullable<Address>, EquatableOperatorArgs];
+      value: OptionOrNullable<Address>;
+      operator: EquatableOperatorArgs;
     }
   | { __kind: 'TokenAccountOwnerIsDerived' };
 
@@ -86,82 +96,57 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
     [
       'Mint',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Owner',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Amount',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'Delegate',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getAddressEncoder()),
-            getEquatableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getOptionEncoder(getAddressEncoder())],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'State',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU8Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU8Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'IsNative',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU64Encoder()),
-            getComparableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getOptionEncoder(getU64Encoder())],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'DelegatedAmount',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'CloseAuthority',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getAddressEncoder()),
-            getEquatableOperatorEncoder(),
-          ]),
-        ],
+        ['value', getOptionEncoder(getAddressEncoder())],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     ['TokenAccountOwnerIsDerived', getUnitEncoder()],
@@ -173,82 +158,57 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
     [
       'Mint',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Owner',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Amount',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'Delegate',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getAddressDecoder()),
-            getEquatableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getOptionDecoder(getAddressDecoder())],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'State',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU8Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU8Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'IsNative',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU64Decoder()),
-            getComparableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getOptionDecoder(getU64Decoder())],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'DelegatedAmount',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'CloseAuthority',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getAddressDecoder()),
-            getEquatableOperatorDecoder(),
-          ]),
-        ],
+        ['value', getOptionDecoder(getAddressDecoder())],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     ['TokenAccountOwnerIsDerived', getUnitDecoder()],
@@ -268,41 +228,35 @@ export function getTokenAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function tokenAccountAssertion(
   kind: 'Mint',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Mint'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Mint'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'Mint'>;
 export function tokenAccountAssertion(
   kind: 'Owner',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Owner'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Owner'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'Owner'>;
 export function tokenAccountAssertion(
   kind: 'Amount',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Amount'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Amount'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'Amount'>;
 export function tokenAccountAssertion(
   kind: 'Delegate',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Delegate'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Delegate'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'Delegate'>;
 export function tokenAccountAssertion(
   kind: 'State',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'State'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'State'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'State'>;
 export function tokenAccountAssertion(
   kind: 'IsNative',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'IsNative'>['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'IsNative'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'IsNative'>;
 export function tokenAccountAssertion(
   kind: 'DelegatedAmount',
-  data: GetDataEnumKindContent<
-    TokenAccountAssertionArgs,
-    'DelegatedAmount'
-  >['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'DelegatedAmount'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'DelegatedAmount'>;
 export function tokenAccountAssertion(
   kind: 'CloseAuthority',
-  data: GetDataEnumKindContent<
-    TokenAccountAssertionArgs,
-    'CloseAuthority'
-  >['fields']
+  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'CloseAuthority'>
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'CloseAuthority'>;
 export function tokenAccountAssertion(
   kind: 'TokenAccountOwnerIsDerived'

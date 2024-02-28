@@ -10,16 +10,13 @@ devDependencies:
     version: 0.20.2
   '@metaplex-foundation/amman':
     specifier: ^0.12.1
-    version: 0.12.1(typescript@5.3.3)
+    version: 0.12.1
   '@metaplex-foundation/kinobi':
     specifier: ^0.17.4
     version: 0.17.4(fastestsmallesttextencoderdecoder@1.0.22)
   '@metaplex-foundation/shank-js':
     specifier: ^0.1.5
     version: 0.1.5
-  typescript:
-    specifier: ^5.3.3
-    version: 5.3.3
 
 packages:
 
@@ -230,7 +227,7 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@metaplex-foundation/amman@0.12.1(typescript@5.3.3):
+  /@metaplex-foundation/amman@0.12.1:
     resolution: {integrity: sha512-F3cdHr11ByLGMCrSBRvRCf5uIlhLE+5sWaHT2ZzcE6zVyDta3gs/A12ZBzYZS8ugNETNpJySfB42kMp1VZwbUA==}
     hasBin: true
     dependencies:
@@ -249,7 +246,7 @@ packages:
       socket.io: 4.7.4
       text-table: 0.2.0
       timeago.js: 4.0.2
-      ts-essentials: 9.4.1(typescript@5.3.3)
+      ts-essentials: 9.4.1
       wait-on: 6.0.1(debug@4.3.4)
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -2454,15 +2451,13 @@ packages:
     engines: {node: '>= 14.0.0'}
     dev: true
 
-  /ts-essentials@9.4.1(typescript@5.3.3):
+  /ts-essentials@9.4.1:
     resolution: {integrity: sha512-oke0rI2EN9pzHsesdmrOrnqv1eQODmJpd/noJjwj2ZPC3Z4N2wbjrOEqnsEgmvlO2+4fBb0a794DCna2elEVIQ==}
     peerDependencies:
       typescript: '>=4.1.0'
     peerDependenciesMeta:
       typescript:
         optional: true
-    dependencies:
-      typescript: 5.3.3
     dev: true
 
   /tslib@2.6.2:
@@ -2487,12 +2482,6 @@ packages:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
     dependencies:
       is-typedarray: 1.0.0
-    dev: true
-
-  /typescript@5.3.3:
-    resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
-    engines: {node: '>=14.17'}
-    hasBin: true
     dev: true
 
   /undici-types@5.26.5:

@@ -5,8 +5,8 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
+use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -14,9 +14,24 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MintAccountAssertion {
-    MintAuthority(Option<Pubkey>, EquatableOperator),
-    Supply(u64, ComparableOperator),
-    Decimals(u8, ComparableOperator),
-    IsInitialized(bool, EquatableOperator),
-    FreezeAuthority(Option<Pubkey>, EquatableOperator),
+    MintAuthority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
+    Supply {
+        value: u64,
+        operator: IntegerOperator,
+    },
+    Decimals {
+        value: u8,
+        operator: IntegerOperator,
+    },
+    IsInitialized {
+        value: bool,
+        operator: EquatableOperator,
+    },
+    FreezeAuthority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
 }

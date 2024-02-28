@@ -38,26 +38,24 @@ import {
 } from '.';
 
 export type StakeAccountAssertion =
-  | { __kind: 'State'; fields: [number, ComparableOperator] }
+  | { __kind: 'State'; value: number; operator: ComparableOperator }
   | { __kind: 'MetaAssertion'; fields: [MetaAssertion] }
   | { __kind: 'StakeAssertion'; fields: [StakeAssertion] }
-  | { __kind: 'StakeFlags'; fields: [number, IntegerOperator] };
+  | { __kind: 'StakeFlags'; value: number; operator: IntegerOperator };
 
 export type StakeAccountAssertionArgs =
-  | { __kind: 'State'; fields: [number, ComparableOperatorArgs] }
+  | { __kind: 'State'; value: number; operator: ComparableOperatorArgs }
   | { __kind: 'MetaAssertion'; fields: [MetaAssertionArgs] }
   | { __kind: 'StakeAssertion'; fields: [StakeAssertionArgs] }
-  | { __kind: 'StakeFlags'; fields: [number, IntegerOperatorArgs] };
+  | { __kind: 'StakeFlags'; value: number; operator: IntegerOperatorArgs };
 
 export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertionArgs> {
   return getDataEnumEncoder([
     [
       'State',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU8Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU8Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
@@ -75,10 +73,8 @@ export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertion
     [
       'StakeFlags',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU8Encoder(), getIntegerOperatorEncoder()]),
-        ],
+        ['value', getU8Encoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
   ]);
@@ -89,10 +85,8 @@ export function getStakeAccountAssertionDecoder(): Decoder<StakeAccountAssertion
     [
       'State',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU8Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU8Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
@@ -110,10 +104,8 @@ export function getStakeAccountAssertionDecoder(): Decoder<StakeAccountAssertion
     [
       'StakeFlags',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU8Decoder(), getIntegerOperatorDecoder()]),
-        ],
+        ['value', getU8Decoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
   ]);
@@ -132,7 +124,7 @@ export function getStakeAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function stakeAccountAssertion(
   kind: 'State',
-  data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'State'>['fields']
+  data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'State'>
 ): GetDataEnumKind<StakeAccountAssertionArgs, 'State'>;
 export function stakeAccountAssertion(
   kind: 'MetaAssertion',
@@ -150,10 +142,7 @@ export function stakeAccountAssertion(
 ): GetDataEnumKind<StakeAccountAssertionArgs, 'StakeAssertion'>;
 export function stakeAccountAssertion(
   kind: 'StakeFlags',
-  data: GetDataEnumKindContent<
-    StakeAccountAssertionArgs,
-    'StakeFlags'
-  >['fields']
+  data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'StakeFlags'>
 ): GetDataEnumKind<StakeAccountAssertionArgs, 'StakeFlags'>;
 export function stakeAccountAssertion<
   K extends StakeAccountAssertionArgs['__kind']

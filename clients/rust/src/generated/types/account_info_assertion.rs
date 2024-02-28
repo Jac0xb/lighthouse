@@ -15,14 +15,53 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AccountInfoAssertion {
-    Key(Pubkey, EquatableOperator),
-    Lamports(u64, ComparableOperator),
-    DataLength(u64, ComparableOperator),
-    Owner(Pubkey, EquatableOperator),
-    KnownOwner(KnownProgram, EquatableOperator),
-    RentEpoch(u64, ComparableOperator),
-    IsSigner(bool, EquatableOperator),
-    IsWritable(bool, EquatableOperator),
-    Executable(bool, EquatableOperator),
-    VerifyDatahash([u8; 32], Option<u16>, Option<u16>),
+    Key {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    Lamports {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    DataLength {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    Owner {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    KnownOwner {
+        value: KnownProgram,
+        operator: EquatableOperator,
+    },
+    RentEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    IsSigner {
+        value: bool,
+        operator: EquatableOperator,
+    },
+    IsWritable {
+        value: bool,
+        operator: EquatableOperator,
+    },
+    Executable {
+        value: bool,
+        operator: EquatableOperator,
+    },
+    VerifyDatahash {
+        expected_hash: [u8; 32],
+        start: Option<u16>,
+        length: Option<u16>,
+    },
 }

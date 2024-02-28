@@ -58,149 +58,125 @@ import {
 } from '.';
 
 export type DataValueAssertion =
-  | { __kind: 'Bool'; expectedValue: boolean; operator: EquatableOperator }
-  | { __kind: 'U8'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'I8'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'U16'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'I16'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'U32'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'I32'; expectedValue: number; operator: IntegerOperator }
-  | { __kind: 'U64'; expectedValue: bigint; operator: IntegerOperator }
-  | { __kind: 'I64'; expectedValue: bigint; operator: IntegerOperator }
-  | { __kind: 'U128'; expectedValue: bigint; operator: IntegerOperator }
-  | { __kind: 'I128'; expectedValue: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; expectedValue: Uint8Array; operator: EquatableOperator }
-  | { __kind: 'Pubkey'; expectedValue: Address; operator: EquatableOperator };
+  | { __kind: 'Bool'; value: boolean; operator: EquatableOperator }
+  | { __kind: 'U8'; value: number; operator: IntegerOperator }
+  | { __kind: 'I8'; value: number; operator: IntegerOperator }
+  | { __kind: 'U16'; value: number; operator: IntegerOperator }
+  | { __kind: 'I16'; value: number; operator: IntegerOperator }
+  | { __kind: 'U32'; value: number; operator: IntegerOperator }
+  | { __kind: 'I32'; value: number; operator: IntegerOperator }
+  | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperator }
+  | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
-  | { __kind: 'Bool'; expectedValue: boolean; operator: EquatableOperatorArgs }
-  | { __kind: 'U8'; expectedValue: number; operator: IntegerOperatorArgs }
-  | { __kind: 'I8'; expectedValue: number; operator: IntegerOperatorArgs }
-  | { __kind: 'U16'; expectedValue: number; operator: IntegerOperatorArgs }
-  | { __kind: 'I16'; expectedValue: number; operator: IntegerOperatorArgs }
-  | { __kind: 'U32'; expectedValue: number; operator: IntegerOperatorArgs }
-  | { __kind: 'I32'; expectedValue: number; operator: IntegerOperatorArgs }
-  | {
-      __kind: 'U64';
-      expectedValue: number | bigint;
-      operator: IntegerOperatorArgs;
-    }
-  | {
-      __kind: 'I64';
-      expectedValue: number | bigint;
-      operator: IntegerOperatorArgs;
-    }
-  | {
-      __kind: 'U128';
-      expectedValue: number | bigint;
-      operator: IntegerOperatorArgs;
-    }
-  | {
-      __kind: 'I128';
-      expectedValue: number | bigint;
-      operator: IntegerOperatorArgs;
-    }
-  | {
-      __kind: 'Bytes';
-      expectedValue: Uint8Array;
-      operator: EquatableOperatorArgs;
-    }
-  | {
-      __kind: 'Pubkey';
-      expectedValue: Address;
-      operator: EquatableOperatorArgs;
-    };
+  | { __kind: 'Bool'; value: boolean; operator: EquatableOperatorArgs }
+  | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'I8'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'U16'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'I16'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'U32'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'I32'; value: number; operator: IntegerOperatorArgs }
+  | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperatorArgs }
+  | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
 
 export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> {
   return getDataEnumEncoder([
     [
       'Bool',
       getStructEncoder([
-        ['expectedValue', getBooleanEncoder()],
+        ['value', getBooleanEncoder()],
         ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'U8',
       getStructEncoder([
-        ['expectedValue', getU8Encoder()],
+        ['value', getU8Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'I8',
       getStructEncoder([
-        ['expectedValue', getI8Encoder()],
+        ['value', getI8Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'U16',
       getStructEncoder([
-        ['expectedValue', getU16Encoder()],
+        ['value', getU16Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'I16',
       getStructEncoder([
-        ['expectedValue', getI16Encoder()],
+        ['value', getI16Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'U32',
       getStructEncoder([
-        ['expectedValue', getU32Encoder()],
+        ['value', getU32Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'I32',
       getStructEncoder([
-        ['expectedValue', getI32Encoder()],
+        ['value', getI32Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'U64',
       getStructEncoder([
-        ['expectedValue', getU64Encoder()],
+        ['value', getU64Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'I64',
       getStructEncoder([
-        ['expectedValue', getI64Encoder()],
+        ['value', getI64Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'U128',
       getStructEncoder([
-        ['expectedValue', getU128Encoder()],
+        ['value', getU128Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'I128',
       getStructEncoder([
-        ['expectedValue', getI128Encoder()],
+        ['value', getI128Encoder()],
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'Bytes',
       getStructEncoder([
-        ['expectedValue', getBytesEncoder({ size: getU32Encoder() })],
+        ['value', getBytesEncoder({ size: getU32Encoder() })],
         ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'Pubkey',
       getStructEncoder([
-        ['expectedValue', getAddressEncoder()],
+        ['value', getAddressEncoder()],
         ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
@@ -212,91 +188,91 @@ export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
     [
       'Bool',
       getStructDecoder([
-        ['expectedValue', getBooleanDecoder()],
+        ['value', getBooleanDecoder()],
         ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'U8',
       getStructDecoder([
-        ['expectedValue', getU8Decoder()],
+        ['value', getU8Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'I8',
       getStructDecoder([
-        ['expectedValue', getI8Decoder()],
+        ['value', getI8Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'U16',
       getStructDecoder([
-        ['expectedValue', getU16Decoder()],
+        ['value', getU16Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'I16',
       getStructDecoder([
-        ['expectedValue', getI16Decoder()],
+        ['value', getI16Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'U32',
       getStructDecoder([
-        ['expectedValue', getU32Decoder()],
+        ['value', getU32Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'I32',
       getStructDecoder([
-        ['expectedValue', getI32Decoder()],
+        ['value', getI32Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'U64',
       getStructDecoder([
-        ['expectedValue', getU64Decoder()],
+        ['value', getU64Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'I64',
       getStructDecoder([
-        ['expectedValue', getI64Decoder()],
+        ['value', getI64Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'U128',
       getStructDecoder([
-        ['expectedValue', getU128Decoder()],
+        ['value', getU128Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'I128',
       getStructDecoder([
-        ['expectedValue', getI128Decoder()],
+        ['value', getI128Decoder()],
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'Bytes',
       getStructDecoder([
-        ['expectedValue', getBytesDecoder({ size: getU32Decoder() })],
+        ['value', getBytesDecoder({ size: getU32Decoder() })],
         ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'Pubkey',
       getStructDecoder([
-        ['expectedValue', getAddressDecoder()],
+        ['value', getAddressDecoder()],
         ['operator', getEquatableOperatorDecoder()],
       ]),
     ],

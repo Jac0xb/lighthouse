@@ -52,7 +52,6 @@ impl WriteType {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteTypeParameter {
-    // Memory offset, write type
     WriteU8 { offset: u8, write_type: WriteType },
     WriteU16 { offset: u16, write_type: WriteType },
     WriteU32 { offset: u32, write_type: WriteType },

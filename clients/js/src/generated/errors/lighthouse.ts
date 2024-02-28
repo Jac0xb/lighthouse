@@ -23,14 +23,16 @@ export const enum LighthouseProgramErrorCode {
   OUT_OF_RANGE = 0x1776, // 6006
   /** AccountBorrowFailed: AccountBorrowFailed */
   ACCOUNT_BORROW_FAILED = 0x1777, // 6007
-  /** OwnerMismatch: AccountNotTokenAccount */
-  OWNER_MISMATCH = 0x1778, // 6008
+  /** AccountOwnerMismatch: AccountNotTokenAccount */
+  ACCOUNT_OWNER_MISMATCH = 0x1778, // 6008
   /** AccountNotInitialized: AccountNotInitialized */
   ACCOUNT_NOT_INITIALIZED = 0x1779, // 6009
   /** UnauthorizedIxEntry: UnauthorizedIxEntry */
   UNAUTHORIZED_IX_ENTRY = 0x177a, // 6010
   /** InvalidDataLength: InvalidDataLength */
   INVALID_DATA_LENGTH = 0x177b, // 6011
+  /** FailedToDeserialize: FailedToDeserialize */
+  FAILED_TO_DESERIALIZE = 0x177c, // 6012
   /** AccountOwnerValidationFailed: AccountOwnerValidationFailed */
   ACCOUNT_OWNER_VALIDATION_FAILED = 0x177d, // 6013
   /** AccountFundedValidationFailed: AccountFundedValidationFailed */
@@ -98,8 +100,8 @@ if (__DEV__) {
       'AccountBorrowFailed',
       `AccountBorrowFailed`,
     ],
-    [LighthouseProgramErrorCode.OWNER_MISMATCH]: [
-      'OwnerMismatch',
+    [LighthouseProgramErrorCode.ACCOUNT_OWNER_MISMATCH]: [
+      'AccountOwnerMismatch',
       `AccountNotTokenAccount`,
     ],
     [LighthouseProgramErrorCode.ACCOUNT_NOT_INITIALIZED]: [
@@ -113,6 +115,10 @@ if (__DEV__) {
     [LighthouseProgramErrorCode.INVALID_DATA_LENGTH]: [
       'InvalidDataLength',
       `InvalidDataLength`,
+    ],
+    [LighthouseProgramErrorCode.FAILED_TO_DESERIALIZE]: [
+      'FailedToDeserialize',
+      `FailedToDeserialize`,
     ],
     [LighthouseProgramErrorCode.ACCOUNT_OWNER_VALIDATION_FAILED]: [
       'AccountOwnerValidationFailed',
