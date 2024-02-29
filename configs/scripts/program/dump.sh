@@ -1,86 +1,74 @@
 #!/bin/bash
 
-EXTERNAL_ID=("")
-EXTERNAL_SO=("")
-
-
-# output colours
-RED() { echo $'\e[1;31m'$1$'\e[0m'; }
-GRN() { echo $'\e[1;32m'$1$'\e[0m'; }
-YLW() { echo $'\e[1;33m'$1$'\e[0m'; }
-
-CURRENT_DIR=$(pwd)
+# Import utils.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-# go to parent folder
-cd $(dirname $(dirname $(dirname $SCRIPT_DIR)))
+source $(dirname $SCRIPT_DIR)/utils.sh
 
-OUTPUT=$1
+# Go to the working directory.
+cd $WORKING_DIR
 
+# Set default value for RPC option.
 if [ -z ${RPC+x} ]; then
     RPC="https://api.mainnet-beta.solana.com"
 fi
 
-if [ -z "$OUTPUT" ]; then
-    echo "missing output directory"
-    exit 1
+# Create the output directory if it doesn't exist.
+if [ ! -d ${PROGRAMS_OUTPUT_DIR} ]; then
+    mkdir ${PROGRAMS_OUTPUT_DIR}
 fi
 
-# creates the output directory if it doesn't exist
-if [ ! -d ${OUTPUT} ]; then
-    mkdir ${OUTPUT}
+# Print prologue message if we have external programs.
+if [ ${#PROGRAMS_EXTERNAL_ADDRESSES[@]} -gt 0 ]; then
+    echo "Dumping external accounts to '${PROGRAMS_OUTPUT_DIR}':"
 fi
 
-# only prints this if we have external programs
-if [ ${#EXTERNAL_ID[@]} -gt 0 ]; then
-    echo "Dumping external accounts to '${OUTPUT}':"
-fi
-
-# copy external programs or accounts binaries from the chain
+# Helper function to copy external programs or accounts binaries from the chain.
 copy_from_chain() {
-    ACCOUNT_TYPE=`echo $1 | cut -d. -f2`
-    PREFIX=$2
+    ACCOUNT_TYPE=$(echo $2 | cut -d. -f2)
+    PREFIX=$3
 
     case "$ACCOUNT_TYPE" in
-        "bin")
-            solana account -u $RPC ${EXTERNAL_ID[$i]} -o ${OUTPUT}/$2$1 > /dev/null
-            ;;
-        "so")
-            solana program dump -u $RPC ${EXTERNAL_ID[$i]} ${OUTPUT}/$2$1 > /dev/null
-            ;;
-        *)
-            echo $(RED "[  ERROR  ] unknown account type for '$1'")
-            exit 1
-            ;;
+    "bin")
+        solana account -u $RPC $1 -o ${PROGRAMS_OUTPUT_DIR}/$3$2 >/dev/null
+        ;;
+    "so")
+        solana program dump -u $RPC $1 ${PROGRAMS_OUTPUT_DIR}/$3$2 >/dev/null
+        ;;
+    *)
+        echo $(RED "[  ERROR  ] unknown account type for '$2'")
+        exit 1
+        ;;
     esac
 
     if [ -z "$PREFIX" ]; then
-        echo "Wrote account data to ${OUTPUT}/$2$1"
+        echo "Wrote account data to ${PROGRAMS_OUTPUT_DIR}/$3$2"
     fi
 }
 
-# dump external programs binaries if needed
-for i in ${!EXTERNAL_ID[@]}; do
-    if [ ! -f "${OUTPUT}/${EXTERNAL_SO[$i]}" ]; then
-        copy_from_chain "${EXTERNAL_SO[$i]}"
-    else
-        copy_from_chain "${EXTERNAL_SO[$i]}" "onchain-"
+# Dump external programs binaries if needed.
+for i in ${!PROGRAMS_EXTERNAL_ADDRESSES_ARRAY[@]}; do
+    ADDRESS=${PROGRAMS_EXTERNAL_ADDRESSES_ARRAY[$i]}
+    BINARY=${PROGRAMS_EXTERNAL_BINARIES_ARRAY[$i]}
 
-        ON_CHAIN=`sha256sum -b ${OUTPUT}/onchain-${EXTERNAL_SO[$i]} | cut -d ' ' -f 1`
-        LOCAL=`sha256sum -b ${OUTPUT}/${EXTERNAL_SO[$i]} | cut -d ' ' -f 1`
+    if [ ! -f "${PROGRAMS_OUTPUT_DIR}/${BINARY}" ]; then
+        copy_from_chain "${ADDRESS}" "${BINARY}"
+    else
+        copy_from_chain "${ADDRESS}" "${BINARY}" "onchain-"
+
+        ON_CHAIN=$(sha256sum -b ${PROGRAMS_OUTPUT_DIR}/onchain-${BINARY} | cut -d ' ' -f 1)
+        LOCAL=$(sha256sum -b ${PROGRAMS_OUTPUT_DIR}/${BINARY} | cut -d ' ' -f 1)
 
         if [ "$ON_CHAIN" != "$LOCAL" ]; then
-            echo $(YLW "[ WARNING ] on-chain and local binaries are different for '${EXTERNAL_SO[$i]}'")
+            echo $(YLW "[ WARNING ] on-chain and local binaries are different for '${BINARY}'")
         else
-            echo "$(GRN "[ SKIPPED ]") on-chain and local binaries are the same for '${EXTERNAL_SO[$i]}'"
+            echo "$(GRN "[ SKIPPED ]") on-chain and local binaries are the same for '${BINARY}'"
         fi
 
-        rm ${OUTPUT}/onchain-${EXTERNAL_SO[$i]}
+        rm ${PROGRAMS_OUTPUT_DIR}/onchain-${BINARY}
     fi
 done
 
-# only prints this if we have external programs
-if [ ${#EXTERNAL_ID[@]} -gt 0 ]; then
+# Print epilogue message if we have external programs.
+if [ ${#PROGRAMS_EXTERNAL_ADDRESSES[@]} -gt 0 ]; then
     echo ""
 fi
-
-cd ${CURRENT_DIR}

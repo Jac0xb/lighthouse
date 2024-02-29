@@ -1,0 +1,158 @@
+{
+  "version": "0.0.1",
+  "name": "test_program",
+  "instructions": [
+    {
+      "name": "createTestAccountV1",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "testAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "slotHashes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "random",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "TestAccountV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "u8",
+            "type": "u8"
+          },
+          {
+            "name": "i8",
+            "type": "i8"
+          },
+          {
+            "name": "u16",
+            "type": "u16"
+          },
+          {
+            "name": "i16",
+            "type": "i16"
+          },
+          {
+            "name": "u32",
+            "type": "u32"
+          },
+          {
+            "name": "i32",
+            "type": "i32"
+          },
+          {
+            "name": "u64",
+            "type": "u64"
+          },
+          {
+            "name": "i64",
+            "type": "i64"
+          },
+          {
+            "name": "u128",
+            "type": "u128"
+          },
+          {
+            "name": "i128",
+            "type": "i128"
+          },
+          {
+            "name": "bytes",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "trueField",
+            "type": "bool"
+          },
+          {
+            "name": "falseField",
+            "type": "bool"
+          },
+          {
+            "name": "optionU8",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "optionU8None",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "optionU16",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "optionU16None",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "vec",
+            "type": "bytes"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unimplemented",
+      "msg": "Unimplemented"
+    },
+    {
+      "code": 6001,
+      "name": "NumericalOverflowError",
+      "msg": "NumericalOverflowError"
+    }
+  ],
+  "metadata": {
+    "origin": "anchor",
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
+  }
+}

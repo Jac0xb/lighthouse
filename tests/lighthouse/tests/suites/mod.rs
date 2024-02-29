@@ -1,2 +1,2 @@
 pub mod assert;
-// pub mod write;
+pub mod write;

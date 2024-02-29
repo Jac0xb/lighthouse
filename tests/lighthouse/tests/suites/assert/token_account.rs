@@ -1,8 +1,9 @@
+use crate::utils::blackhat_program::BlackhatProgram;
+use crate::utils::tx_builder::TxBuilder;
 use anchor_spl::associated_token::get_associated_token_address;
-use blackhat_sdk::blackhat_program::BlackhatProgram;
-use lighthouse::error::LighthouseError;
-use lighthouse::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
-use lighthouse_sdk::{LighthouseProgram, TxBuilder};
+use lighthouse_client::errors::LighthouseError;
+use lighthouse_client::instructions::{AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder};
+use lighthouse_client::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
@@ -21,7 +22,6 @@ use crate::utils::{create_mint, create_user, CreateMintParameters};
 #[tokio::test]
 async fn test_basic() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let (tx, mint) = create_mint(
@@ -42,35 +42,54 @@ async fn test_basic() {
         .unwrap();
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
-    let mut tx_builder = program.assert_token_account_multi(
-        token_account,
-        vec![
-            (TokenAccountAssertion::Mint(mint.pubkey(), EquatableOperator::Equal)),
-            (TokenAccountAssertion::Owner(user.pubkey(), EquatableOperator::Equal)),
-            (TokenAccountAssertion::Amount(100, ComparableOperator::Equal)),
-            (TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)),
-            (TokenAccountAssertion::State(
-                TokenAccountState::Frozen as u8,
-                ComparableOperator::NotEqual,
-            )),
-            (TokenAccountAssertion::IsNative(None, ComparableOperator::Equal)),
-            (TokenAccountAssertion::DelegatedAmount(0, ComparableOperator::LessThanOrEqual)),
-            (TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)),
-            (TokenAccountAssertion::TokenAccountOwnerIsDerived),
-        ],
-        None,
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertTokenAccountMultiBuilder::new()
+            .target_account(token_account)
+            .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
+            .args(vec![
+                TokenAccountAssertion::Mint {
+                    value: mint.pubkey(),
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::Owner {
+                    value: user.pubkey(),
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::Amount {
+                    value: 100,
+                    operator: ComparableOperator::Equal,
+                },
+                TokenAccountAssertion::Delegate {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::State {
+                    value: TokenAccountState::Frozen as u8,
+                    operator: ComparableOperator::NotEqual,
+                },
+                TokenAccountAssertion::IsNative {
+                    value: None,
+                    operator: ComparableOperator::Equal,
+                },
+                TokenAccountAssertion::DelegatedAmount {
+                    value: 0,
+                    operator: ComparableOperator::LessThanOrEqual,
+                },
+                TokenAccountAssertion::CloseAuthority {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                },
+                TokenAccountAssertion::TokenAccountOwnerIsDerived,
+            ])
+            .instruction()],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
     );
 
-    let blockhash = context.get_blockhash().await;
-
-    process_transaction_assert_success(
-        context,
-        tx_builder
-            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
-            .unwrap(),
-    )
-    .await
-    .unwrap();
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 }
 
 // This tests the assumption that non-native accounts cannot be closed by a malicious actor.
@@ -154,7 +173,6 @@ async fn set_token_close_authority() {
 #[tokio::test]
 async fn set_token_close_authority_native() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
@@ -233,13 +251,13 @@ async fn set_token_close_authority_native() {
                 &[],
             )
             .unwrap(),
-            program
-                .assert_token_account(
-                    bad_actor_token_account,
-                    TokenAccountAssertion::Amount(100_000, ComparableOperator::Equal),
-                    None,
-                )
-                .ix(),
+            AssertTokenAccountBuilder::new()
+                .target_account(bad_actor_token_account)
+                .token_account_assertion(TokenAccountAssertion::Amount {
+                    value: 100_000,
+                    operator: ComparableOperator::Equal,
+                })
+                .instruction(),
         ],
         Some(&bad_actor.pubkey()),
         &[&bad_actor],
@@ -261,7 +279,6 @@ async fn set_token_close_authority_native() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_owner_equal() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
@@ -299,13 +316,13 @@ async fn set_token_owner_attack_assert_owner_equal() {
                         spl_token::instruction::AuthorityType::AccountOwner,
                     )
                     .ix(),
-                program
-                    .assert_token_account(
-                        token_account,
-                        TokenAccountAssertion::Owner(user.pubkey(), EquatableOperator::Equal),
-                        None,
-                    )
-                    .ix(),
+                AssertTokenAccountBuilder::new()
+                    .target_account(token_account)
+                    .token_account_assertion(TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    })
+                    .instruction(),
             ],
             look_up_tables: None,
         }
@@ -321,7 +338,6 @@ async fn set_token_owner_attack_assert_owner_equal() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_token_owner_derived() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
@@ -358,13 +374,10 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
                         spl_token::instruction::AuthorityType::AccountOwner,
                     )
                     .ix(),
-                program
-                    .assert_token_account(
-                        token_account,
-                        TokenAccountAssertion::TokenAccountOwnerIsDerived,
-                        None,
-                    )
-                    .ix(),
+                AssertTokenAccountBuilder::new()
+                    .target_account(token_account)
+                    .token_account_assertion(TokenAccountAssertion::TokenAccountOwnerIsDerived)
+                    .instruction(),
             ],
             look_up_tables: None,
         }
@@ -380,7 +393,6 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
 #[tokio::test]
 async fn test_drain_token_account() {
     let context = &mut TestContext::new().await.unwrap();
-    let lighthouse_program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
 
     let drainer = Keypair::new();
@@ -406,28 +418,34 @@ async fn test_drain_token_account() {
 
     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
 
-    let tx = blackhat_program
-        .drain_token_account(
-            user.encodable_pubkey(),
-            drainer.encodable_pubkey(),
-            mint.pubkey(),
-        )
-        .append(lighthouse_program.assert_token_account(
-            user_ata,
-            TokenAccountAssertion::Amount(69_000, ComparableOperator::Equal),
-            None,
-        ))
-        .append(lighthouse_program.assert_token_account(
-            user_ata,
-            TokenAccountAssertion::Delegate(None, EquatableOperator::Equal),
-            None,
-        ))
-        .to_transaction_and_sign(
-            vec![&user],
-            user.encodable_pubkey(),
-            context.get_blockhash().await,
-        )
-        .unwrap();
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            blackhat_program
+                .drain_token_account(
+                    user.encodable_pubkey(),
+                    drainer.encodable_pubkey(),
+                    mint.pubkey(),
+                )
+                .ix(),
+            AssertTokenAccountBuilder::new()
+                .target_account(user_ata)
+                .token_account_assertion(TokenAccountAssertion::Amount {
+                    value: 69_000,
+                    operator: ComparableOperator::Equal,
+                })
+                .instruction(),
+            AssertTokenAccountBuilder::new()
+                .target_account(user_ata)
+                .token_account_assertion(TokenAccountAssertion::Delegate {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                })
+                .instruction(),
+        ],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
 
     process_transaction_assert_failure(
         context,

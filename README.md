@@ -163,21 +163,15 @@ pub fn write_v1<'info>(..., memory_idx, write_type) -> Result<()> {
 
 ### Prerequisites
 
-TODO
+- Install pnpm (https://pnpm.io/7.x/installation or npm install -g pnpm)
 
 ### Installation
 
-1. Clone the Lighthouse repository:
+- pnpm install
+
+1. Compile the program:
    ```bash
-   git clone https://github.com/jac0xb/lighthouse.git
-   ```
-2. Change directory to Lighthouse:
-   ```bash
-   cd lighthouse
-   ```
-3. Compile the program:
-   ```bash
-   npm run programs:build
+   pnpm run programs:build
    ```
 
 ## Usage

@@ -3,21 +3,45 @@ use crate::{
     types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::{unpack_coption_key, unpack_coption_u64, Result}, // Assert, EvaluationResult, Operator,
 };
-use anchor_spl::token_interface::spl_token_2022::{self, state::AccountState};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
+use spl_token_2022::state::AccountState;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum TokenAccountAssertion {
-    Mint(Pubkey, EquatableOperator),
-    Owner(Pubkey, EquatableOperator),
-    Amount(u64, ComparableOperator),
-    Delegate(Option<Pubkey>, EquatableOperator),
-    State(u8, ComparableOperator),
-    IsNative(Option<u64>, ComparableOperator),
-    DelegatedAmount(u64, ComparableOperator),
-    CloseAuthority(Option<Pubkey>, EquatableOperator),
+    Mint {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    Owner {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    Amount {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    Delegate {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
+    State {
+        value: u8,
+        operator: ComparableOperator,
+    },
+    IsNative {
+        value: Option<u64>,
+        operator: ComparableOperator,
+    },
+    DelegatedAmount {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    CloseAuthority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
     TokenAccountOwnerIsDerived,
 }
 
@@ -53,35 +77,47 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
         }
 
         if ![spl_token::ID, spl_token_2022::ID].contains(account.owner) {
-            return Err(LighthouseError::OwnerMismatch.into());
+            return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 
         let data = account.try_borrow_mut_data().unwrap();
 
         let result = match self {
-            TokenAccountAssertion::Mint(pubkey, operator) => {
+            TokenAccountAssertion::Mint {
+                value: assertion_value,
+                operator,
+            } => {
                 let mint_slice = &data[0..32];
                 let mint = Pubkey::try_from(mint_slice).unwrap();
 
-                operator.evaluate(&mint, pubkey, include_output)
+                operator.evaluate(&mint, assertion_value, include_output)
             }
-            TokenAccountAssertion::Owner(pubkey, operator) => {
+            TokenAccountAssertion::Owner {
+                value: assertion_value,
+                operator,
+            } => {
                 let owner_slice = &data[32..64];
                 let owner = Pubkey::try_from(owner_slice).unwrap();
 
-                operator.evaluate(&owner, pubkey, include_output)
+                operator.evaluate(&owner, assertion_value, include_output)
             }
-            TokenAccountAssertion::Amount(amount, operator) => {
+            TokenAccountAssertion::Amount {
+                value: assertion_value,
+                operator,
+            } => {
                 let amount_slice = &data[64..72];
                 let actual_amount = u64::from_le_bytes(amount_slice.try_into().unwrap());
 
-                operator.evaluate(&actual_amount, amount, include_output)
+                operator.evaluate(&actual_amount, assertion_value, include_output)
             }
-            TokenAccountAssertion::Delegate(assertion_pubkey, operator) => {
+            TokenAccountAssertion::Delegate {
+                value: assertion_value,
+                operator,
+            } => {
                 let delegate_slice = &data[72..108];
                 let delegate = unpack_coption_key(delegate_slice)?;
 
-                match (delegate, assertion_pubkey) {
+                match (delegate, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
                         output: "None == None".to_string(),
@@ -99,16 +135,22 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                     }
                 }
             }
-            TokenAccountAssertion::State(state, operator) => {
+            TokenAccountAssertion::State {
+                value: assertion_value,
+                operator,
+            } => {
                 let actual_state = data[108];
 
-                operator.evaluate(&actual_state, state, include_output)
+                operator.evaluate(&actual_state, assertion_value, include_output)
             }
-            TokenAccountAssertion::IsNative(is_native, operator) => {
+            TokenAccountAssertion::IsNative {
+                value: assertion_value,
+                operator,
+            } => {
                 let is_native_slice = &data[109..121];
                 let actual_is_native = unpack_coption_u64(is_native_slice)?;
 
-                match (actual_is_native, is_native) {
+                match (actual_is_native, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
                         output: "None == None".to_string(),
@@ -126,18 +168,24 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                     }
                 }
             }
-            TokenAccountAssertion::DelegatedAmount(delegated_amount, operator) => {
+            TokenAccountAssertion::DelegatedAmount {
+                value: assertion_value,
+                operator,
+            } => {
                 let delegated_amount_slice = &data[121..129];
                 let actual_delegated_amount =
                     u64::from_le_bytes(delegated_amount_slice.try_into().unwrap());
 
-                operator.evaluate(&actual_delegated_amount, delegated_amount, include_output)
+                operator.evaluate(&actual_delegated_amount, assertion_value, include_output)
             }
-            TokenAccountAssertion::CloseAuthority(pubkey, operator) => {
+            TokenAccountAssertion::CloseAuthority {
+                value: assertion_value,
+                operator,
+            } => {
                 let close_authority_slice = &data[129..165];
                 let close_authority = unpack_coption_key(close_authority_slice)?;
 
-                match (close_authority, pubkey) {
+                match (close_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
                         output: "None == None".to_string(),
@@ -175,18 +223,14 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use anchor_spl::token_interface::spl_token_2022::{
-            self,
-            state::{Account, AccountState},
-        };
+        use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
         };
         use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
         use spl_associated_token_account::get_associated_token_address_with_program_id;
+        use spl_token_2022::state::{Account, AccountState};
         use std::{cell::RefCell, rc::Rc};
-
-        use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
 
         #[test]
         fn evaluate_token_account_no_delegate_no_close_authority() {
@@ -230,8 +274,11 @@ mod tests {
             //
             // Assert on amount
             //
-            let result = TokenAccountAssertion::Amount(69, ComparableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Amount {
+                value: 69,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -240,8 +287,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::Amount(1600, ComparableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Amount {
+                value: 1600,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -253,9 +303,11 @@ mod tests {
             //
             // Assert on mint
             //
-            let result =
-                TokenAccountAssertion::Mint(mint.encodable_pubkey(), EquatableOperator::Equal)
-                    .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Mint {
+                value: mint.encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -267,9 +319,11 @@ mod tests {
             //
             // Assert on owner
             //
-            let result =
-                TokenAccountAssertion::Owner(owner.encodable_pubkey(), EquatableOperator::Equal)
-                    .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Owner {
+                value: owner.encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -282,8 +336,11 @@ mod tests {
             // Assert on delegate
             //
 
-            let result = TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -292,10 +349,10 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::Delegate(
-                Some(owner.encodable_pubkey()),
-                EquatableOperator::NotEqual,
-            )
+            let result = TokenAccountAssertion::Delegate {
+                value: Some(owner.encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -309,10 +366,10 @@ mod tests {
             // Assert on state
             //
 
-            let result = TokenAccountAssertion::State(
-                AccountState::Initialized as u8,
-                ComparableOperator::Equal,
-            )
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Initialized as u8,
+                operator: ComparableOperator::Equal,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -322,9 +379,11 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result =
-                TokenAccountAssertion::State(AccountState::Frozen as u8, ComparableOperator::Equal)
-                    .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Frozen as u8,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -333,10 +392,10 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::State(
-                AccountState::Uninitialized as u8,
-                ComparableOperator::Equal,
-            )
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Uninitialized as u8,
+                operator: ComparableOperator::Equal,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -350,8 +409,11 @@ mod tests {
             // Assert on is_native
             //
 
-            let result = TokenAccountAssertion::IsNative(Some(1), ComparableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::IsNative {
+                value: Some(1),
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -363,8 +425,11 @@ mod tests {
             //
             // Assert on delegated_amount
             //
-            let result = TokenAccountAssertion::DelegatedAmount(42, ComparableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::DelegatedAmount {
+                value: 42,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -377,8 +442,11 @@ mod tests {
             // Assert on close_authority
             //
 
-            let result = TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -387,10 +455,10 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::CloseAuthority(
-                Some(owner.encodable_pubkey()),
-                EquatableOperator::NotEqual,
-            )
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: Some(owner.encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -444,8 +512,11 @@ mod tests {
             // Assert on delegate
             //
 
-            let result = TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -454,10 +525,10 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::Delegate(
-                Some(delegate.encodable_pubkey()),
-                EquatableOperator::Equal,
-            )
+            let result = TokenAccountAssertion::Delegate {
+                value: Some(delegate.encodable_pubkey()),
+                operator: EquatableOperator::Equal,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {
@@ -470,8 +541,11 @@ mod tests {
             //
             // Assert on close_authority
             //
-            let result = TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)
-                .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -480,10 +554,10 @@ mod tests {
                 panic!("{:?}", error);
             }
 
-            let result = TokenAccountAssertion::CloseAuthority(
-                Some(close_authority.encodable_pubkey()),
-                EquatableOperator::Equal,
-            )
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: Some(close_authority.encodable_pubkey()),
+                operator: EquatableOperator::Equal,
+            }
             .evaluate(&account_info, true);
 
             if let Ok(result) = result {

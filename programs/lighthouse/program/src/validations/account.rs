@@ -2,10 +2,12 @@ use std::collections::HashMap;
 
 use crate::{error::LighthouseError, utils::Result};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
-pub enum AccountValidation<'a> {
-    IsEmpty,
+
+pub enum AccountValidation {
+    IsNotInited,
+    IsInited,
     IsWritable,
-    IsProgramDerivedAddress(&'a [&'a [u8]], Pubkey, Option<u8>),
+    IsProgramDerivedAddress(Vec<Vec<u8>>, Pubkey, Option<u8>),
     IsOwnedBy(Pubkey),
 }
 
@@ -15,17 +17,30 @@ pub trait CheckedAccount<'info> {
     fn key(&self) -> Pubkey;
 }
 
-pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
-    account: AccountInfo<'info>,
-    conditions: &Vec<AccountValidation<'_>>,
-) -> Result<(T, HashMap<Pubkey, u8>)> {
-    let mut bump_map = HashMap::new();
+pub trait DerivedAccount<'info> {
+    fn new(account: AccountInfo<'info>) -> Self;
+    fn get_info(&self) -> &AccountInfo<'info>;
+    fn key(&self) -> Pubkey;
+}
 
+pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
+    account: &'a AccountInfo<'info>,
+    conditions: Vec<AccountValidation>,
+    bump_map: &mut HashMap<Pubkey, u8>,
+) -> Result<T> {
     for condition in conditions {
         match condition {
-            AccountValidation::IsEmpty => {
-                if account.lamports() != 0 || !account.data_is_empty() {
-                    msg!("account empty condition failed: {:?}", account.key);
+            AccountValidation::IsInited => {
+                if account.data_is_empty() || account.owner.eq(&solana_program::system_program::ID)
+                {
+                    msg!("account inited condition failed: {:?}", account.key);
+                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                }
+            }
+            AccountValidation::IsNotInited => {
+                if account.lamports() != 0 || !account.owner.eq(&solana_program::system_program::ID)
+                {
+                    msg!("account not inited condition failed: {:?}", account.key);
                     return Err(LighthouseError::AccountValidaitonFailed.into());
                 }
             }
@@ -38,16 +53,14 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
             AccountValidation::IsProgramDerivedAddress(seeds, program_id, bump) => match bump {
                 Some(bump) => {
                     let mut seeds_and_bump = vec![];
-                    let bump_slice = [*bump];
+                    let bump_slice = [bump];
 
-                    for seed in seeds.iter() {
-                        seeds_and_bump.push(*seed);
-                    }
-                    seeds_and_bump.push(bump_slice.as_ref());
+                    seeds_and_bump.extend(seeds.iter().map(|seed| seed.as_slice()));
+                    seeds_and_bump.push(&bump_slice);
 
                     // TODO: give pubkey create program address unwrap better error
                     let derived_address =
-                        Pubkey::create_program_address(seeds_and_bump.as_slice(), program_id)
+                        Pubkey::create_program_address(seeds_and_bump.as_slice(), &program_id)
                             .unwrap();
 
                     if account.key != &derived_address {
@@ -59,10 +72,13 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                         return Err(LighthouseError::AccountValidaitonFailed.into());
                     }
 
-                    bump_map.insert(*account.key, *bump);
+                    bump_map.insert(*account.key, bump);
                 }
                 None => {
-                    let (generated_pda, bump) = Pubkey::find_program_address(seeds, program_id);
+                    let seeds = seeds.iter().map(|seed| seed.as_slice()).collect::<Vec<_>>();
+
+                    let (generated_pda, bump) =
+                        Pubkey::find_program_address(seeds.as_slice(), &program_id);
 
                     if account.key != &generated_pda {
                         msg!(
@@ -78,7 +94,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                 }
             },
             AccountValidation::IsOwnedBy(owner) => {
-                if !account.owner.eq(owner) {
+                if !account.owner.eq(&owner) {
                     msg!(
                         "account owner condition failed: expected {:?} actual {:?}",
                         account.owner,
@@ -90,11 +106,25 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
         }
     }
 
-    Ok((T::new(account), bump_map))
+    Ok(T::new(account.clone()))
 }
 
 pub struct MemoryAccount<'info> {
     pub account_info: AccountInfo<'info>,
+}
+
+impl<'info> MemoryAccount<'info> {
+    pub fn get_seeds(payer: &Pubkey, memory_index: u8, bump: Option<u8>) -> Vec<Vec<u8>> {
+        vec![
+            b"memory".to_vec(),
+            payer.to_bytes().to_vec(),
+            if let Some(bump) = bump {
+                vec![memory_index, bump]
+            } else {
+                vec![memory_index]
+            },
+        ]
+    }
 }
 
 impl<'info> CheckedAccount<'info> for MemoryAccount<'info> {

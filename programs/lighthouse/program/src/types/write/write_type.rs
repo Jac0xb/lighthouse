@@ -5,9 +5,10 @@ use solana_program::account_info::AccountInfo;
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {
     AccountBalance,
-
-    // Account Data Offset, Data Length, Validation
-    AccountData(u16, Option<u16>),
+    AccountData {
+        offset: u16,
+        data_length: Option<u16>,
+    },
     AccountInfo,
     DataValue(DataValue),
     Program,
@@ -17,7 +18,10 @@ impl WriteType {
     pub fn size(&self, account_info: Option<&AccountInfo<'_>>) -> Option<usize> {
         match self {
             WriteType::AccountBalance => Some(8),
-            WriteType::AccountData(account_offset, data_length) => {
+            WriteType::AccountData {
+                offset: account_offset,
+                data_length,
+            } => {
                 if let Some(data_length) = data_length {
                     Some(*data_length as usize)
                 } else {
@@ -48,8 +52,7 @@ impl WriteType {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteTypeParameter {
-    // Memory offset, write type
-    WriteU8(u8, WriteType),
-    WriteU16(u16, WriteType),
-    WriteU32(u32, WriteType),
+    WriteU8 { offset: u8, write_type: WriteType },
+    WriteU16 { offset: u16, write_type: WriteType },
+    WriteU32 { offset: u32, write_type: WriteType },
 }

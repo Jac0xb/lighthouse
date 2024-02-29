@@ -1,10 +1,12 @@
+pub mod blackhat_program;
 pub mod context;
 pub mod error;
+pub mod test_program;
+pub mod tx_builder;
 pub mod utils;
 
 use anchor_spl::{associated_token, token::Mint};
-use blackhat_sdk::blackhat_program::BlackhatProgram;
-use lighthouse_sdk::LighthouseProgram;
+use lighthouse_client::instructions::CreateMemoryAccountBuilder;
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::{
@@ -14,8 +16,20 @@ use solana_sdk::{
 };
 use std::result;
 
+pub fn find_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+    solana_program::pubkey::Pubkey::find_program_address(
+        &[
+            "memory".to_string().as_ref(),
+            user.as_ref(),
+            &[memory_index],
+        ],
+        &lighthouse_client::programs::LIGHTHOUSE_ID,
+    )
+}
+
 use self::{
     context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},
+    test_program::TestProgram,
     utils::process_transaction_assert_success,
 };
 
@@ -25,8 +39,13 @@ pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 pub fn program_test() -> ProgramTest {
     // program.add_program("<program_name>", <program_name>::id(), processor!(<program_name>::entry));
 
-    let mut test = ProgramTest::new("lighthouse", lighthouse::id(), None);
+    let mut test = ProgramTest::new(
+        "lighthouse",
+        lighthouse_client::programs::LIGHTHOUSE_ID,
+        None,
+    );
     test.add_program("blackhat", blackhat::id(), None);
+    test.add_program("test_program", test_program::id(), None);
     test.set_compute_max_units(1_400_000);
 
     test
@@ -41,17 +60,31 @@ pub fn clone_keypair(k: &Keypair) -> Keypair {
 pub async fn create_memory_account(
     context: &mut TestContext,
     user: &Keypair,
+    memory_index: u8,
     size: u64,
 ) -> Result<()> {
-    let program = LighthouseProgram {};
-    let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), 0, size);
-    let tx = tx_builder
-        .to_transaction_and_sign(
-            vec![user],
-            user.encodable_pubkey(),
-            context.get_blockhash().await,
-        )
-        .unwrap();
+    // let program = LighthouseProgram {};
+    // let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), memory_index, size);
+    // let tx = tx_builder
+    //     .to_transaction_and_sign(
+    //         vec![user],
+    //         user.encodable_pubkey(),
+    //         context.get_blockhash().await,
+    //     )
+    //     .unwrap();
+
+    let tx = Transaction::new_signed_with_payer(
+        &[CreateMemoryAccountBuilder::new()
+            .payer(user.encodable_pubkey())
+            .memory_account(find_memory_account(user.encodable_pubkey(), memory_index).0)
+            .memory_index(memory_index)
+            .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
+            .memory_account_size(size)
+            .instruction()],
+        Some(&user.pubkey()),
+        &[user],
+        context.get_blockhash().await,
+    );
 
     process_transaction_assert_success(context, tx)
         .await
@@ -283,7 +316,7 @@ pub async fn create_test_account(
     random: bool,
 ) -> Result<Keypair> {
     let account_keypair = Keypair::new();
-    let program = BlackhatProgram {};
+    let program = TestProgram {};
 
     let tx = program
         .create_test_account(
