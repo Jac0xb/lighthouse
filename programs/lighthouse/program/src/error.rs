@@ -1,4 +1,4 @@
-use solana_program::{msg, program_error::ProgramError};
+use solana_program::program_error::ProgramError;
 use thiserror::Error;
 
 #[derive(Debug, Error, Clone, Copy, PartialEq, Eq)]
@@ -58,7 +58,7 @@ pub fn assert_is_program_error(err: ProgramError, expected_error: ProgramError) 
 #[macro_export]
 macro_rules! err {
     ($error:expr) => {
-        ProgramError::from($error)
+        ::solana_program::program_error::ProgramError::from($error)
     };
 }
 

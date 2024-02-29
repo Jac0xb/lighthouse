@@ -1,11 +1,11 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError};
+use solana_program::{account_info::AccountInfo, msg};
 
 use crate::{
     constants::CANNOT_BORROW_DATA_TARGET_ERROR_MSG,
     err,
     error::LighthouseError,
-    types::{Assert, DataValue, EvaluationResult, IntegerOperator, Operator},
+    types::{Assert, EvaluationResult, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
 };
 
@@ -60,64 +60,64 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
         match assertion {
             DataValueDiffAssertion::U8(expected_diff_value, operator) => {
-                let left_value = try_from_slice::<u8>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<u8>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<u8>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<u8>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i16 - right_value as i16;
 
                 Ok(operator.evaluate(&diff_value, expected_diff_value, include_output))
             }
             DataValueDiffAssertion::I8(expected_value, operator) => {
-                let left_value = try_from_slice::<i8>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<i8>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<i8>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<i8>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i16 - right_value as i16;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::U16(expected_value, operator) => {
-                let left_value = try_from_slice::<u16>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<u16>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<u16>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<u16>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i32 - right_value as i32;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::I16(expected_value, operator) => {
-                let left_value = try_from_slice::<i16>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<i16>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<i16>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<i16>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i32 - right_value as i32;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::U32(expected_value, operator) => {
-                let left_value = try_from_slice::<u32>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<u32>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<u32>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<u32>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i64 - right_value as i64;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::I32(expected_value, operator) => {
-                let left_value = try_from_slice::<i32>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<i32>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<i32>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<i32>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i64 - right_value as i64;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::U64(expected_value, operator) => {
-                let left_value = try_from_slice::<u64>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<u64>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<u64>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<u64>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i128 - right_value as i128;
 
                 Ok(operator.evaluate(&diff_value, expected_value, include_output))
             }
             DataValueDiffAssertion::I64(expected_value, operator) => {
-                let left_value = try_from_slice::<i64>(&left_account_data, left_offset)?;
-                let right_value = try_from_slice::<i64>(&right_account_data, right_offset)?;
+                let left_value = try_from_slice::<i64>(&left_account_data, left_offset, None)?;
+                let right_value = try_from_slice::<i64>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i128 - right_value as i128;
 

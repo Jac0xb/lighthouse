@@ -60,11 +60,18 @@ pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
     }
 }
 
-pub fn try_from_slice<T: BorshDeserialize + Sized>(data: &[u8], offset: usize) -> Result<T> {
-    let data_length = std::mem::size_of::<T>();
+pub fn try_from_slice<T: BorshDeserialize + Sized>(
+    data: &[u8],
+    offset: usize,
+    length: Option<usize>,
+) -> Result<T> {
+    let data_length = length.unwrap_or(std::mem::size_of::<T>());
+
     let slice = data
         .get(offset..(offset + data_length))
         .ok_or(LighthouseError::OutOfRange)?;
+
+    msg!("slice: {:?}", slice);
 
     Ok(T::try_from_slice(slice)?)
 }

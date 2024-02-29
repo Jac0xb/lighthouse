@@ -2,11 +2,13 @@ use crate::{
     constants::CANNOT_BORROW_DATA_TARGET_ERROR_MSG,
     err,
     error::LighthouseError,
-    types::{Assert, EquatableOperator, EvaluationResult, IntegerOperator, Operator},
+    types::{
+        Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
+    },
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct AccountDataAssertion {
@@ -62,7 +64,7 @@ pub enum DataValueAssertion {
     },
     Bytes {
         value: Vec<u8>,
-        operator: EquatableOperator,
+        operator: BytesOperator,
     },
     Pubkey {
         value: Pubkey,
@@ -93,88 +95,93 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<bool>(&data, offset)?;
+                let actual_value = try_from_slice::<bool>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::U8 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<u8>(&data, offset)?;
+                let actual_value = try_from_slice::<u8>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::I8 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<i8>(&data, offset)?;
+                let actual_value = try_from_slice::<i8>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::U16 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<u16>(&data, offset)?;
+                let actual_value = try_from_slice::<u16>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::I16 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<i16>(&data, offset)?;
+                let actual_value = try_from_slice::<i16>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::U32 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<u32>(&data, offset)?;
+                let actual_value = try_from_slice::<u32>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::I32 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<i32>(&data, offset)?;
+                let actual_value = try_from_slice::<i32>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::U64 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<u64>(&data, offset)?;
+                let actual_value = try_from_slice::<u64>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::I64 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<i64>(&data, offset)?;
+                let actual_value = try_from_slice::<i64>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::U128 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<u128>(&data, offset)?;
+                let actual_value = try_from_slice::<u128>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::I128 {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<i128>(&data, offset)?;
+                let actual_value = try_from_slice::<i128>(&data, offset, None)?;
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
             DataValueAssertion::Bytes {
                 value: assertion_value,
                 operator,
-            } => Ok(operator.evaluate(assertion_value, assertion_value, include_output)),
+            } => {
+                let actual_value = &data[offset..offset + assertion_value.len()];
+                let assertion_value = assertion_value.as_slice();
+                Ok(operator.evaluate(actual_value, assertion_value, include_output))
+            }
             DataValueAssertion::Pubkey {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<Pubkey>(&data, offset)?;
+                let actual_value = try_from_slice::<Pubkey>(&data, offset, None)?;
+
                 Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
         }

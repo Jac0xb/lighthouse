@@ -35,10 +35,9 @@ solana-program-test = "1.17.23"
 solana-sdk = "1.17.23"
 solana-banks-interface = "1.14.10"
 regex = "1.5.4"
-lighthouse = { path = "../../programs/lighthouse/program" }
+# lighthouse = { path = "../../programs/lighthouse/program" }
 test-program = { path = "../../programs/test-program/program", features = ["no-entrypoint"] }
 blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }
-# lighthouse-sdk = { path = "../../lighthouse-sdk" }
 lighthouse-client = { path = "../../clients/rust" }
 solana-vote-program = "1.17.23"
 rand = "0.8.4"

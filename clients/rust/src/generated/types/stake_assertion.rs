@@ -14,9 +14,28 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StakeAssertion {
-    DelegationVoterPubkey(Pubkey, EquatableOperator),
-    DelegationStake(u64, ComparableOperator),
-    DelegationActivationEpoch(u64, ComparableOperator),
-    DelegationDeactivationEpoch(u64, ComparableOperator),
-    CreditsObserved(u64, ComparableOperator),
+    DelegationVoterPubkey {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    DelegationStake {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    DelegationActivationEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    DelegationDeactivationEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    CreditsObserved {
+        value: u64,
+        operator: ComparableOperator,
+    },
 }

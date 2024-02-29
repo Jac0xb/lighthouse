@@ -1,6 +1,6 @@
 use crate::{
     constants::{CANNOT_BORROW_DATA_TARGET_ERROR_MSG, FAILED_DESERIALIZE_STAKE_ACCOUNT_ERROR_MSG},
-    err,
+    err, err_msg,
     error::LighthouseError,
     types::{Assert, EvaluationResult, Operator},
 };
@@ -9,12 +9,12 @@ use crate::{
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::msg;
 use solana_program::{
     account_info::AccountInfo,
     pubkey::Pubkey,
     stake::state::{Meta, Stake, StakeStateV2},
 };
-use solana_program::{msg, program_error::ProgramError};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 #[repr(u8)]
@@ -79,7 +79,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
             }
             StakeAccountAssertion::MetaAssertion(meta_assertion) => {
                 let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).map_err(|e| {
-                    msg!("Failed to deserialize stake account state {}", e);
+                    err_msg!("Failed to deserialize stake account state", e);
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
@@ -137,12 +137,30 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum MetaAssertion {
-    RentExemptReserve(u64, ComparableOperator),
-    AuthorizedStaker(Pubkey, EquatableOperator),
-    AuthorizedWithdrawer(Pubkey, EquatableOperator),
-    LockupUnixTimestamp(i64, ComparableOperator),
-    LockupEpoch(u64, ComparableOperator),
-    LockupCustodian(Pubkey, EquatableOperator),
+    RentExemptReserve {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    AuthorizedStaker {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    AuthorizedWithdrawer {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    LockupUnixTimestamp {
+        value: i64,
+        operator: ComparableOperator,
+    },
+    LockupEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    LockupCustodian {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
 }
 
 impl Assert<Meta> for MetaAssertion {
@@ -152,32 +170,30 @@ impl Assert<Meta> for MetaAssertion {
 
     fn evaluate(&self, meta: &Meta, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
-            MetaAssertion::RentExemptReserve(rent_exempt_reserve, operator) => operator.evaluate(
-                &meta.rent_exempt_reserve,
-                rent_exempt_reserve,
-                include_output,
-            ),
-            MetaAssertion::AuthorizedStaker(authorized_staker, operator) => {
-                operator.evaluate(&meta.authorized.staker, authorized_staker, include_output)
-            }
-            MetaAssertion::AuthorizedWithdrawer(authorized_withdrawer, operator) => operator
-                .evaluate(
-                    &meta.authorized.withdrawer,
-                    authorized_withdrawer,
-                    include_output,
-                ),
-            MetaAssertion::LockupUnixTimestamp(lockup_unix_timestamp, operator) => operator
-                .evaluate(
-                    &meta.lockup.unix_timestamp,
-                    lockup_unix_timestamp,
-                    include_output,
-                ),
-            MetaAssertion::LockupEpoch(lockup_epoch, operator) => {
-                operator.evaluate(&meta.lockup.epoch, lockup_epoch, include_output)
-            }
-            MetaAssertion::LockupCustodian(lockup_custodian, operator) => {
-                operator.evaluate(&meta.lockup.custodian, lockup_custodian, include_output)
-            }
+            MetaAssertion::RentExemptReserve {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.rent_exempt_reserve, assertion_value, include_output),
+            MetaAssertion::AuthorizedStaker {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.authorized.staker, assertion_value, include_output),
+            MetaAssertion::AuthorizedWithdrawer {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.authorized.withdrawer, assertion_value, include_output),
+            MetaAssertion::LockupUnixTimestamp {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.lockup.unix_timestamp, assertion_value, include_output),
+            MetaAssertion::LockupEpoch {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.lockup.epoch, assertion_value, include_output),
+            MetaAssertion::LockupCustodian {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&meta.lockup.custodian, assertion_value, include_output),
         };
 
         Ok(result)
@@ -186,13 +202,26 @@ impl Assert<Meta> for MetaAssertion {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum StakeAssertion {
-    DelegationVoterPubkey(Pubkey, EquatableOperator),
-    DelegationStake(u64, ComparableOperator),
-    DelegationActivationEpoch(u64, ComparableOperator),
-    DelegationDeactivationEpoch(u64, ComparableOperator),
-    // DelegationWarmupCooldownRate(f64, ComparableOperator),
-    /// stake account's credits observed at the time of delegation
-    CreditsObserved(u64, ComparableOperator),
+    DelegationVoterPubkey {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    DelegationStake {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    DelegationActivationEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    DelegationDeactivationEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    CreditsObserved {
+        value: u64,
+        operator: ComparableOperator,
+    },
 }
 
 impl Assert<Stake> for StakeAssertion {
@@ -202,30 +231,38 @@ impl Assert<Stake> for StakeAssertion {
 
     fn evaluate(&self, stake: &Stake, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
-            StakeAssertion::DelegationVoterPubkey(voter_pubkey, operator) => {
-                operator.evaluate(&stake.delegation.voter_pubkey, voter_pubkey, include_output)
-            }
-            StakeAssertion::DelegationStake(delegation_stake, operator) => {
-                operator.evaluate(&stake.delegation.stake, delegation_stake, include_output)
-            }
-            StakeAssertion::DelegationActivationEpoch(activation_epoch, operator) => operator
-                .evaluate(
-                    &stake.delegation.activation_epoch,
-                    activation_epoch,
-                    include_output,
-                ),
-            StakeAssertion::DelegationDeactivationEpoch(deactivation_epoch, operator) => operator
-                .evaluate(
-                    &stake.delegation.deactivation_epoch,
-                    deactivation_epoch,
-                    include_output,
-                ),
-            // StakeAssertion::DelegationWarmupCooldownRate(_warmup_cooldown_rate, _operator) => {
-            //     panic!("Not implemented");
-            // }
-            StakeAssertion::CreditsObserved(credits_observed, operator) => {
-                operator.evaluate(&stake.credits_observed, credits_observed, include_output)
-            }
+            StakeAssertion::DelegationVoterPubkey {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(
+                &stake.delegation.voter_pubkey,
+                assertion_value,
+                include_output,
+            ),
+            StakeAssertion::DelegationStake {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&stake.delegation.stake, assertion_value, include_output),
+            StakeAssertion::DelegationActivationEpoch {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(
+                &stake.delegation.activation_epoch,
+                assertion_value,
+                include_output,
+            ),
+            StakeAssertion::DelegationDeactivationEpoch {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(
+                &stake.delegation.deactivation_epoch,
+                assertion_value,
+                include_output,
+            ),
+            StakeAssertion::CreditsObserved {
+                value: assertion_value,
+                operator,
+            } => operator.evaluate(&stake.credits_observed, assertion_value, include_output),
         };
 
         Ok(result)

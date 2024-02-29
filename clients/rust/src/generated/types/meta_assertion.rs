@@ -14,10 +14,40 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MetaAssertion {
-    RentExemptReserve(u64, ComparableOperator),
-    AuthorizedStaker(Pubkey, EquatableOperator),
-    AuthorizedWithdrawer(Pubkey, EquatableOperator),
-    LockupUnixTimestamp(i64, ComparableOperator),
-    LockupEpoch(u64, ComparableOperator),
-    LockupCustodian(Pubkey, EquatableOperator),
+    RentExemptReserve {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    AuthorizedStaker {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    AuthorizedWithdrawer {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+    LockupUnixTimestamp {
+        value: i64,
+        operator: ComparableOperator,
+    },
+    LockupEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    LockupCustodian {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
 }

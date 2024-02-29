@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::BytesOperator;
 use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
@@ -60,7 +61,7 @@ pub enum DataValueAssertion {
     },
     Bytes {
         value: Vec<u8>,
-        operator: EquatableOperator,
+        operator: BytesOperator,
     },
     Pubkey {
         #[cfg_attr(

@@ -639,45 +639,75 @@
           {
             "name": "Slot",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "EpochStartTimestamp",
             "fields": [
-              "i64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "Epoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "LeaderScheduleEpoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "UnixTimestamp",
             "fields": [
-              "i64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           }
@@ -864,7 +894,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "EquatableOperator"
+                  "defined": "BytesOperator"
                 }
               }
             ]
@@ -1136,54 +1166,90 @@
           {
             "name": "RentExemptReserve",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "AuthorizedStaker",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "AuthorizedWithdrawer",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "LockupUnixTimestamp",
             "fields": [
-              "i64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "LockupEpoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "LockupCustodian",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           }
@@ -1198,45 +1264,75 @@
           {
             "name": "DelegationVoterPubkey",
             "fields": [
-              "publicKey",
               {
-                "defined": "EquatableOperator"
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
               }
             ]
           },
           {
             "name": "DelegationStake",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "DelegationActivationEpoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "DelegationDeactivationEpoch",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           },
           {
             "name": "CreditsObserved",
             "fields": [
-              "u64",
               {
-                "defined": "ComparableOperator"
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
               }
             ]
           }
@@ -1558,6 +1654,20 @@
     },
     {
       "name": "EquatableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BytesOperator",
       "type": {
         "kind": "enum",
         "variants": [

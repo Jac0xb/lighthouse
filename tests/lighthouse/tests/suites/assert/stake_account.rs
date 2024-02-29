@@ -103,10 +103,10 @@ async fn test_borsh_account_data() {
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
                 .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
-                    MetaAssertion::AuthorizedStaker(
-                        user.encodable_pubkey(),
-                        EquatableOperator::Equal,
-                    ),
+                    MetaAssertion::AuthorizedStaker {
+                        value: user.encodable_pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
                 ))
                 .instruction(),
         ],

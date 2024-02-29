@@ -9,6 +9,7 @@
 export * from './accountInfoAssertion';
 export * from './accountInfoData';
 export * from './assertionConfigV1';
+export * from './bytesOperator';
 export * from './comparableOperator';
 export * from './dataValue';
 export * from './dataValueAssertion';
