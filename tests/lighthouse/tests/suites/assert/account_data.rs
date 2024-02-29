@@ -1,10 +1,11 @@
 use crate::utils::context::TestContext;
+use crate::utils::tx_builder::TxBuilder;
 use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{create_test_account, create_user_with_balance};
-use lighthouse::types::{
-    AccountDataAssertion, DataValueAssertion, EquatableOperator, IntegerOperator,
+use lighthouse_client::instructions::AssertAccountDataBuilder;
+use lighthouse_client::types::{
+    BytesOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
-use lighthouse_sdk::{LighthouseProgram, TxBuilder};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
@@ -12,9 +13,8 @@ use solana_sdk::signer::EncodableKeypair;
 /// Tests all data types using the `AccountData` assertion.
 ///
 #[tokio::test]
-async fn test_borsh_account_data() {
+async fn borsh_account_data() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
         .unwrap();
@@ -23,173 +23,172 @@ async fn test_borsh_account_data() {
 
     let mut tx = TxBuilder {
         ixs: vec![
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 8,
-                        assertion: DataValueAssertion::U8(1, IntegerOperator::Equal),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 9,
-                        assertion: DataValueAssertion::I8(-1, IntegerOperator::Equal),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 10,
-                        assertion: DataValueAssertion::U16(
-                            (u8::MAX as u16) + 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 12,
-                        assertion: DataValueAssertion::I16(
-                            (i8::MIN as i16) - 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 14,
-                        assertion: DataValueAssertion::U32(
-                            (u16::MAX as u32) + 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 18,
-                        assertion: DataValueAssertion::I32(
-                            (i16::MIN as i32) - 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 22,
-                        assertion: DataValueAssertion::U64(
-                            (u32::MAX as u64) + 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 30,
-                        assertion: DataValueAssertion::I64(
-                            (i32::MIN as i64) - 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 38,
-                        assertion: DataValueAssertion::U128(
-                            (u64::MAX as u128) + 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 54,
-                        assertion: DataValueAssertion::I128(
-                            (i64::MIN as i128) - 1,
-                            IntegerOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 70,
-                        assertion: DataValueAssertion::Bytes(
-                            vec![u8::MAX; 32],
-                            EquatableOperator::Equal,
-                        ),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 102,
-                        assertion: DataValueAssertion::Bool(true, EquatableOperator::Equal),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 103,
-                        assertion: DataValueAssertion::Bool(false, EquatableOperator::Equal),
-                    },
-                    None,
-                )
-                .ix(),
-            program
-                .assert_account_data(
-                    test_account.encodable_pubkey(),
-                    AccountDataAssertion {
-                        offset: 105,
-                        assertion: DataValueAssertion::U8(u8::MAX, IntegerOperator::Equal),
-                    },
-                    None,
-                )
-                .ix(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(8)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(9)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U16 {
+                    value: (u8::MAX as u16) + 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(10)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::I16 {
+                    value: (i8::MIN as i16) - 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(12)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U32 {
+                    value: (u16::MAX as u32) + 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(14)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::I32 {
+                    value: (i16::MIN as i32) - 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(18)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U64 {
+                    value: (u32::MAX as u64) + 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(22)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::I64 {
+                    value: (i32::MIN as i64) - 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(30)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U128 {
+                    value: (u64::MAX as u128) + 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(38)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::I128 {
+                    value: (i64::MIN as i128) - 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(54)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: vec![u8::MAX; 32],
+                    operator: BytesOperator::Equal,
+                })
+                .offset(70)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bool {
+                    value: true,
+                    operator: EquatableOperator::Equal,
+                })
+                .offset(102)
+                .instruction(),
+            // False represented as 0
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(103)
+                .instruction(),
+            // Some in Option<u8>
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(104)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: u8::MAX,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(105)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(106)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: [1, 255, 255].to_vec(),
+                    operator: BytesOperator::Equal,
+                })
+                .offset(107)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: [0].to_vec(),
+                    operator: BytesOperator::Equal,
+                })
+                .offset(110)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Pubkey {
+                    value: user.encodable_pubkey(),
+                    operator: EquatableOperator::Equal,
+                })
+                .offset(111)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: [32, 0, 0, 0]
+                        .iter()
+                        .cloned()
+                        .chain(vec![255; 32])
+                        .collect::<Vec<u8>>(),
+                    operator: BytesOperator::Equal,
+                })
+                .offset(143)
+                .instruction(),
         ],
         look_up_tables: None,
     };

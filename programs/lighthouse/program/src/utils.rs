@@ -2,6 +2,7 @@ use crate::{
     error::LighthouseError,
     types::{operator::EvaluationResult, Assert},
 };
+use borsh::BorshDeserialize;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
@@ -57,6 +58,22 @@ pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
         [1, 0, 0, 0] => Ok(COption::Some(u64::from_le_bytes(body.try_into().unwrap()))),
         _ => Err(LighthouseError::AccountNotInitialized.into()),
     }
+}
+
+pub fn try_from_slice<T: BorshDeserialize + Sized>(
+    data: &[u8],
+    offset: usize,
+    length: Option<usize>,
+) -> Result<T> {
+    let data_length = length.unwrap_or(std::mem::size_of::<T>());
+
+    let slice = data
+        .get(offset..(offset + data_length))
+        .ok_or(LighthouseError::OutOfRange)?;
+
+    msg!("slice: {:?}", slice);
+
+    Ok(T::try_from_slice(slice)?)
 }
 
 pub fn create_account<'a, 'info>(

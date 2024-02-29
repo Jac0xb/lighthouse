@@ -10,7 +10,7 @@ description = "A simple CLI application to test Lighthouse on Solana network"
 clap = { version = "^4.5.1", features = ["derive"] }
 solana-sdk = "1.17.23"
 lighthouse = { path = "../programs/lighthouse/program" }
-lighthouse-sdk = { path = "../lighthouse-sdk" }
+lighthouse-client = { path = "../clients/rust" }
 serde_json = "1.0.114"
 solana-program = "1.17.23"
 solana-client = "1.17.23"

@@ -1,22 +1,22 @@
+use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::context::TestContext;
-use crate::utils::create_user;
+use crate::utils::tx_builder::TxBuilder;
 use crate::utils::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use blackhat_sdk::blackhat_program::BlackhatProgram;
-use lighthouse::error::LighthouseError;
-use lighthouse::types::{
-    AccountInfoAssertion, AssertionConfigV1, ComparableOperator, EquatableOperator,
-};
-use lighthouse_sdk::{LighthouseProgram, TxBuilder};
-use solana_program::system_program;
+use crate::utils::{create_mint, create_test_account, create_user, CreateMintParameters};
+use lighthouse_client::errors::LighthouseError;
+use lighthouse_client::instructions::AssertAccountInfoBuilder;
+use lighthouse_client::types::{AccountInfoAssertion, ComparableOperator, EquatableOperator};
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
+use solana_sdk::transaction::Transaction;
+use solana_sdk::{keccak, system_program};
+use spl_associated_token_account::get_associated_token_address;
 
 #[tokio::test]
 async fn test_hijack_account_ownership() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let blackhat_program = BlackhatProgram {};
     let unprotected_user = create_user(context).await.unwrap();
     let bad_fee_payer = create_user(context).await.unwrap();
@@ -52,16 +52,13 @@ async fn test_hijack_account_ownership() {
             blackhat_program
                 .hijack_account_ownership(protected_user.pubkey())
                 .ix(),
-            program
-                .assert_account_info(
-                    protected_user.pubkey(),
-                    lighthouse::types::AccountInfoAssertion::Owner(
-                        system_program::id(),
-                        EquatableOperator::Equal,
-                    ),
-                    None,
-                )
-                .ix(),
+            AssertAccountInfoBuilder::new()
+                .target_account(protected_user.pubkey())
+                .account_info_assertion(AccountInfoAssertion::Owner {
+                    value: system_program::id(),
+                    operator: EquatableOperator::Equal,
+                })
+                .instruction(),
         ],
     }
     .to_transaction_and_sign(
@@ -84,7 +81,6 @@ async fn test_hijack_account_ownership() {
 #[tokio::test]
 async fn test_account_balance() {
     let context = &mut TestContext::new().await.unwrap();
-    let program = LighthouseProgram {};
     let user = create_user(context).await.unwrap();
 
     let user_balance = context
@@ -93,19 +89,138 @@ async fn test_account_balance() {
         .await
         .unwrap();
 
-    let mut tx_builder = program.assert_account_info(
-        user.encodable_pubkey(),
-        AccountInfoAssertion::Lamports(user_balance - 5000, ComparableOperator::Equal),
-        Some(AssertionConfigV1 { verbose: true }),
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(user.encodable_pubkey())
+            .account_info_assertion(AccountInfoAssertion::Lamports {
+                value: user_balance - 5000,
+                operator: ComparableOperator::Equal,
+            })
+            .instruction()],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
     );
 
-    let blockhash = context.get_blockhash().await;
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+}
 
-    process_transaction_assert_success(
-        context,
-        tx_builder
-            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
-            .unwrap(),
+#[tokio::test]
+async fn data_hash() {
+    let ctx = &mut TestContext::new().await.unwrap();
+    let user = create_user(ctx).await.unwrap();
+
+    let test_account = create_test_account(ctx, &user, false).await.unwrap();
+
+    let test_account_data = ctx
+        .client()
+        .get_account(test_account.encodable_pubkey())
+        .await
+        .unwrap()
+        .unwrap();
+
+    let account_hash = keccak::hashv(&[&test_account_data.data]).0;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(test_account.encodable_pubkey())
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: None,
+                length: None,
+            })
+            .instruction()],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        ctx.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(ctx, tx).await.unwrap();
+
+    let (tx, mint) = create_mint(
+        ctx,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: None,
+            freeze_authority: None,
+            decimals: 9,
+            mint_to: Some((user.encodable_pubkey(), 100)),
+        },
+    )
+    .await
+    .unwrap();
+    process_transaction_assert_success(ctx, tx).await.unwrap();
+
+    let token_account =
+        get_associated_token_address(&user.encodable_pubkey(), &mint.encodable_pubkey());
+
+    let token_account_data = ctx
+        .client()
+        .get_account(token_account)
+        .await
+        .unwrap()
+        .unwrap();
+
+    let account_hash = keccak::hashv(&[&token_account_data.data]).0;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(token_account)
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: None,
+                length: None,
+            })
+            .instruction()],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        ctx.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(ctx, tx).await.unwrap();
+
+    let account_hash = keccak::hashv(&[&token_account_data.data[30..]]).0;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(token_account)
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: Some(30),
+                length: None,
+            })
+            .instruction()],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        ctx.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(ctx, tx).await.unwrap();
+
+    let account_hash = keccak::hashv(&[&token_account_data.data[29..]]).0;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertAccountInfoBuilder::new()
+            .target_account(token_account)
+            .account_info_assertion(AccountInfoAssertion::VerifyDatahash {
+                expected_hash: account_hash,
+                start: Some(30),
+                length: None,
+            })
+            .instruction()],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        ctx.get_blockhash().await,
+    );
+
+    process_transaction_assert_failure(
+        ctx,
+        tx,
+        to_transaction_error(0, LighthouseError::AssertionFailed),
+        None,
     )
     .await
     .unwrap();

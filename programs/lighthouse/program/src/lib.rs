@@ -1,3 +1,4 @@
+pub mod constants;
 pub mod error;
 pub mod instruction;
 pub mod processor;
@@ -27,6 +28,7 @@ pub mod lighthouse {
         account_info::AccountInfo,
         entrypoint::ProgramResult,
         instruction::{AccountMeta, Instruction},
+        msg,
         program::invoke,
         pubkey::Pubkey,
     };
@@ -42,8 +44,8 @@ pub mod lighthouse {
         let instruction = LighthouseInstruction::deserialize(&mut remaining_instruction_data)
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
-        // TODO: printing the instruction name is 500 Compute Units, lets think about that.
-        // msg!("Lighthouse instruction: {:?}", instruction);
+        // TODO: printing the instruction name is 1000's Compute Units, lets think about that.
+        msg!("Lighthouse instruction: {:?}", instruction);
 
         match instruction {
             LighthouseInstruction::CreateMemoryAccount(parameters) => {
@@ -63,7 +65,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertAccountDataDiff(assertion) => {
@@ -72,7 +74,7 @@ pub mod lighthouse {
                 processor::assert_with_accounts(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertAccountInfo(assertion) => {
@@ -81,7 +83,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertMintAccount(assertion) => {
@@ -90,7 +92,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertMintAccountMulti(assertions) => {
@@ -118,7 +120,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertTokenAccountMulti(assertions) => {
@@ -146,11 +148,11 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: false }),
+                    Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertSysvarClock(assertion) => {
-                processor::assert(&assertion, Some(AssertionConfigV1 { verbose: false }))?;
+                processor::assert(&assertion, Some(AssertionConfigV1 { verbose: true }))?;
             }
         }
 

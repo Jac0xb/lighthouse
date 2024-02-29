@@ -1,7 +1,11 @@
 use crate::{
+    constants::CANNOT_BORROW_DATA_TARGET_ERROR_MSG,
+    err,
     error::LighthouseError,
-    types::{Assert, DataValue, EquatableOperator, EvaluationResult, IntegerOperator, Operator},
-    utils::Result,
+    types::{
+        Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
+    },
+    utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
@@ -14,197 +18,58 @@ pub struct AccountDataAssertion {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValueAssertion {
-    Bool(bool, EquatableOperator),
-    U8(u8, IntegerOperator),
-    I8(i8, IntegerOperator),
-    U16(u16, IntegerOperator),
-    I16(i16, IntegerOperator),
-    U32(u32, IntegerOperator),
-    I32(i32, IntegerOperator),
-    U64(u64, IntegerOperator),
-    I64(i64, IntegerOperator),
-    U128(u128, IntegerOperator),
-    I128(i128, IntegerOperator),
-    Bytes(Vec<u8>, EquatableOperator),
-    Pubkey(Pubkey, EquatableOperator),
-}
-
-impl DataValueAssertion {
-    pub fn size(&self) -> usize {
-        match self {
-            DataValueAssertion::Bool(_, _) => 1,
-            DataValueAssertion::U8(_, _) => 1,
-            DataValueAssertion::I8(_, _) => 1,
-            DataValueAssertion::U16(_, _) => 2,
-            DataValueAssertion::I16(_, _) => 2,
-            DataValueAssertion::U32(_, _) => 4,
-            DataValueAssertion::I32(_, _) => 4,
-            DataValueAssertion::U64(_, _) => 8,
-            DataValueAssertion::I64(_, _) => 8,
-            DataValueAssertion::U128(_, _) => 16,
-            DataValueAssertion::I128(_, _) => 16,
-            DataValueAssertion::Bytes(value, _) => value.len(),
-            DataValueAssertion::Pubkey(_, _) => 32,
-        }
-    }
-
-    pub fn deserialize(&self, bytes: &[u8]) -> Result<DataValue> {
-        match self {
-            DataValueAssertion::Bool(_, _) => {
-                let len = bytes.len();
-                if len != 1 {
-                    msg!("Boolean data value must be 1 byte long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::Bool(bytes[0] != 0))
-                }
-            }
-            DataValueAssertion::U8(_, _) => {
-                let len = bytes.len();
-                if len != 1 {
-                    msg!("U8 data value must be 1 byte long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::U8(u8::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::I8(_, _) => {
-                let len = bytes.len();
-                if len != 1 {
-                    msg!("I8 data value must be 1 byte long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::I8(i8::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::U16(_, _) => {
-                let len = bytes.len();
-                if len != 2 {
-                    msg!("U16 data value must be 2 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::U16(u16::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::I16(_, _) => {
-                let len = bytes.len();
-                if len != 2 {
-                    msg!("I16 data value must be 2 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::I16(i16::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::U32(_, _) => {
-                let len = bytes.len();
-                if len != 4 {
-                    msg!("U32 data value must be 4 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::U32(u32::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::I32(_, _) => {
-                let len = bytes.len();
-                if len != 4 {
-                    msg!("I32 data value must be 4 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::I32(i32::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::U64(_, _) => {
-                let len = bytes.len();
-                if len != 8 {
-                    msg!("U64 data value must be 8 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::U64(u64::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::I64(_, _) => {
-                let len = bytes.len();
-                if len != 8 {
-                    msg!("I64 data value must be 8 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::I64(i64::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::U128(_, _) => {
-                let len = bytes.len();
-                if len != 16 {
-                    msg!("U128 data value must be 16 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::U128(u128::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::I128(_, _) => {
-                let len = bytes.len();
-                if len != 16 {
-                    msg!("I128 data value must be 16 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::I128(i128::from_le_bytes(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-            DataValueAssertion::Bytes(_, _) => Ok(DataValue::Bytes(bytes.to_vec())),
-            DataValueAssertion::Pubkey(_, _) => {
-                let len = bytes.len();
-                if len != 32 {
-                    msg!("Pubkey data value must be 32 bytes long");
-                    Err(LighthouseError::InvalidDataLength.into())
-                } else {
-                    Ok(DataValue::Pubkey(Pubkey::new_from_array(
-                        bytes
-                            .try_into()
-                            .map_err(|_| LighthouseError::InvalidDataLength)?,
-                    )))
-                }
-            }
-        }
-    }
+    Bool {
+        value: bool,
+        operator: EquatableOperator,
+    },
+    U8 {
+        value: u8,
+        operator: IntegerOperator,
+    },
+    I8 {
+        value: i8,
+        operator: IntegerOperator,
+    },
+    U16 {
+        value: u16,
+        operator: IntegerOperator,
+    },
+    I16 {
+        value: i16,
+        operator: IntegerOperator,
+    },
+    U32 {
+        value: u32,
+        operator: IntegerOperator,
+    },
+    I32 {
+        value: i32,
+        operator: IntegerOperator,
+    },
+    U64 {
+        value: u64,
+        operator: IntegerOperator,
+    },
+    I64 {
+        value: i64,
+        operator: IntegerOperator,
+    },
+    U128 {
+        value: u128,
+        operator: IntegerOperator,
+    },
+    I128 {
+        value: i128,
+        operator: IntegerOperator,
+    },
+    Bytes {
+        value: Vec<u8>,
+        operator: BytesOperator,
+    },
+    Pubkey {
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
 }
 
 impl Assert<AccountInfo<'_>> for AccountDataAssertion {
@@ -220,117 +85,104 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
         let offset = self.offset as usize;
         let assertion = &self.assertion;
 
-        let data = account.try_borrow_data()?;
-        let slice = data
-            .get(offset..(offset + assertion.size()))
-            .ok_or(LighthouseError::OutOfRange)?;
-
-        let value = DataValueAssertion::deserialize(assertion, slice)?;
+        let data = account.try_borrow_data().map_err(|e| {
+            msg!("{}: {}", CANNOT_BORROW_DATA_TARGET_ERROR_MSG, e);
+            err!(LighthouseError::AccountBorrowFailed)
+        })?;
 
         match assertion {
-            DataValueAssertion::Bool(expected_value, operator) => {
-                let value = match value {
-                    DataValue::Bool(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::Bool {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<bool>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::U8(expected_value, operator) => {
-                let value = match value {
-                    DataValue::U8(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::U8 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<u8>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::I8(expected_value, operator) => {
-                let value = match value {
-                    DataValue::I8(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::I8 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<i8>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::U16(expected_value, operator) => {
-                let value = match value {
-                    DataValue::U16(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::U16 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<u16>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::I16(expected_value, operator) => {
-                let value = match value {
-                    DataValue::I16(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::I16 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<i16>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::U32(expected_value, operator) => {
-                let value = match value {
-                    DataValue::U32(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::U32 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<u32>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::I32(expected_value, operator) => {
-                let value = match value {
-                    DataValue::I32(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::I32 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<i32>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::U64(expected_value, operator) => {
-                let value = match value {
-                    DataValue::U64(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::U64 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<u64>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::I64(expected_value, operator) => {
-                let value = match value {
-                    DataValue::I64(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::I64 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<i64>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::U128(expected_value, operator) => {
-                let value = match value {
-                    DataValue::U128(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::U128 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<u128>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::I128(expected_value, operator) => {
-                let value = match value {
-                    DataValue::I128(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::I128 {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<i128>(&data, offset, None)?;
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::Bytes(expected_value, operator) => {
-                let value = match value {
-                    DataValue::Bytes(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
-
-                Ok(operator.evaluate(&value, expected_value, include_output))
+            DataValueAssertion::Bytes {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = &data[offset..offset + assertion_value.len()];
+                let assertion_value = assertion_value.as_slice();
+                Ok(operator.evaluate(actual_value, assertion_value, include_output))
             }
-            DataValueAssertion::Pubkey(expected_value, operator) => {
-                let value = match value {
-                    DataValue::Pubkey(value) => value,
-                    _ => return Err(LighthouseError::DataValueMismatch.into()),
-                };
+            DataValueAssertion::Pubkey {
+                value: assertion_value,
+                operator,
+            } => {
+                let actual_value = try_from_slice::<Pubkey>(&data, offset, None)?;
 
-                Ok(operator.evaluate(&value, expected_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
             }
         }
     }
@@ -360,19 +212,46 @@ mod tests {
 
         // Test all operators
         let assertions = vec![
-            (DataValueAssertion::U8(1, IntegerOperator::Equal), true),
-            (DataValueAssertion::U8(1, IntegerOperator::NotEqual), false),
             (
-                DataValueAssertion::U8(0, IntegerOperator::GreaterThan),
+                DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::Equal,
+                },
                 true,
             ),
             (
-                DataValueAssertion::U8(1, IntegerOperator::GreaterThanOrEqual),
+                DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::NotEqual,
+                },
+                false,
+            ),
+            (
+                DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::GreaterThan,
+                },
                 true,
             ),
-            (DataValueAssertion::U8(2, IntegerOperator::LessThan), true),
             (
-                DataValueAssertion::U8(1, IntegerOperator::LessThanOrEqual),
+                DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::GreaterThanOrEqual,
+                },
+                true,
+            ),
+            (
+                DataValueAssertion::U8 {
+                    value: 2,
+                    operator: IntegerOperator::LessThan,
+                },
+                true,
+            ),
+            (
+                DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::LessThanOrEqual,
+                },
                 true,
             ),
         ];
@@ -393,19 +272,46 @@ mod tests {
         }
 
         let assertions = vec![
-            (DataValueAssertion::I8(-1, IntegerOperator::Equal), true),
-            (DataValueAssertion::I8(-1, IntegerOperator::NotEqual), false),
             (
-                DataValueAssertion::I8(-2, IntegerOperator::GreaterThan),
+                DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::Equal,
+                },
                 true,
             ),
             (
-                DataValueAssertion::I8(-1, IntegerOperator::GreaterThanOrEqual),
+                DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+                false,
+            ),
+            (
+                DataValueAssertion::I8 {
+                    value: -2,
+                    operator: IntegerOperator::GreaterThan,
+                },
                 true,
             ),
-            (DataValueAssertion::I8(0, IntegerOperator::LessThan), true),
             (
-                DataValueAssertion::I8(-1, IntegerOperator::LessThanOrEqual),
+                DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::GreaterThanOrEqual,
+                },
+                true,
+            ),
+            (
+                DataValueAssertion::I8 {
+                    value: 0,
+                    operator: IntegerOperator::LessThan,
+                },
+                true,
+            ),
+            (
+                DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::LessThanOrEqual,
+                },
                 true,
             ),
         ];
@@ -427,25 +333,31 @@ mod tests {
 
         let assertions = vec![
             (
-                DataValueAssertion::Pubkey(test_account.pubkey, EquatableOperator::Equal),
+                DataValueAssertion::Pubkey {
+                    value: test_account.pubkey,
+                    operator: EquatableOperator::Equal,
+                },
                 true,
             ),
             (
-                DataValueAssertion::Pubkey(test_account.pubkey, EquatableOperator::NotEqual),
+                DataValueAssertion::Pubkey {
+                    value: test_account.pubkey,
+                    operator: EquatableOperator::NotEqual,
+                },
                 false,
             ),
             (
-                DataValueAssertion::Pubkey(
-                    Keypair::new().encodable_pubkey(),
-                    EquatableOperator::Equal,
-                ),
+                DataValueAssertion::Pubkey {
+                    value: Keypair::new().encodable_pubkey(),
+                    operator: EquatableOperator::Equal,
+                },
                 false,
             ),
             (
-                DataValueAssertion::Pubkey(
-                    Keypair::new().encodable_pubkey(),
-                    EquatableOperator::NotEqual,
-                ),
+                DataValueAssertion::Pubkey {
+                    value: Keypair::new().encodable_pubkey(),
+                    operator: EquatableOperator::NotEqual,
+                },
                 true,
             ),
         ];

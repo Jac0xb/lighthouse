@@ -1,4 +1,3 @@
-use anchor_spl::token_interface::spl_token_2022::{self};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     bpf_loader, config, pubkey::Pubkey, rent::Rent, stake, system_program, sysvar::SysvarId, vote,

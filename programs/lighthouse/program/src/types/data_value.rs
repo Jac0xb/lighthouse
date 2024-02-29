@@ -1,3 +1,4 @@
+use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
@@ -19,21 +20,21 @@ pub enum DataValue {
 }
 
 impl DataValue {
-    pub fn serialize(self) -> Vec<u8> {
-        match self {
+    pub fn serialize(self) -> Result<Vec<u8>> {
+        Ok(match self {
             DataValue::Bool(value) => vec![value as u8],
-            DataValue::U8(value) => value.to_le_bytes().to_vec(),
-            DataValue::I8(value) => value.to_le_bytes().to_vec(),
-            DataValue::U16(value) => value.to_le_bytes().to_vec(),
-            DataValue::I16(value) => value.to_le_bytes().to_vec(),
-            DataValue::U32(value) => value.to_le_bytes().to_vec(),
-            DataValue::I32(value) => value.to_le_bytes().to_vec(),
-            DataValue::U64(value) => value.to_le_bytes().to_vec(),
-            DataValue::I64(value) => value.to_le_bytes().to_vec(),
-            DataValue::U128(value) => value.to_le_bytes().to_vec(),
-            DataValue::I128(value) => value.to_le_bytes().to_vec(),
+            DataValue::U8(value) => value.try_to_vec()?,
+            DataValue::I8(value) => value.try_to_vec()?,
+            DataValue::U16(value) => value.try_to_vec()?,
+            DataValue::I16(value) => value.try_to_vec()?,
+            DataValue::U32(value) => value.try_to_vec()?,
+            DataValue::I32(value) => value.try_to_vec()?,
+            DataValue::U64(value) => value.try_to_vec()?,
+            DataValue::I64(value) => value.try_to_vec()?,
+            DataValue::U128(value) => value.try_to_vec()?,
+            DataValue::I128(value) => value.try_to_vec()?,
             DataValue::Bytes(value) => value,
             DataValue::Pubkey(value) => value.to_bytes().to_vec(),
-        }
+        })
     }
 }
