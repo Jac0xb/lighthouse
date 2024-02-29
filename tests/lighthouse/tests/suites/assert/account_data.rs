@@ -3,7 +3,9 @@ use crate::utils::tx_builder::TxBuilder;
 use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse_client::instructions::AssertAccountDataBuilder;
-use lighthouse_client::types::{DataValueAssertion, EquatableOperator, IntegerOperator};
+use lighthouse_client::types::{
+    BytesOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
+};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 
@@ -11,7 +13,7 @@ use solana_sdk::signer::EncodableKeypair;
 /// Tests all data types using the `AccountData` assertion.
 ///
 #[tokio::test]
-async fn test_borsh_account_data() {
+async fn borsh_account_data() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
@@ -105,9 +107,67 @@ async fn test_borsh_account_data() {
                 .target_account(test_account.encodable_pubkey())
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
-                    operator: EquatableOperator::Equal,
+                    operator: BytesOperator::Equal,
                 })
                 .offset(70)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bool {
+                    value: true,
+                    operator: EquatableOperator::Equal,
+                })
+                .offset(102)
+                .instruction(),
+            // False represented as 0
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(103)
+                .instruction(),
+            // Some in Option<u8>
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 1,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(104)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: u8::MAX,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(105)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                })
+                .offset(106)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: [1, 255, 255].to_vec(),
+                    operator: BytesOperator::Equal,
+                })
+                .offset(107)
+                .instruction(),
+            AssertAccountDataBuilder::new()
+                .target_account(test_account.encodable_pubkey())
+                .assertion(DataValueAssertion::Bytes {
+                    value: [0].to_vec(),
+                    operator: BytesOperator::Equal,
+                })
+                .offset(110)
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
@@ -115,23 +175,19 @@ async fn test_borsh_account_data() {
                     value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(102)
+                .offset(111)
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .assertion(DataValueAssertion::Bool {
-                    value: false,
-                    operator: EquatableOperator::Equal,
+                .assertion(DataValueAssertion::Bytes {
+                    value: [32, 0, 0, 0]
+                        .iter()
+                        .cloned()
+                        .chain(vec![255; 32])
+                        .collect::<Vec<u8>>(),
+                    operator: BytesOperator::Equal,
                 })
-                .offset(103)
-                .instruction(),
-            AssertAccountDataBuilder::new()
-                .target_account(test_account.encodable_pubkey())
-                .offset(154)
-                .assertion(DataValueAssertion::U8 {
-                    value: u8::MAX,
-                    operator: IntegerOperator::Equal,
-                })
+                .offset(143)
                 .instruction(),
         ],
         look_up_tables: None,

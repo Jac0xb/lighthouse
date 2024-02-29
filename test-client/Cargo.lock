@@ -1966,14 +1966,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
+name = "lighthouse-client"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
- "kaigan",
- "lighthouse",
+ "num-derive 0.3.3",
+ "num-traits",
  "solana-program",
- "solana-sdk",
+ "thiserror",
 ]
 
 [[package]]
@@ -1983,7 +1983,7 @@ dependencies = [
  "borsh 0.10.3",
  "clap 4.5.1",
  "lighthouse",
- "lighthouse-sdk",
+ "lighthouse-client",
  "rayon",
  "serde_json",
  "solana-client",

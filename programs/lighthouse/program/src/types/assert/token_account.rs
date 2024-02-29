@@ -220,422 +220,452 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     mod evaluate {
-//         use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
-//         use solana_program::{
-//             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
-//         };
-//         use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
-//         use spl_associated_token_account::get_associated_token_address_with_program_id;
-//         use spl_token_2022::state::{Account, AccountState};
-//         use std::{cell::RefCell, rc::Rc};
+#[cfg(test)]
+mod tests {
+    mod evaluate {
+        use crate::types::{Assert, ComparableOperator, EquatableOperator, TokenAccountAssertion};
+        use solana_program::{
+            account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
+        };
+        use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
+        use spl_associated_token_account::get_associated_token_address_with_program_id;
+        use spl_token_2022::state::{Account, AccountState};
+        use std::{cell::RefCell, rc::Rc};
 
-//         #[test]
-//         fn evaluate_token_account_no_delegate_no_close_authority() {
-//             let mint = Keypair::new();
-//             let owner = Keypair::new();
+        #[test]
+        fn evaluate_token_account_no_delegate_no_close_authority() {
+            let mint = Keypair::new();
+            let owner = Keypair::new();
 
-//             let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
-//             Account::pack(
-//                 Account {
-//                     mint: mint.encodable_pubkey(),
-//                     owner: owner.encodable_pubkey(),
-//                     amount: 69,
-//                     delegate: COption::None,
-//                     state: AccountState::Initialized,
-//                     is_native: COption::Some(1),
-//                     delegated_amount: 42,
-//                     close_authority: COption::None,
-//                 },
-//                 serialized_token_account,
-//             )
-//             .unwrap();
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    mint: mint.encodable_pubkey(),
+                    owner: owner.encodable_pubkey(),
+                    amount: 69,
+                    delegate: COption::None,
+                    state: AccountState::Initialized,
+                    is_native: COption::Some(1),
+                    delegated_amount: 42,
+                    close_authority: COption::None,
+                },
+                serialized_token_account,
+            )
+            .unwrap();
 
-//             println!("{:?}", serialized_token_account);
+            println!("{:?}", serialized_token_account);
 
-//             let lamports_data: &mut u64 = &mut 0;
-//             let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+            let lamports_data: &mut u64 = &mut 0;
+            let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
 
-//             let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+            let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
 
-//             let account_info = AccountInfo {
-//                 key: &Pubkey::default(),
-//                 is_signer: false,
-//                 is_writable: false,
-//                 owner: &spl_token_2022::ID,
-//                 lamports: Rc::new(lamports),
-//                 rent_epoch: 0,
-//                 data,
-//                 executable: false,
-//             };
+            let account_info = AccountInfo {
+                key: &Pubkey::default(),
+                is_signer: false,
+                is_writable: false,
+                owner: &spl_token_2022::ID,
+                lamports: Rc::new(lamports),
+                rent_epoch: 0,
+                data,
+                executable: false,
+            };
 
-//             //
-//             // Assert on amount
-//             //
-//             let result = TokenAccountAssertion::Amount(69, ComparableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            //
+            // Assert on amount
+            //
+            let result = TokenAccountAssertion::Amount {
+                value: 69,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::Amount(1600, ComparableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Amount {
+                value: 1600,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on mint
-//             //
-//             let result =
-//                 TokenAccountAssertion::Mint(mint.encodable_pubkey(), EquatableOperator::Equal)
-//                     .evaluate(&account_info, true);
+            //
+            // Assert on mint
+            //
+            let result = TokenAccountAssertion::Mint {
+                value: mint.encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on owner
-//             //
-//             let result =
-//                 TokenAccountAssertion::Owner(owner.encodable_pubkey(), EquatableOperator::Equal)
-//                     .evaluate(&account_info, true);
+            //
+            // Assert on owner
+            //
+            let result = TokenAccountAssertion::Owner {
+                value: owner.encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on delegate
-//             //
+            //
+            // Assert on delegate
+            //
 
-//             let result = TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::Delegate(
-//                 Some(owner.encodable_pubkey()),
-//                 EquatableOperator::NotEqual,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: Some(owner.encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on state
-//             //
+            //
+            // Assert on state
+            //
 
-//             let result = TokenAccountAssertion::State(
-//                 AccountState::Initialized as u8,
-//                 ComparableOperator::Equal,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Initialized as u8,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result =
-//                 TokenAccountAssertion::State(AccountState::Frozen as u8, ComparableOperator::Equal)
-//                     .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Frozen as u8,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::State(
-//                 AccountState::Uninitialized as u8,
-//                 ComparableOperator::Equal,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::State {
+                value: AccountState::Uninitialized as u8,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on is_native
-//             //
+            //
+            // Assert on is_native
+            //
 
-//             let result = TokenAccountAssertion::IsNative(Some(1), ComparableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::IsNative {
+                value: Some(1),
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on delegated_amount
-//             //
-//             let result = TokenAccountAssertion::DelegatedAmount(42, ComparableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            //
+            // Assert on delegated_amount
+            //
+            let result = TokenAccountAssertion::DelegatedAmount {
+                value: 42,
+                operator: ComparableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on close_authority
-//             //
+            //
+            // Assert on close_authority
+            //
 
-//             let result = TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::CloseAuthority(
-//                 Some(owner.encodable_pubkey()),
-//                 EquatableOperator::NotEqual,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: Some(owner.encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
-//         }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
+        }
 
-//         #[test]
-//         fn evaluate_token_account_some_delegate_some_close_authority() {
-//             let mint = Keypair::new();
-//             let owner = Keypair::new();
-//             let delegate = Keypair::new();
-//             let close_authority = Keypair::new();
+        #[test]
+        fn evaluate_token_account_some_delegate_some_close_authority() {
+            let mint = Keypair::new();
+            let owner = Keypair::new();
+            let delegate = Keypair::new();
+            let close_authority = Keypair::new();
 
-//             let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
-//             Account::pack(
-//                 Account {
-//                     mint: mint.encodable_pubkey(),
-//                     owner: owner.encodable_pubkey(),
-//                     amount: 69,
-//                     delegate: COption::Some(delegate.encodable_pubkey()),
-//                     state: AccountState::Initialized,
-//                     is_native: COption::Some(1),
-//                     delegated_amount: 42,
-//                     close_authority: COption::Some(close_authority.encodable_pubkey()),
-//                 },
-//                 serialized_token_account,
-//             )
-//             .unwrap();
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    mint: mint.encodable_pubkey(),
+                    owner: owner.encodable_pubkey(),
+                    amount: 69,
+                    delegate: COption::Some(delegate.encodable_pubkey()),
+                    state: AccountState::Initialized,
+                    is_native: COption::Some(1),
+                    delegated_amount: 42,
+                    close_authority: COption::Some(close_authority.encodable_pubkey()),
+                },
+                serialized_token_account,
+            )
+            .unwrap();
 
-//             let lamports_data: &mut u64 = &mut 0;
-//             let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+            let lamports_data: &mut u64 = &mut 0;
+            let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
 
-//             let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+            let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
 
-//             let account_info = AccountInfo {
-//                 key: &Pubkey::default(),
-//                 is_signer: false,
-//                 is_writable: false,
-//                 owner: &spl_token_2022::ID,
-//                 lamports: Rc::new(lamports),
-//                 rent_epoch: 0,
-//                 data,
-//                 executable: false,
-//             };
+            let account_info = AccountInfo {
+                key: &Pubkey::default(),
+                is_signer: false,
+                is_writable: false,
+                owner: &spl_token_2022::ID,
+                lamports: Rc::new(lamports),
+                rent_epoch: 0,
+                data,
+                executable: false,
+            };
 
-//             //
-//             // Assert on delegate
-//             //
+            //
+            // Assert on delegate
+            //
 
-//             let result = TokenAccountAssertion::Delegate(None, EquatableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::Delegate(
-//                 Some(delegate.encodable_pubkey()),
-//                 EquatableOperator::Equal,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::Delegate {
+                value: Some(delegate.encodable_pubkey()),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             //
-//             // Assert on close_authority
-//             //
-//             let result = TokenAccountAssertion::CloseAuthority(None, EquatableOperator::Equal)
-//                 .evaluate(&account_info, true);
+            //
+            // Assert on close_authority
+            //
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(!result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
+            if let Ok(result) = result {
+                assert!(!result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
 
-//             let result = TokenAccountAssertion::CloseAuthority(
-//                 Some(close_authority.encodable_pubkey()),
-//                 EquatableOperator::Equal,
-//             )
-//             .evaluate(&account_info, true);
+            let result = TokenAccountAssertion::CloseAuthority {
+                value: Some(close_authority.encodable_pubkey()),
+                operator: EquatableOperator::Equal,
+            }
+            .evaluate(&account_info, true);
 
-//             if let Ok(result) = result {
-//                 assert!(result.passed, "{:?}", result.output);
-//             } else {
-//                 let error = result.err().unwrap();
-//                 panic!("{:?}", error);
-//             }
-//         }
+            if let Ok(result) = result {
+                assert!(result.passed, "{:?}", result.output);
+            } else {
+                let error = result.err().unwrap();
+                panic!("{:?}", error);
+            }
+        }
 
-//         #[test]
-//         fn evaluate_token_account_address_is_derived() {
-//             let mint = Keypair::new();
-//             let owner = Keypair::new();
-//             let delegate = Keypair::new();
-//             let close_authority = Keypair::new();
+        #[test]
+        fn evaluate_token_account_address_is_derived() {
+            let mint = Keypair::new();
+            let owner = Keypair::new();
+            let delegate = Keypair::new();
+            let close_authority = Keypair::new();
 
-//             // Owner is derived
-//             {
-//                 let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
-//                 Account::pack(
-//                     Account {
-//                         mint: mint.encodable_pubkey(),
-//                         owner: owner.encodable_pubkey(),
-//                         amount: 69,
-//                         delegate: COption::Some(delegate.encodable_pubkey()),
-//                         state: AccountState::Initialized,
-//                         is_native: COption::Some(1),
-//                         delegated_amount: 42,
-//                         close_authority: COption::Some(close_authority.encodable_pubkey()),
-//                     },
-//                     serialized_token_account,
-//                 )
-//                 .unwrap();
+            // Owner is derived
+            {
+                let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+                Account::pack(
+                    Account {
+                        mint: mint.encodable_pubkey(),
+                        owner: owner.encodable_pubkey(),
+                        amount: 69,
+                        delegate: COption::Some(delegate.encodable_pubkey()),
+                        state: AccountState::Initialized,
+                        is_native: COption::Some(1),
+                        delegated_amount: 42,
+                        close_authority: COption::Some(close_authority.encodable_pubkey()),
+                    },
+                    serialized_token_account,
+                )
+                .unwrap();
 
-//                 let lamports_data: &mut u64 = &mut 0;
-//                 let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
-//                 let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
-//                 let account_info = AccountInfo {
-//                     key: &get_associated_token_address_with_program_id(
-//                         &owner.encodable_pubkey(),
-//                         &mint.encodable_pubkey(),
-//                         &spl_token_2022::ID,
-//                     ),
-//                     is_signer: false,
-//                     is_writable: false,
-//                     owner: &spl_token_2022::ID,
-//                     lamports: Rc::new(lamports),
-//                     rent_epoch: 0,
-//                     data,
-//                     executable: false,
-//                 };
+                let lamports_data: &mut u64 = &mut 0;
+                let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+                let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+                let account_info = AccountInfo {
+                    key: &get_associated_token_address_with_program_id(
+                        &owner.encodable_pubkey(),
+                        &mint.encodable_pubkey(),
+                        &spl_token_2022::ID,
+                    ),
+                    is_signer: false,
+                    is_writable: false,
+                    owner: &spl_token_2022::ID,
+                    lamports: Rc::new(lamports),
+                    rent_epoch: 0,
+                    data,
+                    executable: false,
+                };
 
-//                 // assert on TokenAccountOwnerIsDerived
-//                 let result =
-//                     TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
+                // assert on TokenAccountOwnerIsDerived
+                let result =
+                    TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
 
-//                 if let Ok(result) = result {
-//                     assert!(result.passed, "{:?}", result.output);
-//                 } else {
-//                     let error = result.err().unwrap();
-//                     panic!("{:?}", error);
-//                 }
-//             }
+                if let Ok(result) = result {
+                    assert!(result.passed, "{:?}", result.output);
+                } else {
+                    let error = result.err().unwrap();
+                    panic!("{:?}", error);
+                }
+            }
 
-//             // None derived owner
-//             {
-//                 let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
-//                 Account::pack(
-//                     Account {
-//                         mint: mint.encodable_pubkey(),
-//                         owner: Keypair::new().encodable_pubkey(),
-//                         amount: 69,
-//                         delegate: COption::Some(delegate.encodable_pubkey()),
-//                         state: AccountState::Initialized,
-//                         is_native: COption::Some(1),
-//                         delegated_amount: 42,
-//                         close_authority: COption::Some(close_authority.encodable_pubkey()),
-//                     },
-//                     serialized_token_account,
-//                 )
-//                 .unwrap();
+            // None derived owner
+            {
+                let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+                Account::pack(
+                    Account {
+                        mint: mint.encodable_pubkey(),
+                        owner: Keypair::new().encodable_pubkey(),
+                        amount: 69,
+                        delegate: COption::Some(delegate.encodable_pubkey()),
+                        state: AccountState::Initialized,
+                        is_native: COption::Some(1),
+                        delegated_amount: 42,
+                        close_authority: COption::Some(close_authority.encodable_pubkey()),
+                    },
+                    serialized_token_account,
+                )
+                .unwrap();
 
-//                 let lamports_data: &mut u64 = &mut 0;
-//                 let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
-//                 let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
-//                 let account_info = AccountInfo {
-//                     key: &Pubkey::default(),
-//                     is_signer: false,
-//                     is_writable: false,
-//                     owner: &spl_token_2022::ID,
-//                     lamports: Rc::new(lamports),
-//                     rent_epoch: 0,
-//                     data,
-//                     executable: false,
-//                 };
+                let lamports_data: &mut u64 = &mut 0;
+                let lamports: RefCell<&mut u64> = RefCell::new(lamports_data);
+                let data: Rc<RefCell<&mut [u8]>> = Rc::new(RefCell::new(serialized_token_account));
+                let account_info = AccountInfo {
+                    key: &Pubkey::default(),
+                    is_signer: false,
+                    is_writable: false,
+                    owner: &spl_token_2022::ID,
+                    lamports: Rc::new(lamports),
+                    rent_epoch: 0,
+                    data,
+                    executable: false,
+                };
 
-//                 // assert on TokenAccountOwnerIsDerived
-//                 let result =
-//                     TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
+                // assert on TokenAccountOwnerIsDerived
+                let result =
+                    TokenAccountAssertion::TokenAccountOwnerIsDerived.evaluate(&account_info, true);
 
-//                 if let Ok(result) = result {
-//                     assert!(!result.passed, "{:?}", result.output);
-//                 } else {
-//                     let error = result.err().unwrap();
-//                     panic!("{:?}", error);
-//                 }
-//             }
-//         }
-//     }
-// }
+                if let Ok(result) = result {
+                    assert!(!result.passed, "{:?}", result.output);
+                } else {
+                    let error = result.err().unwrap();
+                    panic!("{:?}", error);
+                }
+            }
+        }
+    }
+}

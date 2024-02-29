@@ -12,9 +12,24 @@ use borsh::BorshSerialize;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SysvarClockAssertion {
-    Slot(u64, ComparableOperator),
-    EpochStartTimestamp(i64, ComparableOperator),
-    Epoch(u64, ComparableOperator),
-    LeaderScheduleEpoch(u64, ComparableOperator),
-    UnixTimestamp(i64, ComparableOperator),
+    Slot {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    EpochStartTimestamp {
+        value: i64,
+        operator: ComparableOperator,
+    },
+    Epoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    LeaderScheduleEpoch {
+        value: u64,
+        operator: ComparableOperator,
+    },
+    UnixTimestamp {
+        value: i64,
+        operator: ComparableOperator,
+    },
 }

@@ -3,7 +3,7 @@ use std::{fmt::Debug, ops::BitAnd};
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 
-pub trait Operator<T> {
+pub trait Operator<T: ?Sized> {
     fn evaluate(
         &self,
         actual_value: &T,
@@ -44,6 +44,12 @@ pub enum EquatableOperator {
     NotEqual,
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
+pub enum BytesOperator {
+    Equal,
+    NotEqual,
+}
+
 pub struct EvaluationResult {
     pub passed: bool,
     pub output: String,
@@ -63,7 +69,7 @@ impl Format for ComparableOperator {
     }
 }
 
-impl<T: PartialEq + Eq + PartialOrd + Ord + Debug> Operator<T> for ComparableOperator {
+impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for ComparableOperator {
     fn evaluate(
         &self,
         actual_value: &T,
@@ -88,7 +94,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug> Operator<T> for ComparableOpe
     }
 }
 
-impl<T: PrimInt + BitAnd + Debug + Eq> Operator<T> for IntegerOperator {
+impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
     fn evaluate(
         &self,
         actual_value: &T,
@@ -146,7 +152,7 @@ impl Format for IntegerOperator {
     }
 }
 
-impl<T: PartialEq + Eq + Debug> Operator<T> for EquatableOperator {
+impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
     fn evaluate(
         &self,
         actual_value: &T,
@@ -172,6 +178,50 @@ impl Format for EquatableOperator {
         match self {
             EquatableOperator::Equal => "==",
             EquatableOperator::NotEqual => "!=",
+        }
+        .to_string()
+    }
+}
+
+impl<T> Operator<T> for BytesOperator
+where
+    T: AsRef<[u8]> + Debug + ?Sized,
+{
+    fn evaluate(
+        &self,
+        actual_value: &T,
+        assertion_value: &T,
+        output: bool,
+    ) -> Box<EvaluationResult> {
+        Box::new(EvaluationResult {
+            passed: match self {
+                BytesOperator::Equal => {
+                    let actual_value = actual_value.as_ref();
+                    let assertion_value = assertion_value.as_ref();
+
+                    actual_value == assertion_value
+                }
+                BytesOperator::NotEqual => {
+                    let actual_value = actual_value.as_ref();
+                    let assertion_value = assertion_value.as_ref();
+
+                    actual_value != assertion_value
+                }
+            },
+            output: if output {
+                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
+            } else {
+                "".to_string()
+            },
+        })
+    }
+}
+
+impl Format for BytesOperator {
+    fn format(&self) -> String {
+        match self {
+            BytesOperator::Equal => "==",
+            BytesOperator::NotEqual => "!=",
         }
         .to_string()
     }

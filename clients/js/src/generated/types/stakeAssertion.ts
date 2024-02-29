@@ -19,8 +19,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
 } from '@solana/codecs-data-structures';
 import { getU64Decoder, getU64Encoder } from '@solana/codecs-numbers';
 import {
@@ -35,38 +33,49 @@ import {
 } from '.';
 
 export type StakeAssertion =
-  | { __kind: 'DelegationVoterPubkey'; fields: [Address, EquatableOperator] }
-  | { __kind: 'DelegationStake'; fields: [bigint, ComparableOperator] }
+  | {
+      __kind: 'DelegationVoterPubkey';
+      value: Address;
+      operator: EquatableOperator;
+    }
+  | { __kind: 'DelegationStake'; value: bigint; operator: ComparableOperator }
   | {
       __kind: 'DelegationActivationEpoch';
-      fields: [bigint, ComparableOperator];
+      value: bigint;
+      operator: ComparableOperator;
     }
   | {
       __kind: 'DelegationDeactivationEpoch';
-      fields: [bigint, ComparableOperator];
+      value: bigint;
+      operator: ComparableOperator;
     }
-  | { __kind: 'CreditsObserved'; fields: [bigint, ComparableOperator] };
+  | { __kind: 'CreditsObserved'; value: bigint; operator: ComparableOperator };
 
 export type StakeAssertionArgs =
   | {
       __kind: 'DelegationVoterPubkey';
-      fields: [Address, EquatableOperatorArgs];
+      value: Address;
+      operator: EquatableOperatorArgs;
     }
   | {
       __kind: 'DelegationStake';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'DelegationActivationEpoch';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'DelegationDeactivationEpoch';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'CreditsObserved';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     };
 
 export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
@@ -74,46 +83,36 @@ export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
     [
       'DelegationVoterPubkey',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'DelegationStake',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'DelegationActivationEpoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'DelegationDeactivationEpoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'CreditsObserved',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
   ]);
@@ -124,46 +123,36 @@ export function getStakeAssertionDecoder(): Decoder<StakeAssertion> {
     [
       'DelegationVoterPubkey',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'DelegationStake',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'DelegationActivationEpoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'DelegationDeactivationEpoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'CreditsObserved',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
   ]);
@@ -179,32 +168,26 @@ export function getStakeAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function stakeAssertion(
   kind: 'DelegationVoterPubkey',
-  data: GetDataEnumKindContent<
-    StakeAssertionArgs,
-    'DelegationVoterPubkey'
-  >['fields']
+  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationVoterPubkey'>
 ): GetDataEnumKind<StakeAssertionArgs, 'DelegationVoterPubkey'>;
 export function stakeAssertion(
   kind: 'DelegationStake',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationStake'>['fields']
+  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationStake'>
 ): GetDataEnumKind<StakeAssertionArgs, 'DelegationStake'>;
 export function stakeAssertion(
   kind: 'DelegationActivationEpoch',
-  data: GetDataEnumKindContent<
-    StakeAssertionArgs,
-    'DelegationActivationEpoch'
-  >['fields']
+  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationActivationEpoch'>
 ): GetDataEnumKind<StakeAssertionArgs, 'DelegationActivationEpoch'>;
 export function stakeAssertion(
   kind: 'DelegationDeactivationEpoch',
   data: GetDataEnumKindContent<
     StakeAssertionArgs,
     'DelegationDeactivationEpoch'
-  >['fields']
+  >
 ): GetDataEnumKind<StakeAssertionArgs, 'DelegationDeactivationEpoch'>;
 export function stakeAssertion(
   kind: 'CreditsObserved',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'CreditsObserved'>['fields']
+  data: GetDataEnumKindContent<StakeAssertionArgs, 'CreditsObserved'>
 ): GetDataEnumKind<StakeAssertionArgs, 'CreditsObserved'>;
 export function stakeAssertion<K extends StakeAssertionArgs['__kind']>(
   kind: K,

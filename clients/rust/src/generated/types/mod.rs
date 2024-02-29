@@ -8,6 +8,7 @@
 pub(crate) mod r#account_info_assertion;
 pub(crate) mod r#account_info_data;
 pub(crate) mod r#assertion_config_v1;
+pub(crate) mod r#bytes_operator;
 pub(crate) mod r#comparable_operator;
 pub(crate) mod r#data_value;
 pub(crate) mod r#data_value_assertion;
@@ -28,6 +29,7 @@ pub(crate) mod r#write_type_parameter;
 pub use self::r#account_info_assertion::*;
 pub use self::r#account_info_data::*;
 pub use self::r#assertion_config_v1::*;
+pub use self::r#bytes_operator::*;
 pub use self::r#comparable_operator::*;
 pub use self::r#data_value::*;
 pub use self::r#data_value_assertion::*;

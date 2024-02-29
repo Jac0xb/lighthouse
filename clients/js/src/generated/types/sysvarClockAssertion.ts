@@ -14,8 +14,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
 } from '@solana/codecs-data-structures';
 import {
   getI64Decoder,
@@ -31,26 +29,41 @@ import {
 } from '.';
 
 export type SysvarClockAssertion =
-  | { __kind: 'Slot'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'EpochStartTimestamp'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'Epoch'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'LeaderScheduleEpoch'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'UnixTimestamp'; fields: [bigint, ComparableOperator] };
-
-export type SysvarClockAssertionArgs =
-  | { __kind: 'Slot'; fields: [number | bigint, ComparableOperatorArgs] }
+  | { __kind: 'Slot'; value: bigint; operator: ComparableOperator }
   | {
       __kind: 'EpochStartTimestamp';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: bigint;
+      operator: ComparableOperator;
     }
-  | { __kind: 'Epoch'; fields: [number | bigint, ComparableOperatorArgs] }
+  | { __kind: 'Epoch'; value: bigint; operator: ComparableOperator }
   | {
       __kind: 'LeaderScheduleEpoch';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: bigint;
+      operator: ComparableOperator;
+    }
+  | { __kind: 'UnixTimestamp'; value: bigint; operator: ComparableOperator };
+
+export type SysvarClockAssertionArgs =
+  | { __kind: 'Slot'; value: number | bigint; operator: ComparableOperatorArgs }
+  | {
+      __kind: 'EpochStartTimestamp';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | {
+      __kind: 'Epoch';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | {
+      __kind: 'LeaderScheduleEpoch';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
   | {
       __kind: 'UnixTimestamp';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     };
 
 export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionArgs> {
@@ -58,46 +71,36 @@ export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionAr
     [
       'Slot',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'EpochStartTimestamp',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getI64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getI64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'Epoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'LeaderScheduleEpoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'UnixTimestamp',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getI64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getI64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
   ]);
@@ -108,46 +111,36 @@ export function getSysvarClockAssertionDecoder(): Decoder<SysvarClockAssertion> 
     [
       'Slot',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'EpochStartTimestamp',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getI64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getI64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'Epoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'LeaderScheduleEpoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'UnixTimestamp',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getI64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getI64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
   ]);
@@ -166,32 +159,23 @@ export function getSysvarClockAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function sysvarClockAssertion(
   kind: 'Slot',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Slot'>['fields']
+  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Slot'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'Slot'>;
 export function sysvarClockAssertion(
   kind: 'EpochStartTimestamp',
-  data: GetDataEnumKindContent<
-    SysvarClockAssertionArgs,
-    'EpochStartTimestamp'
-  >['fields']
+  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'EpochStartTimestamp'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'EpochStartTimestamp'>;
 export function sysvarClockAssertion(
   kind: 'Epoch',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Epoch'>['fields']
+  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Epoch'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'Epoch'>;
 export function sysvarClockAssertion(
   kind: 'LeaderScheduleEpoch',
-  data: GetDataEnumKindContent<
-    SysvarClockAssertionArgs,
-    'LeaderScheduleEpoch'
-  >['fields']
+  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'LeaderScheduleEpoch'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'LeaderScheduleEpoch'>;
 export function sysvarClockAssertion(
   kind: 'UnixTimestamp',
-  data: GetDataEnumKindContent<
-    SysvarClockAssertionArgs,
-    'UnixTimestamp'
-  >['fields']
+  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'UnixTimestamp'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'UnixTimestamp'>;
 export function sysvarClockAssertion<
   K extends SysvarClockAssertionArgs['__kind']

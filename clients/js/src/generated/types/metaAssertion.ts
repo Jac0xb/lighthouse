@@ -19,8 +19,6 @@ import {
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
 } from '@solana/codecs-data-structures';
 import {
   getI64Decoder,
@@ -40,81 +38,95 @@ import {
 } from '.';
 
 export type MetaAssertion =
-  | { __kind: 'RentExemptReserve'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'AuthorizedStaker'; fields: [Address, EquatableOperator] }
-  | { __kind: 'AuthorizedWithdrawer'; fields: [Address, EquatableOperator] }
-  | { __kind: 'LockupUnixTimestamp'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'LockupEpoch'; fields: [bigint, ComparableOperator] }
-  | { __kind: 'LockupCustodian'; fields: [Address, EquatableOperator] };
+  | { __kind: 'RentExemptReserve'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'AuthorizedStaker'; value: Address; operator: EquatableOperator }
+  | {
+      __kind: 'AuthorizedWithdrawer';
+      value: Address;
+      operator: EquatableOperator;
+    }
+  | {
+      __kind: 'LockupUnixTimestamp';
+      value: bigint;
+      operator: ComparableOperator;
+    }
+  | { __kind: 'LockupEpoch'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'LockupCustodian'; value: Address; operator: EquatableOperator };
 
 export type MetaAssertionArgs =
   | {
       __kind: 'RentExemptReserve';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
-  | { __kind: 'AuthorizedStaker'; fields: [Address, EquatableOperatorArgs] }
-  | { __kind: 'AuthorizedWithdrawer'; fields: [Address, EquatableOperatorArgs] }
+  | {
+      __kind: 'AuthorizedStaker';
+      value: Address;
+      operator: EquatableOperatorArgs;
+    }
+  | {
+      __kind: 'AuthorizedWithdrawer';
+      value: Address;
+      operator: EquatableOperatorArgs;
+    }
   | {
       __kind: 'LockupUnixTimestamp';
-      fields: [number | bigint, ComparableOperatorArgs];
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
     }
-  | { __kind: 'LockupEpoch'; fields: [number | bigint, ComparableOperatorArgs] }
-  | { __kind: 'LockupCustodian'; fields: [Address, EquatableOperatorArgs] };
+  | {
+      __kind: 'LockupEpoch';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
+  | {
+      __kind: 'LockupCustodian';
+      value: Address;
+      operator: EquatableOperatorArgs;
+    };
 
 export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
   return getDataEnumEncoder([
     [
       'RentExemptReserve',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'AuthorizedStaker',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'AuthorizedWithdrawer',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
       'LockupUnixTimestamp',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getI64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getI64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'LockupEpoch',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getU64Encoder(), getComparableOperatorEncoder()]),
-        ],
+        ['value', getU64Encoder()],
+        ['operator', getComparableOperatorEncoder()],
       ]),
     ],
     [
       'LockupCustodian',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getAddressEncoder(), getEquatableOperatorEncoder()]),
-        ],
+        ['value', getAddressEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
   ]);
@@ -125,55 +137,43 @@ export function getMetaAssertionDecoder(): Decoder<MetaAssertion> {
     [
       'RentExemptReserve',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'AuthorizedStaker',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'AuthorizedWithdrawer',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [
       'LockupUnixTimestamp',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getI64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getI64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'LockupEpoch',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getU64Decoder(), getComparableOperatorDecoder()]),
-        ],
+        ['value', getU64Decoder()],
+        ['operator', getComparableOperatorDecoder()],
       ]),
     ],
     [
       'LockupCustodian',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getAddressDecoder(), getEquatableOperatorDecoder()]),
-        ],
+        ['value', getAddressDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
   ]);
@@ -189,33 +189,27 @@ export function getMetaAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function metaAssertion(
   kind: 'RentExemptReserve',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'RentExemptReserve'>['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'RentExemptReserve'>
 ): GetDataEnumKind<MetaAssertionArgs, 'RentExemptReserve'>;
 export function metaAssertion(
   kind: 'AuthorizedStaker',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'AuthorizedStaker'>['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'AuthorizedStaker'>
 ): GetDataEnumKind<MetaAssertionArgs, 'AuthorizedStaker'>;
 export function metaAssertion(
   kind: 'AuthorizedWithdrawer',
-  data: GetDataEnumKindContent<
-    MetaAssertionArgs,
-    'AuthorizedWithdrawer'
-  >['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'AuthorizedWithdrawer'>
 ): GetDataEnumKind<MetaAssertionArgs, 'AuthorizedWithdrawer'>;
 export function metaAssertion(
   kind: 'LockupUnixTimestamp',
-  data: GetDataEnumKindContent<
-    MetaAssertionArgs,
-    'LockupUnixTimestamp'
-  >['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupUnixTimestamp'>
 ): GetDataEnumKind<MetaAssertionArgs, 'LockupUnixTimestamp'>;
 export function metaAssertion(
   kind: 'LockupEpoch',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupEpoch'>['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupEpoch'>
 ): GetDataEnumKind<MetaAssertionArgs, 'LockupEpoch'>;
 export function metaAssertion(
   kind: 'LockupCustodian',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupCustodian'>['fields']
+  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupCustodian'>
 ): GetDataEnumKind<MetaAssertionArgs, 'LockupCustodian'>;
 export function metaAssertion<K extends MetaAssertionArgs['__kind']>(
   kind: K,

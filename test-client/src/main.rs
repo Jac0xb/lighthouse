@@ -3,11 +3,11 @@ use std::str::FromStr;
 
 use borsh::BorshDeserialize;
 use clap::{Parser, Subcommand};
-use lighthouse::types::{
+use lighthouse_client::instructions::{AssertAccountInfoBuilder, AssertStakeAccountBuilder};
+use lighthouse_client::types::{
     AccountInfoAssertion, ComparableOperator, EquatableOperator, KnownProgram, MetaAssertion,
-    StakeAccountAssertion, StakeAssertion,
+    StakeAccountAssertion,
 };
-use lighthouse_sdk::LighthouseProgram;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_program::system_instruction;
@@ -142,32 +142,25 @@ pub fn build_safe_send_transaction(
         },
     );
 
-    let lighthouse_program = LighthouseProgram {};
     let ix = system_instruction::transfer(&from_keypair.pubkey(), to_pubkey, amount);
 
     Transaction::new_signed_with_payer(
         &[
             ix,
-            lighthouse_program
-                .assert_account_info(
-                    from_keypair.pubkey(),
-                    AccountInfoAssertion::KnownOwner(
-                        KnownProgram::System,
-                        EquatableOperator::Equal,
-                    ),
-                    None,
-                )
-                .ix(),
-            lighthouse_program
-                .assert_account_info(
-                    from_keypair.pubkey(),
-                    AccountInfoAssertion::Lamports(
-                        balance - amount - 5000,
-                        ComparableOperator::Equal,
-                    ),
-                    None,
-                )
-                .ix(),
+            AssertAccountInfoBuilder::new()
+                .target_account(from_keypair.pubkey())
+                .account_info_assertion(AccountInfoAssertion::KnownOwner {
+                    value: KnownProgram::System,
+                    operator: EquatableOperator::Equal,
+                })
+                .instruction(),
+            AssertAccountInfoBuilder::new()
+                .target_account(from_keypair.pubkey())
+                .account_info_assertion(AccountInfoAssertion::Lamports {
+                    value: balance - amount - 5000,
+                    operator: ComparableOperator::Equal,
+                })
+                .instruction(),
         ],
         Some(&from_keypair.pubkey()),
         &[from_keypair],
@@ -187,180 +180,142 @@ fn build_assert_stake_transaction(
 
     match stake_state {
         StakeStateV2::Uninitialized => panic!("Stake account is not initialized."),
-        StakeStateV2::Initialized(meta) => {
-            let lighthouse_program = LighthouseProgram {};
-
-            Transaction::new_signed_with_payer(
-                &[
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::State(1, ComparableOperator::Equal),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker(
-                                meta.authorized.staker,
-                                EquatableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(
-                                MetaAssertion::AuthorizedWithdrawer(
-                                    meta.authorized.withdrawer,
-                                    EquatableOperator::Equal,
-                                ),
-                            ),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch(
-                                meta.lockup.epoch,
-                                ComparableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(
-                                MetaAssertion::LockupUnixTimestamp(
-                                    meta.lockup.unix_timestamp,
-                                    ComparableOperator::Equal,
-                                ),
-                            ),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian(
-                                meta.lockup.custodian,
-                                EquatableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve(
-                                meta.rent_exempt_reserve,
-                                ComparableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                ],
-                Some(&payer.pubkey()),
-                &[payer],
-                blockhash,
-            )
-        }
+        StakeStateV2::Initialized(meta) => Transaction::new_signed_with_payer(
+            &[
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::State {
+                        value: 1,
+                        operator: ComparableOperator::Equal,
+                    })
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::AuthorizedStaker {
+                            value: meta.authorized.staker,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::AuthorizedWithdrawer {
+                            value: meta.authorized.withdrawer,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupEpoch {
+                            value: meta.lockup.epoch,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupUnixTimestamp {
+                            value: meta.lockup.unix_timestamp,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupCustodian {
+                            value: meta.lockup.custodian,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::RentExemptReserve {
+                            value: meta.rent_exempt_reserve,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+            ],
+            Some(&payer.pubkey()),
+            &[payer],
+            blockhash,
+        ),
         StakeStateV2::RewardsPool => panic!("Stake account is a rewards pool."),
-        StakeStateV2::Stake(meta, stake, _stake_flags) => {
-            let lighthouse_program = LighthouseProgram {};
-
-            Transaction::new_signed_with_payer(
-                &[
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::State(2, ComparableOperator::Equal),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker(
-                                meta.authorized.staker,
-                                EquatableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(
-                                MetaAssertion::AuthorizedWithdrawer(
-                                    meta.authorized.withdrawer,
-                                    EquatableOperator::Equal,
-                                ),
-                            ),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch(
-                                meta.lockup.epoch,
-                                ComparableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(
-                                MetaAssertion::LockupUnixTimestamp(
-                                    meta.lockup.unix_timestamp,
-                                    ComparableOperator::Equal,
-                                ),
-                            ),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian(
-                                meta.lockup.custodian,
-                                EquatableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve(
-                                meta.rent_exempt_reserve,
-                                ComparableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                    lighthouse_program
-                        .assert_stake_account(
-                            stake_state_pubkey,
-                            StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationStake(
-                                stake.delegation.stake,
-                                ComparableOperator::Equal,
-                            )),
-                            None,
-                        )
-                        .ix(),
-                ],
-                Some(&payer.pubkey()),
-                &[payer],
-                blockhash,
-            )
-        }
+        StakeStateV2::Stake(meta, stake, _stake_flags) => Transaction::new_signed_with_payer(
+            &[
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::State {
+                        value: 2,
+                        operator: ComparableOperator::Equal,
+                    })
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::AuthorizedStaker {
+                            value: meta.authorized.staker,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::AuthorizedWithdrawer {
+                            value: meta.authorized.withdrawer,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupEpoch {
+                            value: meta.lockup.epoch,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupUnixTimestamp {
+                            value: meta.lockup.unix_timestamp,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::LockupCustodian {
+                            value: meta.lockup.custodian,
+                            operator: EquatableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+                AssertStakeAccountBuilder::new()
+                    .target_account(stake_state_pubkey)
+                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                        MetaAssertion::RentExemptReserve {
+                            value: meta.rent_exempt_reserve,
+                            operator: ComparableOperator::Equal,
+                        },
+                    ))
+                    .instruction(),
+            ],
+            Some(&payer.pubkey()),
+            &[payer],
+            blockhash,
+        ),
     }
 }
