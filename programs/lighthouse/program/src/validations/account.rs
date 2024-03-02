@@ -58,10 +58,16 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                     seeds_and_bump.extend(seeds.iter().map(|seed| seed.as_slice()));
                     seeds_and_bump.push(&bump_slice);
 
-                    // TODO: give pubkey create program address unwrap better error
                     let derived_address =
                         Pubkey::create_program_address(seeds_and_bump.as_slice(), &program_id)
-                            .unwrap();
+                            .map_err(|err| {
+                                msg!(
+                                    "failed to create program address: {:?} {:?}",
+                                    seeds_and_bump,
+                                    err
+                                );
+                                LighthouseError::AccountValidaitonFailed
+                            })?;
 
                     if account.key != &derived_address {
                         msg!(

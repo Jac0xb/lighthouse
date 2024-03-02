@@ -65,10 +65,6 @@ pub enum AccountInfoAssertion {
 }
 
 impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
-    fn format(&self) -> String {
-        format!("AccountInfoAssertion[{:?}]", self)
-    }
-
     fn evaluate(
         &self,
         account: &AccountInfo,
@@ -111,7 +107,7 @@ impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
                     account_data
                         .len()
                         .checked_sub(start as usize)
-                        .ok_or(LighthouseError::OutOfRange)? as u16,
+                        .ok_or(LighthouseError::RangeOutOfBounds)? as u16,
                 );
 
                 let account_data = &account_data[start as usize..(start + length) as usize];

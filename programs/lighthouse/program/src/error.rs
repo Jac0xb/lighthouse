@@ -16,32 +16,36 @@ pub enum LighthouseError {
     DataValueMismatch = 6004,
     #[error("UnsupportedOperator")]
     UnsupportedOperator = 6005,
-    #[error("OutOfRange")]
-    OutOfRange = 6006,
+    #[error("RangeOutOfBounds")]
+    RangeOutOfBounds = 6006,
+    #[error("IndexOutOfBounds")]
+    IndexOutOfBounds = 6007,
     #[error("AccountBorrowFailed")]
-    AccountBorrowFailed = 6007,
+    AccountBorrowFailed = 6008,
     #[error("AccountNotTokenAccount")]
-    AccountOwnerMismatch = 6008,
+    AccountOwnerMismatch = 6009,
     #[error("AccountNotInitialized")]
-    AccountNotInitialized = 6009,
+    AccountNotInitialized = 6010,
     #[error("UnauthorizedIxEntry")]
-    UnauthorizedIxEntry = 6010,
+    UnauthorizedIxEntry = 6011,
     #[error("InvalidDataLength")]
-    InvalidDataLength = 6011,
+    InvalidDataLength = 6012,
     #[error("FailedToDeserialize")]
-    FailedToDeserialize = 6012,
+    FailedToDeserialize = 6013,
+    #[error("FailedToSerialize")]
+    FailedToSerialize = 6014,
     #[error("AccountOwnerValidationFailed")]
-    AccountOwnerValidationFailed = 6013,
+    AccountOwnerValidationFailed = 6015,
     #[error("AccountFundedValidationFailed")]
-    AccountFundedValidationFailed = 6014,
+    AccountFundedValidationFailed = 6016,
     #[error("AccountDiscriminatorValidationFailed")]
-    AccountDiscriminatorValidationFailed = 6015,
+    AccountDiscriminatorValidationFailed = 6017,
     #[error("AccountValidaitonFailed")]
-    AccountValidaitonFailed = 6016,
+    AccountValidaitonFailed = 6018,
     #[error("InvalidProgramAddress")]
-    InvalidProgramAddress = 6017,
-    #[error("SerializationFailed")]
-    SerializationFailed = 6018,
+    InvalidProgramAddress = 6019,
+    #[error("BumpNotFound")]
+    BumpNotFound = 6020,
 }
 
 impl From<LighthouseError> for ProgramError {
@@ -66,6 +70,6 @@ macro_rules! err {
 macro_rules! err_msg {
     ($msg:expr, $error:expr) => {
         // Print the message and error
-        msg!("{}: {:?}", $msg, $error);
+        solana_program::msg!("{}: {:?}", $msg, $error);
     };
 }

@@ -1,6 +1,5 @@
 use crate::{
-    constants::CANNOT_BORROW_DATA_TARGET_ERROR_MSG,
-    err,
+    err, err_msg,
     error::LighthouseError,
     types::{
         Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
@@ -8,7 +7,7 @@ use crate::{
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct AccountDataAssertion {
@@ -73,10 +72,6 @@ pub enum DataValueAssertion {
 }
 
 impl Assert<AccountInfo<'_>> for AccountDataAssertion {
-    fn format(&self) -> String {
-        format!("AccountData[{}|{:?}]", self.offset, self.assertion)
-    }
-
     fn evaluate(
         &self,
         account: &AccountInfo,
@@ -86,7 +81,7 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
         let assertion = &self.assertion;
 
         let data = account.try_borrow_data().map_err(|e| {
-            msg!("{}: {}", CANNOT_BORROW_DATA_TARGET_ERROR_MSG, e);
+            err_msg!("Cannot borrow data for target account", e);
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 

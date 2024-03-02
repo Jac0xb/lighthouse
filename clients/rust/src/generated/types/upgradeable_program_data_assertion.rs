@@ -5,25 +5,21 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
-use crate::generated::types::IntegerOperator;
-use crate::generated::types::MetaAssertion;
-use crate::generated::types::StakeAssertion;
-use crate::generated::types::StakeStateType;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
+use solana_program::pubkey::Pubkey;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum StakeAccountAssertion {
-    State {
-        value: StakeStateType,
+pub enum UpgradeableProgramDataAssertion {
+    UpgradeAuthority {
+        value: Option<Pubkey>,
         operator: EquatableOperator,
     },
-    MetaAssertion(MetaAssertion),
-    StakeAssertion(StakeAssertion),
-    StakeFlags {
-        value: u8,
-        operator: IntegerOperator,
+    Slot {
+        value: u64,
+        operator: ComparableOperator,
     },
 }

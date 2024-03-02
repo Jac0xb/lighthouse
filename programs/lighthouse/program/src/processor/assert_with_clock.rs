@@ -4,9 +4,10 @@ use crate::{
     utils::print_assertion_result,
     utils::Result,
 };
-use solana_program::{clock::Clock, msg, sysvar::Sysvar};
+use solana_program::{clock::Clock, sysvar::Sysvar};
+use std::fmt::Debug;
 
-pub(crate) fn assert<T: Assert<Clock>>(
+pub(crate) fn assert_with_clock<T: Assert<Clock> + Debug>(
     assertion: &T,
     config: Option<AssertionConfigV1>,
 ) -> Result<()> {
@@ -17,7 +18,6 @@ pub(crate) fn assert<T: Assert<Clock>>(
     let evaluation_result = assertion.evaluate(&Clock::get()?, include_output)?;
 
     if include_output {
-        msg!("[--] [-] Status | Assertion | Actual Value (Operator) Assertion Value");
         print_assertion_result(assertion, 0, &evaluation_result);
     }
 

@@ -6,24 +6,21 @@
 //!
 
 use crate::generated::types::EquatableOperator;
-use crate::generated::types::IntegerOperator;
-use crate::generated::types::MetaAssertion;
-use crate::generated::types::StakeAssertion;
-use crate::generated::types::StakeStateType;
+use crate::generated::types::UpgradableBufferAssertion;
+use crate::generated::types::UpgradeableLoaderStateType;
+use crate::generated::types::UpgradeableProgramAssertion;
+use crate::generated::types::UpgradeableProgramDataAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum StakeAccountAssertion {
+pub enum UpgradeableLoaderStateAssertion {
     State {
-        value: StakeStateType,
+        value: UpgradeableLoaderStateType,
         operator: EquatableOperator,
     },
-    MetaAssertion(MetaAssertion),
-    StakeAssertion(StakeAssertion),
-    StakeFlags {
-        value: u8,
-        operator: IntegerOperator,
-    },
+    Buffer(UpgradableBufferAssertion),
+    Program(UpgradeableProgramAssertion),
+    ProgramData(UpgradeableProgramDataAssertion),
 }

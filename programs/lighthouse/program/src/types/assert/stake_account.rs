@@ -1,5 +1,4 @@
 use crate::{
-    constants::{CANNOT_BORROW_DATA_TARGET_ERROR_MSG, FAILED_DESERIALIZE_STAKE_ACCOUNT_ERROR_MSG},
     err, err_msg,
     error::LighthouseError,
     types::{Assert, EvaluationResult, Operator},
@@ -13,12 +12,12 @@ use solana_program::msg;
 use solana_program::{
     account_info::AccountInfo,
     pubkey::Pubkey,
-    stake::state::{Meta, Stake, StakeStateV2},
+    stake::state::{Meta as StakeMeta, Stake as StakeInfo, StakeStateV2},
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 #[repr(u8)]
-pub enum StakeAccountState {
+pub enum StakeStateType {
     Uninitialized = 0,
     Initialized = 1,
     Stake = 2,
@@ -28,8 +27,8 @@ pub enum StakeAccountState {
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum StakeAccountAssertion {
     State {
-        value: u8,
-        operator: ComparableOperator,
+        value: StakeStateType,
+        operator: EquatableOperator,
     },
     MetaAssertion(MetaAssertion),
     StakeAssertion(StakeAssertion),
@@ -40,10 +39,6 @@ pub enum StakeAccountAssertion {
 }
 
 impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
-    fn format(&self) -> String {
-        format!("StakeAccountAssertion[{:?}]", self)
-    }
-
     fn evaluate(
         &self,
         account: &AccountInfo,
@@ -59,23 +54,24 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
         // TODO: Logic to assert on if account is a mint account
         let data = account.try_borrow_data().map_err(|e| {
-            msg!("{}: {}", CANNOT_BORROW_DATA_TARGET_ERROR_MSG, e);
+            err_msg!("Failed to borrow data for target account", e);
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
         let result = match self {
-            StakeAccountAssertion::State { value, operator } => {
+            StakeAccountAssertion::State {
+                value: assertion_value,
+                operator,
+            } => {
+                let casted_assertion_value: u8 = assertion_value.clone() as u8;
                 let actual_state: u8 = data[0];
 
                 if actual_state > 4 {
-                    msg!(
-                        "{} enum out of bounds",
-                        FAILED_DESERIALIZE_STAKE_ACCOUNT_ERROR_MSG
-                    );
+                    msg!("Failed to deserialize upgradeable loader state: enum out of bounds");
                     return Err(LighthouseError::FailedToDeserialize.into());
                 }
 
-                operator.evaluate(&actual_state, value, include_output)
+                operator.evaluate(&actual_state, &casted_assertion_value, include_output)
             }
             StakeAccountAssertion::MetaAssertion(meta_assertion) => {
                 let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).map_err(|e| {
@@ -95,7 +91,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
             }
             StakeAccountAssertion::StakeAssertion(stake_assertion) => {
                 let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).map_err(|e| {
-                    msg!("Failed to deserialize stake account state {}", e);
+                    err_msg!("Failed to deserialize stake account state", e);
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
@@ -111,14 +107,19 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
             }
             StakeAccountAssertion::StakeFlags { value, operator } => {
                 let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).map_err(|e| {
-                    msg!("Failed to deserialize stake account state {}", e);
+                    err_msg!("Failed to deserialize stake account state", e);
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
                 match stake_account {
                     StakeStateV2::Stake(_, _, actual_stake_flags) => {
                         // No way to access stake flags directly, serialize and use the raw bytes
-                        let serialized_stake_flag = actual_stake_flags.try_to_vec()?;
+                        let serialized_stake_flag =
+                            actual_stake_flags.try_to_vec().map_err(|e| {
+                                err_msg!("Failed to serialize stake flags", e);
+                                err!(LighthouseError::FailedToSerialize)
+                            })?;
+
                         let actual_stake_flag = serialized_stake_flag[0];
 
                         operator.evaluate(&actual_stake_flag, value, include_output)
@@ -163,12 +164,8 @@ pub enum MetaAssertion {
     },
 }
 
-impl Assert<Meta> for MetaAssertion {
-    fn format(&self) -> String {
-        format!("MetaAssertion[{:?}]", self)
-    }
-
-    fn evaluate(&self, meta: &Meta, include_output: bool) -> Result<Box<EvaluationResult>> {
+impl Assert<StakeMeta> for MetaAssertion {
+    fn evaluate(&self, meta: &StakeMeta, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
             MetaAssertion::RentExemptReserve {
                 value: assertion_value,
@@ -224,12 +221,8 @@ pub enum StakeAssertion {
     },
 }
 
-impl Assert<Stake> for StakeAssertion {
-    fn format(&self) -> String {
-        format!("StakeAssertion[{:?}]", self)
-    }
-
-    fn evaluate(&self, stake: &Stake, include_output: bool) -> Result<Box<EvaluationResult>> {
+impl Assert<StakeInfo> for StakeAssertion {
+    fn evaluate(&self, stake: &StakeInfo, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
             StakeAssertion::DelegationVoterPubkey {
                 value: assertion_value,

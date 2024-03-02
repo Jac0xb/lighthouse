@@ -4,11 +4,8 @@ use crate::{
     utils::print_assertion_result,
     utils::Result,
 };
-use solana_program::{
-    account_info::{next_account_info, AccountInfo},
-    msg,
-};
-use std::slice::Iter;
+use solana_program::account_info::{next_account_info, AccountInfo};
+use std::{fmt::Debug, slice::Iter};
 
 pub(crate) struct AssertWithAccountsContext<'info> {
     pub(crate) left_account: AccountInfo<'info>,
@@ -24,7 +21,10 @@ impl<'info> AssertWithAccountsContext<'info> {
     }
 }
 
-pub(crate) fn assert_with_accounts<'info, T: Assert<(AccountInfo<'info>, AccountInfo<'info>)>>(
+pub(crate) fn assert_with_accounts<
+    'info,
+    T: Assert<(AccountInfo<'info>, AccountInfo<'info>)> + Debug,
+>(
     assert_context: &AssertWithAccountsContext<'info>,
     assertion: &T,
     config: Option<AssertionConfigV1>,
@@ -42,7 +42,6 @@ pub(crate) fn assert_with_accounts<'info, T: Assert<(AccountInfo<'info>, Account
     )?;
 
     if include_output {
-        msg!("[--] [-] Status | Assertion | Actual Value (Operator) Assertion Value");
         print_assertion_result(assertion, 0, &evaluation_result);
     }
 

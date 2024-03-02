@@ -12,12 +12,36 @@ use borsh::BorshSerialize;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DataValueDiffAssertion {
-    U8(i16, IntegerOperator),
-    I8(i16, IntegerOperator),
-    U16(i32, IntegerOperator),
-    I16(i32, IntegerOperator),
-    U32(i64, IntegerOperator),
-    I32(i64, IntegerOperator),
-    U64(i128, IntegerOperator),
-    I64(i128, IntegerOperator),
+    U8 {
+        value: i16,
+        operator: IntegerOperator,
+    },
+    I8 {
+        value: i16,
+        operator: IntegerOperator,
+    },
+    U16 {
+        value: i32,
+        operator: IntegerOperator,
+    },
+    I16 {
+        value: i32,
+        operator: IntegerOperator,
+    },
+    U32 {
+        value: i64,
+        operator: IntegerOperator,
+    },
+    I32 {
+        value: i64,
+        operator: IntegerOperator,
+    },
+    U64 {
+        value: i128,
+        operator: IntegerOperator,
+    },
+    I64 {
+        value: i128,
+        operator: IntegerOperator,
+    },
 }

@@ -29,10 +29,6 @@ pub enum SysvarClockAssertion {
 }
 
 impl Assert<Clock> for SysvarClockAssertion {
-    fn format(&self) -> String {
-        format!("SysvarClockAssertion[{:?}]", self)
-    }
-
     fn evaluate(&self, clock: &Clock, include_output: bool) -> Result<Box<EvaluationResult>> {
         let result = match self {
             SysvarClockAssertion::Slot {

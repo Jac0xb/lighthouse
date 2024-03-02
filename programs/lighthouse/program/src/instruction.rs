@@ -6,6 +6,7 @@ use crate::{
     types::{
         AccountDataAssertion, AccountDataDiffAssertion, AccountInfoAssertion, MintAccountAssertion,
         StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion,
+        UpgradeableLoaderStateAssertion,
     },
 };
 
@@ -49,6 +50,9 @@ pub enum LighthouseInstruction {
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertStakeAccount(StakeAccountAssertion),
+
+    #[account(0, name = "target_account", desc = "Target account")]
+    AssertUpgradeableLoaderAccount(UpgradeableLoaderStateAssertion),
 
     // No accounts
     AssertSysvarClock(SysvarClockAssertion),

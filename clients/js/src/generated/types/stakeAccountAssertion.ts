@@ -19,32 +19,40 @@ import {
 } from '@solana/codecs-data-structures';
 import { getU8Decoder, getU8Encoder } from '@solana/codecs-numbers';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
+  EquatableOperator,
+  EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
   MetaAssertion,
   MetaAssertionArgs,
   StakeAssertion,
   StakeAssertionArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  StakeStateType,
+  StakeStateTypeArgs,
+  getEquatableOperatorDecoder,
+  getEquatableOperatorEncoder,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
   getMetaAssertionDecoder,
   getMetaAssertionEncoder,
   getStakeAssertionDecoder,
   getStakeAssertionEncoder,
+  getStakeStateTypeDecoder,
+  getStakeStateTypeEncoder,
 } from '.';
 
 export type StakeAccountAssertion =
-  | { __kind: 'State'; value: number; operator: ComparableOperator }
+  | { __kind: 'State'; value: StakeStateType; operator: EquatableOperator }
   | { __kind: 'MetaAssertion'; fields: [MetaAssertion] }
   | { __kind: 'StakeAssertion'; fields: [StakeAssertion] }
   | { __kind: 'StakeFlags'; value: number; operator: IntegerOperator };
 
 export type StakeAccountAssertionArgs =
-  | { __kind: 'State'; value: number; operator: ComparableOperatorArgs }
+  | {
+      __kind: 'State';
+      value: StakeStateTypeArgs;
+      operator: EquatableOperatorArgs;
+    }
   | { __kind: 'MetaAssertion'; fields: [MetaAssertionArgs] }
   | { __kind: 'StakeAssertion'; fields: [StakeAssertionArgs] }
   | { __kind: 'StakeFlags'; value: number; operator: IntegerOperatorArgs };
@@ -54,8 +62,8 @@ export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertion
     [
       'State',
       getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['value', getStakeStateTypeEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
@@ -85,8 +93,8 @@ export function getStakeAccountAssertionDecoder(): Decoder<StakeAccountAssertion
     [
       'State',
       getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['value', getStakeStateTypeDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [

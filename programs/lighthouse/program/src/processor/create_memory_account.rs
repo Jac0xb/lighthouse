@@ -3,12 +3,14 @@ use std::{collections::HashMap, slice::Iter};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
+    msg,
     pubkey::Pubkey,
     rent::Rent,
     sysvar::Sysvar,
 };
 
 use crate::{
+    error::LighthouseError,
     utils::{create_account, Result},
     validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer},
 };
@@ -82,15 +84,19 @@ pub(crate) fn create_memory_account(
         memory_account_size,
     } = parameters;
 
-    // TODO: better error handling
-    let bump = *bump_map.get(memory_account.account_info.key).unwrap();
+    let bump = *bump_map
+        .get(memory_account.account_info.key)
+        .ok_or_else(|| {
+            msg!("Bump not found for memory account");
+            LighthouseError::BumpNotFound
+        })?;
 
     create_account(
         payer.as_ref(),
         &memory_account.account_info,
         system_program.as_ref(),
         &crate::id(),
-        &Rent::get().unwrap(),
+        &Rent::get()?,
         memory_account_size,
         MemoryAccount::get_seeds(payer.key, memory_index, Some(bump)),
     )?;

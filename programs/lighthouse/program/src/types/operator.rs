@@ -3,6 +3,15 @@ use std::{fmt::Debug, ops::BitAnd};
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 
+const EQUAL_SYMBOL: &str = "==";
+const NOT_EQUAL_SYMBOL: &str = "!=";
+const GREATER_THAN_SYMBOL: &str = ">";
+const LESS_THAN_SYMBOL: &str = "<";
+const GREATER_THAN_OR_EQUAL_SYMBOL: &str = ">=";
+const LESS_THAN_OR_EQUAL_SYMBOL: &str = "<=";
+const CONTAINS_SYMBOL: &str = "&";
+const DOES_NOT_CONTAIN_SYMBOL: &str = "!&";
+
 pub trait Operator<T: ?Sized> {
     fn evaluate(
         &self,
@@ -10,10 +19,6 @@ pub trait Operator<T: ?Sized> {
         assertion_value: &T,
         output: bool,
     ) -> Box<EvaluationResult>;
-}
-
-pub trait Format {
-    fn format(&self) -> String;
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
@@ -55,20 +60,6 @@ pub struct EvaluationResult {
     pub output: String,
 }
 
-impl Format for ComparableOperator {
-    fn format(&self) -> String {
-        match self {
-            ComparableOperator::Equal => "==",
-            ComparableOperator::NotEqual => "!=",
-            ComparableOperator::GreaterThan => ">",
-            ComparableOperator::LessThan => "<",
-            ComparableOperator::GreaterThanOrEqual => ">=",
-            ComparableOperator::LessThanOrEqual => "<=",
-        }
-        .to_string()
-    }
-}
-
 impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for ComparableOperator {
     fn evaluate(
         &self,
@@ -86,7 +77,21 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
             output: if output {
-                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
+                format!(
+                    "{:?} {} {:?}",
+                    actual_value,
+                    match self {
+                        ComparableOperator::Equal => EQUAL_SYMBOL.to_string(),
+                        ComparableOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
+                        ComparableOperator::GreaterThan => GREATER_THAN_SYMBOL.to_string(),
+                        ComparableOperator::LessThan => LESS_THAN_SYMBOL.to_string(),
+                        ComparableOperator::GreaterThanOrEqual =>
+                            GREATER_THAN_OR_EQUAL_SYMBOL.to_string(),
+                        ComparableOperator::LessThanOrEqual =>
+                            LESS_THAN_OR_EQUAL_SYMBOL.to_string(),
+                    },
+                    assertion_value
+                )
             } else {
                 "".to_string()
             },
@@ -126,29 +131,23 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                 format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
-                    self.format(),
+                    match self {
+                        IntegerOperator::Equal => EQUAL_SYMBOL.to_string(),
+                        IntegerOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
+                        IntegerOperator::GreaterThan => GREATER_THAN_SYMBOL.to_string(),
+                        IntegerOperator::LessThan => LESS_THAN_SYMBOL.to_string(),
+                        IntegerOperator::GreaterThanOrEqual =>
+                            GREATER_THAN_OR_EQUAL_SYMBOL.to_string(),
+                        IntegerOperator::LessThanOrEqual => LESS_THAN_OR_EQUAL_SYMBOL.to_string(),
+                        IntegerOperator::Contains => CONTAINS_SYMBOL.to_string(),
+                        IntegerOperator::DoesNotContain => DOES_NOT_CONTAIN_SYMBOL.to_string(),
+                    },
                     assertion_value
                 )
             } else {
                 "".to_string()
             },
         })
-    }
-}
-
-impl Format for IntegerOperator {
-    fn format(&self) -> String {
-        match self {
-            IntegerOperator::Equal => "==",
-            IntegerOperator::NotEqual => "!=",
-            IntegerOperator::GreaterThan => ">",
-            IntegerOperator::LessThan => "<",
-            IntegerOperator::GreaterThanOrEqual => ">=",
-            IntegerOperator::LessThanOrEqual => "<=",
-            IntegerOperator::Contains => "&",
-            IntegerOperator::DoesNotContain => "!&",
-        }
-        .to_string()
     }
 }
 
@@ -165,21 +164,19 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
                 EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
             },
             output: if output {
-                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
+                format!(
+                    "{:?} {} {:?}",
+                    actual_value,
+                    match self {
+                        EquatableOperator::Equal => EQUAL_SYMBOL.to_string(),
+                        EquatableOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
+                    },
+                    assertion_value
+                )
             } else {
                 "".to_string()
             },
         })
-    }
-}
-
-impl Format for EquatableOperator {
-    fn format(&self) -> String {
-        match self {
-            EquatableOperator::Equal => "==",
-            EquatableOperator::NotEqual => "!=",
-        }
-        .to_string()
     }
 }
 
@@ -209,20 +206,18 @@ where
                 }
             },
             output: if output {
-                format!("{:?} {} {:?}", actual_value, self.format(), assertion_value)
+                format!(
+                    "{:?} {} {:?}",
+                    actual_value,
+                    match self {
+                        BytesOperator::Equal => EQUAL_SYMBOL.to_string(),
+                        BytesOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
+                    },
+                    assertion_value
+                )
             } else {
                 "".to_string()
             },
         })
-    }
-}
-
-impl Format for BytesOperator {
-    fn format(&self) -> String {
-        match self {
-            BytesOperator::Equal => "==",
-            BytesOperator::NotEqual => "!=",
-        }
-        .to_string()
     }
 }
