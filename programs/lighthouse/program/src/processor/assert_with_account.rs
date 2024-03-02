@@ -1,4 +1,4 @@
-use std::slice::Iter;
+use std::{fmt::Debug, slice::Iter};
 
 use crate::{
     error::LighthouseError,
@@ -6,10 +6,7 @@ use crate::{
     utils::print_assertion_result,
     utils::Result,
 };
-use solana_program::{
-    account_info::{next_account_info, AccountInfo},
-    msg,
-};
+use solana_program::account_info::{next_account_info, AccountInfo};
 
 pub(crate) struct AssertWithAccountContext<'info> {
     pub(crate) target_account: AccountInfo<'info>,
@@ -23,7 +20,7 @@ impl<'info> AssertWithAccountContext<'info> {
     }
 }
 
-pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
+pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>> + Debug>(
     assert_context: &AssertWithAccountContext<'info>,
     assertion: &T,
     config: Option<AssertionConfigV1>,
@@ -35,7 +32,6 @@ pub(crate) fn assert_with_account<'info, T: Assert<AccountInfo<'info>>>(
     let evaluation_result = assertion.evaluate(&assert_context.target_account, include_output)?;
 
     if include_output {
-        msg!("[--] [-] Status | Assertion | Actual Value (Operator) Assertion Value");
         print_assertion_result(assertion, 0, &evaluation_result);
     }
 

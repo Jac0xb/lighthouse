@@ -15,5 +15,6 @@ export * from './assertStakeAccount';
 export * from './assertSysvarClock';
 export * from './assertTokenAccount';
 export * from './assertTokenAccountMulti';
+export * from './assertUpgradeableLoaderAccount';
 export * from './createMemoryAccount';
 export * from './write';

@@ -79,4 +79,10 @@ impl TestContext {
     pub fn payer(&self) -> Keypair {
         clone_keypair(&self.program_context.payer)
     }
+
+    pub async fn get_minimum_balance_for_rent_exemption(&mut self, data_len: usize) -> u64 {
+        let rent = self.program_context.banks_client.get_rent().await.unwrap();
+
+        rent.minimum_balance(data_len)
+    }
 }

@@ -1,6 +1,6 @@
-use crate::utils::Result;
+use crate::{err_msg, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::pubkey::Pubkey;
+use solana_program::{program_error::ProgramError, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValue {
@@ -21,18 +21,23 @@ pub enum DataValue {
 
 impl DataValue {
     pub fn serialize(self) -> Result<Vec<u8>> {
+        let err_map: fn(e: std::io::Error) -> ProgramError = |e| {
+            err_msg!("Failed to serialize data value", e);
+            ProgramError::InvalidAccountData
+        };
+
         Ok(match self {
             DataValue::Bool(value) => vec![value as u8],
-            DataValue::U8(value) => value.try_to_vec()?,
-            DataValue::I8(value) => value.try_to_vec()?,
-            DataValue::U16(value) => value.try_to_vec()?,
-            DataValue::I16(value) => value.try_to_vec()?,
-            DataValue::U32(value) => value.try_to_vec()?,
-            DataValue::I32(value) => value.try_to_vec()?,
-            DataValue::U64(value) => value.try_to_vec()?,
-            DataValue::I64(value) => value.try_to_vec()?,
-            DataValue::U128(value) => value.try_to_vec()?,
-            DataValue::I128(value) => value.try_to_vec()?,
+            DataValue::U8(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::I8(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::U16(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::I16(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::U32(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::I32(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::U64(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::I64(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::U128(value) => value.try_to_vec().map_err(err_map)?,
+            DataValue::I128(value) => value.try_to_vec().map_err(err_map)?,
             DataValue::Bytes(value) => value,
             DataValue::Pubkey(value) => value.to_bytes().to_vec(),
         })

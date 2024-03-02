@@ -5,29 +5,36 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::SysvarClockAssertion;
+use crate::generated::types::UpgradeableLoaderStateAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
-pub struct AssertSysvarClock {}
+pub struct AssertUpgradeableLoaderAccount {
+    /// Target account
+    pub target_account: solana_program::pubkey::Pubkey,
+}
 
-impl AssertSysvarClock {
+impl AssertUpgradeableLoaderAccount {
     pub fn instruction(
         &self,
-        args: AssertSysvarClockInstructionArgs,
+        args: AssertUpgradeableLoaderAccountInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: AssertSysvarClockInstructionArgs,
+        args: AssertUpgradeableLoaderAccountInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(0 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.target_account,
+            false,
+        ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertSysvarClockInstructionData::new()
+        let mut data = AssertUpgradeableLoaderAccountInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = args.try_to_vec().unwrap();
@@ -42,42 +49,50 @@ impl AssertSysvarClock {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertSysvarClockInstructionData {
+struct AssertUpgradeableLoaderAccountInstructionData {
     discriminator: u8,
 }
 
-impl AssertSysvarClockInstructionData {
+impl AssertUpgradeableLoaderAccountInstructionData {
     fn new() -> Self {
-        Self { discriminator: 11 }
+        Self { discriminator: 10 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AssertSysvarClockInstructionArgs {
-    pub sysvar_clock_assertion: SysvarClockAssertion,
+pub struct AssertUpgradeableLoaderAccountInstructionArgs {
+    pub upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
 }
 
-/// Instruction builder for `AssertSysvarClock`.
+/// Instruction builder for `AssertUpgradeableLoaderAccount`.
 ///
 /// ### Accounts:
 ///
+///   0. `[]` target_account
 #[derive(Default)]
-pub struct AssertSysvarClockBuilder {
-    sysvar_clock_assertion: Option<SysvarClockAssertion>,
+pub struct AssertUpgradeableLoaderAccountBuilder {
+    target_account: Option<solana_program::pubkey::Pubkey>,
+    upgradeable_loader_state_assertion: Option<UpgradeableLoaderStateAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl AssertSysvarClockBuilder {
+impl AssertUpgradeableLoaderAccountBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+    /// Target account
     #[inline(always)]
-    pub fn sysvar_clock_assertion(
+    pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.target_account = Some(target_account);
+        self
+    }
+    #[inline(always)]
+    pub fn upgradeable_loader_state_assertion(
         &mut self,
-        sysvar_clock_assertion: SysvarClockAssertion,
+        upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
     ) -> &mut Self {
-        self.sysvar_clock_assertion = Some(sysvar_clock_assertion);
+        self.upgradeable_loader_state_assertion = Some(upgradeable_loader_state_assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -100,33 +115,45 @@ impl AssertSysvarClockBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = AssertSysvarClock {};
-        let args = AssertSysvarClockInstructionArgs {
-            sysvar_clock_assertion: self
-                .sysvar_clock_assertion
+        let accounts = AssertUpgradeableLoaderAccount {
+            target_account: self.target_account.expect("target_account is not set"),
+        };
+        let args = AssertUpgradeableLoaderAccountInstructionArgs {
+            upgradeable_loader_state_assertion: self
+                .upgradeable_loader_state_assertion
                 .clone()
-                .expect("sysvar_clock_assertion is not set"),
+                .expect("upgradeable_loader_state_assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `assert_sysvar_clock` CPI instruction.
-pub struct AssertSysvarClockCpi<'a, 'b> {
-    /// The program to invoke.
-    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The arguments for the instruction.
-    pub __args: AssertSysvarClockInstructionArgs,
+/// `assert_upgradeable_loader_account` CPI accounts.
+pub struct AssertUpgradeableLoaderAccountCpiAccounts<'a, 'b> {
+    /// Target account
+    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
+/// `assert_upgradeable_loader_account` CPI instruction.
+pub struct AssertUpgradeableLoaderAccountCpi<'a, 'b> {
+    /// The program to invoke.
+    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Target account
+    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The arguments for the instruction.
+    pub __args: AssertUpgradeableLoaderAccountInstructionArgs,
+}
+
+impl<'a, 'b> AssertUpgradeableLoaderAccountCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        args: AssertSysvarClockInstructionArgs,
+        accounts: AssertUpgradeableLoaderAccountCpiAccounts<'a, 'b>,
+        args: AssertUpgradeableLoaderAccountInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
+            target_account: accounts.target_account,
             __args: args,
         }
     }
@@ -163,7 +190,11 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(0 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.target_account.key,
+            false,
+        ));
         remaining_accounts.iter().for_each(|remaining_account| {
             accounts.push(solana_program::instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
@@ -171,7 +202,7 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertSysvarClockInstructionData::new()
+        let mut data = AssertUpgradeableLoaderAccountInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
@@ -182,8 +213,9 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(0 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(1 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
+        account_infos.push(self.target_account.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -196,29 +228,41 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `AssertSysvarClock` via CPI.
+/// Instruction builder for `AssertUpgradeableLoaderAccount` via CPI.
 ///
 /// ### Accounts:
 ///
-pub struct AssertSysvarClockCpiBuilder<'a, 'b> {
-    instruction: Box<AssertSysvarClockCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` target_account
+pub struct AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
+    instruction: Box<AssertUpgradeableLoaderAccountCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
+impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(AssertSysvarClockCpiBuilderInstruction {
+        let instruction = Box::new(AssertUpgradeableLoaderAccountCpiBuilderInstruction {
             __program: program,
-            sysvar_clock_assertion: None,
+            target_account: None,
+            upgradeable_loader_state_assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
+    /// Target account
     #[inline(always)]
-    pub fn sysvar_clock_assertion(
+    pub fn target_account(
         &mut self,
-        sysvar_clock_assertion: SysvarClockAssertion,
+        target_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.sysvar_clock_assertion = Some(sysvar_clock_assertion);
+        self.instruction.target_account = Some(target_account);
+        self
+    }
+    #[inline(always)]
+    pub fn upgradeable_loader_state_assertion(
+        &mut self,
+        upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
+    ) -> &mut Self {
+        self.instruction.upgradeable_loader_state_assertion =
+            Some(upgradeable_loader_state_assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -262,15 +306,20 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = AssertSysvarClockInstructionArgs {
-            sysvar_clock_assertion: self
+        let args = AssertUpgradeableLoaderAccountInstructionArgs {
+            upgradeable_loader_state_assertion: self
                 .instruction
-                .sysvar_clock_assertion
+                .upgradeable_loader_state_assertion
                 .clone()
-                .expect("sysvar_clock_assertion is not set"),
+                .expect("upgradeable_loader_state_assertion is not set"),
         };
-        let instruction = AssertSysvarClockCpi {
+        let instruction = AssertUpgradeableLoaderAccountCpi {
             __program: self.instruction.__program,
+
+            target_account: self
+                .instruction
+                .target_account
+                .expect("target_account is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -280,9 +329,10 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
     }
 }
 
-struct AssertSysvarClockCpiBuilderInstruction<'a, 'b> {
+struct AssertUpgradeableLoaderAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    sysvar_clock_assertion: Option<SysvarClockAssertion>,
+    target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    upgradeable_loader_state_assertion: Option<UpgradeableLoaderStateAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

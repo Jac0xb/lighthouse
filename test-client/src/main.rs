@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 use lighthouse_client::instructions::{AssertAccountInfoBuilder, AssertStakeAccountBuilder};
 use lighthouse_client::types::{
     AccountInfoAssertion, ComparableOperator, EquatableOperator, KnownProgram, MetaAssertion,
-    StakeAccountAssertion,
+    StakeAccountAssertion, StakeStateType,
 };
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
@@ -185,8 +185,8 @@ fn build_assert_stake_transaction(
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
                     .stake_account_assertion(StakeAccountAssertion::State {
-                        value: 1,
-                        operator: ComparableOperator::Equal,
+                        value: StakeStateType::Initialized,
+                        operator: EquatableOperator::Equal,
                     })
                     .instruction(),
                 AssertStakeAccountBuilder::new()
@@ -254,8 +254,8 @@ fn build_assert_stake_transaction(
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
                     .stake_account_assertion(StakeAccountAssertion::State {
-                        value: 2,
-                        operator: ComparableOperator::Equal,
+                        value: StakeStateType::Stake,
+                        operator: EquatableOperator::Equal,
                     })
                     .instruction(),
                 AssertStakeAccountBuilder::new()

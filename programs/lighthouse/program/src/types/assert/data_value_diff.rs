@@ -1,9 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, msg};
+use solana_program::account_info::AccountInfo;
 
 use crate::{
-    constants::CANNOT_BORROW_DATA_TARGET_ERROR_MSG,
-    err,
+    err, err_msg,
     error::LighthouseError,
     types::{Assert, EvaluationResult, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
@@ -18,26 +17,41 @@ pub struct AccountDataDiffAssertion {
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValueDiffAssertion {
-    U8(i16, IntegerOperator),
-    I8(i16, IntegerOperator),
-    U16(i32, IntegerOperator),
-    I16(i32, IntegerOperator),
-    U32(i64, IntegerOperator),
-    I32(i64, IntegerOperator),
-    U64(i128, IntegerOperator),
-    I64(i128, IntegerOperator),
+    U8 {
+        value: i16,
+        operator: IntegerOperator,
+    },
+    I8 {
+        value: i16,
+        operator: IntegerOperator,
+    },
+    U16 {
+        value: i32,
+        operator: IntegerOperator,
+    },
+    I16 {
+        value: i32,
+        operator: IntegerOperator,
+    },
+    U32 {
+        value: i64,
+        operator: IntegerOperator,
+    },
+    I32 {
+        value: i64,
+        operator: IntegerOperator,
+    },
+    U64 {
+        value: i128,
+        operator: IntegerOperator,
+    },
+    I64 {
+        value: i128,
+        operator: IntegerOperator,
+    },
 }
 
 impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
-    fn format(&self) -> String {
-        format!(
-            "AccountData[{}, {}, {}]",
-            self.offset_left,
-            self.offset_right,
-            self.assertion.format()
-        )
-    }
-
     fn evaluate(
         &self,
         accounts: &(AccountInfo, AccountInfo),
@@ -50,105 +64,102 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
         let (left_account, right_account) = accounts;
 
         let left_account_data = left_account.try_borrow_data().map_err(|e| {
-            msg!("{}: {}", CANNOT_BORROW_DATA_TARGET_ERROR_MSG, e);
+            err_msg!("Cannot borrow data for left target account", e);
             err!(LighthouseError::AccountBorrowFailed)
         })?;
         let right_account_data = right_account.try_borrow_data().map_err(|e| {
-            msg!("{}: {}", CANNOT_BORROW_DATA_TARGET_ERROR_MSG, e);
+            err_msg!("Cannot borrow data for right target account", e);
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
         match assertion {
-            DataValueDiffAssertion::U8(expected_diff_value, operator) => {
+            DataValueDiffAssertion::U8 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<u8>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<u8>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i16 - right_value as i16;
 
-                Ok(operator.evaluate(&diff_value, expected_diff_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::I8(expected_value, operator) => {
+            DataValueDiffAssertion::I8 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<i8>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<i8>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i16 - right_value as i16;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::U16(expected_value, operator) => {
+            DataValueDiffAssertion::U16 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<u16>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<u16>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i32 - right_value as i32;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::I16(expected_value, operator) => {
+            DataValueDiffAssertion::I16 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<i16>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<i16>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i32 - right_value as i32;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::U32(expected_value, operator) => {
+            DataValueDiffAssertion::U32 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<u32>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<u32>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i64 - right_value as i64;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::I32(expected_value, operator) => {
+            DataValueDiffAssertion::I32 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<i32>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<i32>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i64 - right_value as i64;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::U64(expected_value, operator) => {
+            DataValueDiffAssertion::U64 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<u64>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<u64>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i128 - right_value as i128;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
-            DataValueDiffAssertion::I64(expected_value, operator) => {
+            DataValueDiffAssertion::I64 {
+                value: assertion_value,
+                operator,
+            } => {
                 let left_value = try_from_slice::<i64>(&left_account_data, left_offset, None)?;
                 let right_value = try_from_slice::<i64>(&right_account_data, right_offset, None)?;
 
                 let diff_value = left_value as i128 - right_value as i128;
 
-                Ok(operator.evaluate(&diff_value, expected_value, include_output))
-            }
-        }
-    }
-}
-
-impl DataValueDiffAssertion {
-    pub fn format(&self) -> String {
-        match self {
-            DataValueDiffAssertion::U8(value, operator) => format!("U8[{}, {:?}]", value, operator),
-            DataValueDiffAssertion::I8(value, operator) => format!("I8[{}, {:?}]", value, operator),
-            DataValueDiffAssertion::U16(value, operator) => {
-                format!("U16[{}, {:?}]", value, operator)
-            }
-            DataValueDiffAssertion::I16(value, operator) => {
-                format!("I16[{}, {:?}]", value, operator)
-            }
-            DataValueDiffAssertion::U32(value, operator) => {
-                format!("U32[{}, {:?}]", value, operator)
-            }
-            DataValueDiffAssertion::I32(value, operator) => {
-                format!("I32[{}, {:?}]", value, operator)
-            }
-            DataValueDiffAssertion::U64(value, operator) => {
-                format!("U64[{}, {:?}]", value, operator)
-            }
-            DataValueDiffAssertion::I64(value, operator) => {
-                format!("I64[{}, {:?}]", value, operator)
+                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
             }
         }
     }
@@ -182,10 +193,10 @@ mod tests {
             let assertion = AccountDataDiffAssertion {
                 offset_left: 0,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U8(
-                    1i16 - (u8::MAX as i16),
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::U8 {
+                    value: 1i16 - (u8::MAX as i16),
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = assertion
@@ -200,10 +211,10 @@ mod tests {
             let reverse_assertion = AccountDataDiffAssertion {
                 offset_left: 0,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U8(
-                    (u8::MAX as i16) - 1i16,
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::U8 {
+                    value: (u8::MAX as i16) - 1i16,
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = reverse_assertion
@@ -232,10 +243,10 @@ mod tests {
             let assertion = AccountDataDiffAssertion {
                 offset_left: 1,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::I8(
-                    (test_account.i8 as i16) - (i8::MIN as i16),
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::I8 {
+                    value: (test_account.i8 as i16) - (i8::MIN as i16),
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = assertion
@@ -252,10 +263,10 @@ mod tests {
             let reverse_assertion = AccountDataDiffAssertion {
                 offset_left: 0,
                 offset_right: 1,
-                assertion: DataValueDiffAssertion::I8(
-                    (i8::MIN as i16) - (test_account.i8 as i16),
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::I8 {
+                    value: (i8::MIN as i16) - (test_account.i8 as i16),
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = reverse_assertion
@@ -284,10 +295,10 @@ mod tests {
             let assertion = AccountDataDiffAssertion {
                 offset_left: 2,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U16(
-                    (test_account.u16 as i32) - (u16::MAX as i32),
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::U16 {
+                    value: (test_account.u16 as i32) - (u16::MAX as i32),
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = assertion
@@ -304,10 +315,10 @@ mod tests {
             let reverse_assertion = AccountDataDiffAssertion {
                 offset_left: 0,
                 offset_right: 2,
-                assertion: DataValueDiffAssertion::U16(
-                    (u16::MAX as i32) - (test_account.u16 as i32),
-                    IntegerOperator::Equal,
-                ),
+                assertion: DataValueDiffAssertion::U16 {
+                    value: (u16::MAX as i32) - (test_account.u16 as i32),
+                    operator: IntegerOperator::Equal,
+                },
             };
 
             let result = reverse_assertion
@@ -336,10 +347,10 @@ mod tests {
             let assertion = AccountDataDiffAssertion {
                 offset_left: 4,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::I16(
-                    (test_account.i16 as i32) - (i16::MIN as i32) - 10,
-                    IntegerOperator::GreaterThan,
-                ),
+                assertion: DataValueDiffAssertion::I16 {
+                    value: (test_account.i16 as i32) - (i16::MIN as i32) - 10,
+                    operator: IntegerOperator::GreaterThan,
+                },
             };
 
             let result = assertion
@@ -356,10 +367,10 @@ mod tests {
             let reverse_assertion = AccountDataDiffAssertion {
                 offset_left: 0,
                 offset_right: 4,
-                assertion: DataValueDiffAssertion::I16(
-                    (i16::MIN as i32) - (test_account.i16 as i32) + 10,
-                    IntegerOperator::LessThan,
-                ),
+                assertion: DataValueDiffAssertion::I16 {
+                    value: (i16::MIN as i32) - (test_account.i16 as i32) + 10,
+                    operator: IntegerOperator::LessThan,
+                },
             };
 
             let result = reverse_assertion

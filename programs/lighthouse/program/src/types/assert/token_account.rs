@@ -1,7 +1,8 @@
 use crate::{
+    err, err_msg,
     error::LighthouseError,
     types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
-    utils::{unpack_coption_key, unpack_coption_u64, Result}, // Assert, EvaluationResult, Operator,
+    utils::{out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
@@ -63,10 +64,6 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
 }
 
 impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
-    fn format(&self) -> String {
-        format!("TokenAccountAssertion[{:?}]", self)
-    }
-
     fn evaluate(
         &self,
         account: &AccountInfo,
@@ -80,15 +77,24 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 
-        let data = account.try_borrow_mut_data().unwrap();
+        let data = account.try_borrow_data().map_err(|e| {
+            err_msg!("Failed to borrow data for target account", e);
+            err!(LighthouseError::AccountBorrowFailed)
+        })?;
 
         let result = match self {
             TokenAccountAssertion::Mint {
                 value: assertion_value,
                 operator,
             } => {
-                let mint_slice = &data[0..32];
-                let mint = Pubkey::try_from(mint_slice).unwrap();
+                let data_range = 0..32;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let mint = Pubkey::try_from(data_slice).map_err(|e| {
+                    err_msg!("Failed to deserialize mint from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?;
 
                 operator.evaluate(&mint, assertion_value, include_output)
             }
@@ -96,8 +102,14 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let owner_slice = &data[32..64];
-                let owner = Pubkey::try_from(owner_slice).unwrap();
+                let data_range = 32..64;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let owner = Pubkey::try_from(data_slice).map_err(|e| {
+                    err_msg!("Failed to deserialize owner from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?;
 
                 operator.evaluate(&owner, assertion_value, include_output)
             }
@@ -105,8 +117,14 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let amount_slice = &data[64..72];
-                let actual_amount = u64::from_le_bytes(amount_slice.try_into().unwrap());
+                let data_range = 64..72;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let actual_amount = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
+                    err_msg!("Failed to deserialize amount from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?);
 
                 operator.evaluate(&actual_amount, assertion_value, include_output)
             }
@@ -114,8 +132,11 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let delegate_slice = &data[72..108];
-                let delegate = unpack_coption_key(delegate_slice)?;
+                let data_range = 72..108;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let delegate = unpack_coption_key(data_slice)?;
 
                 match (delegate, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
@@ -124,11 +145,11 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                     }),
                     (COption::Some(token_account_delegate), None) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("{:?} != None", token_account_delegate),
+                        output: format!("{} != None", token_account_delegate),
                     }),
                     (COption::None, Some(assertion_pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {:?}", assertion_pubkey),
+                        output: format!("None != {}", assertion_pubkey),
                     }),
                     (COption::Some(token_account_delegate), Some(assertion_pubkey)) => {
                         operator.evaluate(&token_account_delegate, assertion_pubkey, include_output)
@@ -139,16 +160,20 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_state = data[108];
+                let actual_state = data.get(108).ok_or_else(|| out_of_bounds_err(108..109))?;
 
-                operator.evaluate(&actual_state, assertion_value, include_output)
+                operator.evaluate(actual_state, assertion_value, include_output)
             }
             TokenAccountAssertion::IsNative {
                 value: assertion_value,
                 operator,
             } => {
-                let is_native_slice = &data[109..121];
-                let actual_is_native = unpack_coption_u64(is_native_slice)?;
+                let data_range = 109..121;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+
+                let actual_is_native = unpack_coption_u64(data_slice)?;
 
                 match (actual_is_native, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
@@ -172,9 +197,16 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let delegated_amount_slice = &data[121..129];
+                let data_range = 121..129;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+
                 let actual_delegated_amount =
-                    u64::from_le_bytes(delegated_amount_slice.try_into().unwrap());
+                    u64::from_le_bytes(data_slice.try_into().map_err(|e| {
+                        err_msg!("Failed to deserialize delegatedamount from account data", e);
+                        err!(LighthouseError::FailedToDeserialize)
+                    })?);
 
                 operator.evaluate(&actual_delegated_amount, assertion_value, include_output)
             }
@@ -182,8 +214,11 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let close_authority_slice = &data[129..165];
-                let close_authority = unpack_coption_key(close_authority_slice)?;
+                let data_range = 129..165;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let close_authority = unpack_coption_key(data_slice)?;
 
                 match (close_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
@@ -193,12 +228,12 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                     (COption::Some(token_account_close_authority), None) => {
                         Box::new(EvaluationResult {
                             passed: false,
-                            output: format!("{:?} != None", token_account_close_authority),
+                            output: format!("{} != None", token_account_close_authority),
                         })
                     }
                     (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {:?}", pubkey),
+                        output: format!("None != {}", pubkey),
                     }),
                     (COption::Some(token_account_close_authority), Some(pubkey)) => {
                         operator.evaluate(&token_account_close_authority, pubkey, include_output)
@@ -206,8 +241,23 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
                 }
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
-                let mint = Pubkey::try_from(&data[0..32]).unwrap();
-                let owner = Pubkey::try_from(&data[32..64]).unwrap();
+                let mint_range = 0..32;
+                let mint_data = data
+                    .get(mint_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(mint_range))?;
+                let mint = Pubkey::try_from(mint_data).map_err(|e| {
+                    err_msg!("Failed to deserialize mint from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?;
+
+                let owner_range = 32..64;
+                let owner_data = data
+                    .get(owner_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(owner_range))?;
+                let owner = Pubkey::try_from(owner_data).map_err(|e| {
+                    err_msg!("Failed to deserialize owner from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?;
 
                 let expected_ata =
                     get_associated_token_address_with_program_id(&owner, &mint, account.owner);

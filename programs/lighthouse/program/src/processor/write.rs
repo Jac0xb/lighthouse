@@ -6,6 +6,7 @@ use solana_program::account_info::{next_account_info, AccountInfo};
 use solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 use solana_program::{msg, pubkey::Pubkey};
 
+use crate::err_msg;
 use crate::error::LighthouseError;
 
 use crate::types::{AccountInfoData, WriteType, WriteTypeParameter};
@@ -85,9 +86,6 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
         write_type,
     } = parameters;
 
-    let memory_ref = &mut memory_account.account_info.try_borrow_mut_data()?;
-    let memory_data_length = memory_ref.len();
-
     let (memory_offset, write_type) = match write_type {
         WriteTypeParameter::WriteU8 {
             offset: memory_offset,
@@ -103,6 +101,8 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
         } => (memory_offset as usize, write_type),
     };
 
+    let memory_ref = &mut memory_account.account_info.try_borrow_mut_data()?;
+
     match write_type {
         WriteType::Program => {
             return Err(LighthouseError::Unimplemented.into());
@@ -110,55 +110,52 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
         WriteType::DataValue(borsh_value) => {
             let bytes = borsh_value.serialize()?;
 
-            if (memory_offset + bytes.len()) <= memory_data_length {
-                memory_ref[memory_offset..(memory_offset + bytes.len())].copy_from_slice(&bytes);
-            } else {
-                msg!("DataValue write out of range");
-                return Err(LighthouseError::OutOfRange.into());
-            }
+            let slice_range = memory_offset..(memory_offset + bytes.len());
+            let memory_ref_slice = memory_ref.get_mut(slice_range.clone()).ok_or_else(|| {
+                msg!("DataValue write - range out of bounds {:?}", slice_range);
+                LighthouseError::RangeOutOfBounds
+            })?;
+
+            memory_ref_slice.copy_from_slice(&bytes);
         }
         WriteType::AccountBalance => {
-            let data = source_account.lamports();
-            let data_slice = &data.to_le_bytes();
-            let data_length = data_slice.len();
-
-            memory_ref[memory_offset..(memory_offset + data_length)]
-                .copy_from_slice(data_slice.as_ref());
+            unimplemented!("");
         }
         WriteType::AccountData {
-            offset: account_offset,
+            offset: data_offset,
             data_length,
         } => {
-            let account_offset = account_offset as usize;
+            let data_offset = data_offset as usize;
             let data_length = if let Some(data_length) = data_length {
                 data_length as usize
             } else {
                 source_account
                     .data_len()
-                    .checked_sub(account_offset)
+                    .checked_sub(data_offset)
                     .ok_or_else(|| {
-                        msg!("Account offset greater than account data length");
-                        LighthouseError::OutOfRange
+                        msg!("Account data offset index out of bounds");
+                        LighthouseError::RangeOutOfBounds
                     })?
             };
 
             let data = source_account.try_borrow_data().map_err(|err| {
-                msg!("Error: {:?}", err);
+                msg!("Failed to borrow target account: {:?}", err);
                 LighthouseError::AccountBorrowFailed
             })?;
-            let data_slice = data.get(account_offset..(account_offset + data_length));
 
-            if let Some(data_slice) = data_slice {
-                memory_ref[memory_offset..(memory_offset + data_length)]
-                    .copy_from_slice(data_slice);
-            } else {
-                msg!(
-                    "Account data write out of range {} memory data length {}",
-                    data_length,
-                    memory_data_length
-                );
-                return Err(LighthouseError::OutOfRange.into());
-            }
+            let data_range = data_offset..(data_offset + data_length);
+            let data_slice = data.get(data_range.clone()).ok_or_else(|| {
+                msg!("AccountData - read range out of bounds {:?}", data_range);
+                LighthouseError::RangeOutOfBounds
+            })?;
+
+            let memory_range = memory_offset..(memory_offset + data_length);
+            let memory_ref_slice = memory_ref.get_mut(memory_range.clone()).ok_or_else(|| {
+                msg!("AccountData - write range out of bounds {:?}", memory_range);
+                LighthouseError::RangeOutOfBounds
+            })?;
+
+            memory_ref_slice.copy_from_slice(data_slice);
         }
         WriteType::AccountInfo => {
             let account_info = AccountInfoData {
@@ -171,20 +168,19 @@ pub(crate) fn write(context: WriteContext, parameters: WriteParameters) -> Resul
             };
 
             let data = account_info.try_to_vec().map_err(|err| {
-                msg!("Unable to serialize account info {:?}", err);
-                LighthouseError::SerializationFailed
+                err_msg!("Failed serialize AccountInfo", err);
+                LighthouseError::FailedToSerialize
             })?;
 
-            let data_length = data.len();
+            let memory_range = memory_offset..(memory_offset + data.len());
+            let memory_ref_slice = memory_ref.get_mut(memory_range.clone()).ok_or_else(|| {
+                msg!("AccountInfo write - range out of bounds {:?}", memory_range);
+                LighthouseError::RangeOutOfBounds
+            })?;
 
-            let data_slice = &data[0..data_length];
-
-            memory_ref[memory_offset..(memory_offset + data_length)]
-                .copy_from_slice(data_slice.as_ref());
+            memory_ref_slice.copy_from_slice(&data);
         }
     };
 
     Ok(())
 }
-
-// TODO write tests

@@ -44,6 +44,7 @@ export enum LighthouseInstruction {
   AssertTokenAccount,
   AssertTokenAccountMulti,
   AssertStakeAccount,
+  AssertUpgradeableLoaderAccount,
   AssertSysvarClock,
 }
 
@@ -83,6 +84,9 @@ export function identifyLighthouseInstruction(
     return LighthouseInstruction.AssertStakeAccount;
   }
   if (memcmp(data, getU8Encoder().encode(10), 0)) {
+    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
+  }
+  if (memcmp(data, getU8Encoder().encode(11), 0)) {
     return LighthouseInstruction.AssertSysvarClock;
   }
   throw new Error(

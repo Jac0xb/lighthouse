@@ -321,6 +321,31 @@
       }
     },
     {
+      "name": "AssertUpgradeableLoaderAccount",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "upgradeableLoaderStateAssertion",
+          "type": {
+            "defined": "UpgradeableLoaderStateAssertion"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 10
+      }
+    },
+    {
       "name": "AssertSysvarClock",
       "accounts": [],
       "args": [
@@ -333,7 +358,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 11
       }
     }
   ],
@@ -925,72 +950,120 @@
           {
             "name": "U8",
             "fields": [
-              "i16",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "I8",
             "fields": [
-              "i16",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "U16",
             "fields": [
-              "i32",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "I16",
             "fields": [
-              "i32",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "U32",
             "fields": [
-              "i64",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "I32",
             "fields": [
-              "i64",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "U64",
             "fields": [
-              "i128",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           },
           {
             "name": "I64",
             "fields": [
-              "i128",
               {
-                "defined": "IntegerOperator"
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
               }
             ]
           }
@@ -1085,7 +1158,7 @@
       }
     },
     {
-      "name": "StakeAccountState",
+      "name": "StakeStateType",
       "type": {
         "kind": "enum",
         "variants": [
@@ -1114,12 +1187,14 @@
             "fields": [
               {
                 "name": "value",
-                "type": "u8"
+                "type": {
+                  "defined": "StakeStateType"
+                }
               },
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]
@@ -1472,6 +1547,163 @@
           },
           {
             "name": "TokenAccountOwnerIsDerived"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableLoaderStateType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Buffer"
+          },
+          {
+            "name": "Program"
+          },
+          {
+            "name": "ProgramData"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableLoaderStateAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "State",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "defined": "UpgradeableLoaderStateType"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Buffer",
+            "fields": [
+              {
+                "defined": "UpgradableBufferAssertion"
+              }
+            ]
+          },
+          {
+            "name": "Program",
+            "fields": [
+              {
+                "defined": "UpgradeableProgramAssertion"
+              }
+            ]
+          },
+          {
+            "name": "ProgramData",
+            "fields": [
+              {
+                "defined": "UpgradeableProgramDataAssertion"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradableBufferAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Authority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableProgramAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProgramDataAddress",
+            "fields": [
+              {
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableProgramDataAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "UpgradeAuthority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Slot",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
+              }
+            ]
           }
         ]
       }

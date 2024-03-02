@@ -45,7 +45,7 @@ pub mod lighthouse {
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
         // TODO: printing the instruction name is 1000's Compute Units, lets think about that.
-        msg!("Lighthouse instruction: {:?}", instruction);
+        // msg!("Lighthouse instruction: {:?}", instruction);
 
         match instruction {
             LighthouseInstruction::CreateMemoryAccount(parameters) => {
@@ -65,7 +65,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
+                    Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
             LighthouseInstruction::AssertAccountDataDiff(assertion) => {
@@ -74,7 +74,7 @@ pub mod lighthouse {
                 processor::assert_with_accounts(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
+                    Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
             LighthouseInstruction::AssertAccountInfo(assertion) => {
@@ -83,7 +83,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
+                    Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
             LighthouseInstruction::AssertMintAccount(assertion) => {
@@ -92,7 +92,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
+                    Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
             LighthouseInstruction::AssertMintAccountMulti(assertions) => {
@@ -108,7 +108,10 @@ pub mod lighthouse {
                             )],
                             data: LighthouseInstruction::AssertMintAccount(assertion.clone())
                                 .try_to_vec()
-                                .unwrap(),
+                                .map_err(|e| {
+                                    msg!("Failed to serialize assertion: {:?}", e);
+                                    err!(LighthouseError::FailedToSerialize)
+                                })?,
                         },
                         accounts,
                     )?;
@@ -120,7 +123,7 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
-                    Some(AssertionConfigV1 { verbose: true }),
+                    Some(AssertionConfigV1 { verbose: false }),
                 )?;
             }
             LighthouseInstruction::AssertTokenAccountMulti(assertions) => {
@@ -136,7 +139,10 @@ pub mod lighthouse {
                             )],
                             data: LighthouseInstruction::AssertTokenAccount(assertion.clone())
                                 .try_to_vec()
-                                .unwrap(),
+                                .map_err(|e| {
+                                    msg!("Failed to serialize assertion: {:?}", e);
+                                    err!(LighthouseError::FailedToSerialize)
+                                })?,
                         },
                         accounts,
                     )?;
@@ -148,11 +154,23 @@ pub mod lighthouse {
                 processor::assert_with_account(
                     &context,
                     &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
+            }
+            LighthouseInstruction::AssertUpgradeableLoaderAccount(assertion) => {
+                let context = AssertWithAccountContext::load(&mut accounts.iter())?;
+
+                processor::assert_with_account(
+                    &context,
+                    &assertion,
                     Some(AssertionConfigV1 { verbose: true }),
                 )?;
             }
             LighthouseInstruction::AssertSysvarClock(assertion) => {
-                processor::assert(&assertion, Some(AssertionConfigV1 { verbose: true }))?;
+                processor::assert_with_clock(
+                    &assertion,
+                    Some(AssertionConfigV1 { verbose: false }),
+                )?;
             }
         }
 

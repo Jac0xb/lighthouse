@@ -61,7 +61,7 @@ export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysv
       ['discriminator', getU8Encoder()],
       ['sysvarClockAssertion', getSysvarClockAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 10 })
+    (value) => ({ ...value, discriminator: 11 })
   );
 }
 

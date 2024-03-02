@@ -5,14 +5,16 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::EquatableOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
+use solana_program::pubkey::Pubkey;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum StakeAccountState {
-    Uninitialized,
-    Initialized,
-    Stake,
-    RewardsPool,
+pub enum UpgradableBufferAssertion {
+    Authority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
 }
