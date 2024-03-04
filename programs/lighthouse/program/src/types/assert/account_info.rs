@@ -1,14 +1,14 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
-
+use super::{Assert, LogLevel};
 use crate::{
     error::LighthouseError,
     types::{
-        Assert, ComparableOperator, EquatableOperator, EvaluationResult, KnownProgram, LogLevel,
-        Operator,
+        known_program::KnownProgram,
+        operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     },
     utils::Result,
 };
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum AccountInfoAssertion {

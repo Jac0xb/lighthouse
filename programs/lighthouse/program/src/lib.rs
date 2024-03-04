@@ -165,9 +165,12 @@ pub mod lighthouse {
             } => {
                 processor::assert_clock(assertion, log_level)?;
             }
-            LighthouseInstruction::AssertMerkleTreeAccount(log_level, parameters) => {
+            LighthouseInstruction::AssertMerkleTreeAccount {
+                log_level,
+                assertion,
+            } => {
                 let context = AssertMerkleTreeAccountContext::load(accounts)?;
-                processor::assert_merkle_tree_account(&context, parameters, &(), log_level)?;
+                processor::assert_merkle_tree_account(&context, assertion, log_level)?;
             }
         }
 

@@ -1,13 +1,9 @@
-use std::fmt::Debug;
-
 use crate::{
     error::LighthouseError,
-    types::{Assert, EvaluationResult, LogLevel},
+    types::assert::{Assert, LogLevel},
     utils::Result,
     validations::Program,
 };
-use anchor_lang::{context::CpiContext, ToAccountInfo};
-use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, msg};
 
 pub(crate) struct AssertMerkleTreeAccountContext<'a, 'info> {
@@ -31,45 +27,21 @@ impl<'a, 'info> AssertMerkleTreeAccountContext<'a, 'info> {
     }
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
-pub struct AssertMerkleLeafParameters {
-    pub leaf_index: u32,
-    pub leaf_hash: [u8; 32],
-}
-
-pub(crate) fn assert_merkle_tree_account<'a, 'info, T: Assert<()> + Debug>(
+pub(crate) fn assert_merkle_tree_account<
+    'a,
+    'info,
+    T: Assert<AssertMerkleTreeAccountContext<'a, 'info>>,
+>(
     context: &AssertMerkleTreeAccountContext<'a, 'info>,
-    parameters: &AssertMerkleLeafParameters,
     assertion: &T,
     log_level: &LogLevel,
 ) -> Result<()> {
-    let accounts = spl_account_compression::cpi::accounts::VerifyLeaf {
-        merkle_tree: context.merkle_tree.clone(),
-    };
+    let result = assertion.evaluate(context, log_level)?;
 
-    let cpi_context = CpiContext::new(context.spl_account_compression.to_account_info(), accounts)
-        .with_remaining_accounts(context.proof_path.to_vec());
-
-    let result = spl_account_compression::cpi::verify_leaf(
-        cpi_context,
-        context.root.key.to_bytes(),
-        parameters.leaf_hash,
-        parameters.leaf_index,
-    );
-
-    if let Err(e) = result {
-        msg!("Merkle leaf assertion failed: {:?}", e);
+    if !result.passed {
+        msg!("Merkle tree assertion failed: {:?}", result.output);
         return Err(LighthouseError::AssertionFailed.into());
     }
 
     Ok(())
-}
-
-impl Assert<()> for () {
-    fn evaluate(&self, _context: &(), log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
-        Ok(Box::new(EvaluationResult {
-            passed: true,
-            output: "No assertion to evaluate".to_string(),
-        }))
-    }
 }

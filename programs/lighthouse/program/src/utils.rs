@@ -1,14 +1,11 @@
-use std::{any::type_name, fmt::Debug, ops::Range};
+use std::{any::type_name, ops::Range};
 
-use crate::{
-    error::LighthouseError,
-    types::{operator::EvaluationResult, Assert},
-};
+use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
-    log, msg,
+    msg,
     program::{invoke, invoke_signed},
     program_error::ProgramError,
     program_option::COption,
@@ -18,25 +15,6 @@ use solana_program::{
 };
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
-
-pub fn print_assertion_result<U: Debug, T: Assert<U> + Debug>(
-    assertion: &T,
-    assertion_index: usize,
-    evaluation_result: &EvaluationResult,
-) {
-    msg!(
-        // repeating zeros infront of assettion index
-        "{} {} {:?} {}",
-        format!("[{:0>2}]", assertion_index),
-        if evaluation_result.passed {
-            "[✓] PASSED"
-        } else {
-            "[✕] FAILED"
-        },
-        assertion,
-        evaluation_result.output
-    );
-}
 
 pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
     let tag = &src[0..4];

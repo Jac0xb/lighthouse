@@ -1,9 +1,9 @@
+use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{
-        Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, LogLevel,
-        Operator,
+    types::operator::{
+        BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
     },
     utils::{try_from_slice, Result},
 };
@@ -193,10 +193,12 @@ mod tests {
     use crate::{
         test_utils::create_test_account,
         types::{
-            AccountDataAssertion, Assert, DataValueAssertion, EquatableOperator, IntegerOperator,
-            LogLevel,
+            assert::{AccountDataAssertion, Assert, LogLevel},
+            operator::{EquatableOperator, IntegerOperator},
         },
     };
+
+    use super::DataValueAssertion;
 
     #[test]
     fn evaluate() {
@@ -260,7 +262,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(
@@ -322,7 +324,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(
@@ -370,7 +372,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(

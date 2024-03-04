@@ -1,19 +1,13 @@
 use crate::utils::bubblegum::context::BubblegumTestContext;
-use crate::utils::bubblegum::{compute_metadata_hashes, DirtyClone, LeafArgs, Tree};
+use crate::utils::bubblegum::{DirtyClone, LeafArgs, Tree};
 use crate::utils::context::TestContext;
-use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::Result;
-use anchor_lang::{InstructionData, ToAccountMetas};
 use lighthouse_client::instructions::AssertMerkleTreeAccountBuilder;
-use mpl_bubblegum::state::leaf_schema::Version;
-use mpl_bubblegum::utils::get_asset_id;
+use lighthouse_client::types::MerkleTreeAssertion;
 use solana_program_test::{tokio, ProgramTestContext};
-use solana_sdk::instruction::{AccountMeta, Instruction};
-use solana_sdk::keccak;
+use solana_sdk::instruction::AccountMeta;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Keypair;
-use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::transaction::Transaction;
 
 const MAX_DEPTH: usize = 14;
 const MAX_BUF_SIZE: usize = 64;
@@ -88,9 +82,11 @@ async fn merkle_tree() {
             .merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .leaf_index(leaf.index)
-            .arg0(lighthouse_client::types::LogLevel::PlaintextLog)
-            .leaf_hash(new_leaf_hash)
+            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .assertion(MerkleTreeAssertion::VerifyLeaf {
+                leaf_index: leaf.index,
+                leaf_hash: new_leaf_hash,
+            })
             .add_remaining_accounts(&proof_path_metas)
             .instruction()],
         &[],

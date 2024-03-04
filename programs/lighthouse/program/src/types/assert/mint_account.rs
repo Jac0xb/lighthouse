@@ -1,13 +1,10 @@
+use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    types::{EquatableOperator, IntegerOperator, LogLevel},
+    types::operator::{EquatableOperator, EvaluationResult, IntegerOperator, Operator},
     utils::{out_of_bounds_err, Result},
 };
-use crate::{
-    error::LighthouseError,
-    types::{Assert, EvaluationResult, Operator},
-    utils::unpack_coption_key,
-};
+use crate::{error::LighthouseError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
 
@@ -169,7 +166,8 @@ mod tests {
         use std::{cell::RefCell, rc::Rc};
 
         use crate::types::{
-            Assert, EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion,
+            assert::{Assert, LogLevel, MintAccountAssertion},
+            operator::{EquatableOperator, IntegerOperator},
         };
 
         #[test]
@@ -213,7 +211,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -226,7 +224,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -243,7 +241,7 @@ mod tests {
                 value: 69,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -256,7 +254,7 @@ mod tests {
                 value: 1600,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -273,7 +271,7 @@ mod tests {
                 value: 2,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -286,7 +284,7 @@ mod tests {
                 value: 3,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -303,7 +301,7 @@ mod tests {
                 value: true,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -316,7 +314,7 @@ mod tests {
                 value: false,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -333,7 +331,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -346,7 +344,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -399,7 +397,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -412,7 +410,7 @@ mod tests {
                 value: Some(freeze_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -429,7 +427,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -442,7 +440,7 @@ mod tests {
                 value: Some(mint_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

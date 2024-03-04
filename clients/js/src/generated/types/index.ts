@@ -17,6 +17,7 @@ export * from './equatableOperator';
 export * from './integerOperator';
 export * from './knownProgram';
 export * from './logLevel';
+export * from './merkleTreeAssertion';
 export * from './metaAssertion';
 export * from './mintAccountAssertion';
 export * from './stakeAccountAssertion';

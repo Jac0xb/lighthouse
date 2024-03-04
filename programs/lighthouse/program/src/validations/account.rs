@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use crate::{error::LighthouseError, utils::Result};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
+use std::collections::HashMap;
 
 pub enum AccountValidation {
     IsNotInited,

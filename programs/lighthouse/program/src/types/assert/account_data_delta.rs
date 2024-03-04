@@ -1,12 +1,12 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::account_info::AccountInfo;
-
+use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{Assert, EvaluationResult, IntegerOperator, LogLevel, Operator},
+    types::operator::{EvaluationResult, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
 };
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::account_info::AccountInfo;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct AccountDataDeltaAssertion {
@@ -172,10 +172,11 @@ mod tests {
 
         use crate::{
             test_utils::create_test_account,
-            types::{
-                AccountDataDeltaAssertion, Assert, DataValueDeltaAssertion, IntegerOperator,
-                LogLevel,
+            types::assert::{
+                account_data_delta::{AccountDataDeltaAssertion, DataValueDeltaAssertion},
+                Assert, LogLevel,
             },
+            types::operator::IntegerOperator,
         };
 
         #[test]
@@ -205,7 +206,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -223,7 +224,7 @@ mod tests {
             let result = reverse_assertion
                 .evaluate(
                     &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -258,7 +259,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -278,7 +279,7 @@ mod tests {
             let result = reverse_assertion
                 .evaluate(
                     &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -313,7 +314,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -333,7 +334,7 @@ mod tests {
             let result = reverse_assertion
                 .evaluate(
                     &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -368,7 +369,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -388,7 +389,7 @@ mod tests {
             let result = reverse_assertion
                 .evaluate(
                     &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextLog,
+                    &LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 

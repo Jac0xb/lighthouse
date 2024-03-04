@@ -1,10 +1,10 @@
 use crate::error::LighthouseError;
-use crate::types::{AccountInfoData, DataValue, WriteType};
+use crate::types::write::{AccountInfoData, DataValue, WriteType};
 use crate::utils::Result;
 use crate::validations::{
     to_checked_account, AccountValidation, CheckedAccount, MemoryAccount, Program, Signer,
 };
-// use crate::{err, err_msg};
+use crate::{err, err_msg};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use std::slice::Iter;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub struct WriteParameters {
+pub(crate) struct WriteParameters {
     pub memory_index: u8,
     pub memory_account_bump: u8,
     pub memory_offset: u16,
@@ -96,9 +96,8 @@ pub(crate) fn write(context: WriteContext, parameters: &WriteParameters) -> Resu
         }
         WriteType::DataValue(data_value) => {
             let err_map: fn(e: std::io::Error) -> ProgramError = |e| {
-                // err_msg!("Failed to serialize data value", e);
-                // err!(LighthouseError::FailedToSerialize)
-                ProgramError::Custom(0)
+                err_msg!("Failed to serialize data value", e);
+                err!(LighthouseError::FailedToSerialize)
             };
 
             let bytes = &match data_value {
@@ -172,9 +171,8 @@ pub(crate) fn write(context: WriteContext, parameters: &WriteParameters) -> Resu
             };
 
             let data = account_info.try_to_vec().map_err(|err| {
-                // err_msg!("Failed serialize AccountInfo", err);
-                // LighthouseError::FailedToSerialize
-                ProgramError::Custom(0)
+                err_msg!("Failed serialize AccountInfo", err);
+                LighthouseError::FailedToSerialize
             })?;
 
             let memory_range = memory_offset..(memory_offset + data.len());

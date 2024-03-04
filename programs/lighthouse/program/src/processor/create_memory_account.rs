@@ -1,5 +1,8 @@
-use std::{collections::HashMap, slice::Iter};
-
+use crate::{
+    error::LighthouseError,
+    utils::{create_account, Result},
+    validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer},
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -8,15 +11,10 @@ use solana_program::{
     rent::Rent,
     sysvar::Sysvar,
 };
-
-use crate::{
-    error::LighthouseError,
-    utils::{create_account, Result},
-    validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer},
-};
+use std::{collections::HashMap, slice::Iter};
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub struct CreateMemoryAccountParameters {
+pub(crate) struct CreateMemoryAccountParameters {
     pub memory_index: u8,
     pub memory_account_size: u64,
 }

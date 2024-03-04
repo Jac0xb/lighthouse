@@ -75,7 +75,7 @@ async fn test_write() {
         &[
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -84,7 +84,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::I8 {
                     value: -1,
                     operator: IntegerOperator::Equal,
@@ -93,7 +93,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U16 {
                     value: (u8::MAX as u16) + 1,
                     operator: IntegerOperator::Equal,
@@ -102,7 +102,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::I16 {
                     value: (i8::MIN as i16) - 1,
                     operator: IntegerOperator::Equal,
@@ -111,7 +111,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U32 {
                     value: (u16::MAX as u32) + 1,
                     operator: IntegerOperator::Equal,
@@ -120,7 +120,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::I32 {
                     value: (i16::MIN as i32) - 1,
                     operator: IntegerOperator::Equal,
@@ -129,7 +129,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U64 {
                     value: (u32::MAX as u64) + 1,
                     operator: IntegerOperator::Equal,
@@ -138,7 +138,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::I64 {
                     value: (i32::MIN as i64) - 1,
                     operator: IntegerOperator::Equal,
@@ -147,7 +147,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U128 {
                     value: (u64::MAX as u128) + 1,
                     operator: IntegerOperator::Equal,
@@ -156,7 +156,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::I128 {
                     value: (i64::MIN as i128) - 1,
                     operator: IntegerOperator::Equal,
@@ -165,7 +165,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
                     operator: BytesOperator::Equal,
@@ -174,7 +174,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Bool {
                     value: true,
                     operator: EquatableOperator::Equal,
@@ -184,7 +184,7 @@ async fn test_write() {
             // False represented as 0
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -194,7 +194,7 @@ async fn test_write() {
             // Some in Option<u8>
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -203,7 +203,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U8 {
                     value: u8::MAX,
                     operator: IntegerOperator::Equal,
@@ -212,7 +212,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -221,7 +221,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
                     operator: BytesOperator::Equal,
@@ -230,7 +230,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
                     operator: BytesOperator::Equal,
@@ -239,7 +239,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Pubkey {
                     value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
@@ -248,7 +248,7 @@ async fn test_write() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
                 .assertion(DataValueAssertion::Bytes {
                     value: [32, 0, 0, 0]
                         .iter()

@@ -1,7 +1,8 @@
+use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, LogLevel, Operator},
+    types::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::{out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -273,9 +274,6 @@ impl Assert<AccountInfo<'_>> for TokenAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use crate::types::{
-            Assert, ComparableOperator, EquatableOperator, LogLevel, TokenAccountAssertion,
-        };
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
         };
@@ -283,6 +281,11 @@ mod tests {
         use spl_associated_token_account::get_associated_token_address_with_program_id;
         use spl_token_2022::state::{Account, AccountState};
         use std::{cell::RefCell, rc::Rc};
+
+        use crate::types::{
+            assert::{Assert, LogLevel, TokenAccountAssertion},
+            operator::{ComparableOperator, EquatableOperator},
+        };
 
         #[test]
         fn evaluate_token_account_no_delegate_no_close_authority() {
@@ -330,7 +333,7 @@ mod tests {
                 value: 69,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -343,7 +346,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -359,7 +362,7 @@ mod tests {
                 value: mint.encodable_pubkey(),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -375,7 +378,7 @@ mod tests {
                 value: owner.encodable_pubkey(),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -392,7 +395,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -405,7 +408,7 @@ mod tests {
                 value: Some(owner.encodable_pubkey()),
                 operator: EquatableOperator::NotEqual,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -422,7 +425,7 @@ mod tests {
                 value: AccountState::Initialized as u8,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -435,7 +438,7 @@ mod tests {
                 value: AccountState::Frozen as u8,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -448,7 +451,7 @@ mod tests {
                 value: AccountState::Uninitialized as u8,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -465,7 +468,7 @@ mod tests {
                 value: Some(1),
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -481,7 +484,7 @@ mod tests {
                 value: 42,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -498,7 +501,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -511,7 +514,7 @@ mod tests {
                 value: Some(owner.encodable_pubkey()),
                 operator: EquatableOperator::NotEqual,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -568,7 +571,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -581,7 +584,7 @@ mod tests {
                 value: Some(delegate.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -597,7 +600,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -610,7 +613,7 @@ mod tests {
                 value: Some(close_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, &LogLevel::PlaintextLog);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -665,7 +668,7 @@ mod tests {
 
                 // assert on TokenAccountOwnerIsDerived
                 let result = TokenAccountAssertion::TokenAccountOwnerIsDerived
-                    .evaluate(&account_info, &LogLevel::PlaintextLog);
+                    .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
                 if let Ok(result) = result {
                     assert!(result.passed, "{:?}", result.output);
@@ -709,7 +712,7 @@ mod tests {
 
                 // assert on TokenAccountOwnerIsDerived
                 let result = TokenAccountAssertion::TokenAccountOwnerIsDerived
-                    .evaluate(&account_info, &LogLevel::PlaintextLog);
+                    .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
                 if let Ok(result) = result {
                     assert!(!result.passed, "{:?}", result.output);

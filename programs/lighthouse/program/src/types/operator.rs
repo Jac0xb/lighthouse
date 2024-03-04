@@ -1,9 +1,8 @@
-use std::{fmt::Debug, ops::BitAnd};
-
+use super::assert::{Assert, LogLevel};
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
-
-use super::LogLevel;
+use solana_program::msg;
+use std::{fmt::Debug, ops::BitAnd};
 
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
@@ -62,6 +61,21 @@ pub struct EvaluationResult {
     pub output: String,
 }
 
+impl EvaluationResult {
+    pub fn log<U: Debug, T: Assert<U> + Debug>(&self, _log_level: &LogLevel, assertion: &T) {
+        msg!(
+            "{} {:?} {}",
+            if self.passed {
+                "[✓] PASSED"
+            } else {
+                "[✕] FAILED"
+            },
+            assertion,
+            self.output
+        );
+    }
+}
+
 impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for ComparableOperator {
     fn evaluate(
         &self,
@@ -78,7 +92,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
-            output: if log_level == &LogLevel::PlaintextLog {
+            output: if log_level == &LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -129,7 +143,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                     actual_value & assertion_value == T::zero()
                 }
             },
-            output: if log_level == &LogLevel::PlaintextLog {
+            output: if log_level == &LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
@@ -165,7 +179,7 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
                 EquatableOperator::Equal => T::eq(actual_value, assertion_value),
                 EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
             },
-            output: if log_level == &LogLevel::PlaintextLog {
+            output: if log_level == &LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -207,7 +221,7 @@ where
                     actual_value != assertion_value
                 }
             },
-            output: if log_level == &LogLevel::PlaintextLog {
+            output: if log_level == &LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,

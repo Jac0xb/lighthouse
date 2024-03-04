@@ -1,12 +1,9 @@
-use crate::{
-    err, err_msg,
-    error::LighthouseError,
-    types::{Assert, EvaluationResult, LogLevel, Operator},
+use super::{Assert, LogLevel};
+use crate::types::operator::{
+    ComparableOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
 };
-use crate::{
-    types::{ComparableOperator, EquatableOperator, IntegerOperator},
-    utils::Result,
-};
+use crate::utils::Result;
+use crate::{err, err_msg, error::LighthouseError};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::msg;
 use solana_program::{
