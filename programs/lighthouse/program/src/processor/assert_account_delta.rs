@@ -1,18 +1,17 @@
 use crate::{
     error::LighthouseError,
     types::{Assert, LogLevel},
-    utils::print_assertion_result,
-    utils::Result,
+    Result,
 };
 use solana_program::account_info::{next_account_info, AccountInfo};
 use std::{fmt::Debug, slice::Iter};
 
-pub(crate) struct AssertDeltaContext<'info> {
+pub(crate) struct AssertAccountDeltaContext<'info> {
     pub(crate) left_account: AccountInfo<'info>,
     pub(crate) right_account: AccountInfo<'info>,
 }
 
-impl<'info> AssertDeltaContext<'info> {
+impl<'info> AssertAccountDeltaContext<'info> {
     pub(crate) fn load(account_iter: &mut Iter<AccountInfo<'info>>) -> Result<Self> {
         Ok(Self {
             left_account: next_account_info(account_iter)?.clone(),
@@ -21,8 +20,11 @@ impl<'info> AssertDeltaContext<'info> {
     }
 }
 
-pub(crate) fn assert_delta<'info, T: Assert<(AccountInfo<'info>, AccountInfo<'info>)> + Debug>(
-    assert_context: &AssertDeltaContext<'info>,
+pub(crate) fn assert_account_delta<
+    'info,
+    T: Assert<(AccountInfo<'info>, AccountInfo<'info>)> + Debug,
+>(
+    assert_context: &AssertAccountDeltaContext<'info>,
     assertion: &T,
     log_level: &LogLevel,
 ) -> Result<()> {

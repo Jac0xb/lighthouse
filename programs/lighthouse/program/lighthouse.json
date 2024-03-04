@@ -132,7 +132,7 @@
       }
     },
     {
-      "name": "AssertDelta",
+      "name": "AssertAccountDataDelta",
       "accounts": [
         {
           "name": "leftAccount",
@@ -161,7 +161,7 @@
         {
           "name": "assertion",
           "type": {
-            "defined": "AccountDeltaAssertion"
+            "defined": "AccountDataDeltaAssertion"
           }
         }
       ],
@@ -422,7 +422,7 @@
       }
     },
     {
-      "name": "AssertAccountCompression",
+      "name": "AssertMerkleTreeAccount",
       "accounts": [
         {
           "name": "merkleTree",
@@ -552,7 +552,7 @@
       }
     },
     {
-      "name": "AccountDeltaAssertion",
+      "name": "AccountDataDeltaAssertion",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1108,26 +1108,6 @@
       }
     },
     {
-      "name": "LogLevel",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Silent"
-          },
-          {
-            "name": "PlaintextLog"
-          },
-          {
-            "name": "EventLog"
-          },
-          {
-            "name": "CpiLog"
-          }
-        ]
-      }
-    },
-    {
       "name": "SysvarClockAssertion",
       "type": {
         "kind": "enum",
@@ -1206,6 +1186,26 @@
                 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "LogLevel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Silent"
+          },
+          {
+            "name": "PlaintextLog"
+          },
+          {
+            "name": "EventLog"
+          },
+          {
+            "name": "CpiLog"
           }
         ]
       }

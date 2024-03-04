@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub struct AccountDeltaAssertion {
+pub struct AccountDataDeltaAssertion {
     pub offset_left: u16,
     pub offset_right: u16,
     pub assertion: DataValueDeltaAssertion,
@@ -51,7 +51,7 @@ pub enum DataValueDeltaAssertion {
     },
 }
 
-impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDeltaAssertion {
+impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDeltaAssertion {
     fn evaluate(
         &self,
         accounts: &(AccountInfo, AccountInfo),
@@ -173,7 +173,8 @@ mod tests {
         use crate::{
             test_utils::create_test_account,
             types::{
-                AccountDeltaAssertion, Assert, DataValueDeltaAssertion, IntegerOperator, LogLevel,
+                AccountDataDeltaAssertion, Assert, DataValueDeltaAssertion, IntegerOperator,
+                LogLevel,
             },
         };
 
@@ -192,7 +193,7 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDeltaAssertion {
+            let assertion = AccountDataDeltaAssertion {
                 offset_left: 0,
                 offset_right: 0,
                 assertion: DataValueDeltaAssertion::U8 {
@@ -210,7 +211,7 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDeltaAssertion {
+            let reverse_assertion = AccountDataDeltaAssertion {
                 offset_left: 0,
                 offset_right: 0,
                 assertion: DataValueDeltaAssertion::U8 {
@@ -245,7 +246,7 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDeltaAssertion {
+            let assertion = AccountDataDeltaAssertion {
                 offset_left: 1,
                 offset_right: 0,
                 assertion: DataValueDeltaAssertion::I8 {
@@ -265,7 +266,7 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDeltaAssertion {
+            let reverse_assertion = AccountDataDeltaAssertion {
                 offset_left: 0,
                 offset_right: 1,
                 assertion: DataValueDeltaAssertion::I8 {
@@ -300,7 +301,7 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDeltaAssertion {
+            let assertion = AccountDataDeltaAssertion {
                 offset_left: 2,
                 offset_right: 0,
                 assertion: DataValueDeltaAssertion::U16 {
@@ -320,7 +321,7 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDeltaAssertion {
+            let reverse_assertion = AccountDataDeltaAssertion {
                 offset_left: 0,
                 offset_right: 2,
                 assertion: DataValueDeltaAssertion::U16 {
@@ -355,7 +356,7 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDeltaAssertion {
+            let assertion = AccountDataDeltaAssertion {
                 offset_left: 4,
                 offset_right: 0,
                 assertion: DataValueDeltaAssertion::I16 {
@@ -375,7 +376,7 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDeltaAssertion {
+            let reverse_assertion = AccountDataDeltaAssertion {
                 offset_left: 0,
                 offset_right: 4,
                 assertion: DataValueDeltaAssertion::I16 {

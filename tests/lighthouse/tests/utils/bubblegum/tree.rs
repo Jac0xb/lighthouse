@@ -13,16 +13,15 @@ use super::{
 use anchor_lang::{self, AccountDeserialize};
 use bytemuck::try_from_bytes;
 use mpl_bubblegum::{
-    state::{leaf_schema::LeafSchema, DecompressibleState, TreeConfig, Voucher, VOUCHER_PREFIX},
+    state::{leaf_schema::LeafSchema, TreeConfig, Voucher, VOUCHER_PREFIX},
     utils::get_asset_id,
 };
-use mpl_token_metadata::accounts::{MasterEdition, Metadata};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey,
     pubkey::Pubkey,
     rent::Rent,
-    system_instruction, system_program, sysvar,
+    system_instruction, system_program,
 };
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -32,7 +31,6 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use spl_account_compression::state::CONCURRENT_MERKLE_TREE_HEADER_SIZE_V1;
-use spl_associated_token_account::get_associated_token_address;
 use spl_concurrent_merkle_tree::concurrent_merkle_tree::ConcurrentMerkleTree;
 use spl_merkle_tree_reference::{MerkleTree, Node};
 use std::{convert::TryFrom, mem::size_of};
@@ -239,11 +237,11 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     // Shorthand method for executing a create tree tx with the default config
     // defined in the `_tx` method.
     pub async fn create(&mut self, payer: &Keypair) -> Result<()> {
-        self.create_tree_tx(payer, false).execute().await
+        self.create_tree_tx(payer, false).execute(&[], &[]).await
     }
 
     pub async fn create_public(&mut self, payer: &Keypair) -> Result<()> {
-        self.create_tree_tx(payer, true).execute().await
+        self.create_tree_tx(payer, true).execute(&[], &[]).await
     }
 
     pub fn mint_v1_tx<'a>(
@@ -282,7 +280,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     // This assumes the owner is the account paying for the tx. We can make things
     // more configurable for any of the methods.
     pub async fn mint_v1(&mut self, tree_delegate: &Keypair, args: &mut LeafArgs) -> Result<()> {
-        self.mint_v1_tx(tree_delegate, args).execute().await
+        self.mint_v1_tx(tree_delegate, args).execute(&[], &[]).await
     }
 
     // pub async fn mint_v1_non_owner(
@@ -291,7 +289,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     //     args: &mut LeafArgs,
     // ) -> Result<()> {
     //     self.mint_v1_non_owner_tx(tree_delegate, args)
-    //         .execute()
+    //         .execute(&[], &[])
     //         .await
     // }
 
@@ -397,109 +395,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         ))
     }
 
-    // pub async fn verify_creator_tx<'a>(
-    //     &'a mut self,
-    //     args: &'a mut LeafArgs,
-    //     creator: &Keypair,
-    // ) -> Result<VerifyCreatorBuilder<MAX_DEPTH, MAX_BUFFER_SIZE>> {
-    //     let root = self.decode_root().await?;
-    //     let (data_hash, creator_hash) = compute_metadata_hashes(&args.metadata)?;
-
-    //     let accounts = mpl_bubblegum::accounts::CreatorVerification {
-    //         tree_authority: self.authority(),
-    //         leaf_owner: args.owner.pubkey(),
-    //         leaf_delegate: args.delegate.pubkey(),
-    //         payer: creator.pubkey(),
-    //         creator: creator.pubkey(),
-    //         log_wrapper: spl_noop::id(),
-    //         compression_program: spl_account_compression::id(),
-    //         merkle_tree: self.tree_pubkey(),
-    //         system_program: system_program::id(),
-    //     };
-
-    //     let data = mpl_bubblegum::instruction::VerifyCreator {
-    //         root,
-    //         data_hash,
-    //         creator_hash,
-    //         nonce: args.nonce,
-    //         index: args.index,
-    //         message: args.metadata.clone(),
-    //     };
-
-    //     let need_proof = Some(args.index);
-
-    //     let inner = CreatorVerificationInner {
-    //         args,
-    //         creator_key: creator.pubkey(),
-    //     };
-
-    //     Ok(self.tx_builder(
-    //         accounts,
-    //         data,
-    //         need_proof,
-    //         inner,
-    //         creator.pubkey(),
-    //         &[creator],
-    //     ))
-    // }
-
-    // pub async fn verify_creator(&mut self, args: &mut LeafArgs, creator: &Keypair) -> Result<()> {
-    //     self.verify_creator_tx(args, creator).await?.execute().await
-    // }
-
-    // pub async fn unverify_creator_tx<'a>(
-    //     &'a mut self,
-    //     args: &'a mut LeafArgs,
-    //     creator: &Keypair,
-    // ) -> Result<UnverifyCreatorBuilder<MAX_DEPTH, MAX_BUFFER_SIZE>> {
-    //     let root = self.decode_root().await?;
-    //     let (data_hash, creator_hash) = compute_metadata_hashes(&args.metadata)?;
-
-    //     let accounts = mpl_bubblegum::accounts::CreatorVerification {
-    //         tree_authority: self.authority(),
-    //         leaf_owner: args.owner.pubkey(),
-    //         leaf_delegate: args.delegate.pubkey(),
-    //         payer: creator.pubkey(),
-    //         creator: creator.pubkey(),
-    //         log_wrapper: spl_noop::id(),
-    //         compression_program: spl_account_compression::id(),
-    //         merkle_tree: self.tree_pubkey(),
-    //         system_program: system_program::id(),
-    //     };
-
-    //     let data = mpl_bubblegum::instruction::UnverifyCreator {
-    //         root,
-    //         data_hash,
-    //         creator_hash,
-    //         nonce: args.nonce,
-    //         index: args.index,
-    //         message: args.metadata.clone(),
-    //     };
-
-    //     let need_proof = Some(args.index);
-
-    //     let inner = CreatorVerificationInner {
-    //         args,
-    //         creator_key: creator.pubkey(),
-    //     };
-
-    //     Ok(self.tx_builder(
-    //         accounts,
-    //         data,
-    //         need_proof,
-    //         inner,
-    //         creator.pubkey(),
-    //         &[creator],
-    //     ))
-    // }
-
-    // pub async fn unverify_creator(&mut self, args: &mut LeafArgs, creator: &Keypair) -> Result<()> {
-    //     self.unverify_creator_tx(args, creator)
-    //         .await?
-    //         .execute()
-    //         .await
-    // }
-
     pub async fn verify_collection_tx<'a>(
         &'a mut self,
         args: &'a mut LeafArgs,
@@ -577,7 +472,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
             None,
         )
         .await?
-        .execute()
+        .execute(&[], &[])
         .await
     }
 
@@ -599,7 +494,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
             Some(collection_record),
         )
         .await?
-        .execute()
+        .execute(&[], &[])
         .await
     }
 
@@ -641,8 +536,17 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         Ok(self.tx_builder(accounts, data, need_proof, inner, owner.pubkey(), &[&owner]))
     }
 
-    pub async fn transfer(&mut self, args: &mut LeafArgs, new_owner: &Keypair) -> Result<()> {
-        self.transfer_tx(args, new_owner).await?.execute().await
+    pub async fn transfer(
+        &mut self,
+        args: &mut LeafArgs,
+        new_owner: &Keypair,
+        additonal_instructions: &[Instruction],
+        additional_signers: &[Keypair],
+    ) -> Result<()> {
+        self.transfer_tx(args, new_owner)
+            .await?
+            .execute(additonal_instructions, additional_signers)
+            .await
     }
 
     pub async fn delegate_tx<'a>(
@@ -684,7 +588,10 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
 
     // Does the prev delegate need to sign as well?
     pub async fn delegate(&mut self, args: &mut LeafArgs, new_delegate: &Keypair) -> Result<()> {
-        self.delegate_tx(args, new_delegate).await?.execute().await
+        self.delegate_tx(args, new_delegate)
+            .await?
+            .execute(&[], &[])
+            .await
     }
 
     pub async fn redeem_tx<'a>(
@@ -724,7 +631,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     }
 
     pub async fn redeem(&mut self, args: &LeafArgs) -> Result<()> {
-        self.redeem_tx(args).await?.execute().await
+        self.redeem_tx(args).await?.execute(&[], &[]).await
     }
 
     pub async fn cancel_redeem_tx<'a>(
@@ -756,7 +663,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     }
 
     pub async fn cancel_redeem(&mut self, args: &LeafArgs) -> Result<()> {
-        self.cancel_redeem_tx(args).await?.execute().await
+        self.cancel_redeem_tx(args).await?.execute(&[], &[]).await
     }
 
     // pub fn decompress_v1_tx(
@@ -801,7 +708,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     // }
 
     // pub async fn decompress_v1(&mut self, voucher: &Voucher, args: &LeafArgs) -> Result<()> {
-    //     self.decompress_v1_tx(voucher, args).execute().await
+    //     self.decompress_v1_tx(voucher, args).execute(&[], &[]).await
     // }
 
     pub fn set_tree_delegate_tx(
@@ -830,7 +737,9 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     }
 
     pub async fn set_tree_delegate(&mut self, new_tree_delegate: &Keypair) -> Result<()> {
-        self.set_tree_delegate_tx(new_tree_delegate).execute().await
+        self.set_tree_delegate_tx(new_tree_delegate)
+            .execute(&[], &[])
+            .await
     }
 
     // The following methods provide convenience when reading data from accounts.
@@ -985,14 +894,14 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     // // Enable Decompression
     // pub async fn enable_decompression(&mut self) -> Result<()> {
     //     self.set_decompression_tx(DecompressibleState::Enabled)
-    //         .execute()
+    //         .execute(&[], &[])
     //         .await
     // }
 
     // // Disable Decompression
     // pub async fn disable_decompression(&mut self) -> Result<()> {
     //     self.set_decompression_tx(DecompressibleState::Disabled)
-    //         .execute()
+    //         .execute(&[], &[])
     //         .await
     // }
 }

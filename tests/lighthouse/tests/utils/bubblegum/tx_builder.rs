@@ -1,7 +1,13 @@
 use anchor_lang::{self, InstructionData, ToAccountMetas};
 use solana_program::pubkey::Pubkey;
 use solana_program_test::BanksClient;
-use solana_sdk::{instruction::AccountMeta, signature::Keypair, transaction::Transaction};
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    signature::Keypair,
+    transaction::Transaction,
+};
+
+use crate::utils::utils::{process_transaction, process_transaction_assert_success};
 
 use super::{clone_keypair, instruction, tree::Tree, Error, LeafArgs, Result};
 
@@ -47,7 +53,11 @@ where
     T: ToAccountMetas,
     U: InstructionData,
 {
-    pub async fn execute(&mut self) -> Result<()>
+    pub async fn execute(
+        &mut self,
+        additional_instructions: &[Instruction],
+        additonal_signers: &[Keypair],
+    ) -> Result<()>
     where
         Self: OnSuccessfulTxExec,
     {
@@ -71,17 +81,46 @@ where
             ix.accounts.append(&mut self.additional_accounts.clone());
         }
 
-        let mut tx = Transaction::new_with_payer(&[ix], Some(&self.payer));
+        let ixs: Vec<Instruction> = [ix]
+            .iter()
+            .chain(additional_instructions.iter())
+            .cloned()
+            .collect::<Vec<_>>();
+
+        let mut tx = Transaction::new_with_payer(&ixs, Some(&self.payer));
+
+        let signers = self
+            .signers
+            .iter()
+            .chain(additonal_signers.iter())
+            .collect::<Vec<_>>();
 
         // Using `try_partial_sign` to avoid panics (and get an error when something is
         // wrong instead) no matter what signers are configured.
-        tx.try_partial_sign(&self.signers.iter().collect::<Vec<_>>(), recent_blockhash)
+        tx.try_partial_sign(&signers, recent_blockhash)
             .map_err(Error::Signer)?;
 
-        self.client
-            .process_transaction(tx)
-            .await
-            .map_err(Error::BanksClient)?;
+        let tx_metadata = process_transaction(&mut self.client, &tx).await;
+
+        if let Err(err) = tx_metadata {
+            panic!("Transaction failed to process: {:?}", err);
+        }
+
+        let tx_metadata = tx_metadata.unwrap();
+
+        if let Some(logs) = tx_metadata.metadata.clone().map(|m| m.log_messages) {
+            println!("Transaction Logs:");
+            for log in logs {
+                println!("{}", log);
+            }
+        }
+
+        if tx_metadata.result.is_err() {
+            return Err(Box::new(Error::TransactionFailed(format!(
+                "Tx Result {:?}",
+                tx_metadata.result.clone().err()
+            ))));
+        }
 
         self.on_successful_execute()?;
 
