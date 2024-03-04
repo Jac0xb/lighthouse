@@ -1,7 +1,6 @@
-use crate::{
-    error::LighthouseError,
-    types::{operator::EvaluationResult, Assert},
-};
+use std::{any::type_name, ops::Range};
+
+use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
 use solana_program::{
     account_info::AccountInfo,
@@ -17,25 +16,6 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
-pub fn print_assertion_result<U, T: Assert<U>>(
-    assertion: &T,
-    assertion_index: usize,
-    evaluation_result: &EvaluationResult,
-) {
-    msg!(
-        // repeating zeros infront of assettion index
-        "{} {} {} {}",
-        format!("[{:0>2}]", assertion_index),
-        if evaluation_result.passed {
-            "[✓] PASSED"
-        } else {
-            "[✕] FAILED"
-        },
-        assertion.format(),
-        evaluation_result.output
-    );
-}
-
 pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
     let tag = &src[0..4];
     let body = &src[4..36];
@@ -45,7 +25,10 @@ pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
         [1, 0, 0, 0] => Ok(COption::Some(Pubkey::new_from_array(
             body.try_into().unwrap(),
         ))),
-        _ => Err(LighthouseError::AccountNotInitialized.into()),
+        _ => {
+            msg!("Failed to deserialize COption<Pubkey> src: {:?}", src);
+            Err(LighthouseError::FailedToDeserialize.into())
+        }
     }
 }
 
@@ -56,7 +39,10 @@ pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
     match *tag {
         [0, 0, 0, 0] => Ok(COption::None),
         [1, 0, 0, 0] => Ok(COption::Some(u64::from_le_bytes(body.try_into().unwrap()))),
-        _ => Err(LighthouseError::AccountNotInitialized.into()),
+        _ => {
+            msg!("Failed to deserialize COption<u64> src: {:?}", src);
+            Err(LighthouseError::FailedToDeserialize.into())
+        }
     }
 }
 
@@ -66,12 +52,20 @@ pub fn try_from_slice<T: BorshDeserialize + Sized>(
     length: Option<usize>,
 ) -> Result<T> {
     let data_length = length.unwrap_or(std::mem::size_of::<T>());
+    let start = offset;
+    let end = offset + data_length;
 
-    let slice = data
-        .get(offset..(offset + data_length))
-        .ok_or(LighthouseError::OutOfRange)?;
+    let slice = data.get(start..end).ok_or_else(|| {
+        msg!(
+            "Failed to deserialized {} range {:?} was out of bounds",
+            type_name::<T>(),
+            start..end
+        );
 
-    msg!("slice: {:?}", slice);
+        // err!(LighthouseError::RangeOutOfBounds)
+
+        ProgramError::Custom(0)
+    })?;
 
     Ok(T::try_from_slice(slice)?)
 }
@@ -136,4 +130,16 @@ pub fn create_account<'a, 'info>(
                 .as_slice()],
         )
     }
+}
+
+pub fn out_of_bounds_err(r: Range<usize>) -> ProgramError {
+    msg!("Failed to access account data range {:?}: out of bounds", r);
+    LighthouseError::RangeOutOfBounds.into()
+}
+
+macro_rules! log_compute {
+    () => {
+        #[cfg(all(feature = "sol-log", feature = "log"))]
+        ::solana_program::log::sol_log_compute_units();
+    };
 }

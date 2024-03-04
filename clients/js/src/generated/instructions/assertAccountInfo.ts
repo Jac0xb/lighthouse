@@ -35,8 +35,12 @@ import {
 import {
   AccountInfoAssertion,
   AccountInfoAssertionArgs,
+  LogLevel,
+  LogLevelArgs,
   getAccountInfoAssertionDecoder,
   getAccountInfoAssertionEncoder,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
 } from '../types';
 
 export type AssertAccountInfoInstruction<
@@ -71,18 +75,21 @@ export type AssertAccountInfoInstructionWithSigners<
 
 export type AssertAccountInfoInstructionData = {
   discriminator: number;
-  accountInfoAssertion: AccountInfoAssertion;
+  logLevel: LogLevel;
+  assertion: AccountInfoAssertion;
 };
 
 export type AssertAccountInfoInstructionDataArgs = {
-  accountInfoAssertion: AccountInfoAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: AccountInfoAssertionArgs;
 };
 
 export function getAssertAccountInfoInstructionDataEncoder(): Encoder<AssertAccountInfoInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['accountInfoAssertion', getAccountInfoAssertionEncoder()],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getAccountInfoAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 4 })
   );
@@ -91,7 +98,8 @@ export function getAssertAccountInfoInstructionDataEncoder(): Encoder<AssertAcco
 export function getAssertAccountInfoInstructionDataDecoder(): Decoder<AssertAccountInfoInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['accountInfoAssertion', getAccountInfoAssertionDecoder()],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getAccountInfoAssertionDecoder()],
   ]);
 }
 
@@ -108,7 +116,8 @@ export function getAssertAccountInfoInstructionDataCodec(): Codec<
 export type AssertAccountInfoInput<TAccountTargetAccount extends string> = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  accountInfoAssertion: AssertAccountInfoInstructionDataArgs['accountInfoAssertion'];
+  logLevel: AssertAccountInfoInstructionDataArgs['logLevel'];
+  assertion: AssertAccountInfoInstructionDataArgs['assertion'];
 };
 
 export type AssertAccountInfoInputWithSigners<
@@ -116,7 +125,8 @@ export type AssertAccountInfoInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  accountInfoAssertion: AssertAccountInfoInstructionDataArgs['accountInfoAssertion'];
+  logLevel: AssertAccountInfoInstructionDataArgs['logLevel'];
+  assertion: AssertAccountInfoInstructionDataArgs['assertion'];
 };
 
 export function getAssertAccountInfoInstruction<

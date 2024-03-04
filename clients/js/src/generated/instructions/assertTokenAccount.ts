@@ -33,8 +33,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   TokenAccountAssertion,
   TokenAccountAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getTokenAccountAssertionDecoder,
   getTokenAccountAssertionEncoder,
 } from '../types';
@@ -71,18 +75,21 @@ export type AssertTokenAccountInstructionWithSigners<
 
 export type AssertTokenAccountInstructionData = {
   discriminator: number;
-  tokenAccountAssertion: TokenAccountAssertion;
+  logLevel: LogLevel;
+  assertion: TokenAccountAssertion;
 };
 
 export type AssertTokenAccountInstructionDataArgs = {
-  tokenAccountAssertion: TokenAccountAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: TokenAccountAssertionArgs;
 };
 
 export function getAssertTokenAccountInstructionDataEncoder(): Encoder<AssertTokenAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['tokenAccountAssertion', getTokenAccountAssertionEncoder()],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getTokenAccountAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 7 })
   );
@@ -91,7 +98,8 @@ export function getAssertTokenAccountInstructionDataEncoder(): Encoder<AssertTok
 export function getAssertTokenAccountInstructionDataDecoder(): Decoder<AssertTokenAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['tokenAccountAssertion', getTokenAccountAssertionDecoder()],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getTokenAccountAssertionDecoder()],
   ]);
 }
 
@@ -108,7 +116,8 @@ export function getAssertTokenAccountInstructionDataCodec(): Codec<
 export type AssertTokenAccountInput<TAccountTargetAccount extends string> = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  tokenAccountAssertion: AssertTokenAccountInstructionDataArgs['tokenAccountAssertion'];
+  logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
+  assertion: AssertTokenAccountInstructionDataArgs['assertion'];
 };
 
 export type AssertTokenAccountInputWithSigners<
@@ -116,7 +125,8 @@ export type AssertTokenAccountInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  tokenAccountAssertion: AssertTokenAccountInstructionDataArgs['tokenAccountAssertion'];
+  logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
+  assertion: AssertTokenAccountInstructionDataArgs['assertion'];
 };
 
 export function getAssertTokenAccountInstruction<

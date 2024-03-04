@@ -1,20 +1,20 @@
-use std::{collections::HashMap, slice::Iter};
-
+use crate::{
+    error::LighthouseError,
+    utils::{create_account, Result},
+    validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer},
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
+    msg,
     pubkey::Pubkey,
     rent::Rent,
     sysvar::Sysvar,
 };
-
-use crate::{
-    utils::{create_account, Result},
-    validations::{to_checked_account, AccountValidation, MemoryAccount, Program, Signer},
-};
+use std::{collections::HashMap, slice::Iter};
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
-pub struct CreateMemoryAccountParameters {
+pub(crate) struct CreateMemoryAccountParameters {
     pub memory_index: u8,
     pub memory_account_size: u64,
 }
@@ -67,7 +67,7 @@ impl<'a, 'info> CreateMemoryAccountContext<'a, 'info> {
 
 pub(crate) fn create_memory_account(
     context: CreateMemoryAccountContext,
-    parameters: CreateMemoryAccountParameters,
+    parameters: &CreateMemoryAccountParameters,
     bump_map: HashMap<Pubkey, u8>,
 ) -> Result<()> {
     let CreateMemoryAccountContext {
@@ -82,17 +82,21 @@ pub(crate) fn create_memory_account(
         memory_account_size,
     } = parameters;
 
-    // TODO: better error handling
-    let bump = *bump_map.get(memory_account.account_info.key).unwrap();
+    let bump = *bump_map
+        .get(memory_account.account_info.key)
+        .ok_or_else(|| {
+            msg!("Bump not found for memory account");
+            LighthouseError::BumpNotFound
+        })?;
 
     create_account(
         payer.as_ref(),
         &memory_account.account_info,
         system_program.as_ref(),
         &crate::id(),
-        &Rent::get().unwrap(),
-        memory_account_size,
-        MemoryAccount::get_seeds(payer.key, memory_index, Some(bump)),
+        &Rent::get()?,
+        *memory_account_size,
+        MemoryAccount::get_seeds(payer.key, *memory_index, Some(bump)),
     )?;
 
     Ok(())

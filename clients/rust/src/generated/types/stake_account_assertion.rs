@@ -5,10 +5,11 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
+use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use crate::generated::types::MetaAssertion;
 use crate::generated::types::StakeAssertion;
+use crate::generated::types::StakeStateType;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -16,8 +17,8 @@ use borsh::BorshSerialize;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StakeAccountAssertion {
     State {
-        value: u8,
-        operator: ComparableOperator,
+        value: StakeStateType,
+        operator: EquatableOperator,
     },
     MetaAssertion(MetaAssertion),
     StakeAssertion(StakeAssertion),

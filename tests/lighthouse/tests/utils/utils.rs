@@ -2,18 +2,18 @@ use super::context::TestContext;
 use super::error::Error;
 use lighthouse_client::errors::LighthouseError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::instruction::InstructionError;
-use solana_program::{instruction::Instruction, pubkey::Pubkey};
+use solana_program::pubkey::Pubkey;
 use solana_program_test::BanksClient;
-use solana_sdk::signature::Keypair;
+use solana_sdk::account::AccountSharedData;
 use solana_sdk::transaction::{Transaction, TransactionError};
 
 pub async fn process_transaction(
-    context: &mut TestContext,
+    client: &mut BanksClient,
     tx: &Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
-    let result: solana_banks_interface::BanksTransactionResultWithMetadata = context
-        .client()
+    let result: solana_banks_interface::BanksTransactionResultWithMetadata = client
         .process_transaction_with_metadata(tx.clone())
         .await
         .unwrap();
@@ -25,7 +25,7 @@ pub async fn process_transaction_assert_success(
     context: &mut TestContext,
     tx: Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
-    let tx_metadata = process_transaction(context, &tx).await;
+    let tx_metadata = process_transaction(&mut context.client(), &tx).await;
 
     if let Err(err) = tx_metadata {
         panic!("Transaction failed to process: {:?}", err);
@@ -56,7 +56,9 @@ pub async fn process_transaction_assert_failure(
     expected_tx_error: TransactionError,
     log_match_regex: Option<&[String]>,
 ) -> Result<(), Error> {
-    let tx_metadata = process_transaction(context, &tx).await.unwrap();
+    let tx_metadata = process_transaction(&mut context.client(), &tx)
+        .await
+        .unwrap();
 
     let logs = tx_metadata.metadata.clone().unwrap().log_messages;
     for log in logs {
@@ -150,19 +152,18 @@ pub fn to_transaction_error_u8(ix_index: u8, program_error: u32) -> TransactionE
     TransactionError::InstructionError(ix_index, InstructionError::Custom(program_error))
 }
 
-pub async fn build_tx(
-    ixs: Vec<Instruction>,
-    signers: Vec<&Keypair>,
-    payer: &Pubkey,
-    client: &mut BanksClient,
-) -> Result<Transaction, Error> {
-    let recent_blockhash = client
-        .get_latest_blockhash()
-        .await
-        .map_err(Error::BanksClient)?;
+pub async fn set_account_from_rpc(
+    context: &mut TestContext,
+    connection: &RpcClient,
+    account_pubkey: &Pubkey,
+) {
+    let account = connection.get_account(account_pubkey).await.unwrap();
 
-    let tx = &mut Transaction::new_with_payer(&ixs, Some(payer));
-    tx.partial_sign(&signers, recent_blockhash);
+    let mut shared_account =
+        AccountSharedData::new(account.lamports, account.data.len(), &account.owner);
+    shared_account.set_data_from_slice(account.data.as_slice());
 
-    Ok(tx.clone())
+    context
+        .program_context
+        .set_account(account_pubkey, &shared_account);
 }

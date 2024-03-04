@@ -20,6 +20,7 @@ export enum KnownProgram {
   Stake,
   Vote,
   BpfLoader,
+  UpgradeableLoader,
   SysvarConfig,
 }
 

@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::MintAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -62,7 +63,8 @@ impl AssertMintAccountInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertMintAccountInstructionArgs {
-    pub mint_account_assertion: MintAccountAssertion,
+    pub log_level: LogLevel,
+    pub assertion: MintAccountAssertion,
 }
 
 /// Instruction builder for `AssertMintAccount`.
@@ -73,7 +75,8 @@ pub struct AssertMintAccountInstructionArgs {
 #[derive(Default)]
 pub struct AssertMintAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
-    mint_account_assertion: Option<MintAccountAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<MintAccountAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -88,11 +91,13 @@ impl AssertMintAccountBuilder {
         self
     }
     #[inline(always)]
-    pub fn mint_account_assertion(
-        &mut self,
-        mint_account_assertion: MintAccountAssertion,
-    ) -> &mut Self {
-        self.mint_account_assertion = Some(mint_account_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: MintAccountAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -119,10 +124,8 @@ impl AssertMintAccountBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertMintAccountInstructionArgs {
-            mint_account_assertion: self
-                .mint_account_assertion
-                .clone()
-                .expect("mint_account_assertion is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -242,7 +245,8 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertMintAccountCpiBuilderInstruction {
             __program: program,
             target_account: None,
-            mint_account_assertion: None,
+            log_level: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -257,11 +261,13 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn mint_account_assertion(
-        &mut self,
-        mint_account_assertion: MintAccountAssertion,
-    ) -> &mut Self {
-        self.instruction.mint_account_assertion = Some(mint_account_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: MintAccountAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -306,11 +312,16 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertMintAccountInstructionArgs {
-            mint_account_assertion: self
+            log_level: self
                 .instruction
-                .mint_account_assertion
+                .log_level
                 .clone()
-                .expect("mint_account_assertion is not set"),
+                .expect("log_level is not set"),
+            assertion: self
+                .instruction
+                .assertion
+                .clone()
+                .expect("assertion is not set"),
         };
         let instruction = AssertMintAccountCpi {
             __program: self.instruction.__program,
@@ -331,7 +342,8 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
 struct AssertMintAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    mint_account_assertion: Option<MintAccountAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<MintAccountAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,
