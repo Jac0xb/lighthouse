@@ -11,7 +11,7 @@ use borsh::BorshSerialize;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum DataValueDiffAssertion {
+pub enum DataValueDeltaAssertion {
     U8 {
         value: i16,
         operator: IntegerOperator,

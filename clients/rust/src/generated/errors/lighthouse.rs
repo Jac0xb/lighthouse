@@ -13,60 +13,54 @@ pub enum LighthouseError {
     /// 6000 (0x1770) - Invalid instruction
     #[error("Invalid instruction")]
     InvalidInstructionData,
-    /// 6001 (0x1771) - Invalid market parameters error
-    #[error("Invalid market parameters error")]
-    Unimplemented,
-    /// 6002 (0x1772) - AssertionFailed
+    /// 6001 (0x1771) - AssertionFailed
     #[error("AssertionFailed")]
     AssertionFailed,
-    /// 6003 (0x1773) - NotEnoughAccounts
+    /// 6002 (0x1772) - NotEnoughAccounts
     #[error("NotEnoughAccounts")]
     NotEnoughAccounts,
-    /// 6004 (0x1774) - DataValueMismatch
-    #[error("DataValueMismatch")]
-    DataValueMismatch,
-    /// 6005 (0x1775) - UnsupportedOperator
-    #[error("UnsupportedOperator")]
-    UnsupportedOperator,
-    /// 6006 (0x1776) - OutOfRange
-    #[error("OutOfRange")]
-    OutOfRange,
-    /// 6007 (0x1777) - AccountBorrowFailed
+    /// 6003 (0x1773) - BumpNotFound
+    #[error("BumpNotFound")]
+    BumpNotFound,
+    /// 6004 (0x1774) - AccountBorrowFailed
     #[error("AccountBorrowFailed")]
     AccountBorrowFailed,
-    /// 6008 (0x1778) - AccountNotTokenAccount
-    #[error("AccountNotTokenAccount")]
-    AccountOwnerMismatch,
-    /// 6009 (0x1779) - AccountNotInitialized
-    #[error("AccountNotInitialized")]
-    AccountNotInitialized,
-    /// 6010 (0x177A) - UnauthorizedIxEntry
-    #[error("UnauthorizedIxEntry")]
-    UnauthorizedIxEntry,
-    /// 6011 (0x177B) - InvalidDataLength
-    #[error("InvalidDataLength")]
-    InvalidDataLength,
-    /// 6012 (0x177C) - FailedToDeserialize
+    /// 6005 (0x1775) - RangeOutOfBounds
+    #[error("RangeOutOfBounds")]
+    RangeOutOfBounds,
+    /// 6006 (0x1776) - IndexOutOfBounds
+    #[error("IndexOutOfBounds")]
+    IndexOutOfBounds,
+    /// 6007 (0x1777) - FailedToDeserialize
     #[error("FailedToDeserialize")]
     FailedToDeserialize,
-    /// 6013 (0x177D) - AccountOwnerValidationFailed
+    /// 6008 (0x1778) - FailedToSerialize
+    #[error("FailedToSerialize")]
+    FailedToSerialize,
+    /// 6009 (0x1779) - AccountOwnerMismatch
+    #[error("AccountOwnerMismatch")]
+    AccountOwnerMismatch,
+    /// 6010 (0x177A) - AccountKeyMismatch
+    #[error("AccountKeyMismatch")]
+    AccountKeyMismatch,
+    /// 6011 (0x177B) - AccountNotInitialized
+    #[error("AccountNotInitialized")]
+    AccountNotInitialized,
+    /// 6012 (0x177C) - AccountOwnerValidationFailed
     #[error("AccountOwnerValidationFailed")]
     AccountOwnerValidationFailed,
-    /// 6014 (0x177E) - AccountFundedValidationFailed
+    /// 6013 (0x177D) - AccountFundedValidationFailed
     #[error("AccountFundedValidationFailed")]
     AccountFundedValidationFailed,
-    /// 6015 (0x177F) - AccountDiscriminatorValidationFailed
+    /// 6014 (0x177E) - AccountDiscriminatorValidationFailed
     #[error("AccountDiscriminatorValidationFailed")]
     AccountDiscriminatorValidationFailed,
-    /// 6016 (0x1780) - AccountValidaitonFailed
+    /// 6015 (0x177F) - AccountValidaitonFailed
     #[error("AccountValidaitonFailed")]
-    AccountValidaitonFailed,
-    /// 6017 (0x1781) - InvalidProgramAddress
-    #[error("InvalidProgramAddress")]
-    InvalidProgramAddress,
-    /// 6018 (0x1782) - SerializationFailed
-    #[error("SerializationFailed")]
-    SerializationFailed,
+    AccountValidationFailed,
+    /// 6016 (0x1780) - CrossProgramInvokeViolation
+    #[error("CrossProgramInvokeViolation")]
+    CrossProgramInvokeViolation,
 }
 
 impl solana_program::program_error::PrintProgramError for LighthouseError {

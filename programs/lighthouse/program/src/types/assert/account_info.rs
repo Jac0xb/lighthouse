@@ -4,20 +4,11 @@ use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
 use crate::{
     error::LighthouseError,
     types::{
-        Assert, ComparableOperator, EquatableOperator, EvaluationResult, KnownProgram, Operator,
+        Assert, ComparableOperator, EquatableOperator, EvaluationResult, KnownProgram, LogLevel,
+        Operator,
     },
     utils::Result,
 };
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub struct AccountInfoData {
-    pub key: Pubkey,
-    pub lamports: u64,
-    pub data_length: u64,
-    pub owner: Pubkey,
-    pub rent_epoch: u64,
-    pub executable: bool,
-}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum AccountInfoAssertion {
@@ -68,32 +59,32 @@ impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match self {
             AccountInfoAssertion::Key { value, operator } => {
-                operator.evaluate(account.unsigned_key(), value, include_output)
+                operator.evaluate(account.unsigned_key(), value, log_level)
             }
             AccountInfoAssertion::Owner { value, operator } => {
-                operator.evaluate(account.owner, value, include_output)
+                operator.evaluate(account.owner, value, log_level)
             }
             AccountInfoAssertion::Lamports { value, operator } => {
-                operator.evaluate(&account.try_lamports()?, value, include_output)
+                operator.evaluate(&account.try_lamports()?, value, log_level)
             }
             AccountInfoAssertion::DataLength { value, operator } => {
-                operator.evaluate(&(account.data_len() as u64), value, include_output)
+                operator.evaluate(&(account.data_len() as u64), value, log_level)
             }
             AccountInfoAssertion::Executable { value, operator } => {
-                operator.evaluate(&account.executable, value, include_output)
+                operator.evaluate(&account.executable, value, log_level)
             }
             AccountInfoAssertion::IsSigner { value, operator } => {
-                operator.evaluate(&account.is_signer, value, include_output)
+                operator.evaluate(&account.is_signer, value, log_level)
             }
             AccountInfoAssertion::IsWritable { value, operator } => {
-                operator.evaluate(&account.is_writable, value, include_output)
+                operator.evaluate(&account.is_writable, value, log_level)
             }
             AccountInfoAssertion::RentEpoch { value, operator } => {
-                operator.evaluate(&account.rent_epoch as &u64, value, include_output)
+                operator.evaluate(&account.rent_epoch as &u64, value, log_level)
             }
             AccountInfoAssertion::VerifyDatahash {
                 expected_hash,
@@ -113,10 +104,10 @@ impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
                 let account_data = &account_data[start as usize..(start + length) as usize];
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
-                EquatableOperator::Equal.evaluate(&actual_hash, expected_hash, include_output)
+                EquatableOperator::Equal.evaluate(&actual_hash, expected_hash, log_level)
             }
             AccountInfoAssertion::KnownOwner { value, operator } => {
-                operator.evaluate(account.owner, &value.to_pubkey(), include_output)
+                operator.evaluate(account.owner, &value.to_pubkey(), log_level)
             }
         };
 

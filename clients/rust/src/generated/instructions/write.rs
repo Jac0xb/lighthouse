@@ -5,7 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::WriteTypeParameter;
+use crate::generated::types::WriteType;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -79,7 +79,8 @@ impl WriteInstructionData {
 pub struct WriteInstructionArgs {
     pub memory_index: u8,
     pub memory_account_bump: u8,
-    pub write_type: WriteTypeParameter,
+    pub memory_offset: u16,
+    pub write_type: WriteType,
 }
 
 /// Instruction builder for `Write`.
@@ -98,7 +99,8 @@ pub struct WriteBuilder {
     source_account: Option<solana_program::pubkey::Pubkey>,
     memory_index: Option<u8>,
     memory_account_bump: Option<u8>,
-    write_type: Option<WriteTypeParameter>,
+    memory_offset: Option<u16>,
+    write_type: Option<WriteType>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -144,7 +146,12 @@ impl WriteBuilder {
         self
     }
     #[inline(always)]
-    pub fn write_type(&mut self, write_type: WriteTypeParameter) -> &mut Self {
+    pub fn memory_offset(&mut self, memory_offset: u16) -> &mut Self {
+        self.memory_offset = Some(memory_offset);
+        self
+    }
+    #[inline(always)]
+    pub fn write_type(&mut self, write_type: WriteType) -> &mut Self {
         self.write_type = Some(write_type);
         self
     }
@@ -182,6 +189,10 @@ impl WriteBuilder {
                 .memory_account_bump
                 .clone()
                 .expect("memory_account_bump is not set"),
+            memory_offset: self
+                .memory_offset
+                .clone()
+                .expect("memory_offset is not set"),
             write_type: self.write_type.clone().expect("write_type is not set"),
         };
 
@@ -338,6 +349,7 @@ impl<'a, 'b> WriteCpiBuilder<'a, 'b> {
             source_account: None,
             memory_index: None,
             memory_account_bump: None,
+            memory_offset: None,
             write_type: None,
             __remaining_accounts: Vec::new(),
         });
@@ -387,7 +399,12 @@ impl<'a, 'b> WriteCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn write_type(&mut self, write_type: WriteTypeParameter) -> &mut Self {
+    pub fn memory_offset(&mut self, memory_offset: u16) -> &mut Self {
+        self.instruction.memory_offset = Some(memory_offset);
+        self
+    }
+    #[inline(always)]
+    pub fn write_type(&mut self, write_type: WriteType) -> &mut Self {
         self.instruction.write_type = Some(write_type);
         self
     }
@@ -443,6 +460,11 @@ impl<'a, 'b> WriteCpiBuilder<'a, 'b> {
                 .memory_account_bump
                 .clone()
                 .expect("memory_account_bump is not set"),
+            memory_offset: self
+                .instruction
+                .memory_offset
+                .clone()
+                .expect("memory_offset is not set"),
             write_type: self
                 .instruction
                 .write_type
@@ -485,7 +507,8 @@ struct WriteCpiBuilderInstruction<'a, 'b> {
     source_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     memory_index: Option<u8>,
     memory_account_bump: Option<u8>,
-    write_type: Option<WriteTypeParameter>,
+    memory_offset: Option<u16>,
+    write_type: Option<WriteType>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

@@ -12,7 +12,6 @@ use borsh::BorshSerialize;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WriteType {
-    AccountBalance,
     AccountData {
         offset: u16,
         data_length: Option<u16>,

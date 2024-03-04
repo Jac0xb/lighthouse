@@ -5,14 +5,14 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::WriteType;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum WriteTypeParameter {
-    WriteU8 { offset: u8, write_type: WriteType },
-    WriteU16 { offset: u16, write_type: WriteType },
-    WriteU32 { offset: u32, write_type: WriteType },
+pub enum LogLevel {
+    Silent,
+    PlaintextLog,
+    EventLog,
+    CpiLog,
 }

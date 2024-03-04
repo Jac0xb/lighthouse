@@ -6,6 +6,7 @@
 //!
 
 use crate::generated::types::DataValueAssertion;
+use crate::generated::types::LogLevel;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -62,6 +63,7 @@ impl AssertAccountDataInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertAccountDataInstructionArgs {
+    pub log_level: LogLevel,
     pub offset: u16,
     pub assertion: DataValueAssertion,
 }
@@ -74,6 +76,7 @@ pub struct AssertAccountDataInstructionArgs {
 #[derive(Default)]
 pub struct AssertAccountDataBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
+    log_level: Option<LogLevel>,
     offset: Option<u16>,
     assertion: Option<DataValueAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
@@ -87,6 +90,11 @@ impl AssertAccountDataBuilder {
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
+        self
+    }
+    #[inline(always)]
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
         self
     }
     #[inline(always)]
@@ -123,6 +131,7 @@ impl AssertAccountDataBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertAccountDataInstructionArgs {
+            log_level: self.log_level.clone().expect("log_level is not set"),
             offset: self.offset.clone().expect("offset is not set"),
             assertion: self.assertion.clone().expect("assertion is not set"),
         };
@@ -244,6 +253,7 @@ impl<'a, 'b> AssertAccountDataCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertAccountDataCpiBuilderInstruction {
             __program: program,
             target_account: None,
+            log_level: None,
             offset: None,
             assertion: None,
             __remaining_accounts: Vec::new(),
@@ -257,6 +267,11 @@ impl<'a, 'b> AssertAccountDataCpiBuilder<'a, 'b> {
         target_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.target_account = Some(target_account);
+        self
+    }
+    #[inline(always)]
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
         self
     }
     #[inline(always)]
@@ -311,6 +326,11 @@ impl<'a, 'b> AssertAccountDataCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertAccountDataInstructionArgs {
+            log_level: self
+                .instruction
+                .log_level
+                .clone()
+                .expect("log_level is not set"),
             offset: self.instruction.offset.clone().expect("offset is not set"),
             assertion: self
                 .instruction
@@ -337,6 +357,7 @@ impl<'a, 'b> AssertAccountDataCpiBuilder<'a, 'b> {
 struct AssertAccountDataCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    log_level: Option<LogLevel>,
     offset: Option<u16>,
     assertion: Option<DataValueAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.

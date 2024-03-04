@@ -1,6 +1,6 @@
 use crate::{
     err, err_msg,
-    types::{EquatableOperator, IntegerOperator},
+    types::{EquatableOperator, IntegerOperator, LogLevel},
     utils::{out_of_bounds_err, Result},
 };
 use crate::{
@@ -39,7 +39,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
@@ -80,7 +80,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                         output: format!("None != {:?}", pubkey),
                     }),
                     (COption::Some(mint_authority), Some(pubkey)) => {
-                        operator.evaluate(&mint_authority, pubkey, include_output)
+                        operator.evaluate(&mint_authority, pubkey, log_level)
                     }
                 }
             }
@@ -97,7 +97,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?);
 
-                operator.evaluate(&actual_supply, assertion_value, include_output)
+                operator.evaluate(&actual_supply, assertion_value, log_level)
             }
             MintAccountAssertion::Decimals {
                 value: assertion_value,
@@ -112,7 +112,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?);
 
-                operator.evaluate(&actual_decimals, assertion_value, include_output)
+                operator.evaluate(&actual_decimals, assertion_value, log_level)
             }
             MintAccountAssertion::IsInitialized {
                 value: assertion_value,
@@ -121,7 +121,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                 let actual_value = data.get(45).ok_or_else(|| out_of_bounds_err(45..46))?;
                 let actual_value = *actual_value != 0;
 
-                operator.evaluate(&actual_value, assertion_value, include_output)
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             MintAccountAssertion::FreezeAuthority {
                 value: assertion_value,
@@ -148,7 +148,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                         output: format!("None != {:?}", pubkey),
                     }),
                     (COption::Some(freeze_authority), Some(pubkey)) => {
-                        operator.evaluate(&freeze_authority, pubkey, include_output)
+                        operator.evaluate(&freeze_authority, pubkey, log_level)
                     }
                 }
             }
@@ -168,7 +168,9 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{Assert, EquatableOperator, IntegerOperator, MintAccountAssertion};
+        use crate::types::{
+            Assert, EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion,
+        };
 
         #[test]
         fn evaluate_mint_account_no_mint_authority_no_freeze_authority() {
@@ -211,7 +213,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -224,7 +226,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -241,7 +243,7 @@ mod tests {
                 value: 69,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -254,7 +256,7 @@ mod tests {
                 value: 1600,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -271,7 +273,7 @@ mod tests {
                 value: 2,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -284,7 +286,7 @@ mod tests {
                 value: 3,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -301,7 +303,7 @@ mod tests {
                 value: true,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -314,7 +316,7 @@ mod tests {
                 value: false,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -331,7 +333,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -344,7 +346,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -397,7 +399,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -410,7 +412,7 @@ mod tests {
                 value: Some(freeze_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -427,7 +429,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -440,7 +442,7 @@ mod tests {
                 value: Some(mint_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

@@ -1,7 +1,7 @@
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{Assert, EvaluationResult, Operator},
+    types::{Assert, EvaluationResult, LogLevel, Operator},
 };
 use crate::{
     types::{ComparableOperator, EquatableOperator, IntegerOperator},
@@ -42,7 +42,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
@@ -71,7 +71,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
                     return Err(LighthouseError::FailedToDeserialize.into());
                 }
 
-                operator.evaluate(&actual_state, &casted_assertion_value, include_output)
+                operator.evaluate(&actual_state, &casted_assertion_value, log_level)
             }
             StakeAccountAssertion::MetaAssertion(meta_assertion) => {
                 let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).map_err(|e| {
@@ -81,7 +81,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
                 match stake_account {
                     StakeStateV2::Initialized(meta) | StakeStateV2::Stake(meta, _, _) => {
-                        meta_assertion.evaluate(&meta, include_output)?
+                        meta_assertion.evaluate(&meta, log_level)?
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
@@ -97,7 +97,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
                 match stake_account {
                     StakeStateV2::Stake(_, stake, _) => {
-                        stake_assertion.evaluate(&stake, include_output)?
+                        stake_assertion.evaluate(&stake, log_level)?
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
@@ -122,7 +122,7 @@ impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
 
                         let actual_stake_flag = serialized_stake_flag[0];
 
-                        operator.evaluate(&actual_stake_flag, value, include_output)
+                        operator.evaluate(&actual_stake_flag, value, log_level)
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
@@ -165,32 +165,32 @@ pub enum MetaAssertion {
 }
 
 impl Assert<StakeMeta> for MetaAssertion {
-    fn evaluate(&self, meta: &StakeMeta, include_output: bool) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, meta: &StakeMeta, log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
         let result = match self {
             MetaAssertion::RentExemptReserve {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.rent_exempt_reserve, assertion_value, include_output),
+            } => operator.evaluate(&meta.rent_exempt_reserve, assertion_value, log_level),
             MetaAssertion::AuthorizedStaker {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.authorized.staker, assertion_value, include_output),
+            } => operator.evaluate(&meta.authorized.staker, assertion_value, log_level),
             MetaAssertion::AuthorizedWithdrawer {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.authorized.withdrawer, assertion_value, include_output),
+            } => operator.evaluate(&meta.authorized.withdrawer, assertion_value, log_level),
             MetaAssertion::LockupUnixTimestamp {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.unix_timestamp, assertion_value, include_output),
+            } => operator.evaluate(&meta.lockup.unix_timestamp, assertion_value, log_level),
             MetaAssertion::LockupEpoch {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.epoch, assertion_value, include_output),
+            } => operator.evaluate(&meta.lockup.epoch, assertion_value, log_level),
             MetaAssertion::LockupCustodian {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.custodian, assertion_value, include_output),
+            } => operator.evaluate(&meta.lockup.custodian, assertion_value, log_level),
         };
 
         Ok(result)
@@ -222,27 +222,23 @@ pub enum StakeAssertion {
 }
 
 impl Assert<StakeInfo> for StakeAssertion {
-    fn evaluate(&self, stake: &StakeInfo, include_output: bool) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, stake: &StakeInfo, log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
         let result = match self {
             StakeAssertion::DelegationVoterPubkey {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(
-                &stake.delegation.voter_pubkey,
-                assertion_value,
-                include_output,
-            ),
+            } => operator.evaluate(&stake.delegation.voter_pubkey, assertion_value, log_level),
             StakeAssertion::DelegationStake {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&stake.delegation.stake, assertion_value, include_output),
+            } => operator.evaluate(&stake.delegation.stake, assertion_value, log_level),
             StakeAssertion::DelegationActivationEpoch {
                 value: assertion_value,
                 operator,
             } => operator.evaluate(
                 &stake.delegation.activation_epoch,
                 assertion_value,
-                include_output,
+                log_level,
             ),
             StakeAssertion::DelegationDeactivationEpoch {
                 value: assertion_value,
@@ -250,12 +246,12 @@ impl Assert<StakeInfo> for StakeAssertion {
             } => operator.evaluate(
                 &stake.delegation.deactivation_epoch,
                 assertion_value,
-                include_output,
+                log_level,
             ),
             StakeAssertion::CreditsObserved {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&stake.credits_observed, assertion_value, include_output),
+            } => operator.evaluate(&stake.credits_observed, assertion_value, log_level),
         };
 
         Ok(result)

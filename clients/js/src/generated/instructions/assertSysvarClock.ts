@@ -26,8 +26,12 @@ import {
   IInstructionWithData,
 } from '@solana/instructions';
 import {
+  LogLevel,
+  LogLevelArgs,
   SysvarClockAssertion,
   SysvarClockAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getSysvarClockAssertionDecoder,
   getSysvarClockAssertionEncoder,
 } from '../types';
@@ -48,18 +52,21 @@ export type AssertSysvarClockInstructionWithSigners<
 
 export type AssertSysvarClockInstructionData = {
   discriminator: number;
-  sysvarClockAssertion: SysvarClockAssertion;
+  logLevel: LogLevel;
+  assertion: SysvarClockAssertion;
 };
 
 export type AssertSysvarClockInstructionDataArgs = {
-  sysvarClockAssertion: SysvarClockAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: SysvarClockAssertionArgs;
 };
 
 export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysvarClockInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['sysvarClockAssertion', getSysvarClockAssertionEncoder()],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getSysvarClockAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 11 })
   );
@@ -68,7 +75,8 @@ export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysv
 export function getAssertSysvarClockInstructionDataDecoder(): Decoder<AssertSysvarClockInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['sysvarClockAssertion', getSysvarClockAssertionDecoder()],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getSysvarClockAssertionDecoder()],
   ]);
 }
 
@@ -83,11 +91,13 @@ export function getAssertSysvarClockInstructionDataCodec(): Codec<
 }
 
 export type AssertSysvarClockInput = {
-  sysvarClockAssertion: AssertSysvarClockInstructionDataArgs['sysvarClockAssertion'];
+  logLevel: AssertSysvarClockInstructionDataArgs['logLevel'];
+  assertion: AssertSysvarClockInstructionDataArgs['assertion'];
 };
 
 export type AssertSysvarClockInputWithSigners = {
-  sysvarClockAssertion: AssertSysvarClockInstructionDataArgs['sysvarClockAssertion'];
+  logLevel: AssertSysvarClockInstructionDataArgs['logLevel'];
+  assertion: AssertSysvarClockInstructionDataArgs['assertion'];
 };
 
 export function getAssertSysvarClockInstruction<

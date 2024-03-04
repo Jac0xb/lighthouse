@@ -18,7 +18,12 @@ import {
   getStructDecoder,
   getStructEncoder,
 } from '@solana/codecs-data-structures';
-import { getU8Decoder, getU8Encoder } from '@solana/codecs-numbers';
+import {
+  getU16Decoder,
+  getU16Encoder,
+  getU8Decoder,
+  getU8Encoder,
+} from '@solana/codecs-numbers';
 import {
   AccountRole,
   IAccountMeta,
@@ -36,10 +41,10 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
-  WriteTypeParameter,
-  WriteTypeParameterArgs,
-  getWriteTypeParameterDecoder,
-  getWriteTypeParameterEncoder,
+  WriteType,
+  WriteTypeArgs,
+  getWriteTypeDecoder,
+  getWriteTypeEncoder,
 } from '../types';
 
 export type WriteInstruction<
@@ -101,13 +106,15 @@ export type WriteInstructionData = {
   discriminator: number;
   memoryIndex: number;
   memoryAccountBump: number;
-  writeType: WriteTypeParameter;
+  memoryOffset: number;
+  writeType: WriteType;
 };
 
 export type WriteInstructionDataArgs = {
   memoryIndex: number;
   memoryAccountBump: number;
-  writeType: WriteTypeParameterArgs;
+  memoryOffset: number;
+  writeType: WriteTypeArgs;
 };
 
 export function getWriteInstructionDataEncoder(): Encoder<WriteInstructionDataArgs> {
@@ -116,7 +123,8 @@ export function getWriteInstructionDataEncoder(): Encoder<WriteInstructionDataAr
       ['discriminator', getU8Encoder()],
       ['memoryIndex', getU8Encoder()],
       ['memoryAccountBump', getU8Encoder()],
-      ['writeType', getWriteTypeParameterEncoder()],
+      ['memoryOffset', getU16Encoder()],
+      ['writeType', getWriteTypeEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 1 })
   );
@@ -127,7 +135,8 @@ export function getWriteInstructionDataDecoder(): Decoder<WriteInstructionData> 
     ['discriminator', getU8Decoder()],
     ['memoryIndex', getU8Decoder()],
     ['memoryAccountBump', getU8Decoder()],
-    ['writeType', getWriteTypeParameterDecoder()],
+    ['memoryOffset', getU16Decoder()],
+    ['writeType', getWriteTypeDecoder()],
   ]);
 }
 
@@ -157,6 +166,7 @@ export type WriteInput<
   sourceAccount: Address<TAccountSourceAccount>;
   memoryIndex: WriteInstructionDataArgs['memoryIndex'];
   memoryAccountBump: WriteInstructionDataArgs['memoryAccountBump'];
+  memoryOffset: WriteInstructionDataArgs['memoryOffset'];
   writeType: WriteInstructionDataArgs['writeType'];
 };
 
@@ -176,6 +186,7 @@ export type WriteInputWithSigners<
   sourceAccount: Address<TAccountSourceAccount>;
   memoryIndex: WriteInstructionDataArgs['memoryIndex'];
   memoryAccountBump: WriteInstructionDataArgs['memoryAccountBump'];
+  memoryOffset: WriteInstructionDataArgs['memoryOffset'];
   writeType: WriteInstructionDataArgs['writeType'];
 };
 

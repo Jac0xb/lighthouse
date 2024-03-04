@@ -34,14 +34,12 @@ import {
 } from '.';
 
 export type WriteType =
-  | { __kind: 'AccountBalance' }
   | { __kind: 'AccountData'; offset: number; dataLength: Option<number> }
   | { __kind: 'AccountInfo' }
   | { __kind: 'DataValue'; fields: [DataValue] }
   | { __kind: 'Program' };
 
 export type WriteTypeArgs =
-  | { __kind: 'AccountBalance' }
   | {
       __kind: 'AccountData';
       offset: number;
@@ -53,7 +51,6 @@ export type WriteTypeArgs =
 
 export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
   return getDataEnumEncoder([
-    ['AccountBalance', getUnitEncoder()],
     [
       'AccountData',
       getStructEncoder([
@@ -72,7 +69,6 @@ export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
 
 export function getWriteTypeDecoder(): Decoder<WriteType> {
   return getDataEnumDecoder([
-    ['AccountBalance', getUnitDecoder()],
     [
       'AccountData',
       getStructDecoder([
@@ -94,9 +90,6 @@ export function getWriteTypeCodec(): Codec<WriteTypeArgs, WriteType> {
 }
 
 // Data Enum Helpers.
-export function writeType(
-  kind: 'AccountBalance'
-): GetDataEnumKind<WriteTypeArgs, 'AccountBalance'>;
 export function writeType(
   kind: 'AccountData',
   data: GetDataEnumKindContent<WriteTypeArgs, 'AccountData'>

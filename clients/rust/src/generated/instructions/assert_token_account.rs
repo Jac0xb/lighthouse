@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::TokenAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -62,7 +63,8 @@ impl AssertTokenAccountInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertTokenAccountInstructionArgs {
-    pub token_account_assertion: TokenAccountAssertion,
+    pub log_level: LogLevel,
+    pub assertion: TokenAccountAssertion,
 }
 
 /// Instruction builder for `AssertTokenAccount`.
@@ -73,7 +75,8 @@ pub struct AssertTokenAccountInstructionArgs {
 #[derive(Default)]
 pub struct AssertTokenAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
-    token_account_assertion: Option<TokenAccountAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<TokenAccountAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -88,11 +91,13 @@ impl AssertTokenAccountBuilder {
         self
     }
     #[inline(always)]
-    pub fn token_account_assertion(
-        &mut self,
-        token_account_assertion: TokenAccountAssertion,
-    ) -> &mut Self {
-        self.token_account_assertion = Some(token_account_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: TokenAccountAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -119,10 +124,8 @@ impl AssertTokenAccountBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertTokenAccountInstructionArgs {
-            token_account_assertion: self
-                .token_account_assertion
-                .clone()
-                .expect("token_account_assertion is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -242,7 +245,8 @@ impl<'a, 'b> AssertTokenAccountCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertTokenAccountCpiBuilderInstruction {
             __program: program,
             target_account: None,
-            token_account_assertion: None,
+            log_level: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -257,11 +261,13 @@ impl<'a, 'b> AssertTokenAccountCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn token_account_assertion(
-        &mut self,
-        token_account_assertion: TokenAccountAssertion,
-    ) -> &mut Self {
-        self.instruction.token_account_assertion = Some(token_account_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: TokenAccountAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -306,11 +312,16 @@ impl<'a, 'b> AssertTokenAccountCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertTokenAccountInstructionArgs {
-            token_account_assertion: self
+            log_level: self
                 .instruction
-                .token_account_assertion
+                .log_level
                 .clone()
-                .expect("token_account_assertion is not set"),
+                .expect("log_level is not set"),
+            assertion: self
+                .instruction
+                .assertion
+                .clone()
+                .expect("assertion is not set"),
         };
         let instruction = AssertTokenAccountCpi {
             __program: self.instruction.__program,
@@ -331,7 +342,8 @@ impl<'a, 'b> AssertTokenAccountCpiBuilder<'a, 'b> {
 struct AssertTokenAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    token_account_assertion: Option<TokenAccountAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<TokenAccountAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

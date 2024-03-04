@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::TokenAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -68,7 +69,8 @@ impl AssertTokenAccountMultiInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertTokenAccountMultiInstructionArgs {
-    pub args: Vec<TokenAccountAssertion>,
+    pub log_level: LogLevel,
+    pub assertions: Vec<TokenAccountAssertion>,
 }
 
 /// Instruction builder for `AssertTokenAccountMulti`.
@@ -81,7 +83,8 @@ pub struct AssertTokenAccountMultiInstructionArgs {
 pub struct AssertTokenAccountMultiBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     lighthouse_program: Option<solana_program::pubkey::Pubkey>,
-    args: Option<Vec<TokenAccountAssertion>>,
+    log_level: Option<LogLevel>,
+    assertions: Option<Vec<TokenAccountAssertion>>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -105,8 +108,13 @@ impl AssertTokenAccountMultiBuilder {
         self
     }
     #[inline(always)]
-    pub fn args(&mut self, args: Vec<TokenAccountAssertion>) -> &mut Self {
-        self.args = Some(args);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
+        self.assertions = Some(assertions);
         self
     }
     /// Add an aditional account to the instruction.
@@ -136,7 +144,8 @@ impl AssertTokenAccountMultiBuilder {
                 .expect("lighthouse_program is not set"),
         };
         let args = AssertTokenAccountMultiInstructionArgs {
-            args: self.args.clone().expect("args is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertions: self.assertions.clone().expect("assertions is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -268,7 +277,8 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
             __program: program,
             target_account: None,
             lighthouse_program: None,
-            args: None,
+            log_level: None,
+            assertions: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -292,8 +302,13 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn args(&mut self, args: Vec<TokenAccountAssertion>) -> &mut Self {
-        self.instruction.args = Some(args);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
+        self.instruction.assertions = Some(assertions);
         self
     }
     /// Add an additional account to the instruction.
@@ -338,7 +353,16 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertTokenAccountMultiInstructionArgs {
-            args: self.instruction.args.clone().expect("args is not set"),
+            log_level: self
+                .instruction
+                .log_level
+                .clone()
+                .expect("log_level is not set"),
+            assertions: self
+                .instruction
+                .assertions
+                .clone()
+                .expect("assertions is not set"),
         };
         let instruction = AssertTokenAccountMultiCpi {
             __program: self.instruction.__program,
@@ -365,7 +389,8 @@ struct AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     lighthouse_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    args: Option<Vec<TokenAccountAssertion>>,
+    log_level: Option<LogLevel>,
+    assertions: Option<Vec<TokenAccountAssertion>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

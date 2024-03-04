@@ -1,4 +1,5 @@
 pub mod blackhat_program;
+pub mod bubblegum;
 pub mod context;
 pub mod error;
 pub mod test_program;
@@ -37,8 +38,6 @@ pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 
 pub fn program_test() -> ProgramTest {
-    // program.add_program("<program_name>", <program_name>::id(), processor!(<program_name>::entry));
-
     let mut test = ProgramTest::new(
         "lighthouse",
         lighthouse_client::programs::LIGHTHOUSE_ID,
@@ -46,6 +45,15 @@ pub fn program_test() -> ProgramTest {
     );
     test.add_program("blackhat", blackhat::id(), None);
     test.add_program("test_program", test_program::id(), None);
+    test.add_program(
+        "spl_account_compression",
+        spl_account_compression::id(),
+        None,
+    );
+    test.add_program("spl_noop", spl_noop::id(), None);
+    test.add_program("mpl_token_metadata", mpl_token_metadata::ID, None);
+    test.add_program("mpl_bubblegum", mpl_bubblegum::ID, None);
+
     test.set_compute_max_units(1_400_000);
 
     test
@@ -63,16 +71,6 @@ pub async fn create_memory_account(
     memory_index: u8,
     size: u64,
 ) -> Result<()> {
-    // let program = LighthouseProgram {};
-    // let mut tx_builder = program.create_memory_account(user.encodable_pubkey(), memory_index, size);
-    // let tx = tx_builder
-    //     .to_transaction_and_sign(
-    //         vec![user],
-    //         user.encodable_pubkey(),
-    //         context.get_blockhash().await,
-    //     )
-    //     .unwrap();
-
     let tx = Transaction::new_signed_with_payer(
         &[CreateMemoryAccountBuilder::new()
             .payer(user.encodable_pubkey())

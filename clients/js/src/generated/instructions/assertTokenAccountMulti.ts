@@ -35,8 +35,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   TokenAccountAssertion,
   TokenAccountAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getTokenAccountAssertionDecoder,
   getTokenAccountAssertionEncoder,
 } from '../types';
@@ -81,18 +85,21 @@ export type AssertTokenAccountMultiInstructionWithSigners<
 
 export type AssertTokenAccountMultiInstructionData = {
   discriminator: number;
-  args: Array<TokenAccountAssertion>;
+  logLevel: LogLevel;
+  assertions: Array<TokenAccountAssertion>;
 };
 
 export type AssertTokenAccountMultiInstructionDataArgs = {
-  args: Array<TokenAccountAssertionArgs>;
+  logLevel: LogLevelArgs;
+  assertions: Array<TokenAccountAssertionArgs>;
 };
 
 export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<AssertTokenAccountMultiInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['args', getArrayEncoder(getTokenAccountAssertionEncoder())],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertions', getArrayEncoder(getTokenAccountAssertionEncoder())],
     ]),
     (value) => ({ ...value, discriminator: 8 })
   );
@@ -101,7 +108,8 @@ export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<Asse
 export function getAssertTokenAccountMultiInstructionDataDecoder(): Decoder<AssertTokenAccountMultiInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['args', getArrayDecoder(getTokenAccountAssertionDecoder())],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertions', getArrayDecoder(getTokenAccountAssertionDecoder())],
   ]);
 }
 
@@ -123,7 +131,8 @@ export type AssertTokenAccountMultiInput<
   targetAccount: Address<TAccountTargetAccount>;
   /** Lighthouse Program */
   lighthouseProgram: Address<TAccountLighthouseProgram>;
-  args: AssertTokenAccountMultiInstructionDataArgs['args'];
+  logLevel: AssertTokenAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertTokenAccountMultiInstructionDataArgs['assertions'];
 };
 
 export type AssertTokenAccountMultiInputWithSigners<
@@ -134,7 +143,8 @@ export type AssertTokenAccountMultiInputWithSigners<
   targetAccount: Address<TAccountTargetAccount>;
   /** Lighthouse Program */
   lighthouseProgram: Address<TAccountLighthouseProgram>;
-  args: AssertTokenAccountMultiInstructionDataArgs['args'];
+  logLevel: AssertTokenAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertTokenAccountMultiInstructionDataArgs['assertions'];
 };
 
 export function getAssertTokenAccountMultiInstruction<

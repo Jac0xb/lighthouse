@@ -3,6 +3,8 @@ use std::{fmt::Debug, ops::BitAnd};
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 
+use super::LogLevel;
+
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
 const GREATER_THAN_SYMBOL: &str = ">";
@@ -17,11 +19,11 @@ pub trait Operator<T: ?Sized> {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        output: bool,
+        log_level: &LogLevel,
     ) -> Box<EvaluationResult>;
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum IntegerOperator {
     Equal,
     NotEqual,
@@ -33,7 +35,7 @@ pub enum IntegerOperator {
     DoesNotContain,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum ComparableOperator {
     Equal,
     NotEqual,
@@ -43,13 +45,13 @@ pub enum ComparableOperator {
     LessThanOrEqual,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum EquatableOperator {
     Equal,
     NotEqual,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum BytesOperator {
     Equal,
     NotEqual,
@@ -65,7 +67,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
         &self,
         actual_value: &T,
         assertion_value: &T,
-        output: bool,
+        log_level: &LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -76,7 +78,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
-            output: if output {
+            output: if log_level == &LogLevel::PlaintextLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -104,7 +106,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        output: bool,
+        log_level: &LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -127,7 +129,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                     actual_value & assertion_value == T::zero()
                 }
             },
-            output: if output {
+            output: if log_level == &LogLevel::PlaintextLog {
                 format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
@@ -156,14 +158,14 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        output: bool,
+        log_level: &LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
                 EquatableOperator::Equal => T::eq(actual_value, assertion_value),
                 EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
             },
-            output: if output {
+            output: if log_level == &LogLevel::PlaintextLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -188,7 +190,7 @@ where
         &self,
         actual_value: &T,
         assertion_value: &T,
-        output: bool,
+        log_level: &LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -205,7 +207,7 @@ where
                     actual_value != assertion_value
                 }
             },
-            output: if output {
+            output: if log_level == &LogLevel::PlaintextLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,

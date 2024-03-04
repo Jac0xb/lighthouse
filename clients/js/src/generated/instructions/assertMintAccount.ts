@@ -33,8 +33,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   MintAccountAssertion,
   MintAccountAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getMintAccountAssertionDecoder,
   getMintAccountAssertionEncoder,
 } from '../types';
@@ -71,18 +75,21 @@ export type AssertMintAccountInstructionWithSigners<
 
 export type AssertMintAccountInstructionData = {
   discriminator: number;
-  mintAccountAssertion: MintAccountAssertion;
+  logLevel: LogLevel;
+  assertion: MintAccountAssertion;
 };
 
 export type AssertMintAccountInstructionDataArgs = {
-  mintAccountAssertion: MintAccountAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: MintAccountAssertionArgs;
 };
 
 export function getAssertMintAccountInstructionDataEncoder(): Encoder<AssertMintAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['mintAccountAssertion', getMintAccountAssertionEncoder()],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getMintAccountAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 5 })
   );
@@ -91,7 +98,8 @@ export function getAssertMintAccountInstructionDataEncoder(): Encoder<AssertMint
 export function getAssertMintAccountInstructionDataDecoder(): Decoder<AssertMintAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['mintAccountAssertion', getMintAccountAssertionDecoder()],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getMintAccountAssertionDecoder()],
   ]);
 }
 
@@ -108,7 +116,8 @@ export function getAssertMintAccountInstructionDataCodec(): Codec<
 export type AssertMintAccountInput<TAccountTargetAccount extends string> = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  mintAccountAssertion: AssertMintAccountInstructionDataArgs['mintAccountAssertion'];
+  logLevel: AssertMintAccountInstructionDataArgs['logLevel'];
+  assertion: AssertMintAccountInstructionDataArgs['assertion'];
 };
 
 export type AssertMintAccountInputWithSigners<
@@ -116,7 +125,8 @@ export type AssertMintAccountInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  mintAccountAssertion: AssertMintAccountInstructionDataArgs['mintAccountAssertion'];
+  logLevel: AssertMintAccountInstructionDataArgs['logLevel'];
+  assertion: AssertMintAccountInstructionDataArgs['assertion'];
 };
 
 export function getAssertMintAccountInstruction<
