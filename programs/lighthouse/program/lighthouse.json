@@ -114,7 +114,13 @@
       ],
       "args": [
         {
-          "name": "accountDataAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "AccountDataAssertion"
           }
@@ -126,7 +132,7 @@
       }
     },
     {
-      "name": "AssertAccountDataDiff",
+      "name": "AssertAccountDataDelta",
       "accounts": [
         {
           "name": "leftAccount",
@@ -147,9 +153,15 @@
       ],
       "args": [
         {
-          "name": "accountDataDiffAssertion",
+          "name": "logLevel",
           "type": {
-            "defined": "AccountDataDiffAssertion"
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
+          "type": {
+            "defined": "AccountDataDeltaAssertion"
           }
         }
       ],
@@ -172,7 +184,13 @@
       ],
       "args": [
         {
-          "name": "accountInfoAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "AccountInfoAssertion"
           }
@@ -197,7 +215,13 @@
       ],
       "args": [
         {
-          "name": "mintAccountAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "MintAccountAssertion"
           }
@@ -222,7 +246,13 @@
       ],
       "args": [
         {
-          "name": "args",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
           "type": {
             "vec": {
               "defined": "MintAccountAssertion"
@@ -249,7 +279,13 @@
       ],
       "args": [
         {
-          "name": "tokenAccountAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "TokenAccountAssertion"
           }
@@ -282,7 +318,13 @@
       ],
       "args": [
         {
-          "name": "args",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
           "type": {
             "vec": {
               "defined": "TokenAccountAssertion"
@@ -309,7 +351,13 @@
       ],
       "args": [
         {
-          "name": "stakeAccountAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "StakeAccountAssertion"
           }
@@ -321,11 +369,48 @@
       }
     },
     {
+      "name": "AssertUpgradeableLoaderAccount",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
+          "type": {
+            "defined": "UpgradeableLoaderStateAssertion"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 10
+      }
+    },
+    {
       "name": "AssertSysvarClock",
       "accounts": [],
       "args": [
         {
-          "name": "sysvarClockAssertion",
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
           "type": {
             "defined": "SysvarClockAssertion"
           }
@@ -333,7 +418,54 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 11
+      }
+    },
+    {
+      "name": "AssertMerkleTreeAccount",
+      "accounts": [
+        {
+          "name": "merkleTree",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Merkle tree account"
+          ]
+        },
+        {
+          "name": "root",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Root account"
+          ]
+        },
+        {
+          "name": "splAccountCompression",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL account compression program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
+          "type": {
+            "defined": "MerkleTreeAssertion"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 12
       }
     }
   ],
@@ -368,9 +500,53 @@
             "type": "u8"
           },
           {
+            "name": "memoryOffset",
+            "type": "u16"
+          },
+          {
             "name": "writeType",
             "type": {
-              "defined": "WriteTypeParameter"
+              "defined": "WriteType"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountDataAssertion",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "offset",
+            "type": "u16"
+          },
+          {
+            "name": "assertion",
+            "type": {
+              "defined": "DataValueAssertion"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountDataDeltaAssertion",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "offsetLeft",
+            "type": "u16"
+          },
+          {
+            "name": "offsetRight",
+            "type": "u16"
+          },
+          {
+            "name": "assertion",
+            "type": {
+              "defined": "DataValueDeltaAssertion"
             }
           }
         ]
@@ -409,53 +585,332 @@
       }
     },
     {
-      "name": "AssertionConfigV1",
+      "name": "DataValueAssertion",
       "type": {
-        "kind": "struct",
-        "fields": [
+        "kind": "enum",
+        "variants": [
           {
-            "name": "verbose",
-            "type": "bool"
+            "name": "Bool",
+            "fields": [
+              {
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U8",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I8",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U16",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I16",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U32",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I32",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U64",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I64",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U128",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I128",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Bytes",
+            "fields": [
+              {
+                "name": "value",
+                "type": "bytes"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "BytesOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Pubkey",
+            "fields": [
+              {
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
           }
         ]
       }
     },
     {
-      "name": "AccountDataAssertion",
+      "name": "DataValueDeltaAssertion",
       "type": {
-        "kind": "struct",
-        "fields": [
+        "kind": "enum",
+        "variants": [
           {
-            "name": "offset",
-            "type": "u16"
+            "name": "U8",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
           },
           {
-            "name": "assertion",
-            "type": {
-              "defined": "DataValueAssertion"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AccountDataDiffAssertion",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "offsetLeft",
-            "type": "u16"
+            "name": "I8",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
           },
           {
-            "name": "offsetRight",
-            "type": "u16"
+            "name": "U16",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
           },
           {
-            "name": "assertion",
-            "type": {
-              "defined": "DataValueDiffAssertion"
-            }
+            "name": "I16",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i32"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U32",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I32",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "U64",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "I64",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
           }
         ]
       }
@@ -715,282 +1170,45 @@
       }
     },
     {
-      "name": "DataValueAssertion",
+      "name": "LogLevel",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Bool",
-            "fields": [
-              {
-                "name": "value",
-                "type": "bool"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
+            "name": "Silent"
           },
           {
-            "name": "U8",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u8"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
+            "name": "PlaintextMsgLog"
           },
           {
-            "name": "I8",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i8"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
+            "name": "SerializedMsgLog"
           },
           {
-            "name": "U16",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u16"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I16",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i16"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u32"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I32",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i32"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I64",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i64"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U128",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u128"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I128",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i128"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Bytes",
-            "fields": [
-              {
-                "name": "value",
-                "type": "bytes"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "BytesOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Pubkey",
-            "fields": [
-              {
-                "name": "value",
-                "type": "publicKey"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
+            "name": "CpiLog"
           }
         ]
       }
     },
     {
-      "name": "DataValueDiffAssertion",
+      "name": "MerkleTreeAssertion",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "U8",
+            "name": "VerifyLeaf",
             "fields": [
-              "i16",
               {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "I8",
-            "fields": [
-              "i16",
+                "name": "leaf_index",
+                "type": "u32"
+              },
               {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "U16",
-            "fields": [
-              "i32",
-              {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "I16",
-            "fields": [
-              "i32",
-              {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              "i64",
-              {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "I32",
-            "fields": [
-              "i64",
-              {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              "i128",
-              {
-                "defined": "IntegerOperator"
-              }
-            ]
-          },
-          {
-            "name": "I64",
-            "fields": [
-              "i128",
-              {
-                "defined": "IntegerOperator"
+                "name": "leaf_hash",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
               }
             ]
           }
@@ -1085,7 +1303,7 @@
       }
     },
     {
-      "name": "StakeAccountState",
+      "name": "StakeStateType",
       "type": {
         "kind": "enum",
         "variants": [
@@ -1114,12 +1332,14 @@
             "fields": [
               {
                 "name": "value",
-                "type": "u8"
+                "type": {
+                  "defined": "StakeStateType"
+                }
               },
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]
@@ -1477,86 +1697,157 @@
       }
     },
     {
-      "name": "DataValue",
+      "name": "UpgradeableLoaderStateType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Bool",
+            "name": "Uninitialized"
+          },
+          {
+            "name": "Buffer"
+          },
+          {
+            "name": "Program"
+          },
+          {
+            "name": "ProgramData"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableLoaderStateAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "State",
             "fields": [
-              "bool"
+              {
+                "name": "value",
+                "type": {
+                  "defined": "UpgradeableLoaderStateType"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
             ]
           },
           {
-            "name": "U8",
+            "name": "Buffer",
             "fields": [
-              "u8"
+              {
+                "defined": "UpgradableBufferAssertion"
+              }
             ]
           },
           {
-            "name": "I8",
+            "name": "Program",
             "fields": [
-              "i8"
+              {
+                "defined": "UpgradeableProgramAssertion"
+              }
             ]
           },
           {
-            "name": "U16",
+            "name": "ProgramData",
             "fields": [
-              "u16"
+              {
+                "defined": "UpgradeableProgramDataAssertion"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradableBufferAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Authority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableProgramAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProgramDataAddress",
+            "fields": [
+              {
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpgradeableProgramDataAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "UpgradeAuthority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
             ]
           },
           {
-            "name": "I16",
+            "name": "Slot",
             "fields": [
-              "i16"
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              "u32"
-            ]
-          },
-          {
-            "name": "I32",
-            "fields": [
-              "i32"
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              "u64"
-            ]
-          },
-          {
-            "name": "I64",
-            "fields": [
-              "i64"
-            ]
-          },
-          {
-            "name": "U128",
-            "fields": [
-              "u128"
-            ]
-          },
-          {
-            "name": "I128",
-            "fields": [
-              "i128"
-            ]
-          },
-          {
-            "name": "Bytes",
-            "fields": [
-              "bytes"
-            ]
-          },
-          {
-            "name": "Pubkey",
-            "fields": [
-              "publicKey"
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
+              }
             ]
           }
         ]
@@ -1587,6 +1878,9 @@
           },
           {
             "name": "BpfLoader"
+          },
+          {
+            "name": "UpgradeableLoader"
           },
           {
             "name": "SysvarConfig"
@@ -1681,13 +1975,96 @@
       }
     },
     {
-      "name": "WriteType",
+      "name": "DataValue",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "AccountBalance"
+            "name": "Bool",
+            "fields": [
+              "bool"
+            ]
           },
+          {
+            "name": "U8",
+            "fields": [
+              "u8"
+            ]
+          },
+          {
+            "name": "I8",
+            "fields": [
+              "i8"
+            ]
+          },
+          {
+            "name": "U16",
+            "fields": [
+              "u16"
+            ]
+          },
+          {
+            "name": "I16",
+            "fields": [
+              "i16"
+            ]
+          },
+          {
+            "name": "U32",
+            "fields": [
+              "u32"
+            ]
+          },
+          {
+            "name": "I32",
+            "fields": [
+              "i32"
+            ]
+          },
+          {
+            "name": "U64",
+            "fields": [
+              "u64"
+            ]
+          },
+          {
+            "name": "I64",
+            "fields": [
+              "i64"
+            ]
+          },
+          {
+            "name": "U128",
+            "fields": [
+              "u128"
+            ]
+          },
+          {
+            "name": "I128",
+            "fields": [
+              "i128"
+            ]
+          },
+          {
+            "name": "Bytes",
+            "fields": [
+              "bytes"
+            ]
+          },
+          {
+            "name": "Pubkey",
+            "fields": [
+              "publicKey"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "WriteType",
+      "type": {
+        "kind": "enum",
+        "variants": [
           {
             "name": "AccountData",
             "fields": [
@@ -1719,59 +2096,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "WriteTypeParameter",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "WriteU8",
-            "fields": [
-              {
-                "name": "offset",
-                "type": "u8"
-              },
-              {
-                "name": "write_type",
-                "type": {
-                  "defined": "WriteType"
-                }
-              }
-            ]
-          },
-          {
-            "name": "WriteU16",
-            "fields": [
-              {
-                "name": "offset",
-                "type": "u16"
-              },
-              {
-                "name": "write_type",
-                "type": {
-                  "defined": "WriteType"
-                }
-              }
-            ]
-          },
-          {
-            "name": "WriteU32",
-            "fields": [
-              {
-                "name": "offset",
-                "type": "u32"
-              },
-              {
-                "name": "write_type",
-                "type": {
-                  "defined": "WriteType"
-                }
-              }
-            ]
-          }
-        ]
-      }
     }
   ],
   "errors": [
@@ -1782,93 +2106,83 @@
     },
     {
       "code": 6001,
-      "name": "Unimplemented",
-      "msg": "Invalid market parameters error"
-    },
-    {
-      "code": 6002,
       "name": "AssertionFailed",
       "msg": "AssertionFailed"
     },
     {
-      "code": 6003,
+      "code": 6002,
       "name": "NotEnoughAccounts",
       "msg": "NotEnoughAccounts"
     },
     {
+      "code": 6003,
+      "name": "BumpNotFound",
+      "msg": "BumpNotFound"
+    },
+    {
       "code": 6004,
-      "name": "DataValueMismatch",
-      "msg": "DataValueMismatch"
-    },
-    {
-      "code": 6005,
-      "name": "UnsupportedOperator",
-      "msg": "UnsupportedOperator"
-    },
-    {
-      "code": 6006,
-      "name": "OutOfRange",
-      "msg": "OutOfRange"
-    },
-    {
-      "code": 6007,
       "name": "AccountBorrowFailed",
       "msg": "AccountBorrowFailed"
     },
     {
-      "code": 6008,
-      "name": "AccountOwnerMismatch",
-      "msg": "AccountNotTokenAccount"
+      "code": 6005,
+      "name": "RangeOutOfBounds",
+      "msg": "RangeOutOfBounds"
     },
     {
-      "code": 6009,
-      "name": "AccountNotInitialized",
-      "msg": "AccountNotInitialized"
+      "code": 6006,
+      "name": "IndexOutOfBounds",
+      "msg": "IndexOutOfBounds"
     },
     {
-      "code": 6010,
-      "name": "UnauthorizedIxEntry",
-      "msg": "UnauthorizedIxEntry"
-    },
-    {
-      "code": 6011,
-      "name": "InvalidDataLength",
-      "msg": "InvalidDataLength"
-    },
-    {
-      "code": 6012,
+      "code": 6007,
       "name": "FailedToDeserialize",
       "msg": "FailedToDeserialize"
     },
     {
-      "code": 6013,
+      "code": 6008,
+      "name": "FailedToSerialize",
+      "msg": "FailedToSerialize"
+    },
+    {
+      "code": 6009,
+      "name": "AccountOwnerMismatch",
+      "msg": "AccountOwnerMismatch"
+    },
+    {
+      "code": 6010,
+      "name": "AccountKeyMismatch",
+      "msg": "AccountKeyMismatch"
+    },
+    {
+      "code": 6011,
+      "name": "AccountNotInitialized",
+      "msg": "AccountNotInitialized"
+    },
+    {
+      "code": 6012,
       "name": "AccountOwnerValidationFailed",
       "msg": "AccountOwnerValidationFailed"
     },
     {
-      "code": 6014,
+      "code": 6013,
       "name": "AccountFundedValidationFailed",
       "msg": "AccountFundedValidationFailed"
     },
     {
-      "code": 6015,
+      "code": 6014,
       "name": "AccountDiscriminatorValidationFailed",
       "msg": "AccountDiscriminatorValidationFailed"
     },
     {
-      "code": 6016,
-      "name": "AccountValidaitonFailed",
+      "code": 6015,
+      "name": "AccountValidationFailed",
       "msg": "AccountValidaitonFailed"
     },
     {
-      "code": 6017,
-      "name": "InvalidProgramAddress",
-      "msg": "InvalidProgramAddress"
-    },
-    {
-      "code": 6018,
-      "name": "SerializationFailed",
-      "msg": "SerializationFailed"
+      "code": 6016,
+      "name": "CrossProgramInvokeViolation",
+      "msg": "CrossProgramInvokeViolation"
     }
   ],
   "metadata": {

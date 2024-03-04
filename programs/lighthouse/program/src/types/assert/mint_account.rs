@@ -1,15 +1,12 @@
+use super::{Assert, LogLevel};
 use crate::{
-    types::{EquatableOperator, IntegerOperator},
-    utils::Result,
+    err, err_msg,
+    types::operator::{EquatableOperator, EvaluationResult, IntegerOperator, Operator},
+    utils::{out_of_bounds_err, Result},
 };
+use crate::{error::LighthouseError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
-
-use crate::{
-    error::LighthouseError,
-    types::{Assert, EvaluationResult, Operator},
-    utils::unpack_coption_key,
-};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum MintAccountAssertion {
@@ -36,14 +33,10 @@ pub enum MintAccountAssertion {
 }
 
 impl Assert<AccountInfo<'_>> for MintAccountAssertion {
-    fn format(&self) -> String {
-        format!("MintAccountAssertion[{:?}]", self)
-    }
-
     fn evaluate(
         &self,
         account: &AccountInfo,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
@@ -53,16 +46,22 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 
-        // TODO: Logic to assert on if account is a mint account
-        let data = account.try_borrow_mut_data().unwrap();
+        let data = account.try_borrow_mut_data().map_err(|e| {
+            err_msg!("Failed to borrow data for target account", e);
+            err!(LighthouseError::AccountBorrowFailed)
+        })?;
 
         let result = match self {
             MintAccountAssertion::MintAuthority {
                 value: assertion_value,
                 operator,
             } => {
-                let mint_authority_slice = &data[0..36];
-                let mint_authority = unpack_coption_key(mint_authority_slice)?;
+                let data_range = 0..36;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+
+                let mint_authority = unpack_coption_key(data_slice)?;
 
                 match (mint_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
@@ -78,7 +77,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                         output: format!("None != {:?}", pubkey),
                     }),
                     (COption::Some(mint_authority), Some(pubkey)) => {
-                        operator.evaluate(&mint_authority, pubkey, include_output)
+                        operator.evaluate(&mint_authority, pubkey, log_level)
                     }
                 }
             }
@@ -86,35 +85,51 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let supply_slice = &data[36..44];
-                let actual_supply = u64::from_le_bytes(supply_slice.try_into().unwrap());
+                let data_range = 36..44;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let actual_supply = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
+                    err_msg!("Failed to deserialize supply from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?);
 
-                operator.evaluate(&actual_supply, assertion_value, include_output)
+                operator.evaluate(&actual_supply, assertion_value, log_level)
             }
             MintAccountAssertion::Decimals {
                 value: assertion_value,
                 operator,
             } => {
-                let decimals_slice = &data[44..45];
-                let actual_decimals = u8::from_le_bytes(decimals_slice.try_into().unwrap());
+                let data_range = 44..45;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let actual_decimals = u8::from_le_bytes(data_slice.try_into().map_err(|e| {
+                    err_msg!("Failed to deserialize decimals from account data", e);
+                    err!(LighthouseError::FailedToDeserialize)
+                })?);
 
-                operator.evaluate(&actual_decimals, assertion_value, include_output)
+                operator.evaluate(&actual_decimals, assertion_value, log_level)
             }
             MintAccountAssertion::IsInitialized {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_is_initialized = (data[45]) != 0;
+                let actual_value = data.get(45).ok_or_else(|| out_of_bounds_err(45..46))?;
+                let actual_value = *actual_value != 0;
 
-                operator.evaluate(&actual_is_initialized, assertion_value, include_output)
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             MintAccountAssertion::FreezeAuthority {
                 value: assertion_value,
                 operator,
             } => {
-                let freeze_authority_slice = &data[46..82];
+                let data_range = 46..82;
+                let data_slice = data
+                    .get(data_range.clone())
+                    .ok_or_else(|| out_of_bounds_err(data_range))?;
 
-                let freeze_authority = unpack_coption_key(freeze_authority_slice)?;
+                let freeze_authority = unpack_coption_key(data_slice)?;
 
                 match (freeze_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
@@ -130,7 +145,7 @@ impl Assert<AccountInfo<'_>> for MintAccountAssertion {
                         output: format!("None != {:?}", pubkey),
                     }),
                     (COption::Some(freeze_authority), Some(pubkey)) => {
-                        operator.evaluate(&freeze_authority, pubkey, include_output)
+                        operator.evaluate(&freeze_authority, pubkey, log_level)
                     }
                 }
             }
@@ -150,7 +165,10 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{Assert, EquatableOperator, IntegerOperator, MintAccountAssertion};
+        use crate::types::{
+            assert::{Assert, LogLevel, MintAccountAssertion},
+            operator::{EquatableOperator, IntegerOperator},
+        };
 
         #[test]
         fn evaluate_mint_account_no_mint_authority_no_freeze_authority() {
@@ -193,7 +211,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -206,7 +224,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -223,7 +241,7 @@ mod tests {
                 value: 69,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -236,7 +254,7 @@ mod tests {
                 value: 1600,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -253,7 +271,7 @@ mod tests {
                 value: 2,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -266,7 +284,7 @@ mod tests {
                 value: 3,
                 operator: IntegerOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -283,7 +301,7 @@ mod tests {
                 value: true,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -296,7 +314,7 @@ mod tests {
                 value: false,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -313,7 +331,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -326,7 +344,7 @@ mod tests {
                 value: Some(Keypair::new().encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -379,7 +397,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -392,7 +410,7 @@ mod tests {
                 value: Some(freeze_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -409,7 +427,7 @@ mod tests {
                 value: None,
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -422,7 +440,7 @@ mod tests {
                 value: Some(mint_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
-            .evaluate(&account_info, true);
+            .evaluate(&account_info, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

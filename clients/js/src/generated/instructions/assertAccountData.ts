@@ -40,8 +40,12 @@ import {
 import {
   DataValueAssertion,
   DataValueAssertionArgs,
+  LogLevel,
+  LogLevelArgs,
   getDataValueAssertionDecoder,
   getDataValueAssertionEncoder,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
 } from '../types';
 
 export type AssertAccountDataInstruction<
@@ -76,11 +80,13 @@ export type AssertAccountDataInstructionWithSigners<
 
 export type AssertAccountDataInstructionData = {
   discriminator: number;
+  logLevel: LogLevel;
   offset: number;
   assertion: DataValueAssertion;
 };
 
 export type AssertAccountDataInstructionDataArgs = {
+  logLevel: LogLevelArgs;
   offset: number;
   assertion: DataValueAssertionArgs;
 };
@@ -89,6 +95,7 @@ export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAcco
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
+      ['logLevel', getLogLevelEncoder()],
       ['offset', getU16Encoder()],
       ['assertion', getDataValueAssertionEncoder()],
     ]),
@@ -99,6 +106,7 @@ export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAcco
 export function getAssertAccountDataInstructionDataDecoder(): Decoder<AssertAccountDataInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
+    ['logLevel', getLogLevelDecoder()],
     ['offset', getU16Decoder()],
     ['assertion', getDataValueAssertionDecoder()],
   ]);
@@ -117,6 +125,7 @@ export function getAssertAccountDataInstructionDataCodec(): Codec<
 export type AssertAccountDataInput<TAccountTargetAccount extends string> = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
+  logLevel: AssertAccountDataInstructionDataArgs['logLevel'];
   offset: AssertAccountDataInstructionDataArgs['offset'];
   assertion: AssertAccountDataInstructionDataArgs['assertion'];
 };
@@ -126,6 +135,7 @@ export type AssertAccountDataInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
+  logLevel: AssertAccountDataInstructionDataArgs['logLevel'];
   offset: AssertAccountDataInstructionDataArgs['offset'];
   assertion: AssertAccountDataInstructionDataArgs['assertion'];
 };

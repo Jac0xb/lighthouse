@@ -1,14 +1,12 @@
 use crate::utils::context::TestContext;
 use crate::utils::create_user_with_balance;
-use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::utils::{process_transaction_assert_success, set_account_from_rpc};
 use lighthouse_client::instructions::AssertStakeAccountBuilder;
 use lighthouse_client::types::{
-    ComparableOperator, EquatableOperator, MetaAssertion, StakeAccountAssertion, StakeAccountState,
+    EquatableOperator, MetaAssertion, StakeAccountAssertion, StakeStateType,
 };
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program_test::tokio;
-use solana_program_test::tokio::task::spawn_blocking;
-use solana_sdk::account::AccountSharedData;
 use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signer::EncodableKeypair;
@@ -30,28 +28,16 @@ async fn test_borsh_account_data() {
         .unwrap();
 
     // Clone a vote account from devnet.
-    let rpc_url = String::from("https://api.devnet.solana.com");
-    let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
+    let connection = RpcClient::new_with_commitment(
+        String::from("https://api.devnet.solana.com"),
+        CommitmentConfig::confirmed(),
+    );
 
     let vote_pubkey =
         solana_sdk::pubkey::Pubkey::from_str("HRACkkKxJHZ22QRfky7QEsSRgxiskQVdK23XS13tjEGM")
             .unwrap();
 
-    let vote_account = spawn_blocking(move || {
-        connection
-            .get_account(&vote_pubkey)
-            .expect("Failed to get account data.")
-    })
-    .await
-    .unwrap();
-
-    let mut account = AccountSharedData::new(
-        vote_account.lamports,
-        vote_account.data.len(),
-        &vote_account.owner,
-    );
-    account.set_data_from_slice(vote_account.data.as_slice());
-    context.program_context.set_account(&vote_pubkey, &account);
+    set_account_from_rpc(context, &connection, &vote_pubkey).await;
 
     let derived_account =
         Pubkey::create_with_seed(&user.encodable_pubkey(), "stake:0", &stake::program::id())
@@ -95,14 +81,16 @@ async fn test_borsh_account_data() {
         &[
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
-                .stake_account_assertion(StakeAccountAssertion::State {
-                    value: StakeAccountState::Stake as u8,
-                    operator: ComparableOperator::Equal,
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .assertion(StakeAccountAssertion::State {
+                    value: StakeStateType::Stake,
+                    operator: EquatableOperator::Equal,
                 })
                 .instruction(),
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
-                .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .assertion(StakeAccountAssertion::MetaAssertion(
                     MetaAssertion::AuthorizedStaker {
                         value: user.encodable_pubkey(),
                         operator: EquatableOperator::Equal,

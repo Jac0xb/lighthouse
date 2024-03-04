@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use crate::{error::LighthouseError, utils::Result};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
+use std::collections::HashMap;
 
 pub enum AccountValidation {
     IsNotInited,
@@ -34,20 +33,20 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                 if account.data_is_empty() || account.owner.eq(&solana_program::system_program::ID)
                 {
                     msg!("account inited condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsNotInited => {
                 if account.lamports() != 0 || !account.owner.eq(&solana_program::system_program::ID)
                 {
                     msg!("account not inited condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsWritable => {
                 if !account.is_writable {
                     msg!("account is writable condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsProgramDerivedAddress(seeds, program_id, bump) => match bump {
@@ -58,10 +57,16 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                     seeds_and_bump.extend(seeds.iter().map(|seed| seed.as_slice()));
                     seeds_and_bump.push(&bump_slice);
 
-                    // TODO: give pubkey create program address unwrap better error
                     let derived_address =
                         Pubkey::create_program_address(seeds_and_bump.as_slice(), &program_id)
-                            .unwrap();
+                            .map_err(|err| {
+                                msg!(
+                                    "failed to create program address: {:?} {:?}",
+                                    seeds_and_bump,
+                                    err
+                                );
+                                LighthouseError::AccountValidationFailed
+                            })?;
 
                     if account.key != &derived_address {
                         msg!(
@@ -69,7 +74,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                             account.key,
                             derived_address
                         );
-                        return Err(LighthouseError::AccountValidaitonFailed.into());
+                        return Err(LighthouseError::AccountValidationFailed.into());
                     }
 
                     bump_map.insert(*account.key, bump);
@@ -87,7 +92,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                             generated_pda
                         );
 
-                        return Err(LighthouseError::AccountValidaitonFailed.into());
+                        return Err(LighthouseError::AccountValidationFailed.into());
                     }
 
                     bump_map.insert(*account.key, bump);
@@ -100,7 +105,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                         account.owner,
                         owner
                     );
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
         }

@@ -4,7 +4,7 @@
     "./programs/lighthouse/Cargo.toml",
     "./programs/test-program/Cargo.toml",
     "./tests/lighthouse/Cargo.toml",
-    "./test-client/Cargo.toml",
+    "./tests/test-client/Cargo.toml",
     "./clients/rust/Cargo.toml"
   ]
 }

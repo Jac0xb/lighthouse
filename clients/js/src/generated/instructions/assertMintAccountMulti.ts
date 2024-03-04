@@ -35,8 +35,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   MintAccountAssertion,
   MintAccountAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getMintAccountAssertionDecoder,
   getMintAccountAssertionEncoder,
 } from '../types';
@@ -73,18 +77,21 @@ export type AssertMintAccountMultiInstructionWithSigners<
 
 export type AssertMintAccountMultiInstructionData = {
   discriminator: number;
-  args: Array<MintAccountAssertion>;
+  logLevel: LogLevel;
+  assertions: Array<MintAccountAssertion>;
 };
 
 export type AssertMintAccountMultiInstructionDataArgs = {
-  args: Array<MintAccountAssertionArgs>;
+  logLevel: LogLevelArgs;
+  assertions: Array<MintAccountAssertionArgs>;
 };
 
 export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<AssertMintAccountMultiInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['args', getArrayEncoder(getMintAccountAssertionEncoder())],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertions', getArrayEncoder(getMintAccountAssertionEncoder())],
     ]),
     (value) => ({ ...value, discriminator: 6 })
   );
@@ -93,7 +100,8 @@ export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<Asser
 export function getAssertMintAccountMultiInstructionDataDecoder(): Decoder<AssertMintAccountMultiInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['args', getArrayDecoder(getMintAccountAssertionDecoder())],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertions', getArrayDecoder(getMintAccountAssertionDecoder())],
   ]);
 }
 
@@ -111,7 +119,8 @@ export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
   {
     /** Target account */
     targetAccount: Address<TAccountTargetAccount>;
-    args: AssertMintAccountMultiInstructionDataArgs['args'];
+    logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
+    assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
   };
 
 export type AssertMintAccountMultiInputWithSigners<
@@ -119,7 +128,8 @@ export type AssertMintAccountMultiInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  args: AssertMintAccountMultiInstructionDataArgs['args'];
+  logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
 };
 
 export function getAssertMintAccountMultiInstruction<

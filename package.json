@@ -3,6 +3,7 @@
   "scripts": {
     "programs:build": "bash configs/scripts/env-run.sh ./configs/scripts/program/build.sh",
     "programs:test": "bash configs/scripts/env-run.sh  ./configs/scripts/program/test.sh",
+    "programs:buildtests": "bash configs/scripts/env-run.sh  ./configs/scripts/program/build-test.sh",
     "programs:clean": "bash configs/scripts/env-run.sh ./configs/scripts/program/clean.sh",
     "clients:rust:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-rust.sh",
     "clients:js:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-js.sh",
