@@ -70,7 +70,7 @@ impl<'info> BubblegumTestContext<'info> {
 
         ctx.default_collection
             .create_and_mint_collection_parent(
-                &mut ctx.program_context,
+                ctx.program_context,
                 TokenStandard::NonFungible,
                 None,
                 None,

@@ -46,7 +46,7 @@ import {
   getLogLevelEncoder,
 } from '../types';
 
-export type AssertAccountCompressionInstruction<
+export type AssertMerkleTreeAccountInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
@@ -69,7 +69,7 @@ export type AssertAccountCompressionInstruction<
     ]
   >;
 
-export type AssertAccountCompressionInstructionWithSigners<
+export type AssertMerkleTreeAccountInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
@@ -92,20 +92,20 @@ export type AssertAccountCompressionInstructionWithSigners<
     ]
   >;
 
-export type AssertAccountCompressionInstructionData = {
+export type AssertMerkleTreeAccountInstructionData = {
   discriminator: number;
   arg0: LogLevel;
   leafIndex: number;
   leafHash: Uint8Array;
 };
 
-export type AssertAccountCompressionInstructionDataArgs = {
+export type AssertMerkleTreeAccountInstructionDataArgs = {
   arg0: LogLevelArgs;
   leafIndex: number;
   leafHash: Uint8Array;
 };
 
-export function getAssertAccountCompressionInstructionDataEncoder(): Encoder<AssertAccountCompressionInstructionDataArgs> {
+export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<AssertMerkleTreeAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
@@ -117,7 +117,7 @@ export function getAssertAccountCompressionInstructionDataEncoder(): Encoder<Ass
   );
 }
 
-export function getAssertAccountCompressionInstructionDataDecoder(): Decoder<AssertAccountCompressionInstructionData> {
+export function getAssertMerkleTreeAccountInstructionDataDecoder(): Decoder<AssertMerkleTreeAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['arg0', getLogLevelDecoder()],
@@ -126,17 +126,17 @@ export function getAssertAccountCompressionInstructionDataDecoder(): Decoder<Ass
   ]);
 }
 
-export function getAssertAccountCompressionInstructionDataCodec(): Codec<
-  AssertAccountCompressionInstructionDataArgs,
-  AssertAccountCompressionInstructionData
+export function getAssertMerkleTreeAccountInstructionDataCodec(): Codec<
+  AssertMerkleTreeAccountInstructionDataArgs,
+  AssertMerkleTreeAccountInstructionData
 > {
   return combineCodec(
-    getAssertAccountCompressionInstructionDataEncoder(),
-    getAssertAccountCompressionInstructionDataDecoder()
+    getAssertMerkleTreeAccountInstructionDataEncoder(),
+    getAssertMerkleTreeAccountInstructionDataDecoder()
   );
 }
 
-export type AssertAccountCompressionInput<
+export type AssertMerkleTreeAccountInput<
   TAccountMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string
@@ -147,12 +147,12 @@ export type AssertAccountCompressionInput<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  arg0: AssertAccountCompressionInstructionDataArgs['arg0'];
-  leafIndex: AssertAccountCompressionInstructionDataArgs['leafIndex'];
-  leafHash: AssertAccountCompressionInstructionDataArgs['leafHash'];
+  arg0: AssertMerkleTreeAccountInstructionDataArgs['arg0'];
+  leafIndex: AssertMerkleTreeAccountInstructionDataArgs['leafIndex'];
+  leafHash: AssertMerkleTreeAccountInstructionDataArgs['leafHash'];
 };
 
-export type AssertAccountCompressionInputWithSigners<
+export type AssertMerkleTreeAccountInputWithSigners<
   TAccountMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string
@@ -163,52 +163,52 @@ export type AssertAccountCompressionInputWithSigners<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  arg0: AssertAccountCompressionInstructionDataArgs['arg0'];
-  leafIndex: AssertAccountCompressionInstructionDataArgs['leafIndex'];
-  leafHash: AssertAccountCompressionInstructionDataArgs['leafHash'];
+  arg0: AssertMerkleTreeAccountInstructionDataArgs['arg0'];
+  leafIndex: AssertMerkleTreeAccountInstructionDataArgs['leafIndex'];
+  leafHash: AssertMerkleTreeAccountInstructionDataArgs['leafHash'];
 };
 
-export function getAssertAccountCompressionInstruction<
+export function getAssertMerkleTreeAccountInstruction<
   TAccountMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertAccountCompressionInputWithSigners<
+  input: AssertMerkleTreeAccountInputWithSigners<
     TAccountMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
   >
-): AssertAccountCompressionInstructionWithSigners<
+): AssertMerkleTreeAccountInstructionWithSigners<
   TProgram,
   TAccountMerkleTree,
   TAccountRoot,
   TAccountSplAccountCompression
 >;
-export function getAssertAccountCompressionInstruction<
+export function getAssertMerkleTreeAccountInstruction<
   TAccountMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertAccountCompressionInput<
+  input: AssertMerkleTreeAccountInput<
     TAccountMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
   >
-): AssertAccountCompressionInstruction<
+): AssertMerkleTreeAccountInstruction<
   TProgram,
   TAccountMerkleTree,
   TAccountRoot,
   TAccountSplAccountCompression
 >;
-export function getAssertAccountCompressionInstruction<
+export function getAssertMerkleTreeAccountInstruction<
   TAccountMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertAccountCompressionInput<
+  input: AssertMerkleTreeAccountInput<
     TAccountMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
@@ -220,7 +220,7 @@ export function getAssertAccountCompressionInstruction<
 
   // Original accounts.
   type AccountMetas = Parameters<
-    typeof getAssertAccountCompressionInstructionRaw<
+    typeof getAssertMerkleTreeAccountInstructionRaw<
       TProgram,
       TAccountMerkleTree,
       TAccountRoot,
@@ -246,16 +246,16 @@ export function getAssertAccountCompressionInstruction<
     programAddress
   );
 
-  const instruction = getAssertAccountCompressionInstructionRaw(
+  const instruction = getAssertMerkleTreeAccountInstructionRaw(
     accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertAccountCompressionInstructionDataArgs,
+    args as AssertMerkleTreeAccountInstructionDataArgs,
     programAddress
   );
 
   return instruction;
 }
 
-export function getAssertAccountCompressionInstructionRaw<
+export function getAssertMerkleTreeAccountInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
@@ -271,7 +271,7 @@ export function getAssertAccountCompressionInstructionRaw<
       ? Address<TAccountSplAccountCompression>
       : TAccountSplAccountCompression;
   },
-  args: AssertAccountCompressionInstructionDataArgs,
+  args: AssertMerkleTreeAccountInstructionDataArgs,
   programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
   remainingAccounts?: TRemainingAccounts
 ) {
@@ -285,9 +285,9 @@ export function getAssertAccountCompressionInstructionRaw<
       ),
       ...(remainingAccounts ?? []),
     ],
-    data: getAssertAccountCompressionInstructionDataEncoder().encode(args),
+    data: getAssertMerkleTreeAccountInstructionDataEncoder().encode(args),
     programAddress,
-  } as AssertAccountCompressionInstruction<
+  } as AssertMerkleTreeAccountInstruction<
     TProgram,
     TAccountMerkleTree,
     TAccountRoot,
@@ -296,7 +296,7 @@ export function getAssertAccountCompressionInstructionRaw<
   >;
 }
 
-export type ParsedAssertAccountCompressionInstruction<
+export type ParsedAssertMerkleTreeAccountInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
 > = {
@@ -309,17 +309,17 @@ export type ParsedAssertAccountCompressionInstruction<
     /** SPL account compression program */
     splAccountCompression: TAccountMetas[2];
   };
-  data: AssertAccountCompressionInstructionData;
+  data: AssertMerkleTreeAccountInstructionData;
 };
 
-export function parseAssertAccountCompressionInstruction<
+export function parseAssertMerkleTreeAccountInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[]
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
-): ParsedAssertAccountCompressionInstruction<TProgram, TAccountMetas> {
+): ParsedAssertMerkleTreeAccountInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
@@ -337,7 +337,7 @@ export function parseAssertAccountCompressionInstruction<
       root: getNextAccount(),
       splAccountCompression: getNextAccount(),
     },
-    data: getAssertAccountCompressionInstructionDataDecoder().decode(
+    data: getAssertMerkleTreeAccountInstructionDataDecoder().decode(
       instruction.data
     ),
   };

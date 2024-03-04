@@ -48,7 +48,7 @@ import {
   getLogLevelEncoder,
 } from '../types';
 
-export type AssertDeltaInstruction<
+export type AssertAccountDataDeltaInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountLeftAccount extends string | IAccountMeta<string> = string,
   TAccountRightAccount extends string | IAccountMeta<string> = string,
@@ -67,7 +67,7 @@ export type AssertDeltaInstruction<
     ]
   >;
 
-export type AssertDeltaInstructionWithSigners<
+export type AssertAccountDataDeltaInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountLeftAccount extends string | IAccountMeta<string> = string,
   TAccountRightAccount extends string | IAccountMeta<string> = string,
@@ -86,7 +86,7 @@ export type AssertDeltaInstructionWithSigners<
     ]
   >;
 
-export type AssertDeltaInstructionData = {
+export type AssertAccountDataDeltaInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
   offsetLeft: number;
@@ -94,14 +94,14 @@ export type AssertDeltaInstructionData = {
   assertion: DataValueDeltaAssertion;
 };
 
-export type AssertDeltaInstructionDataArgs = {
+export type AssertAccountDataDeltaInstructionDataArgs = {
   logLevel: LogLevelArgs;
   offsetLeft: number;
   offsetRight: number;
   assertion: DataValueDeltaAssertionArgs;
 };
 
-export function getAssertDeltaInstructionDataEncoder(): Encoder<AssertDeltaInstructionDataArgs> {
+export function getAssertAccountDataDeltaInstructionDataEncoder(): Encoder<AssertAccountDataDeltaInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
@@ -114,7 +114,7 @@ export function getAssertDeltaInstructionDataEncoder(): Encoder<AssertDeltaInstr
   );
 }
 
-export function getAssertDeltaInstructionDataDecoder(): Decoder<AssertDeltaInstructionData> {
+export function getAssertAccountDataDeltaInstructionDataDecoder(): Decoder<AssertAccountDataDeltaInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
@@ -124,17 +124,17 @@ export function getAssertDeltaInstructionDataDecoder(): Decoder<AssertDeltaInstr
   ]);
 }
 
-export function getAssertDeltaInstructionDataCodec(): Codec<
-  AssertDeltaInstructionDataArgs,
-  AssertDeltaInstructionData
+export function getAssertAccountDataDeltaInstructionDataCodec(): Codec<
+  AssertAccountDataDeltaInstructionDataArgs,
+  AssertAccountDataDeltaInstructionData
 > {
   return combineCodec(
-    getAssertDeltaInstructionDataEncoder(),
-    getAssertDeltaInstructionDataDecoder()
+    getAssertAccountDataDeltaInstructionDataEncoder(),
+    getAssertAccountDataDeltaInstructionDataDecoder()
   );
 }
 
-export type AssertDeltaInput<
+export type AssertAccountDataDeltaInput<
   TAccountLeftAccount extends string,
   TAccountRightAccount extends string
 > = {
@@ -142,13 +142,13 @@ export type AssertDeltaInput<
   leftAccount: Address<TAccountLeftAccount>;
   /** Right account */
   rightAccount: Address<TAccountRightAccount>;
-  logLevel: AssertDeltaInstructionDataArgs['logLevel'];
-  offsetLeft: AssertDeltaInstructionDataArgs['offsetLeft'];
-  offsetRight: AssertDeltaInstructionDataArgs['offsetRight'];
-  assertion: AssertDeltaInstructionDataArgs['assertion'];
+  logLevel: AssertAccountDataDeltaInstructionDataArgs['logLevel'];
+  offsetLeft: AssertAccountDataDeltaInstructionDataArgs['offsetLeft'];
+  offsetRight: AssertAccountDataDeltaInstructionDataArgs['offsetRight'];
+  assertion: AssertAccountDataDeltaInstructionDataArgs['assertion'];
 };
 
-export type AssertDeltaInputWithSigners<
+export type AssertAccountDataDeltaInputWithSigners<
   TAccountLeftAccount extends string,
   TAccountRightAccount extends string
 > = {
@@ -156,36 +156,43 @@ export type AssertDeltaInputWithSigners<
   leftAccount: Address<TAccountLeftAccount>;
   /** Right account */
   rightAccount: Address<TAccountRightAccount>;
-  logLevel: AssertDeltaInstructionDataArgs['logLevel'];
-  offsetLeft: AssertDeltaInstructionDataArgs['offsetLeft'];
-  offsetRight: AssertDeltaInstructionDataArgs['offsetRight'];
-  assertion: AssertDeltaInstructionDataArgs['assertion'];
+  logLevel: AssertAccountDataDeltaInstructionDataArgs['logLevel'];
+  offsetLeft: AssertAccountDataDeltaInstructionDataArgs['offsetLeft'];
+  offsetRight: AssertAccountDataDeltaInstructionDataArgs['offsetRight'];
+  assertion: AssertAccountDataDeltaInstructionDataArgs['assertion'];
 };
 
-export function getAssertDeltaInstruction<
+export function getAssertAccountDataDeltaInstruction<
   TAccountLeftAccount extends string,
   TAccountRightAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertDeltaInputWithSigners<TAccountLeftAccount, TAccountRightAccount>
-): AssertDeltaInstructionWithSigners<
+  input: AssertAccountDataDeltaInputWithSigners<
+    TAccountLeftAccount,
+    TAccountRightAccount
+  >
+): AssertAccountDataDeltaInstructionWithSigners<
   TProgram,
   TAccountLeftAccount,
   TAccountRightAccount
 >;
-export function getAssertDeltaInstruction<
+export function getAssertAccountDataDeltaInstruction<
   TAccountLeftAccount extends string,
   TAccountRightAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertDeltaInput<TAccountLeftAccount, TAccountRightAccount>
-): AssertDeltaInstruction<TProgram, TAccountLeftAccount, TAccountRightAccount>;
-export function getAssertDeltaInstruction<
+  input: AssertAccountDataDeltaInput<TAccountLeftAccount, TAccountRightAccount>
+): AssertAccountDataDeltaInstruction<
+  TProgram,
+  TAccountLeftAccount,
+  TAccountRightAccount
+>;
+export function getAssertAccountDataDeltaInstruction<
   TAccountLeftAccount extends string,
   TAccountRightAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertDeltaInput<TAccountLeftAccount, TAccountRightAccount>
+  input: AssertAccountDataDeltaInput<TAccountLeftAccount, TAccountRightAccount>
 ): IInstruction {
   // Program address.
   const programAddress =
@@ -193,7 +200,7 @@ export function getAssertDeltaInstruction<
 
   // Original accounts.
   type AccountMetas = Parameters<
-    typeof getAssertDeltaInstructionRaw<
+    typeof getAssertAccountDataDeltaInstructionRaw<
       TProgram,
       TAccountLeftAccount,
       TAccountRightAccount
@@ -214,16 +221,16 @@ export function getAssertDeltaInstruction<
     programAddress
   );
 
-  const instruction = getAssertDeltaInstructionRaw(
+  const instruction = getAssertAccountDataDeltaInstructionRaw(
     accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertDeltaInstructionDataArgs,
+    args as AssertAccountDataDeltaInstructionDataArgs,
     programAddress
   );
 
   return instruction;
 }
 
-export function getAssertDeltaInstructionRaw<
+export function getAssertAccountDataDeltaInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountLeftAccount extends string | IAccountMeta<string> = string,
   TAccountRightAccount extends string | IAccountMeta<string> = string,
@@ -237,7 +244,7 @@ export function getAssertDeltaInstructionRaw<
       ? Address<TAccountRightAccount>
       : TAccountRightAccount;
   },
-  args: AssertDeltaInstructionDataArgs,
+  args: AssertAccountDataDeltaInstructionDataArgs,
   programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
   remainingAccounts?: TRemainingAccounts
 ) {
@@ -247,9 +254,9 @@ export function getAssertDeltaInstructionRaw<
       accountMetaWithDefault(accounts.rightAccount, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
     ],
-    data: getAssertDeltaInstructionDataEncoder().encode(args),
+    data: getAssertAccountDataDeltaInstructionDataEncoder().encode(args),
     programAddress,
-  } as AssertDeltaInstruction<
+  } as AssertAccountDataDeltaInstruction<
     TProgram,
     TAccountLeftAccount,
     TAccountRightAccount,
@@ -257,7 +264,7 @@ export function getAssertDeltaInstructionRaw<
   >;
 }
 
-export type ParsedAssertDeltaInstruction<
+export type ParsedAssertAccountDataDeltaInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
 > = {
@@ -268,17 +275,17 @@ export type ParsedAssertDeltaInstruction<
     /** Right account */
     rightAccount: TAccountMetas[1];
   };
-  data: AssertDeltaInstructionData;
+  data: AssertAccountDataDeltaInstructionData;
 };
 
-export function parseAssertDeltaInstruction<
+export function parseAssertAccountDataDeltaInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[]
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
-): ParsedAssertDeltaInstruction<TProgram, TAccountMetas> {
+): ParsedAssertAccountDataDeltaInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 2) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
@@ -295,6 +302,8 @@ export function parseAssertDeltaInstruction<
       leftAccount: getNextAccount(),
       rightAccount: getNextAccount(),
     },
-    data: getAssertDeltaInstructionDataDecoder().decode(instruction.data),
+    data: getAssertAccountDataDeltaInstructionDataDecoder().decode(
+      instruction.data
+    ),
   };
 }

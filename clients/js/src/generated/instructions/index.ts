@@ -6,10 +6,10 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './assertAccountCompression';
 export * from './assertAccountData';
+export * from './assertAccountDataDelta';
 export * from './assertAccountInfo';
-export * from './assertDelta';
+export * from './assertMerkleTreeAccount';
 export * from './assertMintAccount';
 export * from './assertMintAccountMulti';
 export * from './assertStakeAccount';

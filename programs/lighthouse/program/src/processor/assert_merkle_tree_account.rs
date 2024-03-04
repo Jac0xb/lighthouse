@@ -10,14 +10,14 @@ use anchor_lang::{context::CpiContext, ToAccountInfo};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, msg};
 
-pub(crate) struct AssertMerkleLeafContext<'a, 'info> {
+pub(crate) struct AssertMerkleTreeAccountContext<'a, 'info> {
     pub(crate) merkle_tree: AccountInfo<'info>,
     pub(crate) root: AccountInfo<'info>,
     pub(crate) spl_account_compression: Program<'a, 'info>,
     pub(crate) proof_path: &'a [AccountInfo<'info>],
 }
 
-impl<'a, 'info> AssertMerkleLeafContext<'a, 'info> {
+impl<'a, 'info> AssertMerkleTreeAccountContext<'a, 'info> {
     pub(crate) fn load(accounts: &'a [AccountInfo<'info>]) -> Result<Self> {
         Ok(Self {
             merkle_tree: accounts.first().unwrap().to_owned(),
@@ -37,8 +37,8 @@ pub struct AssertMerkleLeafParameters {
     pub leaf_hash: [u8; 32],
 }
 
-pub(crate) fn assert_merkle_leaf<'a, 'info, T: Assert<()> + Debug>(
-    context: &AssertMerkleLeafContext<'a, 'info>,
+pub(crate) fn assert_merkle_tree_account<'a, 'info, T: Assert<()> + Debug>(
+    context: &AssertMerkleTreeAccountContext<'a, 'info>,
     parameters: &AssertMerkleLeafParameters,
     assertion: &T,
     log_level: &LogLevel,

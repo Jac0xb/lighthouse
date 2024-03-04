@@ -1,7 +1,7 @@
 pub mod context;
 pub mod digital_asset;
 pub mod tree;
-pub mod tree_manager;
+// pub mod tree_manager;
 pub mod tx_builder;
 
 use anchor_lang::{InstructionData, ToAccountMetas};
@@ -12,13 +12,9 @@ use mpl_bubblegum::{
 pub use tree::*;
 
 use bytemuck::PodCastError;
-use solana_program::{instruction::Instruction, pubkey::Pubkey, system_instruction};
-use solana_program_test::{BanksClientError, ProgramTest, ProgramTestContext};
-use solana_sdk::{
-    signature::{Keypair, SignerError},
-    signer::Signer,
-    transaction::Transaction,
-};
+use solana_program::{instruction::Instruction, pubkey::Pubkey};
+use solana_program_test::BanksClientError;
+use solana_sdk::signature::{Keypair, SignerError};
 use std::result;
 
 #[derive(Debug)]
@@ -30,6 +26,7 @@ pub enum Error {
     // The on-chain (via banks) and locally computed roots for a tree do not match.
     RootMismatch,
     Signer(SignerError),
+    TransactionFailed(String),
 }
 
 pub type Result<T> = result::Result<T, Box<Error>>;

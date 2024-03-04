@@ -5,47 +5,43 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::DataValueDeltaAssertion;
 use crate::generated::types::LogLevel;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
-pub struct AssertAccountCompression {
-    /// Merkle tree account
-    pub merkle_tree: solana_program::pubkey::Pubkey,
-    /// Root account
-    pub root: solana_program::pubkey::Pubkey,
-    /// SPL account compression program
-    pub spl_account_compression: solana_program::pubkey::Pubkey,
+pub struct AssertAccountDataDelta {
+    /// Left account
+    pub left_account: solana_program::pubkey::Pubkey,
+    /// Right account
+    pub right_account: solana_program::pubkey::Pubkey,
 }
 
-impl AssertAccountCompression {
+impl AssertAccountDataDelta {
     pub fn instruction(
         &self,
-        args: AssertAccountCompressionInstructionArgs,
+        args: AssertAccountDataDeltaInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: AssertAccountCompressionInstructionArgs,
+        args: AssertAccountDataDeltaInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.merkle_tree,
+            self.left_account,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.root, false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.spl_account_compression,
+            self.right_account,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertAccountCompressionInstructionData::new()
+        let mut data = AssertAccountDataDeltaInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = args.try_to_vec().unwrap();
@@ -60,80 +56,76 @@ impl AssertAccountCompression {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertAccountCompressionInstructionData {
+struct AssertAccountDataDeltaInstructionData {
     discriminator: u8,
 }
 
-impl AssertAccountCompressionInstructionData {
+impl AssertAccountDataDeltaInstructionData {
     fn new() -> Self {
-        Self { discriminator: 12 }
+        Self { discriminator: 3 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AssertAccountCompressionInstructionArgs {
-    pub arg0: LogLevel,
-    pub leaf_index: u32,
-    pub leaf_hash: [u8; 32],
+pub struct AssertAccountDataDeltaInstructionArgs {
+    pub log_level: LogLevel,
+    pub offset_left: u16,
+    pub offset_right: u16,
+    pub assertion: DataValueDeltaAssertion,
 }
 
-/// Instruction builder for `AssertAccountCompression`.
+/// Instruction builder for `AssertAccountDataDelta`.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` merkle_tree
-///   1. `[]` root
-///   2. `[]` spl_account_compression
+///   0. `[]` left_account
+///   1. `[]` right_account
 #[derive(Default)]
-pub struct AssertAccountCompressionBuilder {
-    merkle_tree: Option<solana_program::pubkey::Pubkey>,
-    root: Option<solana_program::pubkey::Pubkey>,
-    spl_account_compression: Option<solana_program::pubkey::Pubkey>,
-    arg0: Option<LogLevel>,
-    leaf_index: Option<u32>,
-    leaf_hash: Option<[u8; 32]>,
+pub struct AssertAccountDataDeltaBuilder {
+    left_account: Option<solana_program::pubkey::Pubkey>,
+    right_account: Option<solana_program::pubkey::Pubkey>,
+    log_level: Option<LogLevel>,
+    offset_left: Option<u16>,
+    offset_right: Option<u16>,
+    assertion: Option<DataValueDeltaAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl AssertAccountCompressionBuilder {
+impl AssertAccountDataDeltaBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Merkle tree account
+    /// Left account
     #[inline(always)]
-    pub fn merkle_tree(&mut self, merkle_tree: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.merkle_tree = Some(merkle_tree);
+    pub fn left_account(&mut self, left_account: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.left_account = Some(left_account);
         self
     }
-    /// Root account
+    /// Right account
     #[inline(always)]
-    pub fn root(&mut self, root: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.root = Some(root);
-        self
-    }
-    /// SPL account compression program
-    #[inline(always)]
-    pub fn spl_account_compression(
-        &mut self,
-        spl_account_compression: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.spl_account_compression = Some(spl_account_compression);
+    pub fn right_account(&mut self, right_account: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.right_account = Some(right_account);
         self
     }
     #[inline(always)]
-    pub fn arg0(&mut self, arg0: LogLevel) -> &mut Self {
-        self.arg0 = Some(arg0);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
         self
     }
     #[inline(always)]
-    pub fn leaf_index(&mut self, leaf_index: u32) -> &mut Self {
-        self.leaf_index = Some(leaf_index);
+    pub fn offset_left(&mut self, offset_left: u16) -> &mut Self {
+        self.offset_left = Some(offset_left);
         self
     }
     #[inline(always)]
-    pub fn leaf_hash(&mut self, leaf_hash: [u8; 32]) -> &mut Self {
-        self.leaf_hash = Some(leaf_hash);
+    pub fn offset_right(&mut self, offset_right: u16) -> &mut Self {
+        self.offset_right = Some(offset_right);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: DataValueDeltaAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -156,58 +148,51 @@ impl AssertAccountCompressionBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = AssertAccountCompression {
-            merkle_tree: self.merkle_tree.expect("merkle_tree is not set"),
-            root: self.root.expect("root is not set"),
-            spl_account_compression: self
-                .spl_account_compression
-                .expect("spl_account_compression is not set"),
+        let accounts = AssertAccountDataDelta {
+            left_account: self.left_account.expect("left_account is not set"),
+            right_account: self.right_account.expect("right_account is not set"),
         };
-        let args = AssertAccountCompressionInstructionArgs {
-            arg0: self.arg0.clone().expect("arg0 is not set"),
-            leaf_index: self.leaf_index.clone().expect("leaf_index is not set"),
-            leaf_hash: self.leaf_hash.clone().expect("leaf_hash is not set"),
+        let args = AssertAccountDataDeltaInstructionArgs {
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            offset_left: self.offset_left.clone().expect("offset_left is not set"),
+            offset_right: self.offset_right.clone().expect("offset_right is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `assert_account_compression` CPI accounts.
-pub struct AssertAccountCompressionCpiAccounts<'a, 'b> {
-    /// Merkle tree account
-    pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Root account
-    pub root: &'b solana_program::account_info::AccountInfo<'a>,
-    /// SPL account compression program
-    pub spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+/// `assert_account_data_delta` CPI accounts.
+pub struct AssertAccountDataDeltaCpiAccounts<'a, 'b> {
+    /// Left account
+    pub left_account: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Right account
+    pub right_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `assert_account_compression` CPI instruction.
-pub struct AssertAccountCompressionCpi<'a, 'b> {
+/// `assert_account_data_delta` CPI instruction.
+pub struct AssertAccountDataDeltaCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Merkle tree account
-    pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Root account
-    pub root: &'b solana_program::account_info::AccountInfo<'a>,
-    /// SPL account compression program
-    pub spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Left account
+    pub left_account: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Right account
+    pub right_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: AssertAccountCompressionInstructionArgs,
+    pub __args: AssertAccountDataDeltaInstructionArgs,
 }
 
-impl<'a, 'b> AssertAccountCompressionCpi<'a, 'b> {
+impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: AssertAccountCompressionCpiAccounts<'a, 'b>,
-        args: AssertAccountCompressionInstructionArgs,
+        accounts: AssertAccountDataDeltaCpiAccounts<'a, 'b>,
+        args: AssertAccountDataDeltaInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
-            merkle_tree: accounts.merkle_tree,
-            root: accounts.root,
-            spl_account_compression: accounts.spl_account_compression,
+            left_account: accounts.left_account,
+            right_account: accounts.right_account,
             __args: args,
         }
     }
@@ -244,17 +229,13 @@ impl<'a, 'b> AssertAccountCompressionCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.merkle_tree.key,
+            *self.left_account.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.root.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.spl_account_compression.key,
+            *self.right_account.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
@@ -264,7 +245,7 @@ impl<'a, 'b> AssertAccountCompressionCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertAccountCompressionInstructionData::new()
+        let mut data = AssertAccountDataDeltaInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
@@ -275,11 +256,10 @@ impl<'a, 'b> AssertAccountCompressionCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(3 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.merkle_tree.clone());
-        account_infos.push(self.root.clone());
-        account_infos.push(self.spl_account_compression.clone());
+        account_infos.push(self.left_account.clone());
+        account_infos.push(self.right_account.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -292,68 +272,66 @@ impl<'a, 'b> AssertAccountCompressionCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `AssertAccountCompression` via CPI.
+/// Instruction builder for `AssertAccountDataDelta` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` merkle_tree
-///   1. `[]` root
-///   2. `[]` spl_account_compression
-pub struct AssertAccountCompressionCpiBuilder<'a, 'b> {
-    instruction: Box<AssertAccountCompressionCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` left_account
+///   1. `[]` right_account
+pub struct AssertAccountDataDeltaCpiBuilder<'a, 'b> {
+    instruction: Box<AssertAccountDataDeltaCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> AssertAccountCompressionCpiBuilder<'a, 'b> {
+impl<'a, 'b> AssertAccountDataDeltaCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(AssertAccountCompressionCpiBuilderInstruction {
+        let instruction = Box::new(AssertAccountDataDeltaCpiBuilderInstruction {
             __program: program,
-            merkle_tree: None,
-            root: None,
-            spl_account_compression: None,
-            arg0: None,
-            leaf_index: None,
-            leaf_hash: None,
+            left_account: None,
+            right_account: None,
+            log_level: None,
+            offset_left: None,
+            offset_right: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
-    /// Merkle tree account
+    /// Left account
     #[inline(always)]
-    pub fn merkle_tree(
+    pub fn left_account(
         &mut self,
-        merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
+        left_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.merkle_tree = Some(merkle_tree);
+        self.instruction.left_account = Some(left_account);
         self
     }
-    /// Root account
+    /// Right account
     #[inline(always)]
-    pub fn root(&mut self, root: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.root = Some(root);
-        self
-    }
-    /// SPL account compression program
-    #[inline(always)]
-    pub fn spl_account_compression(
+    pub fn right_account(
         &mut self,
-        spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+        right_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.spl_account_compression = Some(spl_account_compression);
+        self.instruction.right_account = Some(right_account);
         self
     }
     #[inline(always)]
-    pub fn arg0(&mut self, arg0: LogLevel) -> &mut Self {
-        self.instruction.arg0 = Some(arg0);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
         self
     }
     #[inline(always)]
-    pub fn leaf_index(&mut self, leaf_index: u32) -> &mut Self {
-        self.instruction.leaf_index = Some(leaf_index);
+    pub fn offset_left(&mut self, offset_left: u16) -> &mut Self {
+        self.instruction.offset_left = Some(offset_left);
         self
     }
     #[inline(always)]
-    pub fn leaf_hash(&mut self, leaf_hash: [u8; 32]) -> &mut Self {
-        self.instruction.leaf_hash = Some(leaf_hash);
+    pub fn offset_right(&mut self, offset_right: u16) -> &mut Self {
+        self.instruction.offset_right = Some(offset_right);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: DataValueDeltaAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -397,33 +375,40 @@ impl<'a, 'b> AssertAccountCompressionCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = AssertAccountCompressionInstructionArgs {
-            arg0: self.instruction.arg0.clone().expect("arg0 is not set"),
-            leaf_index: self
+        let args = AssertAccountDataDeltaInstructionArgs {
+            log_level: self
                 .instruction
-                .leaf_index
+                .log_level
                 .clone()
-                .expect("leaf_index is not set"),
-            leaf_hash: self
+                .expect("log_level is not set"),
+            offset_left: self
                 .instruction
-                .leaf_hash
+                .offset_left
                 .clone()
-                .expect("leaf_hash is not set"),
+                .expect("offset_left is not set"),
+            offset_right: self
+                .instruction
+                .offset_right
+                .clone()
+                .expect("offset_right is not set"),
+            assertion: self
+                .instruction
+                .assertion
+                .clone()
+                .expect("assertion is not set"),
         };
-        let instruction = AssertAccountCompressionCpi {
+        let instruction = AssertAccountDataDeltaCpi {
             __program: self.instruction.__program,
 
-            merkle_tree: self
+            left_account: self
                 .instruction
-                .merkle_tree
-                .expect("merkle_tree is not set"),
+                .left_account
+                .expect("left_account is not set"),
 
-            root: self.instruction.root.expect("root is not set"),
-
-            spl_account_compression: self
+            right_account: self
                 .instruction
-                .spl_account_compression
-                .expect("spl_account_compression is not set"),
+                .right_account
+                .expect("right_account is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -433,14 +418,14 @@ impl<'a, 'b> AssertAccountCompressionCpiBuilder<'a, 'b> {
     }
 }
 
-struct AssertAccountCompressionCpiBuilderInstruction<'a, 'b> {
+struct AssertAccountDataDeltaCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    root: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    spl_account_compression: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    arg0: Option<LogLevel>,
-    leaf_index: Option<u32>,
-    leaf_hash: Option<[u8; 32]>,
+    left_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    right_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    log_level: Option<LogLevel>,
+    offset_left: Option<u16>,
+    offset_right: Option<u16>,
+    assertion: Option<DataValueDeltaAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

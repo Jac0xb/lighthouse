@@ -4,7 +4,7 @@ use shank::ShankInstruction;
 use crate::{
     processor::{AssertMerkleLeafParameters, CreateMemoryAccountParameters, WriteParameters},
     types::{
-        AccountDataAssertion, AccountDeltaAssertion, AccountInfoAssertion, LogLevel,
+        AccountDataAssertion, AccountDataDeltaAssertion, AccountInfoAssertion, LogLevel,
         MintAccountAssertion, StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion,
         UpgradeableLoaderStateAssertion,
     },
@@ -30,7 +30,7 @@ pub enum LighthouseInstruction {
 
     #[account(0, name = "left_account", desc = "Left account")]
     #[account(1, name = "right_account", desc = "Right account")]
-    AssertDelta { log_level: LogLevel, assertion: AccountDeltaAssertion },
+    AssertAccountDataDelta { log_level: LogLevel, assertion: AccountDataDeltaAssertion },
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountInfo { log_level: LogLevel, assertion: AccountInfoAssertion },
@@ -60,5 +60,5 @@ pub enum LighthouseInstruction {
     #[account(0, name = "merkle_tree", desc = "Merkle tree account")]
     #[account(1, name = "root", desc = "Root account")]
     #[account(2, name = "spl_account_compression", desc = "SPL account compression program")]
-    AssertAccountCompression(LogLevel, AssertMerkleLeafParameters),
+    AssertMerkleTreeAccount(LogLevel, AssertMerkleLeafParameters),
 }

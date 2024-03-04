@@ -5,15 +5,15 @@ use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::instruction::InstructionError;
 use solana_program::pubkey::Pubkey;
+use solana_program_test::BanksClient;
 use solana_sdk::account::AccountSharedData;
 use solana_sdk::transaction::{Transaction, TransactionError};
 
 pub async fn process_transaction(
-    context: &mut TestContext,
+    client: &mut BanksClient,
     tx: &Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
-    let result: solana_banks_interface::BanksTransactionResultWithMetadata = context
-        .client()
+    let result: solana_banks_interface::BanksTransactionResultWithMetadata = client
         .process_transaction_with_metadata(tx.clone())
         .await
         .unwrap();
@@ -25,7 +25,7 @@ pub async fn process_transaction_assert_success(
     context: &mut TestContext,
     tx: Transaction,
 ) -> Result<BanksTransactionResultWithMetadata, Error> {
-    let tx_metadata = process_transaction(context, &tx).await;
+    let tx_metadata = process_transaction(&mut context.client(), &tx).await;
 
     if let Err(err) = tx_metadata {
         panic!("Transaction failed to process: {:?}", err);
@@ -56,7 +56,9 @@ pub async fn process_transaction_assert_failure(
     expected_tx_error: TransactionError,
     log_match_regex: Option<&[String]>,
 ) -> Result<(), Error> {
-    let tx_metadata = process_transaction(context, &tx).await.unwrap();
+    let tx_metadata = process_transaction(&mut context.client(), &tx)
+        .await
+        .unwrap();
 
     let logs = tx_metadata.metadata.clone().unwrap().log_messages;
     for log in logs {
