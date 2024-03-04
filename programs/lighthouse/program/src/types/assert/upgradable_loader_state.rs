@@ -1,15 +1,15 @@
+use super::{Assert, LogLevel};
+use crate::{
+    err, err_msg,
+    error::LighthouseError,
+    types::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    utils::Result,
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::AccountInfo, bpf_loader_upgradeable,
     bpf_loader_upgradeable::UpgradeableLoaderState, msg, program_error::ProgramError,
     pubkey::Pubkey,
-};
-
-use crate::{
-    err, err_msg,
-    error::LighthouseError,
-    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, LogLevel, Operator},
-    utils::Result,
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
@@ -176,7 +176,7 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
         upgradable_loader_state: &UpgradeableLoaderState,
         log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
-        let result = match &upgradable_loader_state {
+        Ok(match &upgradable_loader_state {
             UpgradeableLoaderState::ProgramData {
                 upgrade_authority_address,
                 slot,
@@ -197,9 +197,7 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                     get_state_enum(upgradable_loader_state)
                 ),
             }),
-        };
-
-        Ok(result)
+        })
     }
 }
 

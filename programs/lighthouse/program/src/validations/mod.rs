@@ -1,7 +1,6 @@
 pub mod account;
 
 pub use account::*;
-
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program_error::ProgramError,
     pubkey::Pubkey,

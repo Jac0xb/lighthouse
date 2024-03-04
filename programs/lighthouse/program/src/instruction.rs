@@ -1,18 +1,17 @@
+use crate::{
+    processor::{CreateMemoryAccountParameters, WriteParameters},
+    types::assert::{
+        AccountDataAssertion, AccountDataDeltaAssertion, AccountInfoAssertion, LogLevel,
+        MerkleTreeAssertion, MintAccountAssertion, StakeAccountAssertion, SysvarClockAssertion,
+        TokenAccountAssertion, UpgradeableLoaderStateAssertion,
+    },
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankInstruction;
 
-use crate::{
-    processor::{AssertMerkleLeafParameters, CreateMemoryAccountParameters, WriteParameters},
-    types::{
-        AccountDataAssertion, AccountDataDeltaAssertion, AccountInfoAssertion, LogLevel,
-        MintAccountAssertion, StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion,
-        UpgradeableLoaderStateAssertion,
-    },
-};
-
 #[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction, Debug)]
 #[rustfmt::skip]
-pub enum LighthouseInstruction {
+pub(crate) enum LighthouseInstruction {
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account", signer)]
     #[account(2, name = "memory_account", desc = "Memory account", writable)]
@@ -60,5 +59,5 @@ pub enum LighthouseInstruction {
     #[account(0, name = "merkle_tree", desc = "Merkle tree account")]
     #[account(1, name = "root", desc = "Root account")]
     #[account(2, name = "spl_account_compression", desc = "SPL account compression program")]
-    AssertMerkleTreeAccount(LogLevel, AssertMerkleLeafParameters),
+    AssertMerkleTreeAccount { log_level: LogLevel, assertion: MerkleTreeAssertion },
 }

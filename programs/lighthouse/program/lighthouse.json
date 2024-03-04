@@ -451,15 +451,15 @@
       ],
       "args": [
         {
-          "name": "arg0",
+          "name": "logLevel",
           "type": {
             "defined": "LogLevel"
           }
         },
         {
-          "name": "arg1",
+          "name": "assertion",
           "type": {
-            "defined": "AssertMerkleLeafParameters"
+            "defined": "MerkleTreeAssertion"
           }
         }
       ],
@@ -470,27 +470,6 @@
     }
   ],
   "types": [
-    {
-      "name": "AssertMerkleLeafParameters",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "leafIndex",
-            "type": "u32"
-          },
-          {
-            "name": "leafHash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "CreateMemoryAccountParameters",
       "type": {
@@ -1199,13 +1178,39 @@
             "name": "Silent"
           },
           {
-            "name": "PlaintextLog"
+            "name": "PlaintextMsgLog"
           },
           {
-            "name": "EventLog"
+            "name": "SerializedMsgLog"
           },
           {
             "name": "CpiLog"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MerkleTreeAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "VerifyLeaf",
+            "fields": [
+              {
+                "name": "leaf_index",
+                "type": "u32"
+              },
+              {
+                "name": "leaf_hash",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
+              }
+            ]
           }
         ]
       }

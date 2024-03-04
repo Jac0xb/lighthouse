@@ -15,17 +15,10 @@ import {
   mapEncoder,
 } from '@solana/codecs-core';
 import {
-  getBytesDecoder,
-  getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
 } from '@solana/codecs-data-structures';
-import {
-  getU32Decoder,
-  getU32Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs-numbers';
+import { getU8Decoder, getU8Encoder } from '@solana/codecs-numbers';
 import {
   AccountRole,
   IAccountMeta,
@@ -42,8 +35,12 @@ import {
 import {
   LogLevel,
   LogLevelArgs,
+  MerkleTreeAssertion,
+  MerkleTreeAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
+  getMerkleTreeAssertionDecoder,
+  getMerkleTreeAssertionEncoder,
 } from '../types';
 
 export type AssertMerkleTreeAccountInstruction<
@@ -94,24 +91,21 @@ export type AssertMerkleTreeAccountInstructionWithSigners<
 
 export type AssertMerkleTreeAccountInstructionData = {
   discriminator: number;
-  arg0: LogLevel;
-  leafIndex: number;
-  leafHash: Uint8Array;
+  logLevel: LogLevel;
+  assertion: MerkleTreeAssertion;
 };
 
 export type AssertMerkleTreeAccountInstructionDataArgs = {
-  arg0: LogLevelArgs;
-  leafIndex: number;
-  leafHash: Uint8Array;
+  logLevel: LogLevelArgs;
+  assertion: MerkleTreeAssertionArgs;
 };
 
 export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<AssertMerkleTreeAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['arg0', getLogLevelEncoder()],
-      ['leafIndex', getU32Encoder()],
-      ['leafHash', getBytesEncoder({ size: 32 })],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getMerkleTreeAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 12 })
   );
@@ -120,9 +114,8 @@ export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<Asse
 export function getAssertMerkleTreeAccountInstructionDataDecoder(): Decoder<AssertMerkleTreeAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['arg0', getLogLevelDecoder()],
-    ['leafIndex', getU32Decoder()],
-    ['leafHash', getBytesDecoder({ size: 32 })],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getMerkleTreeAssertionDecoder()],
   ]);
 }
 
@@ -147,9 +140,8 @@ export type AssertMerkleTreeAccountInput<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  arg0: AssertMerkleTreeAccountInstructionDataArgs['arg0'];
-  leafIndex: AssertMerkleTreeAccountInstructionDataArgs['leafIndex'];
-  leafHash: AssertMerkleTreeAccountInstructionDataArgs['leafHash'];
+  logLevel: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
+  assertion: AssertMerkleTreeAccountInstructionDataArgs['assertion'];
 };
 
 export type AssertMerkleTreeAccountInputWithSigners<
@@ -163,9 +155,8 @@ export type AssertMerkleTreeAccountInputWithSigners<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  arg0: AssertMerkleTreeAccountInstructionDataArgs['arg0'];
-  leafIndex: AssertMerkleTreeAccountInstructionDataArgs['leafIndex'];
-  leafHash: AssertMerkleTreeAccountInstructionDataArgs['leafHash'];
+  logLevel: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
+  assertion: AssertMerkleTreeAccountInstructionDataArgs['assertion'];
 };
 
 export function getAssertMerkleTreeAccountInstruction<

@@ -1,12 +1,10 @@
-use std::{fmt::Debug, slice::Iter};
-
 use crate::{
     error::LighthouseError,
-    types::{Assert, LogLevel},
-    utils::print_assertion_result,
+    types::assert::{Assert, LogLevel},
     utils::Result,
 };
 use solana_program::account_info::{next_account_info, AccountInfo};
+use std::{fmt::Debug, slice::Iter};
 
 pub(crate) struct AssertTargetAccountContext<'info> {
     pub(crate) target_account: AccountInfo<'info>,

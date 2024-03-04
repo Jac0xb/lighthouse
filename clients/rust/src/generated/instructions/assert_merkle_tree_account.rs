@@ -6,6 +6,7 @@
 //!
 
 use crate::generated::types::LogLevel;
+use crate::generated::types::MerkleTreeAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -73,9 +74,8 @@ impl AssertMerkleTreeAccountInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertMerkleTreeAccountInstructionArgs {
-    pub arg0: LogLevel,
-    pub leaf_index: u32,
-    pub leaf_hash: [u8; 32],
+    pub log_level: LogLevel,
+    pub assertion: MerkleTreeAssertion,
 }
 
 /// Instruction builder for `AssertMerkleTreeAccount`.
@@ -90,9 +90,8 @@ pub struct AssertMerkleTreeAccountBuilder {
     merkle_tree: Option<solana_program::pubkey::Pubkey>,
     root: Option<solana_program::pubkey::Pubkey>,
     spl_account_compression: Option<solana_program::pubkey::Pubkey>,
-    arg0: Option<LogLevel>,
-    leaf_index: Option<u32>,
-    leaf_hash: Option<[u8; 32]>,
+    log_level: Option<LogLevel>,
+    assertion: Option<MerkleTreeAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -122,18 +121,13 @@ impl AssertMerkleTreeAccountBuilder {
         self
     }
     #[inline(always)]
-    pub fn arg0(&mut self, arg0: LogLevel) -> &mut Self {
-        self.arg0 = Some(arg0);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
         self
     }
     #[inline(always)]
-    pub fn leaf_index(&mut self, leaf_index: u32) -> &mut Self {
-        self.leaf_index = Some(leaf_index);
-        self
-    }
-    #[inline(always)]
-    pub fn leaf_hash(&mut self, leaf_hash: [u8; 32]) -> &mut Self {
-        self.leaf_hash = Some(leaf_hash);
+    pub fn assertion(&mut self, assertion: MerkleTreeAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -164,9 +158,8 @@ impl AssertMerkleTreeAccountBuilder {
                 .expect("spl_account_compression is not set"),
         };
         let args = AssertMerkleTreeAccountInstructionArgs {
-            arg0: self.arg0.clone().expect("arg0 is not set"),
-            leaf_index: self.leaf_index.clone().expect("leaf_index is not set"),
-            leaf_hash: self.leaf_hash.clone().expect("leaf_hash is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -310,9 +303,8 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
             merkle_tree: None,
             root: None,
             spl_account_compression: None,
-            arg0: None,
-            leaf_index: None,
-            leaf_hash: None,
+            log_level: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -342,18 +334,13 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn arg0(&mut self, arg0: LogLevel) -> &mut Self {
-        self.instruction.arg0 = Some(arg0);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
         self
     }
     #[inline(always)]
-    pub fn leaf_index(&mut self, leaf_index: u32) -> &mut Self {
-        self.instruction.leaf_index = Some(leaf_index);
-        self
-    }
-    #[inline(always)]
-    pub fn leaf_hash(&mut self, leaf_hash: [u8; 32]) -> &mut Self {
-        self.instruction.leaf_hash = Some(leaf_hash);
+    pub fn assertion(&mut self, assertion: MerkleTreeAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -398,17 +385,16 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertMerkleTreeAccountInstructionArgs {
-            arg0: self.instruction.arg0.clone().expect("arg0 is not set"),
-            leaf_index: self
+            log_level: self
                 .instruction
-                .leaf_index
+                .log_level
                 .clone()
-                .expect("leaf_index is not set"),
-            leaf_hash: self
+                .expect("log_level is not set"),
+            assertion: self
                 .instruction
-                .leaf_hash
+                .assertion
                 .clone()
-                .expect("leaf_hash is not set"),
+                .expect("assertion is not set"),
         };
         let instruction = AssertMerkleTreeAccountCpi {
             __program: self.instruction.__program,
@@ -438,9 +424,8 @@ struct AssertMerkleTreeAccountCpiBuilderInstruction<'a, 'b> {
     merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     root: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     spl_account_compression: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    arg0: Option<LogLevel>,
-    leaf_index: Option<u32>,
-    leaf_hash: Option<[u8; 32]>,
+    log_level: Option<LogLevel>,
+    assertion: Option<MerkleTreeAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

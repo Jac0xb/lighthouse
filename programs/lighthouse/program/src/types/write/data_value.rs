@@ -1,6 +1,5 @@
-use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{program_error::ProgramError, pubkey::Pubkey};
+use solana_program::pubkey::Pubkey;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValue {

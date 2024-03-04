@@ -1,8 +1,10 @@
+use super::{Assert, LogLevel};
+use crate::{
+    types::operator::{ComparableOperator, EvaluationResult, Operator},
+    utils::Result,
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::clock::Clock;
-
-use crate::types::{Assert, ComparableOperator, EvaluationResult, LogLevel, Operator};
-use crate::utils::Result;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum SysvarClockAssertion {
@@ -80,7 +82,10 @@ impl Assert<Clock> for SysvarClockAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use crate::types::{Assert, ComparableOperator, LogLevel, SysvarClockAssertion};
+        use crate::types::{
+            assert::{Assert, LogLevel, SysvarClockAssertion},
+            operator::ComparableOperator,
+        };
 
         #[test]
         fn evaluate_clock() {
@@ -98,7 +103,7 @@ mod tests {
                 value: 69,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -111,7 +116,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -126,7 +131,7 @@ mod tests {
                 value: 420,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -139,7 +144,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -154,7 +159,7 @@ mod tests {
                 value: 1337,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -167,7 +172,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -182,7 +187,7 @@ mod tests {
                 value: 9001,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -195,7 +200,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -210,7 +215,7 @@ mod tests {
                 value: 123456789,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -223,7 +228,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextLog);
+            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

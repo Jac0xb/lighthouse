@@ -14,8 +14,8 @@ import {
 
 export enum LogLevel {
   Silent,
-  PlaintextLog,
-  EventLog,
+  PlaintextMsgLog,
+  SerializedMsgLog,
   CpiLog,
 }
 

@@ -1,6 +1,6 @@
 use crate::{
     error::LighthouseError,
-    types::{Assert, LogLevel},
+    types::assert::{Assert, LogLevel},
     Result,
 };
 use solana_program::account_info::{next_account_info, AccountInfo};

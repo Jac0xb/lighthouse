@@ -1,15 +1,28 @@
-use crate::{types::EvaluationResult, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
-
-pub trait Assert<T: core::fmt::Debug> {
-    fn evaluate(&self, parameters: &T, log_level: &LogLevel) -> Result<Box<EvaluationResult>>;
-}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, PartialEq, PartialOrd, Clone)]
 #[repr(u8)]
 pub enum LogLevel {
     Silent = 0,
-    PlaintextLog = 1,
-    EventLog = 2,
+    PlaintextMsgLog = 1,
+    SerializedMsgLog = 2,
     CpiLog = 3,
+}
+
+impl LogLevel {
+    pub fn is_silent(&self) -> bool {
+        self == &LogLevel::Silent
+    }
+
+    pub fn is_plaintextmsg_log(&self) -> bool {
+        self == &LogLevel::PlaintextMsgLog
+    }
+
+    pub fn is_serializedmsg_log(&self) -> bool {
+        self == &LogLevel::SerializedMsgLog
+    }
+
+    pub fn is_cpi_log(&self) -> bool {
+        self == &LogLevel::CpiLog
+    }
 }
