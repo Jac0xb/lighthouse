@@ -1,7 +1,6 @@
 use std::{any::type_name, fmt::Debug, ops::Range};
 
 use crate::{
-    err,
     error::LighthouseError,
     types::{operator::EvaluationResult, Assert},
 };
@@ -9,7 +8,7 @@ use borsh::BorshDeserialize;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
-    msg,
+    log, msg,
     program::{invoke, invoke_signed},
     program_error::ProgramError,
     program_option::COption,
@@ -85,7 +84,9 @@ pub fn try_from_slice<T: BorshDeserialize + Sized>(
             start..end
         );
 
-        err!(LighthouseError::RangeOutOfBounds)
+        // err!(LighthouseError::RangeOutOfBounds)
+
+        ProgramError::Custom(0)
     })?;
 
     Ok(T::try_from_slice(slice)?)
@@ -156,4 +157,11 @@ pub fn create_account<'a, 'info>(
 pub fn out_of_bounds_err(r: Range<usize>) -> ProgramError {
     msg!("Failed to access account data range {:?}: out of bounds", r);
     LighthouseError::RangeOutOfBounds.into()
+}
+
+macro_rules! log_compute {
+    () => {
+        #[cfg(all(feature = "sol-log", feature = "log"))]
+        ::solana_program::log::sol_log_compute_units();
+    };
 }

@@ -34,20 +34,20 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                 if account.data_is_empty() || account.owner.eq(&solana_program::system_program::ID)
                 {
                     msg!("account inited condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsNotInited => {
                 if account.lamports() != 0 || !account.owner.eq(&solana_program::system_program::ID)
                 {
                     msg!("account not inited condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsWritable => {
                 if !account.is_writable {
                     msg!("account is writable condition failed: {:?}", account.key);
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
             AccountValidation::IsProgramDerivedAddress(seeds, program_id, bump) => match bump {
@@ -66,7 +66,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                                     seeds_and_bump,
                                     err
                                 );
-                                LighthouseError::AccountValidaitonFailed
+                                LighthouseError::AccountValidationFailed
                             })?;
 
                     if account.key != &derived_address {
@@ -75,7 +75,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                             account.key,
                             derived_address
                         );
-                        return Err(LighthouseError::AccountValidaitonFailed.into());
+                        return Err(LighthouseError::AccountValidationFailed.into());
                     }
 
                     bump_map.insert(*account.key, bump);
@@ -93,7 +93,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                             generated_pda
                         );
 
-                        return Err(LighthouseError::AccountValidaitonFailed.into());
+                        return Err(LighthouseError::AccountValidationFailed.into());
                     }
 
                     bump_map.insert(*account.key, bump);
@@ -106,7 +106,7 @@ pub fn to_checked_account<'a, 'info, T: CheckedAccount<'info>>(
                         account.owner,
                         owner
                     );
-                    return Err(LighthouseError::AccountValidaitonFailed.into());
+                    return Err(LighthouseError::AccountValidationFailed.into());
                 }
             }
         }

@@ -76,14 +76,16 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .upgradeable_loader_state_assertion(UpgradeableLoaderStateAssertion::State {
+                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Program,
                     operator: EquatableOperator::Equal,
                 })
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .upgradeable_loader_state_assertion(UpgradeableLoaderStateAssertion::Program(
+                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .assertion(UpgradeableLoaderStateAssertion::Program(
                     UpgradeableProgramAssertion::ProgramDataAddress {
                         value: programdata_address,
                         operator: EquatableOperator::Equal,
@@ -124,14 +126,16 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .upgradeable_loader_state_assertion(UpgradeableLoaderStateAssertion::State {
+                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::ProgramData,
                     operator: EquatableOperator::Equal,
                 })
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .upgradeable_loader_state_assertion(UpgradeableLoaderStateAssertion::ProgramData(
+                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: upgrade_authority_address,
                         operator: EquatableOperator::Equal,
@@ -140,7 +144,8 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .upgradeable_loader_state_assertion(UpgradeableLoaderStateAssertion::ProgramData(
+                .log_level(lighthouse_client::types::LogLevel::PlaintextLog)
+                .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: slot,
                         operator: ComparableOperator::Equal,

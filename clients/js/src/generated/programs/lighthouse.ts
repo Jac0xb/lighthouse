@@ -37,7 +37,7 @@ export enum LighthouseInstruction {
   CreateMemoryAccount,
   Write,
   AssertAccountData,
-  AssertAccountDataDiff,
+  AssertDelta,
   AssertAccountInfo,
   AssertMintAccount,
   AssertMintAccountMulti,
@@ -46,6 +46,7 @@ export enum LighthouseInstruction {
   AssertStakeAccount,
   AssertUpgradeableLoaderAccount,
   AssertSysvarClock,
+  AssertAccountCompression,
 }
 
 export function identifyLighthouseInstruction(
@@ -63,7 +64,7 @@ export function identifyLighthouseInstruction(
     return LighthouseInstruction.AssertAccountData;
   }
   if (memcmp(data, getU8Encoder().encode(3), 0)) {
-    return LighthouseInstruction.AssertAccountDataDiff;
+    return LighthouseInstruction.AssertDelta;
   }
   if (memcmp(data, getU8Encoder().encode(4), 0)) {
     return LighthouseInstruction.AssertAccountInfo;
@@ -88,6 +89,9 @@ export function identifyLighthouseInstruction(
   }
   if (memcmp(data, getU8Encoder().encode(11), 0)) {
     return LighthouseInstruction.AssertSysvarClock;
+  }
+  if (memcmp(data, getU8Encoder().encode(12), 0)) {
+    return LighthouseInstruction.AssertAccountCompression;
   }
   throw new Error(
     'The provided instruction could not be identified as a lighthouse instruction.'

@@ -4,19 +4,19 @@ use solana_program::account_info::AccountInfo;
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{Assert, EvaluationResult, IntegerOperator, Operator},
+    types::{Assert, EvaluationResult, IntegerOperator, LogLevel, Operator},
     utils::{try_from_slice, Result},
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub struct AccountDataDiffAssertion {
+pub struct AccountDeltaAssertion {
     pub offset_left: u16,
     pub offset_right: u16,
-    pub assertion: DataValueDiffAssertion,
+    pub assertion: DataValueDeltaAssertion,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum DataValueDiffAssertion {
+pub enum DataValueDeltaAssertion {
     U8 {
         value: i16,
         operator: IntegerOperator,
@@ -51,11 +51,11 @@ pub enum DataValueDiffAssertion {
     },
 }
 
-impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
+impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDeltaAssertion {
     fn evaluate(
         &self,
         accounts: &(AccountInfo, AccountInfo),
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let left_offset = self.offset_left as usize;
         let right_offset = self.offset_right as usize;
@@ -73,7 +73,7 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
         })?;
 
         match assertion {
-            DataValueDiffAssertion::U8 {
+            DataValueDeltaAssertion::U8 {
                 value: assertion_value,
                 operator,
             } => {
@@ -82,9 +82,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i16 - right_value as i16;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::I8 {
+            DataValueDeltaAssertion::I8 {
                 value: assertion_value,
                 operator,
             } => {
@@ -93,9 +93,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i16 - right_value as i16;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::U16 {
+            DataValueDeltaAssertion::U16 {
                 value: assertion_value,
                 operator,
             } => {
@@ -104,9 +104,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i32 - right_value as i32;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::I16 {
+            DataValueDeltaAssertion::I16 {
                 value: assertion_value,
                 operator,
             } => {
@@ -115,9 +115,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i32 - right_value as i32;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::U32 {
+            DataValueDeltaAssertion::U32 {
                 value: assertion_value,
                 operator,
             } => {
@@ -126,9 +126,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i64 - right_value as i64;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::I32 {
+            DataValueDeltaAssertion::I32 {
                 value: assertion_value,
                 operator,
             } => {
@@ -137,9 +137,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i64 - right_value as i64;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::U64 {
+            DataValueDeltaAssertion::U64 {
                 value: assertion_value,
                 operator,
             } => {
@@ -148,9 +148,9 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i128 - right_value as i128;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
-            DataValueDiffAssertion::I64 {
+            DataValueDeltaAssertion::I64 {
                 value: assertion_value,
                 operator,
             } => {
@@ -159,7 +159,7 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDiffAssertion {
 
                 let diff_value = left_value as i128 - right_value as i128;
 
-                Ok(operator.evaluate(&diff_value, assertion_value, include_output))
+                Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
         }
     }
@@ -172,7 +172,9 @@ mod tests {
 
         use crate::{
             test_utils::create_test_account,
-            types::{AccountDataDiffAssertion, Assert, DataValueDiffAssertion, IntegerOperator},
+            types::{
+                AccountDeltaAssertion, Assert, DataValueDeltaAssertion, IntegerOperator, LogLevel,
+            },
         };
 
         #[test]
@@ -190,10 +192,10 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDataDiffAssertion {
+            let assertion = AccountDeltaAssertion {
                 offset_left: 0,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U8 {
+                assertion: DataValueDeltaAssertion::U8 {
                     value: 1i16 - (u8::MAX as i16),
                     operator: IntegerOperator::Equal,
                 },
@@ -202,23 +204,26 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    true,
+                    &LogLevel::PlaintextLog,
                 )
                 .unwrap();
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDataDiffAssertion {
+            let reverse_assertion = AccountDeltaAssertion {
                 offset_left: 0,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U8 {
+                assertion: DataValueDeltaAssertion::U8 {
                     value: (u8::MAX as i16) - 1i16,
                     operator: IntegerOperator::Equal,
                 },
             };
 
             let result = reverse_assertion
-                .evaluate(&(right_account_info, left_account_info), true)
+                .evaluate(
+                    &(right_account_info, left_account_info),
+                    &LogLevel::PlaintextLog,
+                )
                 .unwrap();
 
             assert!(result.passed);
@@ -240,10 +245,10 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDataDiffAssertion {
+            let assertion = AccountDeltaAssertion {
                 offset_left: 1,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::I8 {
+                assertion: DataValueDeltaAssertion::I8 {
                     value: (test_account.i8 as i16) - (i8::MIN as i16),
                     operator: IntegerOperator::Equal,
                 },
@@ -252,7 +257,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    true,
+                    &LogLevel::PlaintextLog,
                 )
                 .unwrap();
 
@@ -260,17 +265,20 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDataDiffAssertion {
+            let reverse_assertion = AccountDeltaAssertion {
                 offset_left: 0,
                 offset_right: 1,
-                assertion: DataValueDiffAssertion::I8 {
+                assertion: DataValueDeltaAssertion::I8 {
                     value: (i8::MIN as i16) - (test_account.i8 as i16),
                     operator: IntegerOperator::Equal,
                 },
             };
 
             let result = reverse_assertion
-                .evaluate(&(right_account_info, left_account_info), true)
+                .evaluate(
+                    &(right_account_info, left_account_info),
+                    &LogLevel::PlaintextLog,
+                )
                 .unwrap();
 
             assert!(result.passed);
@@ -292,10 +300,10 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDataDiffAssertion {
+            let assertion = AccountDeltaAssertion {
                 offset_left: 2,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::U16 {
+                assertion: DataValueDeltaAssertion::U16 {
                     value: (test_account.u16 as i32) - (u16::MAX as i32),
                     operator: IntegerOperator::Equal,
                 },
@@ -304,7 +312,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    true,
+                    &LogLevel::PlaintextLog,
                 )
                 .unwrap();
 
@@ -312,17 +320,20 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDataDiffAssertion {
+            let reverse_assertion = AccountDeltaAssertion {
                 offset_left: 0,
                 offset_right: 2,
-                assertion: DataValueDiffAssertion::U16 {
+                assertion: DataValueDeltaAssertion::U16 {
                     value: (u16::MAX as i32) - (test_account.u16 as i32),
                     operator: IntegerOperator::Equal,
                 },
             };
 
             let result = reverse_assertion
-                .evaluate(&(right_account_info, left_account_info), true)
+                .evaluate(
+                    &(right_account_info, left_account_info),
+                    &LogLevel::PlaintextLog,
+                )
                 .unwrap();
 
             assert!(result.passed);
@@ -344,10 +355,10 @@ mod tests {
             let right_account_info =
                 AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
 
-            let assertion = AccountDataDiffAssertion {
+            let assertion = AccountDeltaAssertion {
                 offset_left: 4,
                 offset_right: 0,
-                assertion: DataValueDiffAssertion::I16 {
+                assertion: DataValueDeltaAssertion::I16 {
                     value: (test_account.i16 as i32) - (i16::MIN as i32) - 10,
                     operator: IntegerOperator::GreaterThan,
                 },
@@ -356,7 +367,7 @@ mod tests {
             let result = assertion
                 .evaluate(
                     &(left_account_info.clone(), right_account_info.clone()),
-                    true,
+                    &LogLevel::PlaintextLog,
                 )
                 .unwrap();
 
@@ -364,17 +375,20 @@ mod tests {
 
             assert!(result.passed);
 
-            let reverse_assertion = AccountDataDiffAssertion {
+            let reverse_assertion = AccountDeltaAssertion {
                 offset_left: 0,
                 offset_right: 4,
-                assertion: DataValueDiffAssertion::I16 {
+                assertion: DataValueDeltaAssertion::I16 {
                     value: (i16::MIN as i32) - (test_account.i16 as i32) + 10,
                     operator: IntegerOperator::LessThan,
                 },
             };
 
             let result = reverse_assertion
-                .evaluate(&(right_account_info, left_account_info), true)
+                .evaluate(
+                    &(right_account_info, left_account_info),
+                    &LogLevel::PlaintextLog,
+                )
                 .unwrap();
 
             assert!(result.passed);

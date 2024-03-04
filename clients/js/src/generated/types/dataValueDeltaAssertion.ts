@@ -32,7 +32,7 @@ import {
   getIntegerOperatorEncoder,
 } from '.';
 
-export type DataValueDiffAssertion =
+export type DataValueDeltaAssertion =
   | { __kind: 'U8'; value: number; operator: IntegerOperator }
   | { __kind: 'I8'; value: number; operator: IntegerOperator }
   | { __kind: 'U16'; value: number; operator: IntegerOperator }
@@ -42,7 +42,7 @@ export type DataValueDiffAssertion =
   | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator };
 
-export type DataValueDiffAssertionArgs =
+export type DataValueDeltaAssertionArgs =
   | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
   | { __kind: 'I8'; value: number; operator: IntegerOperatorArgs }
   | { __kind: 'U16'; value: number; operator: IntegerOperatorArgs }
@@ -52,7 +52,7 @@ export type DataValueDiffAssertionArgs =
   | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs };
 
-export function getDataValueDiffAssertionEncoder(): Encoder<DataValueDiffAssertionArgs> {
+export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
   return getDataEnumEncoder([
     [
       'U8',
@@ -113,7 +113,7 @@ export function getDataValueDiffAssertionEncoder(): Encoder<DataValueDiffAsserti
   ]);
 }
 
-export function getDataValueDiffAssertionDecoder(): Decoder<DataValueDiffAssertion> {
+export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAssertion> {
   return getDataEnumDecoder([
     [
       'U8',
@@ -174,62 +174,62 @@ export function getDataValueDiffAssertionDecoder(): Decoder<DataValueDiffAsserti
   ]);
 }
 
-export function getDataValueDiffAssertionCodec(): Codec<
-  DataValueDiffAssertionArgs,
-  DataValueDiffAssertion
+export function getDataValueDeltaAssertionCodec(): Codec<
+  DataValueDeltaAssertionArgs,
+  DataValueDeltaAssertion
 > {
   return combineCodec(
-    getDataValueDiffAssertionEncoder(),
-    getDataValueDiffAssertionDecoder()
+    getDataValueDeltaAssertionEncoder(),
+    getDataValueDeltaAssertionDecoder()
   );
 }
 
 // Data Enum Helpers.
-export function dataValueDiffAssertion(
+export function dataValueDeltaAssertion(
   kind: 'U8',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'U8'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'U8'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U8'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U8'>;
+export function dataValueDeltaAssertion(
   kind: 'I8',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'I8'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'I8'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I8'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I8'>;
+export function dataValueDeltaAssertion(
   kind: 'U16',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'U16'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'U16'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U16'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U16'>;
+export function dataValueDeltaAssertion(
   kind: 'I16',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'I16'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'I16'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I16'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I16'>;
+export function dataValueDeltaAssertion(
   kind: 'U32',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'U32'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'U32'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U32'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U32'>;
+export function dataValueDeltaAssertion(
   kind: 'I32',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'I32'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'I32'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I32'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I32'>;
+export function dataValueDeltaAssertion(
   kind: 'U64',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'U64'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'U64'>;
-export function dataValueDiffAssertion(
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U64'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U64'>;
+export function dataValueDeltaAssertion(
   kind: 'I64',
-  data: GetDataEnumKindContent<DataValueDiffAssertionArgs, 'I64'>
-): GetDataEnumKind<DataValueDiffAssertionArgs, 'I64'>;
-export function dataValueDiffAssertion<
-  K extends DataValueDiffAssertionArgs['__kind']
->(kind: K, data?: any): Extract<DataValueDiffAssertionArgs, { __kind: K }> {
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I64'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I64'>;
+export function dataValueDeltaAssertion<
+  K extends DataValueDeltaAssertionArgs['__kind']
+>(kind: K, data?: any): Extract<DataValueDeltaAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
-export function isDataValueDiffAssertion<
-  K extends DataValueDiffAssertion['__kind']
+export function isDataValueDeltaAssertion<
+  K extends DataValueDeltaAssertion['__kind']
 >(
   kind: K,
-  value: DataValueDiffAssertion
-): value is DataValueDiffAssertion & { __kind: K } {
+  value: DataValueDeltaAssertion
+): value is DataValueDeltaAssertion & { __kind: K } {
   return value.__kind === kind;
 }

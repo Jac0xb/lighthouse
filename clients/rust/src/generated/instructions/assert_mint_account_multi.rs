@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::MintAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -62,7 +63,8 @@ impl AssertMintAccountMultiInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertMintAccountMultiInstructionArgs {
-    pub args: Vec<MintAccountAssertion>,
+    pub log_level: LogLevel,
+    pub assertions: Vec<MintAccountAssertion>,
 }
 
 /// Instruction builder for `AssertMintAccountMulti`.
@@ -73,7 +75,8 @@ pub struct AssertMintAccountMultiInstructionArgs {
 #[derive(Default)]
 pub struct AssertMintAccountMultiBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
-    args: Option<Vec<MintAccountAssertion>>,
+    log_level: Option<LogLevel>,
+    assertions: Option<Vec<MintAccountAssertion>>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -88,8 +91,13 @@ impl AssertMintAccountMultiBuilder {
         self
     }
     #[inline(always)]
-    pub fn args(&mut self, args: Vec<MintAccountAssertion>) -> &mut Self {
-        self.args = Some(args);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertions(&mut self, assertions: Vec<MintAccountAssertion>) -> &mut Self {
+        self.assertions = Some(assertions);
         self
     }
     /// Add an aditional account to the instruction.
@@ -116,7 +124,8 @@ impl AssertMintAccountMultiBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertMintAccountMultiInstructionArgs {
-            args: self.args.clone().expect("args is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertions: self.assertions.clone().expect("assertions is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -236,7 +245,8 @@ impl<'a, 'b> AssertMintAccountMultiCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertMintAccountMultiCpiBuilderInstruction {
             __program: program,
             target_account: None,
-            args: None,
+            log_level: None,
+            assertions: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -251,8 +261,13 @@ impl<'a, 'b> AssertMintAccountMultiCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn args(&mut self, args: Vec<MintAccountAssertion>) -> &mut Self {
-        self.instruction.args = Some(args);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertions(&mut self, assertions: Vec<MintAccountAssertion>) -> &mut Self {
+        self.instruction.assertions = Some(assertions);
         self
     }
     /// Add an additional account to the instruction.
@@ -297,7 +312,16 @@ impl<'a, 'b> AssertMintAccountMultiCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertMintAccountMultiInstructionArgs {
-            args: self.instruction.args.clone().expect("args is not set"),
+            log_level: self
+                .instruction
+                .log_level
+                .clone()
+                .expect("log_level is not set"),
+            assertions: self
+                .instruction
+                .assertions
+                .clone()
+                .expect("assertions is not set"),
         };
         let instruction = AssertMintAccountMultiCpi {
             __program: self.instruction.__program,
@@ -318,7 +342,8 @@ impl<'a, 'b> AssertMintAccountMultiCpiBuilder<'a, 'b> {
 struct AssertMintAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    args: Option<Vec<MintAccountAssertion>>,
+    log_level: Option<LogLevel>,
+    assertions: Option<Vec<MintAccountAssertion>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

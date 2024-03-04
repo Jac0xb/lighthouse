@@ -69,7 +69,7 @@ impl<'a, 'info> CreateMemoryAccountContext<'a, 'info> {
 
 pub(crate) fn create_memory_account(
     context: CreateMemoryAccountContext,
-    parameters: CreateMemoryAccountParameters,
+    parameters: &CreateMemoryAccountParameters,
     bump_map: HashMap<Pubkey, u8>,
 ) -> Result<()> {
     let CreateMemoryAccountContext {
@@ -97,8 +97,8 @@ pub(crate) fn create_memory_account(
         system_program.as_ref(),
         &crate::id(),
         &Rent::get()?,
-        memory_account_size,
-        MemoryAccount::get_seeds(payer.key, memory_index, Some(bump)),
+        *memory_account_size,
+        MemoryAccount::get_seeds(payer.key, *memory_index, Some(bump)),
     )?;
 
     Ok(())

@@ -2,7 +2,8 @@ use crate::{
     err, err_msg,
     error::LighthouseError,
     types::{
-        Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
+        Assert, BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, LogLevel,
+        Operator,
     },
     utils::{try_from_slice, Result},
 };
@@ -75,7 +76,7 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let offset = self.offset as usize;
         let assertion = &self.assertion;
@@ -91,77 +92,77 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
                 operator,
             } => {
                 let actual_value = try_from_slice::<bool>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::U8 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u8>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::I8 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i8>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::U16 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u16>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::I16 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i16>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::U32 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u32>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::I32 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i32>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::U64 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u64>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::I64 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i64>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::U128 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u128>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::I128 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i128>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
             DataValueAssertion::Bytes {
                 value: assertion_value,
@@ -169,7 +170,7 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
             } => {
                 let actual_value = &data[offset..offset + assertion_value.len()];
                 let assertion_value = assertion_value.as_slice();
-                Ok(operator.evaluate(actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(actual_value, assertion_value, log_level))
             }
             DataValueAssertion::Pubkey {
                 value: assertion_value,
@@ -177,7 +178,7 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
             } => {
                 let actual_value = try_from_slice::<Pubkey>(&data, offset, None)?;
 
-                Ok(operator.evaluate(&actual_value, assertion_value, include_output))
+                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
             }
         }
     }
@@ -193,6 +194,7 @@ mod tests {
         test_utils::create_test_account,
         types::{
             AccountDataAssertion, Assert, DataValueAssertion, EquatableOperator, IntegerOperator,
+            LogLevel,
         },
     };
 
@@ -257,7 +259,9 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion.evaluate(&account_info, true).unwrap();
+            let result = assertion
+                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .unwrap();
 
             assert_eq!(
                 result.passed, should_pass,
@@ -317,7 +321,9 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion.evaluate(&account_info, true).unwrap();
+            let result = assertion
+                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .unwrap();
 
             assert_eq!(
                 result.passed, should_pass,
@@ -363,7 +369,9 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion.evaluate(&account_info, true).unwrap();
+            let result = assertion
+                .evaluate(&account_info, &LogLevel::PlaintextLog)
+                .unwrap();
 
             assert_eq!(
                 result.passed, should_pass,

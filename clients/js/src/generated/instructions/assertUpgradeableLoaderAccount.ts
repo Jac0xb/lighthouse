@@ -33,8 +33,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   UpgradeableLoaderStateAssertion,
   UpgradeableLoaderStateAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getUpgradeableLoaderStateAssertionDecoder,
   getUpgradeableLoaderStateAssertionEncoder,
 } from '../types';
@@ -71,21 +75,21 @@ export type AssertUpgradeableLoaderAccountInstructionWithSigners<
 
 export type AssertUpgradeableLoaderAccountInstructionData = {
   discriminator: number;
-  upgradeableLoaderStateAssertion: UpgradeableLoaderStateAssertion;
+  logLevel: LogLevel;
+  assertion: UpgradeableLoaderStateAssertion;
 };
 
 export type AssertUpgradeableLoaderAccountInstructionDataArgs = {
-  upgradeableLoaderStateAssertion: UpgradeableLoaderStateAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: UpgradeableLoaderStateAssertionArgs;
 };
 
 export function getAssertUpgradeableLoaderAccountInstructionDataEncoder(): Encoder<AssertUpgradeableLoaderAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      [
-        'upgradeableLoaderStateAssertion',
-        getUpgradeableLoaderStateAssertionEncoder(),
-      ],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getUpgradeableLoaderStateAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 10 })
   );
@@ -94,10 +98,8 @@ export function getAssertUpgradeableLoaderAccountInstructionDataEncoder(): Encod
 export function getAssertUpgradeableLoaderAccountInstructionDataDecoder(): Decoder<AssertUpgradeableLoaderAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    [
-      'upgradeableLoaderStateAssertion',
-      getUpgradeableLoaderStateAssertionDecoder(),
-    ],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getUpgradeableLoaderStateAssertionDecoder()],
   ]);
 }
 
@@ -116,7 +118,8 @@ export type AssertUpgradeableLoaderAccountInput<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  upgradeableLoaderStateAssertion: AssertUpgradeableLoaderAccountInstructionDataArgs['upgradeableLoaderStateAssertion'];
+  logLevel: AssertUpgradeableLoaderAccountInstructionDataArgs['logLevel'];
+  assertion: AssertUpgradeableLoaderAccountInstructionDataArgs['assertion'];
 };
 
 export type AssertUpgradeableLoaderAccountInputWithSigners<
@@ -124,7 +127,8 @@ export type AssertUpgradeableLoaderAccountInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  upgradeableLoaderStateAssertion: AssertUpgradeableLoaderAccountInstructionDataArgs['upgradeableLoaderStateAssertion'];
+  logLevel: AssertUpgradeableLoaderAccountInstructionDataArgs['logLevel'];
+  assertion: AssertUpgradeableLoaderAccountInstructionDataArgs['assertion'];
 };
 
 export function getAssertUpgradeableLoaderAccountInstruction<

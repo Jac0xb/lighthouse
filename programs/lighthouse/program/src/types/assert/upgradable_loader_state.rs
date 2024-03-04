@@ -8,7 +8,7 @@ use solana_program::{
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::{Assert, ComparableOperator, EquatableOperator, EvaluationResult, LogLevel, Operator},
     utils::Result,
 };
 
@@ -38,7 +38,7 @@ impl Assert<AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo<'_>,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.owner != &bpf_loader_upgradeable::id() {
             return Err(LighthouseError::AccountOwnerMismatch.into());
@@ -72,17 +72,17 @@ impl Assert<AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
                     return Err(LighthouseError::FailedToDeserialize.into());
                 }
 
-                Ok(operator.evaluate(&actual_state, &casted_assertion_value, include_output))
+                Ok(operator.evaluate(&actual_state, &casted_assertion_value, log_level))
             }
             UpgradeableLoaderStateAssertion::Buffer(assertion) => {
                 let state = get_state()?;
-                assertion.evaluate(&state, include_output)
+                assertion.evaluate(&state, log_level)
             }
             UpgradeableLoaderStateAssertion::Program(assertion) => {
-                assertion.evaluate(&get_state()?, include_output)
+                assertion.evaluate(&get_state()?, log_level)
             }
             UpgradeableLoaderStateAssertion::ProgramData(assertion) => {
-                assertion.evaluate(&get_state()?, include_output)
+                assertion.evaluate(&get_state()?, log_level)
             }
         }
     }
@@ -100,14 +100,14 @@ impl Assert<UpgradeableLoaderState> for UpgradableBufferAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match &upgradable_loader_state {
             UpgradeableLoaderState::Buffer { authority_address } => match &self {
                 UpgradableBufferAssertion::Authority {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(authority_address, assertion_value, include_output),
+                } => operator.evaluate(authority_address, assertion_value, log_level),
             },
             _ => Box::new(EvaluationResult {
                 passed: false,
@@ -134,7 +134,7 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match &upgradable_loader_state {
             UpgradeableLoaderState::Program {
@@ -143,7 +143,7 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramAssertion {
                 UpgradeableProgramAssertion::ProgramDataAddress {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(programdata_address, assertion_value, include_output),
+                } => operator.evaluate(programdata_address, assertion_value, log_level),
             },
             _ => Box::new(EvaluationResult {
                 passed: false,
@@ -174,7 +174,7 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        include_output: bool,
+        log_level: &LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match &upgradable_loader_state {
             UpgradeableLoaderState::ProgramData {
@@ -184,11 +184,11 @@ impl Assert<UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                 UpgradeableProgramDataAssertion::UpgradeAuthority {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(upgrade_authority_address, assertion_value, include_output),
+                } => operator.evaluate(upgrade_authority_address, assertion_value, log_level),
                 UpgradeableProgramDataAssertion::Slot {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(slot, assertion_value, include_output),
+                } => operator.evaluate(slot, assertion_value, log_level),
             },
             _ => Box::new(EvaluationResult {
                 passed: false,

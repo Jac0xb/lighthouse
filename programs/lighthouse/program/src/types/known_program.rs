@@ -1,9 +1,11 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
-    bpf_loader, config, pubkey::Pubkey, rent::Rent, stake, system_program, sysvar::SysvarId, vote,
+    bpf_loader, bpf_loader_upgradeable, config, pubkey::Pubkey, rent::Rent, stake, system_program,
+    sysvar::SysvarId, vote,
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[repr(u8)]
 pub enum KnownProgram {
     System,
     Token,
@@ -12,6 +14,7 @@ pub enum KnownProgram {
     Stake,
     Vote,
     BpfLoader,
+    UpgradeableLoader,
     SysvarConfig,
 }
 
@@ -25,6 +28,7 @@ impl KnownProgram {
             KnownProgram::Stake => stake::program::id(),
             KnownProgram::Vote => vote::program::id(),
             KnownProgram::BpfLoader => bpf_loader::id(),
+            KnownProgram::UpgradeableLoader => bpf_loader_upgradeable::id(),
             KnownProgram::SysvarConfig => config::program::id(),
         }
     }

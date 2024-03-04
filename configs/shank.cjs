@@ -18,13 +18,9 @@ getPrograms().forEach((program) => {
 });
 
 function getPrograms() {
-  console.log(process.env);
-
   const folders = process.env.PROGRAMS.split(/\s+/);
   const addresses = process.env.PROGRAMS_ADDRESSES.split(/\s+/);
   const binaries = process.env.PROGRAMS_BINARIES.split(/\s+/);
-
-  console;
 
   return folders.map((folder, index) => {
     const isShank = fs
@@ -33,8 +29,6 @@ function getPrograms() {
         'utf8'
       )
       .match(/shank/);
-
-    console.log(path.join(programsDir, folder, 'program', 'Cargo.toml'));
 
     return {
       folder,

@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::SysvarClockAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -55,7 +56,8 @@ impl AssertSysvarClockInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertSysvarClockInstructionArgs {
-    pub sysvar_clock_assertion: SysvarClockAssertion,
+    pub log_level: LogLevel,
+    pub assertion: SysvarClockAssertion,
 }
 
 /// Instruction builder for `AssertSysvarClock`.
@@ -64,7 +66,8 @@ pub struct AssertSysvarClockInstructionArgs {
 ///
 #[derive(Default)]
 pub struct AssertSysvarClockBuilder {
-    sysvar_clock_assertion: Option<SysvarClockAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<SysvarClockAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -73,11 +76,13 @@ impl AssertSysvarClockBuilder {
         Self::default()
     }
     #[inline(always)]
-    pub fn sysvar_clock_assertion(
-        &mut self,
-        sysvar_clock_assertion: SysvarClockAssertion,
-    ) -> &mut Self {
-        self.sysvar_clock_assertion = Some(sysvar_clock_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: SysvarClockAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -102,10 +107,8 @@ impl AssertSysvarClockBuilder {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = AssertSysvarClock {};
         let args = AssertSysvarClockInstructionArgs {
-            sysvar_clock_assertion: self
-                .sysvar_clock_assertion
-                .clone()
-                .expect("sysvar_clock_assertion is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -208,17 +211,20 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(AssertSysvarClockCpiBuilderInstruction {
             __program: program,
-            sysvar_clock_assertion: None,
+            log_level: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
     #[inline(always)]
-    pub fn sysvar_clock_assertion(
-        &mut self,
-        sysvar_clock_assertion: SysvarClockAssertion,
-    ) -> &mut Self {
-        self.instruction.sysvar_clock_assertion = Some(sysvar_clock_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: SysvarClockAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -263,11 +269,16 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertSysvarClockInstructionArgs {
-            sysvar_clock_assertion: self
+            log_level: self
                 .instruction
-                .sysvar_clock_assertion
+                .log_level
                 .clone()
-                .expect("sysvar_clock_assertion is not set"),
+                .expect("log_level is not set"),
+            assertion: self
+                .instruction
+                .assertion
+                .clone()
+                .expect("assertion is not set"),
         };
         let instruction = AssertSysvarClockCpi {
             __program: self.instruction.__program,
@@ -282,7 +293,8 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
 
 struct AssertSysvarClockCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    sysvar_clock_assertion: Option<SysvarClockAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<SysvarClockAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

@@ -33,8 +33,12 @@ import {
   getAccountMetasWithSigners,
 } from '../shared';
 import {
+  LogLevel,
+  LogLevelArgs,
   StakeAccountAssertion,
   StakeAccountAssertionArgs,
+  getLogLevelDecoder,
+  getLogLevelEncoder,
   getStakeAccountAssertionDecoder,
   getStakeAccountAssertionEncoder,
 } from '../types';
@@ -71,18 +75,21 @@ export type AssertStakeAccountInstructionWithSigners<
 
 export type AssertStakeAccountInstructionData = {
   discriminator: number;
-  stakeAccountAssertion: StakeAccountAssertion;
+  logLevel: LogLevel;
+  assertion: StakeAccountAssertion;
 };
 
 export type AssertStakeAccountInstructionDataArgs = {
-  stakeAccountAssertion: StakeAccountAssertionArgs;
+  logLevel: LogLevelArgs;
+  assertion: StakeAccountAssertionArgs;
 };
 
 export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertStakeAccountInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['stakeAccountAssertion', getStakeAccountAssertionEncoder()],
+      ['logLevel', getLogLevelEncoder()],
+      ['assertion', getStakeAccountAssertionEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 9 })
   );
@@ -91,7 +98,8 @@ export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertSta
 export function getAssertStakeAccountInstructionDataDecoder(): Decoder<AssertStakeAccountInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['stakeAccountAssertion', getStakeAccountAssertionDecoder()],
+    ['logLevel', getLogLevelDecoder()],
+    ['assertion', getStakeAccountAssertionDecoder()],
   ]);
 }
 
@@ -108,7 +116,8 @@ export function getAssertStakeAccountInstructionDataCodec(): Codec<
 export type AssertStakeAccountInput<TAccountTargetAccount extends string> = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  stakeAccountAssertion: AssertStakeAccountInstructionDataArgs['stakeAccountAssertion'];
+  logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
+  assertion: AssertStakeAccountInstructionDataArgs['assertion'];
 };
 
 export type AssertStakeAccountInputWithSigners<
@@ -116,7 +125,8 @@ export type AssertStakeAccountInputWithSigners<
 > = {
   /** Target account */
   targetAccount: Address<TAccountTargetAccount>;
-  stakeAccountAssertion: AssertStakeAccountInstructionDataArgs['stakeAccountAssertion'];
+  logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
+  assertion: AssertStakeAccountInstructionDataArgs['assertion'];
 };
 
 export function getAssertStakeAccountInstruction<

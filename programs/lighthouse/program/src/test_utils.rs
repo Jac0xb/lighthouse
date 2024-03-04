@@ -1,4 +1,4 @@
-use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
+use solana_sdk::{program_error::ProgramError, signature::Keypair, signer::EncodableKeypair};
 use test_program::processor::TestAccountV1;
 
 pub fn create_test_account() -> TestAccountV1 {
@@ -23,4 +23,8 @@ pub fn create_test_account() -> TestAccountV1 {
         pubkey: Keypair::new().encodable_pubkey(), // 103
         vec: vec![u8::MAX; 32],
     }
+}
+
+pub fn assert_is_program_error(err: ProgramError, expected_error: ProgramError) {
+    assert_eq!(err, expected_error);
 }

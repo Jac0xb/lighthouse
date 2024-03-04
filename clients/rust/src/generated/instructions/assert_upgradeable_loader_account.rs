@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::LogLevel;
 use crate::generated::types::UpgradeableLoaderStateAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -62,7 +63,8 @@ impl AssertUpgradeableLoaderAccountInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertUpgradeableLoaderAccountInstructionArgs {
-    pub upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
+    pub log_level: LogLevel,
+    pub assertion: UpgradeableLoaderStateAssertion,
 }
 
 /// Instruction builder for `AssertUpgradeableLoaderAccount`.
@@ -73,7 +75,8 @@ pub struct AssertUpgradeableLoaderAccountInstructionArgs {
 #[derive(Default)]
 pub struct AssertUpgradeableLoaderAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
-    upgradeable_loader_state_assertion: Option<UpgradeableLoaderStateAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<UpgradeableLoaderStateAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -88,11 +91,13 @@ impl AssertUpgradeableLoaderAccountBuilder {
         self
     }
     #[inline(always)]
-    pub fn upgradeable_loader_state_assertion(
-        &mut self,
-        upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
-    ) -> &mut Self {
-        self.upgradeable_loader_state_assertion = Some(upgradeable_loader_state_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: UpgradeableLoaderStateAssertion) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Add an aditional account to the instruction.
@@ -119,10 +124,8 @@ impl AssertUpgradeableLoaderAccountBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertUpgradeableLoaderAccountInstructionArgs {
-            upgradeable_loader_state_assertion: self
-                .upgradeable_loader_state_assertion
-                .clone()
-                .expect("upgradeable_loader_state_assertion is not set"),
+            log_level: self.log_level.clone().expect("log_level is not set"),
+            assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -242,7 +245,8 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertUpgradeableLoaderAccountCpiBuilderInstruction {
             __program: program,
             target_account: None,
-            upgradeable_loader_state_assertion: None,
+            log_level: None,
+            assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -257,12 +261,13 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn upgradeable_loader_state_assertion(
-        &mut self,
-        upgradeable_loader_state_assertion: UpgradeableLoaderStateAssertion,
-    ) -> &mut Self {
-        self.instruction.upgradeable_loader_state_assertion =
-            Some(upgradeable_loader_state_assertion);
+    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
+        self.instruction.log_level = Some(log_level);
+        self
+    }
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: UpgradeableLoaderStateAssertion) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Add an additional account to the instruction.
@@ -307,11 +312,16 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = AssertUpgradeableLoaderAccountInstructionArgs {
-            upgradeable_loader_state_assertion: self
+            log_level: self
                 .instruction
-                .upgradeable_loader_state_assertion
+                .log_level
                 .clone()
-                .expect("upgradeable_loader_state_assertion is not set"),
+                .expect("log_level is not set"),
+            assertion: self
+                .instruction
+                .assertion
+                .clone()
+                .expect("assertion is not set"),
         };
         let instruction = AssertUpgradeableLoaderAccountCpi {
             __program: self.instruction.__program,
@@ -332,7 +342,8 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
 struct AssertUpgradeableLoaderAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    upgradeable_loader_state_assertion: Option<UpgradeableLoaderStateAssertion>,
+    log_level: Option<LogLevel>,
+    assertion: Option<UpgradeableLoaderStateAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

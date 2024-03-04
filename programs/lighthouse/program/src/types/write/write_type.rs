@@ -1,10 +1,10 @@
-use crate::types::DataValue;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::account_info::AccountInfo;
 
+use super::DataValue;
+
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {
-    AccountBalance,
     AccountData {
         offset: u16,
         data_length: Option<u16>,
@@ -17,7 +17,6 @@ pub enum WriteType {
 impl WriteType {
     pub fn size(&self, account_info: Option<&AccountInfo<'_>>) -> Option<usize> {
         match self {
-            WriteType::AccountBalance => Some(8),
             WriteType::AccountData {
                 offset: account_offset,
                 data_length,
@@ -48,11 +47,4 @@ impl WriteType {
             WriteType::Program => Some(64),
         }
     }
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum WriteTypeParameter {
-    WriteU8 { offset: u8, write_type: WriteType },
-    WriteU16 { offset: u16, write_type: WriteType },
-    WriteU32 { offset: u32, write_type: WriteType },
 }
