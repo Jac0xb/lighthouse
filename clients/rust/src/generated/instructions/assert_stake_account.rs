@@ -56,7 +56,7 @@ struct AssertStakeAccountInstructionData {
 
 impl AssertStakeAccountInstructionData {
     fn new() -> Self {
-        Self { discriminator: 8 }
+        Self { discriminator: 9 }
     }
 }
 

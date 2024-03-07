@@ -91,7 +91,7 @@ export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertSta
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getStakeAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 8 })
+    (value) => ({ ...value, discriminator: 9 })
   );
 }
 

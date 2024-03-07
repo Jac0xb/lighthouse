@@ -49,7 +49,7 @@ struct AssertSysvarClockInstructionData {
 
 impl AssertSysvarClockInstructionData {
     fn new() -> Self {
-        Self { discriminator: 10 }
+        Self { discriminator: 11 }
     }
 }
 

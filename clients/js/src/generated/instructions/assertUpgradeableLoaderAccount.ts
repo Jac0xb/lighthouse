@@ -91,7 +91,7 @@ export function getAssertUpgradeableLoaderAccountInstructionDataEncoder(): Encod
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getUpgradeableLoaderStateAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 9 })
+    (value) => ({ ...value, discriminator: 10 })
   );
 }
 
