@@ -16,38 +16,28 @@ import {
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
-  getUnitDecoder,
-  getUnitEncoder,
 } from '@solana/codecs-data-structures';
 import { getU16Decoder, getU16Encoder } from '@solana/codecs-numbers';
 import {
-  Option,
-  OptionOrNullable,
-  getOptionDecoder,
-  getOptionEncoder,
-} from '@solana/options';
-import {
+  AccountInfoField,
+  AccountInfoFieldArgs,
   DataValue,
   DataValueArgs,
+  getAccountInfoFieldDecoder,
+  getAccountInfoFieldEncoder,
   getDataValueDecoder,
   getDataValueEncoder,
 } from '.';
 
 export type WriteType =
-  | { __kind: 'AccountData'; offset: number; dataLength: Option<number> }
-  | { __kind: 'AccountInfo' }
-  | { __kind: 'DataValue'; fields: [DataValue] }
-  | { __kind: 'Program' };
+  | { __kind: 'AccountData'; offset: number; dataLength: number }
+  | { __kind: 'AccountInfoField'; fields: [AccountInfoField] }
+  | { __kind: 'DataValue'; fields: [DataValue] };
 
 export type WriteTypeArgs =
-  | {
-      __kind: 'AccountData';
-      offset: number;
-      dataLength: OptionOrNullable<number>;
-    }
-  | { __kind: 'AccountInfo' }
-  | { __kind: 'DataValue'; fields: [DataValueArgs] }
-  | { __kind: 'Program' };
+  | { __kind: 'AccountData'; offset: number; dataLength: number }
+  | { __kind: 'AccountInfoField'; fields: [AccountInfoFieldArgs] }
+  | { __kind: 'DataValue'; fields: [DataValueArgs] };
 
 export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
   return getDataEnumEncoder([
@@ -55,15 +45,19 @@ export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
       'AccountData',
       getStructEncoder([
         ['offset', getU16Encoder()],
-        ['dataLength', getOptionEncoder(getU16Encoder())],
+        ['dataLength', getU16Encoder()],
       ]),
     ],
-    ['AccountInfo', getUnitEncoder()],
+    [
+      'AccountInfoField',
+      getStructEncoder([
+        ['fields', getTupleEncoder([getAccountInfoFieldEncoder()])],
+      ]),
+    ],
     [
       'DataValue',
       getStructEncoder([['fields', getTupleEncoder([getDataValueEncoder()])]]),
     ],
-    ['Program', getUnitEncoder()],
   ]);
 }
 
@@ -73,15 +67,19 @@ export function getWriteTypeDecoder(): Decoder<WriteType> {
       'AccountData',
       getStructDecoder([
         ['offset', getU16Decoder()],
-        ['dataLength', getOptionDecoder(getU16Decoder())],
+        ['dataLength', getU16Decoder()],
       ]),
     ],
-    ['AccountInfo', getUnitDecoder()],
+    [
+      'AccountInfoField',
+      getStructDecoder([
+        ['fields', getTupleDecoder([getAccountInfoFieldDecoder()])],
+      ]),
+    ],
     [
       'DataValue',
       getStructDecoder([['fields', getTupleDecoder([getDataValueDecoder()])]]),
     ],
-    ['Program', getUnitDecoder()],
   ]);
 }
 
@@ -95,15 +93,13 @@ export function writeType(
   data: GetDataEnumKindContent<WriteTypeArgs, 'AccountData'>
 ): GetDataEnumKind<WriteTypeArgs, 'AccountData'>;
 export function writeType(
-  kind: 'AccountInfo'
-): GetDataEnumKind<WriteTypeArgs, 'AccountInfo'>;
+  kind: 'AccountInfoField',
+  data: GetDataEnumKindContent<WriteTypeArgs, 'AccountInfoField'>['fields']
+): GetDataEnumKind<WriteTypeArgs, 'AccountInfoField'>;
 export function writeType(
   kind: 'DataValue',
   data: GetDataEnumKindContent<WriteTypeArgs, 'DataValue'>['fields']
 ): GetDataEnumKind<WriteTypeArgs, 'DataValue'>;
-export function writeType(
-  kind: 'Program'
-): GetDataEnumKind<WriteTypeArgs, 'Program'>;
 export function writeType<K extends WriteTypeArgs['__kind']>(
   kind: K,
   data?: any

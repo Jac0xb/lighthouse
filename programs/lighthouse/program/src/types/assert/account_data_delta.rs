@@ -2,20 +2,20 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::operator::{EvaluationResult, IntegerOperator, Operator},
+    types::assert::operator::{BytesOperator, EvaluationResult, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::account_info::AccountInfo;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize)]
 pub struct AccountDataDeltaAssertion {
     pub offset_left: u16,
     pub offset_right: u16,
     pub assertion: DataValueDeltaAssertion,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum DataValueDeltaAssertion {
     U8 {
         value: i16,
@@ -49,17 +49,21 @@ pub enum DataValueDeltaAssertion {
         value: i128,
         operator: IntegerOperator,
     },
+    Bytes {
+        operator: BytesOperator,
+    },
 }
 
-impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDeltaAssertion {
+impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)>
+    for AccountDataDeltaAssertion
+{
     fn evaluate(
         &self,
-        accounts: &(AccountInfo, AccountInfo),
-        log_level: &LogLevel,
+        accounts: (&'a AccountInfo<'info>, &'a AccountInfo<'info>),
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let left_offset = self.offset_left as usize;
         let right_offset = self.offset_right as usize;
-        let assertion = &self.assertion;
 
         let (left_account, right_account) = accounts;
 
@@ -72,7 +76,7 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDeltaAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
-        match assertion {
+        match &self.assertion {
             DataValueDeltaAssertion::U8 {
                 value: assertion_value,
                 operator,
@@ -161,6 +165,12 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDeltaAssertion {
 
                 Ok(operator.evaluate(&diff_value, assertion_value, log_level))
             }
+            DataValueDeltaAssertion::Bytes { operator } => {
+                let left_value = &left_account_data[left_offset..];
+                let right_value = &right_account_data[right_offset..];
+
+                Ok(operator.evaluate(&left_value, &right_value, log_level))
+            }
         }
     }
 }
@@ -168,15 +178,18 @@ impl Assert<(AccountInfo<'_>, AccountInfo<'_>)> for AccountDataDeltaAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate_from_data_slice {
-        use solana_sdk::{account_info::AccountInfo, msg, system_program};
+        use solana_sdk::{
+            account_info::AccountInfo, msg, signature::Keypair, signer::EncodableKeypair,
+            system_program,
+        };
 
         use crate::{
             test_utils::create_test_account,
+            types::assert::operator::IntegerOperator,
             types::assert::{
                 account_data_delta::{AccountDataDeltaAssertion, DataValueDeltaAssertion},
                 Assert, LogLevel,
             },
-            types::operator::IntegerOperator,
         };
 
         #[test]
@@ -205,8 +218,8 @@ mod tests {
 
             let result = assertion
                 .evaluate(
-                    &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextMsgLog,
+                    (&left_account_info, &right_account_info),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -223,8 +236,8 @@ mod tests {
 
             let result = reverse_assertion
                 .evaluate(
-                    &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextMsgLog,
+                    (&right_account_info, &left_account_info),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -258,12 +271,10 @@ mod tests {
 
             let result = assertion
                 .evaluate(
-                    &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextMsgLog,
+                    (&left_account_info.clone(), &right_account_info.clone()),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
-
-            msg!("{:?}", result.output);
 
             assert!(result.passed);
 
@@ -278,8 +289,8 @@ mod tests {
 
             let result = reverse_assertion
                 .evaluate(
-                    &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextMsgLog,
+                    (&right_account_info, &left_account_info),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -313,13 +324,12 @@ mod tests {
 
             let result = assertion
                 .evaluate(
-                    &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextMsgLog,
+                    (&left_account_info.clone(), &right_account_info.clone()),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
             msg!("{:?}", result.output);
-
             assert!(result.passed);
 
             let reverse_assertion = AccountDataDeltaAssertion {
@@ -333,8 +343,8 @@ mod tests {
 
             let result = reverse_assertion
                 .evaluate(
-                    &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextMsgLog,
+                    (&right_account_info, &left_account_info),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
@@ -368,13 +378,12 @@ mod tests {
 
             let result = assertion
                 .evaluate(
-                    &(left_account_info.clone(), right_account_info.clone()),
-                    &LogLevel::PlaintextMsgLog,
+                    (&left_account_info.clone(), &right_account_info.clone()),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 
             msg!("{:?}", result.output);
-
             assert!(result.passed);
 
             let reverse_assertion = AccountDataDeltaAssertion {
@@ -388,8 +397,59 @@ mod tests {
 
             let result = reverse_assertion
                 .evaluate(
-                    &(right_account_info, left_account_info),
-                    &LogLevel::PlaintextMsgLog,
+                    (&right_account_info, &left_account_info),
+                    LogLevel::PlaintextMsgLog,
+                )
+                .unwrap();
+
+            assert!(result.passed);
+        }
+
+        #[test]
+        fn evaluate_diff_bytes() {
+            let key = system_program::id();
+            let (lamports_l, lamports_r) = (&mut 0, &mut 0);
+            let left_data: &mut [u8] = &mut [0u8; 32];
+
+            let keypair = Keypair::new().encodable_pubkey().to_bytes();
+            left_data.copy_from_slice(keypair.as_ref());
+            let left_account_info =
+                AccountInfo::new(&key, false, false, lamports_l, left_data, &key, false, 0);
+
+            let right_data: &mut [u8] = &mut [0u8; 36];
+            right_data[4..].copy_from_slice(keypair.as_ref());
+            let right_account_info =
+                AccountInfo::new(&key, false, false, lamports_r, right_data, &key, false, 0);
+
+            let assertion = AccountDataDeltaAssertion {
+                offset_left: 0,
+                offset_right: 4,
+                assertion: DataValueDeltaAssertion::Bytes {
+                    operator: crate::types::assert::operator::BytesOperator::Equal,
+                },
+            };
+
+            let result = assertion
+                .evaluate(
+                    (&left_account_info.clone(), &right_account_info.clone()),
+                    LogLevel::PlaintextMsgLog,
+                )
+                .unwrap();
+
+            assert!(result.passed);
+
+            let reverse_assertion = AccountDataDeltaAssertion {
+                offset_left: 4,
+                offset_right: 0,
+                assertion: DataValueDeltaAssertion::Bytes {
+                    operator: crate::types::assert::operator::BytesOperator::Equal,
+                },
+            };
+
+            let result = reverse_assertion
+                .evaluate(
+                    (&right_account_info, &left_account_info),
+                    LogLevel::PlaintextMsgLog,
                 )
                 .unwrap();
 

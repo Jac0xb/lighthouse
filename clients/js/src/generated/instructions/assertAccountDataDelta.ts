@@ -110,7 +110,7 @@ export function getAssertAccountDataDeltaInstructionDataEncoder(): Encoder<Asser
       ['offsetRight', getU16Encoder()],
       ['assertion', getDataValueDeltaAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 3 })
+    (value) => ({ ...value, discriminator: 2 })
   );
 }
 

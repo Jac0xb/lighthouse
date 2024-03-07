@@ -107,7 +107,7 @@ export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<Asse
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getMerkleTreeAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 12 })
+    (value) => ({ ...value, discriminator: 11 })
   );
 }
 

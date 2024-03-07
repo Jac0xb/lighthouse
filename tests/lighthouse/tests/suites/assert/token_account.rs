@@ -46,7 +46,7 @@ async fn test_basic() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),
@@ -254,7 +254,7 @@ async fn set_token_close_authority_native() {
             .unwrap(),
             AssertTokenAccountBuilder::new()
                 .target_account(bad_actor_token_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Amount {
                     value: 100_000,
                     operator: ComparableOperator::Equal,
@@ -320,7 +320,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                    .log_level(lighthouse_client::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::Owner {
                         value: user.pubkey(),
                         operator: EquatableOperator::Equal,
@@ -379,7 +379,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                    .log_level(lighthouse_client::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::TokenAccountOwnerIsDerived)
                     .instruction(),
             ],
@@ -433,7 +433,7 @@ async fn test_drain_token_account() {
                 .ix(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Amount {
                     value: 69_000,
                     operator: ComparableOperator::Equal,
@@ -441,7 +441,7 @@ async fn test_drain_token_account() {
                 .instruction(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Delegate {
                     value: None,
                     operator: EquatableOperator::Equal,

@@ -7,12 +7,13 @@ pub mod tx_builder;
 pub mod utils;
 
 use anchor_spl::{associated_token, token::Mint};
-use lighthouse_client::instructions::CreateMemoryAccountBuilder;
+// use lighthouse_client::instructions::MemoryCreateBuilder;
 use solana_program::{pubkey::Pubkey, rent::Rent, system_instruction};
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::{
     signature::Keypair,
     signer::{EncodableKeypair, Signer},
+    system_program,
     transaction::Transaction,
 };
 use std::result;
@@ -65,30 +66,31 @@ pub fn clone_keypair(k: &Keypair) -> Keypair {
     Keypair::from_bytes(k.to_bytes().as_slice()).unwrap()
 }
 
-pub async fn create_memory_account(
-    context: &mut TestContext,
-    user: &Keypair,
-    memory_index: u8,
-    size: u64,
-) -> Result<()> {
-    let tx = Transaction::new_signed_with_payer(
-        &[CreateMemoryAccountBuilder::new()
-            .payer(user.encodable_pubkey())
-            .memory_account(find_memory_account(user.encodable_pubkey(), memory_index).0)
-            .memory_index(memory_index)
-            .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
-            .memory_account_size(size)
-            .instruction()],
-        Some(&user.pubkey()),
-        &[user],
-        context.get_blockhash().await,
-    );
+// pub async fn create_memory_account(
+//     context: &mut TestContext,
+//     user: &Keypair,
+//     memory_index: u8,
+//     size: u64,
+// ) -> Result<()> {
+//     let tx = Transaction::new_signed_with_payer(
+//         &[MemoryCreateBuilder::new()
+//             .payer(user.encodable_pubkey())
+//             .memory_account(find_memory_account(user.encodable_pubkey(), memory_index).0)
+//             .memory_index(memory_index)
+//             .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
+//             .system_program(system_program::id())
+//             .space_allocation(size)
+//             .instruction()],
+//         Some(&user.pubkey()),
+//         &[user],
+//         context.get_blockhash().await,
+//     );
 
-    process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
-    Ok(())
-}
+//     process_transaction_assert_success(context, tx)
+//         .await
+//         .unwrap();
+//     Ok(())
+// }
 
 pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {
     let user = Keypair::new();

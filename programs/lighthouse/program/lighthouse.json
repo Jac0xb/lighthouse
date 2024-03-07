@@ -3,7 +3,7 @@
   "name": "lighthouse",
   "instructions": [
     {
-      "name": "CreateMemoryAccount",
+      "name": "MemoryWrite",
       "accounts": [
         {
           "name": "lighthouseProgram",
@@ -11,22 +11,6 @@
           "isSigner": false,
           "docs": [
             "Lighthouse program"
-          ]
-        },
-        {
-          "name": "payer",
-          "isMut": false,
-          "isSigner": true,
-          "docs": [
-            "Payer account"
-          ]
-        },
-        {
-          "name": "memoryAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Memory account"
           ]
         },
         {
@@ -35,31 +19,6 @@
           "isSigner": false,
           "docs": [
             "System program"
-          ]
-        }
-      ],
-      "args": [
-        {
-          "name": "createMemoryAccountParameters",
-          "type": {
-            "defined": "CreateMemoryAccountParameters"
-          }
-        }
-      ],
-      "discriminant": {
-        "type": "u8",
-        "value": 0
-      }
-    },
-    {
-      "name": "Write",
-      "accounts": [
-        {
-          "name": "lighthouseProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Lighthouse program"
           ]
         },
         {
@@ -89,15 +48,27 @@
       ],
       "args": [
         {
-          "name": "writeParameters",
+          "name": "memoryIndex",
+          "type": "u8"
+        },
+        {
+          "name": "memoryAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "memoryOffset",
+          "type": "u16"
+        },
+        {
+          "name": "writeType",
           "type": {
-            "defined": "WriteParameters"
+            "defined": "WriteType"
           }
         }
       ],
       "discriminant": {
         "type": "u8",
-        "value": 1
+        "value": 0
       }
     },
     {
@@ -128,7 +99,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 2
+        "value": 1
       }
     },
     {
@@ -167,7 +138,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 3
+        "value": 2
       }
     },
     {
@@ -198,7 +169,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 4
+        "value": 3
       }
     },
     {
@@ -229,7 +200,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 4
       }
     },
     {
@@ -262,7 +233,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 5
       }
     },
     {
@@ -293,7 +264,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 6
       }
     },
     {
@@ -334,7 +305,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 8
+        "value": 7
       }
     },
     {
@@ -365,7 +336,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 9
+        "value": 8
       }
     },
     {
@@ -396,7 +367,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 9
       }
     },
     {
@@ -418,7 +389,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 11
+        "value": 10
       }
     },
     {
@@ -465,53 +436,11 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 12
+        "value": 11
       }
     }
   ],
   "types": [
-    {
-      "name": "CreateMemoryAccountParameters",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "memoryIndex",
-            "type": "u8"
-          },
-          {
-            "name": "memoryAccountSize",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WriteParameters",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "memoryIndex",
-            "type": "u8"
-          },
-          {
-            "name": "memoryAccountBump",
-            "type": "u8"
-          },
-          {
-            "name": "memoryOffset",
-            "type": "u16"
-          },
-          {
-            "name": "writeType",
-            "type": {
-              "defined": "WriteType"
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "AccountDataAssertion",
       "type": {
@@ -548,38 +477,6 @@
             "type": {
               "defined": "DataValueDeltaAssertion"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AccountInfoData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": "publicKey"
-          },
-          {
-            "name": "lamports",
-            "type": "u64"
-          },
-          {
-            "name": "dataLength",
-            "type": "u64"
-          },
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "rentEpoch",
-            "type": "u64"
-          },
-          {
-            "name": "executable",
-            "type": "bool"
           }
         ]
       }
@@ -911,6 +808,17 @@
                 }
               }
             ]
+          },
+          {
+            "name": "Bytes",
+            "fields": [
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "BytesOperator"
+                }
+              }
+            ]
           }
         ]
       }
@@ -1170,6 +1078,41 @@
       }
     },
     {
+      "name": "KnownProgram",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "System"
+          },
+          {
+            "name": "Token"
+          },
+          {
+            "name": "Token2022"
+          },
+          {
+            "name": "Rent"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Vote"
+          },
+          {
+            "name": "BpfLoader"
+          },
+          {
+            "name": "UpgradeableLoader"
+          },
+          {
+            "name": "SysvarConfig"
+          }
+        ]
+      }
+    },
+    {
       "name": "LogLevel",
       "type": {
         "kind": "enum",
@@ -1179,12 +1122,6 @@
           },
           {
             "name": "PlaintextMsgLog"
-          },
-          {
-            "name": "SerializedMsgLog"
-          },
-          {
-            "name": "CpiLog"
           }
         ]
       }
@@ -1298,6 +1235,92 @@
                 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "IntegerOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          },
+          {
+            "name": "Contains"
+          },
+          {
+            "name": "DoesNotContain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComparableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquatableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BytesOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
           }
         ]
       }
@@ -1854,122 +1877,27 @@
       }
     },
     {
-      "name": "KnownProgram",
+      "name": "AccountInfoField",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "System"
+            "name": "Key"
           },
           {
-            "name": "Token"
+            "name": "Lamports"
           },
           {
-            "name": "Token2022"
+            "name": "DataLength"
           },
           {
-            "name": "Rent"
+            "name": "Owner"
           },
           {
-            "name": "Stake"
+            "name": "RentEpoch"
           },
           {
-            "name": "Vote"
-          },
-          {
-            "name": "BpfLoader"
-          },
-          {
-            "name": "UpgradeableLoader"
-          },
-          {
-            "name": "SysvarConfig"
-          }
-        ]
-      }
-    },
-    {
-      "name": "IntegerOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          },
-          {
-            "name": "Contains"
-          },
-          {
-            "name": "DoesNotContain"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ComparableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          }
-        ]
-      }
-    },
-    {
-      "name": "EquatableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          }
-        ]
-      }
-    },
-    {
-      "name": "BytesOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
+            "name": "Executable"
           }
         ]
       }
@@ -2074,14 +2002,17 @@
               },
               {
                 "name": "data_length",
-                "type": {
-                  "option": "u16"
-                }
+                "type": "u16"
               }
             ]
           },
           {
-            "name": "AccountInfo"
+            "name": "AccountInfoField",
+            "fields": [
+              {
+                "defined": "AccountInfoField"
+              }
+            ]
           },
           {
             "name": "DataValue",
@@ -2090,9 +2021,6 @@
                 "defined": "DataValue"
               }
             ]
-          },
-          {
-            "name": "Program"
           }
         ]
       }

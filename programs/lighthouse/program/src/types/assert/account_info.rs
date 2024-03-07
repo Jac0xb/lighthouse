@@ -1,16 +1,13 @@
-use super::{Assert, LogLevel};
+use super::{Assert, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::{
-        known_program::KnownProgram,
-        operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
-    },
+    types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum AccountInfoAssertion {
     Key {
         value: Pubkey,
@@ -55,11 +52,11 @@ pub enum AccountInfoAssertion {
     },
 }
 
-impl Assert<AccountInfo<'_>> for AccountInfoAssertion {
+impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
     fn evaluate(
         &self,
-        account: &AccountInfo,
-        log_level: &LogLevel,
+        account: &AccountInfo<'_>,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match self {
             AccountInfoAssertion::Key { value, operator } => {

@@ -15,8 +15,6 @@ import {
 export enum LogLevel {
   Silent,
   PlaintextMsgLog,
-  SerializedMsgLog,
-  CpiLog,
 }
 
 export type LogLevelArgs = LogLevel;

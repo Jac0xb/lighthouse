@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::BytesOperator;
 use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -43,5 +44,8 @@ pub enum DataValueDeltaAssertion {
     I64 {
         value: i128,
         operator: IntegerOperator,
+    },
+    Bytes {
+        operator: BytesOperator,
     },
 }

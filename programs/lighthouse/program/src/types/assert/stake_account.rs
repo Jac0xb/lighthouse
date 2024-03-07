@@ -1,5 +1,5 @@
 use super::{Assert, LogLevel};
-use crate::types::operator::{
+use crate::types::assert::operator::{
     ComparableOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
 };
 use crate::utils::Result;
@@ -35,11 +35,11 @@ pub enum StakeAccountAssertion {
     },
 }
 
-impl Assert<AccountInfo<'_>> for StakeAccountAssertion {
+impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
     fn evaluate(
         &self,
-        account: &AccountInfo,
-        log_level: &LogLevel,
+        account: &AccountInfo<'_>,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
@@ -161,8 +161,8 @@ pub enum MetaAssertion {
     },
 }
 
-impl Assert<StakeMeta> for MetaAssertion {
-    fn evaluate(&self, meta: &StakeMeta, log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
+impl Assert<&StakeMeta> for MetaAssertion {
+    fn evaluate(&self, meta: &StakeMeta, log_level: LogLevel) -> Result<Box<EvaluationResult>> {
         let result = match self {
             MetaAssertion::RentExemptReserve {
                 value: assertion_value,
@@ -218,8 +218,8 @@ pub enum StakeAssertion {
     },
 }
 
-impl Assert<StakeInfo> for StakeAssertion {
-    fn evaluate(&self, stake: &StakeInfo, log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
+impl Assert<&StakeInfo> for StakeAssertion {
+    fn evaluate(&self, stake: &StakeInfo, log_level: LogLevel) -> Result<Box<EvaluationResult>> {
         let result = match self {
             StakeAssertion::DelegationVoterPubkey {
                 value: assertion_value,

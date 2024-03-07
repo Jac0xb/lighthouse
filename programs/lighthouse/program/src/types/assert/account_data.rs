@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::operator::{
+    types::assert::operator::{
         BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
     },
     utils::{try_from_slice, Result},
@@ -10,13 +10,13 @@ use crate::{
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {
     pub offset: u16,
     pub assertion: DataValueAssertion,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum DataValueAssertion {
     Bool {
         value: bool,
@@ -72,11 +72,11 @@ pub enum DataValueAssertion {
     },
 }
 
-impl Assert<AccountInfo<'_>> for AccountDataAssertion {
+impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
     fn evaluate(
         &self,
-        account: &AccountInfo,
-        log_level: &LogLevel,
+        account: &AccountInfo<'_>,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let offset = self.offset as usize;
         let assertion = &self.assertion;
@@ -193,8 +193,8 @@ mod tests {
     use crate::{
         test_utils::create_test_account,
         types::{
+            assert::operator::{EquatableOperator, IntegerOperator},
             assert::{AccountDataAssertion, Assert, LogLevel},
-            operator::{EquatableOperator, IntegerOperator},
         },
     };
 
@@ -262,7 +262,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(
@@ -324,7 +324,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(
@@ -372,7 +372,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
                 .unwrap();
 
             assert_eq!(
