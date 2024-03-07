@@ -5,45 +5,52 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::LogLevel;
-use crate::generated::types::TokenAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
-pub struct AssertTokenAccountMulti {
-    /// Target account
-    pub target_account: solana_program::pubkey::Pubkey,
-    /// Lighthouse Program
+pub struct MemoryClose {
+    /// Lighthouse program
     pub lighthouse_program: solana_program::pubkey::Pubkey,
+    /// System program
+    pub system_program: solana_program::pubkey::Pubkey,
+    /// Payer account
+    pub payer: solana_program::pubkey::Pubkey,
+    /// Memory account
+    pub memory_account: solana_program::pubkey::Pubkey,
 }
 
-impl AssertTokenAccountMulti {
+impl MemoryClose {
     pub fn instruction(
         &self,
-        args: AssertTokenAccountMultiInstructionArgs,
+        args: MemoryCloseInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: AssertTokenAccountMultiInstructionArgs,
+        args: MemoryCloseInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.target_account,
-            false,
-        ));
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.lighthouse_program,
             false,
         ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.system_program,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.payer, true,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            self.memory_account,
+            false,
+        ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertTokenAccountMultiInstructionData::new()
-            .try_to_vec()
-            .unwrap();
+        let mut data = MemoryCloseInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -56,49 +63,47 @@ impl AssertTokenAccountMulti {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertTokenAccountMultiInstructionData {
+struct MemoryCloseInstructionData {
     discriminator: u8,
 }
 
-impl AssertTokenAccountMultiInstructionData {
+impl MemoryCloseInstructionData {
     fn new() -> Self {
-        Self { discriminator: 8 }
+        Self { discriminator: 1 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AssertTokenAccountMultiInstructionArgs {
-    pub log_level: LogLevel,
-    pub assertions: Vec<TokenAccountAssertion>,
+pub struct MemoryCloseInstructionArgs {
+    pub memory_index: u8,
+    pub memory_account_bump: u8,
 }
 
-/// Instruction builder for `AssertTokenAccountMulti`.
+/// Instruction builder for `MemoryClose`.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` target_account
-///   1. `[]` lighthouse_program
+///   0. `[]` lighthouse_program
+///   1. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   2. `[signer]` payer
+///   3. `[writable]` memory_account
 #[derive(Default)]
-pub struct AssertTokenAccountMultiBuilder {
-    target_account: Option<solana_program::pubkey::Pubkey>,
+pub struct MemoryCloseBuilder {
     lighthouse_program: Option<solana_program::pubkey::Pubkey>,
-    log_level: Option<LogLevel>,
-    assertions: Option<Vec<TokenAccountAssertion>>,
+    system_program: Option<solana_program::pubkey::Pubkey>,
+    payer: Option<solana_program::pubkey::Pubkey>,
+    memory_account: Option<solana_program::pubkey::Pubkey>,
+    memory_index: Option<u8>,
+    memory_account_bump: Option<u8>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl AssertTokenAccountMultiBuilder {
+impl MemoryCloseBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Target account
-    #[inline(always)]
-    pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.target_account = Some(target_account);
-        self
-    }
-    /// Lighthouse Program
+    /// Lighthouse program
     #[inline(always)]
     pub fn lighthouse_program(
         &mut self,
@@ -107,14 +112,33 @@ impl AssertTokenAccountMultiBuilder {
         self.lighthouse_program = Some(lighthouse_program);
         self
     }
+    /// `[optional account, default to '11111111111111111111111111111111']`
+    /// System program
     #[inline(always)]
-    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
-        self.log_level = Some(log_level);
+    pub fn system_program(&mut self, system_program: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.system_program = Some(system_program);
+        self
+    }
+    /// Payer account
+    #[inline(always)]
+    pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.payer = Some(payer);
+        self
+    }
+    /// Memory account
+    #[inline(always)]
+    pub fn memory_account(&mut self, memory_account: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.memory_account = Some(memory_account);
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
-        self.assertions = Some(assertions);
+    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
+        self.memory_index = Some(memory_index);
+        self
+    }
+    #[inline(always)]
+    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
+        self.memory_account_bump = Some(memory_account_bump);
         self
     }
     /// Add an aditional account to the instruction.
@@ -137,51 +161,68 @@ impl AssertTokenAccountMultiBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = AssertTokenAccountMulti {
-            target_account: self.target_account.expect("target_account is not set"),
+        let accounts = MemoryClose {
             lighthouse_program: self
                 .lighthouse_program
                 .expect("lighthouse_program is not set"),
+            system_program: self
+                .system_program
+                .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
+            payer: self.payer.expect("payer is not set"),
+            memory_account: self.memory_account.expect("memory_account is not set"),
         };
-        let args = AssertTokenAccountMultiInstructionArgs {
-            log_level: self.log_level.clone().expect("log_level is not set"),
-            assertions: self.assertions.clone().expect("assertions is not set"),
+        let args = MemoryCloseInstructionArgs {
+            memory_index: self.memory_index.clone().expect("memory_index is not set"),
+            memory_account_bump: self
+                .memory_account_bump
+                .clone()
+                .expect("memory_account_bump is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `assert_token_account_multi` CPI accounts.
-pub struct AssertTokenAccountMultiCpiAccounts<'a, 'b> {
-    /// Target account
-    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Lighthouse Program
+/// `memory_close` CPI accounts.
+pub struct MemoryCloseCpiAccounts<'a, 'b> {
+    /// Lighthouse program
     pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// System program
+    pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Payer account
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Memory account
+    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `assert_token_account_multi` CPI instruction.
-pub struct AssertTokenAccountMultiCpi<'a, 'b> {
+/// `memory_close` CPI instruction.
+pub struct MemoryCloseCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Target account
-    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Lighthouse Program
+    /// Lighthouse program
     pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// System program
+    pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Payer account
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Memory account
+    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: AssertTokenAccountMultiInstructionArgs,
+    pub __args: MemoryCloseInstructionArgs,
 }
 
-impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
+impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: AssertTokenAccountMultiCpiAccounts<'a, 'b>,
-        args: AssertTokenAccountMultiInstructionArgs,
+        accounts: MemoryCloseCpiAccounts<'a, 'b>,
+        args: MemoryCloseInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
-            target_account: accounts.target_account,
             lighthouse_program: accounts.lighthouse_program,
+            system_program: accounts.system_program,
+            payer: accounts.payer,
+            memory_account: accounts.memory_account,
             __args: args,
         }
     }
@@ -218,13 +259,21 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.target_account.key,
+            *self.lighthouse_program.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.lighthouse_program.key,
+            *self.system_program.key,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.payer.key,
+            true,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            *self.memory_account.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
@@ -234,9 +283,7 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertTokenAccountMultiInstructionData::new()
-            .try_to_vec()
-            .unwrap();
+        let mut data = MemoryCloseInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -245,10 +292,12 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(4 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.target_account.clone());
         account_infos.push(self.lighthouse_program.clone());
+        account_infos.push(self.system_program.clone());
+        account_infos.push(self.payer.clone());
+        account_infos.push(self.memory_account.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -261,38 +310,33 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `AssertTokenAccountMulti` via CPI.
+/// Instruction builder for `MemoryClose` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` target_account
-///   1. `[]` lighthouse_program
-pub struct AssertTokenAccountMultiCpiBuilder<'a, 'b> {
-    instruction: Box<AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` lighthouse_program
+///   1. `[]` system_program
+///   2. `[signer]` payer
+///   3. `[writable]` memory_account
+pub struct MemoryCloseCpiBuilder<'a, 'b> {
+    instruction: Box<MemoryCloseCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
+impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(AssertTokenAccountMultiCpiBuilderInstruction {
+        let instruction = Box::new(MemoryCloseCpiBuilderInstruction {
             __program: program,
-            target_account: None,
             lighthouse_program: None,
-            log_level: None,
-            assertions: None,
+            system_program: None,
+            payer: None,
+            memory_account: None,
+            memory_index: None,
+            memory_account_bump: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
-    /// Target account
-    #[inline(always)]
-    pub fn target_account(
-        &mut self,
-        target_account: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.target_account = Some(target_account);
-        self
-    }
-    /// Lighthouse Program
+    /// Lighthouse program
     #[inline(always)]
     pub fn lighthouse_program(
         &mut self,
@@ -301,14 +345,38 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         self.instruction.lighthouse_program = Some(lighthouse_program);
         self
     }
+    /// System program
     #[inline(always)]
-    pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
-        self.instruction.log_level = Some(log_level);
+    pub fn system_program(
+        &mut self,
+        system_program: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.system_program = Some(system_program);
+        self
+    }
+    /// Payer account
+    #[inline(always)]
+    pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.payer = Some(payer);
+        self
+    }
+    /// Memory account
+    #[inline(always)]
+    pub fn memory_account(
+        &mut self,
+        memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.memory_account = Some(memory_account);
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
-        self.instruction.assertions = Some(assertions);
+    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
+        self.instruction.memory_index = Some(memory_index);
+        self
+    }
+    #[inline(always)]
+    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
+        self.instruction.memory_account_bump = Some(memory_account_bump);
         self
     }
     /// Add an additional account to the instruction.
@@ -352,30 +420,37 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = AssertTokenAccountMultiInstructionArgs {
-            log_level: self
+        let args = MemoryCloseInstructionArgs {
+            memory_index: self
                 .instruction
-                .log_level
+                .memory_index
                 .clone()
-                .expect("log_level is not set"),
-            assertions: self
+                .expect("memory_index is not set"),
+            memory_account_bump: self
                 .instruction
-                .assertions
+                .memory_account_bump
                 .clone()
-                .expect("assertions is not set"),
+                .expect("memory_account_bump is not set"),
         };
-        let instruction = AssertTokenAccountMultiCpi {
+        let instruction = MemoryCloseCpi {
             __program: self.instruction.__program,
-
-            target_account: self
-                .instruction
-                .target_account
-                .expect("target_account is not set"),
 
             lighthouse_program: self
                 .instruction
                 .lighthouse_program
                 .expect("lighthouse_program is not set"),
+
+            system_program: self
+                .instruction
+                .system_program
+                .expect("system_program is not set"),
+
+            payer: self.instruction.payer.expect("payer is not set"),
+
+            memory_account: self
+                .instruction
+                .memory_account
+                .expect("memory_account is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -385,12 +460,14 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
     }
 }
 
-struct AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b> {
+struct MemoryCloseCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     lighthouse_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    log_level: Option<LogLevel>,
-    assertions: Option<Vec<TokenAccountAssertion>>,
+    system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    memory_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    memory_index: Option<u8>,
+    memory_account_bump: Option<u8>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

@@ -56,7 +56,7 @@ struct AssertUpgradeableLoaderAccountInstructionData {
 
 impl AssertUpgradeableLoaderAccountInstructionData {
     fn new() -> Self {
-        Self { discriminator: 9 }
+        Self { discriminator: 10 }
     }
 }
 

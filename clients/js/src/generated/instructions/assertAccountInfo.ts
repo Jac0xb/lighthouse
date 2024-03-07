@@ -91,7 +91,7 @@ export function getAssertAccountInfoInstructionDataEncoder(): Encoder<AssertAcco
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getAccountInfoAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 3 })
+    (value) => ({ ...value, discriminator: 4 })
   );
 }
 

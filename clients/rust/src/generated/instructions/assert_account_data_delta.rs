@@ -62,7 +62,7 @@ struct AssertAccountDataDeltaInstructionData {
 
 impl AssertAccountDataDeltaInstructionData {
     fn new() -> Self {
-        Self { discriminator: 2 }
+        Self { discriminator: 3 }
     }
 }
 

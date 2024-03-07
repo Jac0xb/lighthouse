@@ -44,21 +44,9 @@ async fn merkle_tree() {
         .unwrap();
 
     let leaf = leaves.first_mut().unwrap();
-    // let (data_hash, creator_hash) = compute_metadata_hashes(&leaf.metadata).unwrap();
 
     let tree_pubkey = tree.tree_pubkey();
     let tree_root = tree.decode_root().await.unwrap();
-
-    // let leaf_hash = keccak::hashv(&[
-    //     &[Version::V1.to_bytes()],
-    //     (get_asset_id(&tree_pubkey, leaf.nonce)).as_ref(),
-    //     new_owner.encodable_pubkey().as_ref(),
-    //     leaf.delegate.encodable_pubkey().as_ref(),
-    //     leaf.nonce.to_le_bytes().as_ref(),
-    //     data_hash.as_ref(),
-    //     creator_hash.as_ref(),
-    // ])
-    // .to_bytes();
 
     let proof_path = tree.proof_of_leaf(leaf.index);
     let mut proof_path_metas: Vec<AccountMeta> = vec![];
