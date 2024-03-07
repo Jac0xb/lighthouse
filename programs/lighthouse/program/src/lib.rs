@@ -3,7 +3,7 @@ pub mod instruction;
 pub mod processor;
 pub mod types;
 pub mod utils;
-pub mod validations;
+pub mod validation;
 
 #[cfg(test)]
 pub mod test_utils;
@@ -41,43 +41,60 @@ pub mod lighthouse {
         // TODO: printing the instruction name is 1000's Compute Units, lets think about that.
         // msg!("Lighthouse instruction: {:?}", instruction);
 
-        match &instruction {
-            LighthouseInstruction::CreateMemoryAccount(parameters) => {
-                let (context, bump_map) =
-                    CreateMemoryAccountContext::load(&mut accounts.iter(), parameters)?;
-                processor::create_memory_account(context, parameters, bump_map)?;
+        match instruction {
+            LighthouseInstruction::MemoryWrite {
+                memory_index,
+                memory_account_bump,
+                memory_offset,
+                write_type,
+            } => {
+                let context = MemoryWriteContext::load(
+                    &mut accounts.iter(),
+                    memory_index,
+                    memory_offset,
+                    memory_account_bump,
+                    &write_type,
+                )?;
+                processor::memory_write(&context, memory_offset, &write_type)?;
             }
-            LighthouseInstruction::Write(parameters) => {
-                let context = WriteContext::load(&mut accounts.iter(), parameters)?;
-                processor::write(context, parameters)?;
+            LighthouseInstruction::MemoryClose {
+                memory_index,
+                memory_account_bump,
+            } => {
+                let context = MemoryCloseContext::load(
+                    &mut accounts.iter(),
+                    memory_index,
+                    memory_account_bump,
+                )?;
+                processor::memory_close(&context)?;
             }
             LighthouseInstruction::AssertAccountData {
                 log_level,
                 assertion,
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertAccountDataDelta {
                 log_level,
                 assertion,
             } => {
                 let context = AssertAccountDeltaContext::load(&mut accounts.iter())?;
-                processor::assert_account_delta(&context, assertion, log_level)?;
+                processor::assert_account_delta(&context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertAccountInfo {
                 assertion,
                 log_level,
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertMintAccount {
                 log_level,
                 assertion,
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertMintAccountMulti {
                 log_level,
@@ -113,7 +130,7 @@ pub mod lighthouse {
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
 
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertTokenAccountMulti {
                 log_level,
@@ -148,27 +165,27 @@ pub mod lighthouse {
                 assertion,
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertUpgradeableLoaderAccount {
                 log_level,
                 assertion,
             } => {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(&context, assertion, log_level)?;
+                processor::assert_target_account(context, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertSysvarClock {
                 log_level,
                 assertion,
             } => {
-                processor::assert_clock(assertion, log_level)?;
+                processor::assert_clock(&assertion, log_level)?;
             }
             LighthouseInstruction::AssertMerkleTreeAccount {
                 log_level,
                 assertion,
             } => {
-                let context = AssertMerkleTreeAccountContext::load(accounts)?;
-                processor::assert_merkle_tree_account(&context, assertion, log_level)?;
+                let context = AssertMerkleTreeAccountContext::load(&mut accounts.iter())?;
+                processor::assert_merkle_tree_account(&context, &assertion, log_level)?;
             }
         }
 

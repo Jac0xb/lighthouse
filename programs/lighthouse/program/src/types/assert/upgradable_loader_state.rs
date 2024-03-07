@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -34,11 +34,11 @@ pub enum UpgradeableLoaderStateAssertion {
     ProgramData(UpgradeableProgramDataAssertion),
 }
 
-impl Assert<AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
+impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
     fn evaluate(
         &self,
         account: &AccountInfo<'_>,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         if account.owner != &bpf_loader_upgradeable::id() {
             return Err(LighthouseError::AccountOwnerMismatch.into());
@@ -96,11 +96,11 @@ pub enum UpgradableBufferAssertion {
     },
 }
 
-impl Assert<UpgradeableLoaderState> for UpgradableBufferAssertion {
+impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match &upgradable_loader_state {
             UpgradeableLoaderState::Buffer { authority_address } => match &self {
@@ -130,11 +130,11 @@ pub enum UpgradeableProgramAssertion {
     },
 }
 
-impl Assert<UpgradeableLoaderState> for UpgradeableProgramAssertion {
+impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let result = match &upgradable_loader_state {
             UpgradeableLoaderState::Program {
@@ -170,11 +170,11 @@ pub enum UpgradeableProgramDataAssertion {
     },
 }
 
-impl Assert<UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
+impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
     fn evaluate(
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         Ok(match &upgradable_loader_state {
             UpgradeableLoaderState::ProgramData {

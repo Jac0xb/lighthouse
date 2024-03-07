@@ -16,8 +16,7 @@ pub(crate) mod r#assert_sysvar_clock;
 pub(crate) mod r#assert_token_account;
 pub(crate) mod r#assert_token_account_multi;
 pub(crate) mod r#assert_upgradeable_loader_account;
-pub(crate) mod r#create_memory_account;
-pub(crate) mod r#write;
+pub(crate) mod r#memory_write;
 
 pub use self::r#assert_account_data::*;
 pub use self::r#assert_account_data_delta::*;
@@ -30,5 +29,4 @@ pub use self::r#assert_sysvar_clock::*;
 pub use self::r#assert_token_account::*;
 pub use self::r#assert_token_account_multi::*;
 pub use self::r#assert_upgradeable_loader_account::*;
-pub use self::r#create_memory_account::*;
-pub use self::r#write::*;
+pub use self::r#memory_write::*;

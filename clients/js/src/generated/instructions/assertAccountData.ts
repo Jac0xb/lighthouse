@@ -99,7 +99,7 @@ export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAcco
       ['offset', getU16Encoder()],
       ['assertion', getDataValueAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 2 })
+    (value) => ({ ...value, discriminator: 1 })
   );
 }
 

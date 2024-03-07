@@ -56,7 +56,7 @@ struct AssertAccountDataInstructionData {
 
 impl AssertAccountDataInstructionData {
     fn new() -> Self {
-        Self { discriminator: 2 }
+        Self { discriminator: 1 }
     }
 }
 

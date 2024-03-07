@@ -7,7 +7,7 @@
  */
 
 export * from './accountInfoAssertion';
-export * from './accountInfoData';
+export * from './accountInfoField';
 export * from './bytesOperator';
 export * from './comparableOperator';
 export * from './dataValue';

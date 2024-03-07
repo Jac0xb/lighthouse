@@ -1,28 +1,34 @@
-use crate::{
-    processor::{CreateMemoryAccountParameters, WriteParameters},
-    types::assert::{
+use crate::types::{
+    assert::{
         AccountDataAssertion, AccountDataDeltaAssertion, AccountInfoAssertion, LogLevel,
         MerkleTreeAssertion, MintAccountAssertion, StakeAccountAssertion, SysvarClockAssertion,
         TokenAccountAssertion, UpgradeableLoaderStateAssertion,
     },
+    write::WriteType,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankInstruction;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, ShankInstruction)]
 #[rustfmt::skip]
 pub(crate) enum LighthouseInstruction {
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "payer", desc = "Payer account", signer)]
-    #[account(2, name = "memory_account", desc = "Memory account", writable)]
-    #[account(3, name = "system_program", desc = "System program")]
-    CreateMemoryAccount(CreateMemoryAccountParameters),
+    #[account(1, name = "system_program", desc = "System program")]
+    #[account(2, name = "payer", desc = "Payer account", signer)]
+    #[account(3, name = "memory_account", desc = "Memory account", writable)]
+    #[account(4, name = "source_account", desc = "System program")]
+    MemoryWrite { 
+        memory_index: u8,
+        memory_account_bump: u8,
+        memory_offset: u16,
+        write_type: WriteType,
+    },
 
     #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
-    #[account(1, name = "payer", desc = "Payer account", signer)]
-    #[account(2, name = "memory_account", desc = "Memory account", writable)]
-    #[account(3, name = "source_account", desc = "System program")]
-    Write(WriteParameters),
+    #[account(1, name = "system_program", desc = "System program")]
+    #[account(2, name = "payer", desc = "Payer account", signer)]
+    #[account(3, name = "memory_account", desc = "Memory account", writable)]
+    MemoryClose { memory_index: u8, memory_account_bump: u8 },
 
     #[account(0, name = "target_account", desc = "Target account")]
     AssertAccountData { log_level: LogLevel, assertion: AccountDataAssertion },

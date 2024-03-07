@@ -1,8 +1,9 @@
-use super::assert::{Assert, LogLevel};
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 use solana_program::msg;
 use std::{fmt::Debug, ops::BitAnd};
+
+use super::{Assert, LogLevel};
 
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
@@ -18,7 +19,7 @@ pub trait Operator<T: ?Sized> {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Box<EvaluationResult>;
 }
 
@@ -81,7 +82,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
         &self,
         actual_value: &T,
         assertion_value: &T,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -92,7 +93,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
-            output: if log_level == &LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -120,7 +121,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -143,7 +144,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                     actual_value & assertion_value == T::zero()
                 }
             },
-            output: if log_level == &LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
@@ -172,14 +173,14 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
         &self,
         actual_value: &T,
         assertion_value: &T,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
                 EquatableOperator::Equal => T::eq(actual_value, assertion_value),
                 EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
             },
-            output: if log_level == &LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -204,7 +205,7 @@ where
         &self,
         actual_value: &T,
         assertion_value: &T,
-        log_level: &LogLevel,
+        log_level: LogLevel,
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
@@ -221,7 +222,7 @@ where
                     actual_value != assertion_value
                 }
             },
-            output: if log_level == &LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMsgLog {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,

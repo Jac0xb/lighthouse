@@ -149,14 +149,14 @@ pub fn build_safe_send_transaction(
             ix,
             AssertAccountInfoBuilder::new()
                 .target_account(from_keypair.pubkey())
-                .account_info_assertion(AccountInfoAssertion::KnownOwner {
+                .assertion(AccountInfoAssertion::KnownOwner {
                     value: KnownProgram::System,
                     operator: EquatableOperator::Equal,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(from_keypair.pubkey())
-                .account_info_assertion(AccountInfoAssertion::Lamports {
+                .assertion(AccountInfoAssertion::Lamports {
                     value: balance - amount - 5000,
                     operator: ComparableOperator::Equal,
                 })
@@ -184,14 +184,14 @@ fn build_assert_stake_transaction(
             &[
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::State {
+                    .assertion(StakeAccountAssertion::State {
                         value: StakeStateType::Initialized,
                         operator: EquatableOperator::Equal,
                     })
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::AuthorizedStaker {
                             value: meta.authorized.staker,
                             operator: EquatableOperator::Equal,
@@ -200,7 +200,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::AuthorizedWithdrawer {
                             value: meta.authorized.withdrawer,
                             operator: EquatableOperator::Equal,
@@ -209,7 +209,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupEpoch {
                             value: meta.lockup.epoch,
                             operator: ComparableOperator::Equal,
@@ -218,7 +218,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupUnixTimestamp {
                             value: meta.lockup.unix_timestamp,
                             operator: ComparableOperator::Equal,
@@ -227,7 +227,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupCustodian {
                             value: meta.lockup.custodian,
                             operator: EquatableOperator::Equal,
@@ -236,7 +236,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::RentExemptReserve {
                             value: meta.rent_exempt_reserve,
                             operator: ComparableOperator::Equal,
@@ -253,14 +253,14 @@ fn build_assert_stake_transaction(
             &[
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::State {
+                    .assertion(StakeAccountAssertion::State {
                         value: StakeStateType::Stake,
                         operator: EquatableOperator::Equal,
                     })
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::AuthorizedStaker {
                             value: meta.authorized.staker,
                             operator: EquatableOperator::Equal,
@@ -269,7 +269,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::AuthorizedWithdrawer {
                             value: meta.authorized.withdrawer,
                             operator: EquatableOperator::Equal,
@@ -278,7 +278,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupEpoch {
                             value: meta.lockup.epoch,
                             operator: ComparableOperator::Equal,
@@ -287,7 +287,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupUnixTimestamp {
                             value: meta.lockup.unix_timestamp,
                             operator: ComparableOperator::Equal,
@@ -296,7 +296,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupCustodian {
                             value: meta.lockup.custodian,
                             operator: EquatableOperator::Equal,
@@ -305,7 +305,7 @@ fn build_assert_stake_transaction(
                     .instruction(),
                 AssertStakeAccountBuilder::new()
                     .target_account(stake_state_pubkey)
-                    .stake_account_assertion(StakeAccountAssertion::MetaAssertion(
+                    .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::RentExemptReserve {
                             value: meta.rent_exempt_reserve,
                             operator: ComparableOperator::Equal,

@@ -101,7 +101,7 @@ export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<Asse
       ['logLevel', getLogLevelEncoder()],
       ['assertions', getArrayEncoder(getTokenAccountAssertionEncoder())],
     ]),
-    (value) => ({ ...value, discriminator: 8 })
+    (value) => ({ ...value, discriminator: 7 })
   );
 }
 

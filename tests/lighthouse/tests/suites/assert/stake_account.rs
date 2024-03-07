@@ -81,7 +81,7 @@ async fn test_borsh_account_data() {
         &[
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(StakeAccountAssertion::State {
                     value: StakeStateType::Stake,
                     operator: EquatableOperator::Equal,
@@ -89,7 +89,7 @@ async fn test_borsh_account_data() {
                 .instruction(),
             AssertStakeAccountBuilder::new()
                 .target_account(derived_account)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(StakeAccountAssertion::MetaAssertion(
                     MetaAssertion::AuthorizedStaker {
                         value: user.encodable_pubkey(),

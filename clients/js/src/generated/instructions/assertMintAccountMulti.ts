@@ -93,7 +93,7 @@ export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<Asser
       ['logLevel', getLogLevelEncoder()],
       ['assertions', getArrayEncoder(getMintAccountAssertionEncoder())],
     ]),
-    (value) => ({ ...value, discriminator: 6 })
+    (value) => ({ ...value, discriminator: 5 })
   );
 }
 

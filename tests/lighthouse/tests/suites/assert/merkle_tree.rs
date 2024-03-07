@@ -82,7 +82,7 @@ async fn merkle_tree() {
             .merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: new_leaf_hash,

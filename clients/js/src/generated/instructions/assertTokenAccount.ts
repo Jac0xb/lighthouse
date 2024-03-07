@@ -91,7 +91,7 @@ export function getAssertTokenAccountInstructionDataEncoder(): Encoder<AssertTok
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getTokenAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 7 })
+    (value) => ({ ...value, discriminator: 6 })
   );
 }
 

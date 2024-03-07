@@ -39,10 +39,6 @@ impl<'info> BubblegumTestContext<'info> {
         self.program_context
     }
 
-    // pub fn owned_test_context(self) -> ProgramTestContext {
-    //     self.program_context
-    // }
-
     pub fn warp_to_slot(&mut self, slot: u64) -> std::result::Result<(), ProgramTestError> {
         self.program_context.warp_to_slot(slot)
     }
