@@ -1,8 +1,5 @@
-use core::panic;
-
-use crate::utils::find_memory_account;
-use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_test_account, create_user};
+use crate::utils::{find_memory_account, process_transaction_assert_success};
 use lighthouse_client::instructions::{AssertAccountDataBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
     BytesOperator, DataValue, DataValueAssertion, EquatableOperator, IntegerOperator, WriteType,
@@ -370,6 +367,4 @@ async fn test_write_u64() {
     process_transaction_assert_success(context, tx.clone())
         .await
         .unwrap();
-
-    panic!("ass")
 }

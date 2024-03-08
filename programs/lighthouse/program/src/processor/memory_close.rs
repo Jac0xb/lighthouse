@@ -1,8 +1,7 @@
-use crate::error::LighthouseError;
 use crate::utils::{close, Result};
 use crate::validation::{
     AccountValidation, CheckedAccount, DerivedAddress, LighthouseProgram, MemoryAccount,
-    MemoryAccountSeeds, Program, Signer, SystemProgram,
+    MemoryAccountSeeds, Program, Signer,
 };
 use solana_program::account_info::{next_account_info, AccountInfo};
 use std::slice::Iter;
@@ -10,7 +9,6 @@ use std::slice::Iter;
 #[allow(dead_code)]
 pub(crate) struct MemoryCloseContext<'a, 'info> {
     pub lighthouse_program: Program<'a, 'info, LighthouseProgram>,
-    pub system_program: Program<'a, 'info, SystemProgram>,
     pub payer: Signer<'a, 'info>,
     pub memory_account: MemoryAccount<'a, 'info>,
 }
@@ -22,7 +20,6 @@ impl<'a, 'info> MemoryCloseContext<'a, 'info> {
         memory_account_bump: u8,
     ) -> Result<Self> {
         let lighthouse_program = Program::new_checked(next_account_info(account_iter)?, None)?;
-        let system_program = Program::new_checked(next_account_info(account_iter).unwrap(), None)?;
         let payer = Signer::new_checked(next_account_info(account_iter)?, None)?;
 
         let seeds = &MemoryAccount::get_seeds(MemoryAccountSeeds {
@@ -45,7 +42,6 @@ impl<'a, 'info> MemoryCloseContext<'a, 'info> {
         )?;
 
         Ok(Self {
-            system_program,
             lighthouse_program,
             payer,
             memory_account,

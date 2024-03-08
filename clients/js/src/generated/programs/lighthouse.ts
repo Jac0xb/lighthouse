@@ -37,7 +37,7 @@ export enum LighthouseInstruction {
   MemoryWrite,
   MemoryClose,
   AssertAccountData,
-  AssertAccountDataDelta,
+  AssertAccountDelta,
   AssertAccountInfo,
   AssertMintAccount,
   AssertMintAccountMulti,
@@ -64,7 +64,7 @@ export function identifyLighthouseInstruction(
     return LighthouseInstruction.AssertAccountData;
   }
   if (memcmp(data, getU8Encoder().encode(3), 0)) {
-    return LighthouseInstruction.AssertAccountDataDelta;
+    return LighthouseInstruction.AssertAccountDelta;
   }
   if (memcmp(data, getU8Encoder().encode(4), 0)) {
     return LighthouseInstruction.AssertAccountInfo;

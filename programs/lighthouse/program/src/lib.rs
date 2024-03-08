@@ -75,7 +75,7 @@ pub mod lighthouse {
                 let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account(context, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertAccountDataDelta {
+            LighthouseInstruction::AssertAccountDelta {
                 log_level,
                 assertion,
             } => {

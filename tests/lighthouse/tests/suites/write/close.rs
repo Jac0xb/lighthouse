@@ -3,7 +3,7 @@ use lighthouse_sdk::{find_memory_account, LighthouseProgram};
 use solana_program_test::tokio;
 use solana_sdk::{signer::EncodableKeypair, transaction::Transaction};
 
-use crate::utils::utils::process_transaction_assert_success;
+use crate::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_test_account, create_user};
 
 #[tokio::test]

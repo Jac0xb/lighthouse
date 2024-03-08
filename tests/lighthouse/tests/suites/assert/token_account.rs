@@ -13,11 +13,11 @@ use solana_sdk::transaction::Transaction;
 use spl_token::state::AccountState as TokenAccountState;
 
 use crate::utils::context::TestContext;
-use crate::utils::utils::{
+use crate::utils::{create_mint, create_user, CreateMintParameters};
+use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
     to_transaction_error_u8,
 };
-use crate::utils::{create_mint, create_user, CreateMintParameters};
 
 #[tokio::test]
 async fn test_basic() {

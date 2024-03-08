@@ -67,7 +67,7 @@ async fn merkle_tree() {
         leaf,
         &new_owner,
         &[AssertMerkleTreeAccountBuilder::new()
-            .merkle_tree(tree_pubkey)
+            .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
             .log_level(lighthouse_client::types::LogLevel::Silent)

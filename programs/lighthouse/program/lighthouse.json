@@ -83,14 +83,6 @@
           ]
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "System program"
-          ]
-        },
-        {
           "name": "payer",
           "isMut": false,
           "isSigner": true,
@@ -130,7 +122,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -154,22 +146,22 @@
       }
     },
     {
-      "name": "AssertAccountDataDelta",
+      "name": "AssertAccountDelta",
       "accounts": [
         {
-          "name": "leftAccount",
+          "name": "accountA",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Left account"
+            "Account A where the delta is calculated from"
           ]
         },
         {
-          "name": "rightAccount",
+          "name": "accountB",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Right account"
+            "Account B where the delta is calculated to"
           ]
         }
       ],
@@ -183,7 +175,7 @@
         {
           "name": "assertion",
           "type": {
-            "defined": "AccountDataDeltaAssertion"
+            "defined": "AccountDeltaAssertion"
           }
         }
       ],
@@ -200,7 +192,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -231,7 +223,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -262,7 +254,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -295,7 +287,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -326,7 +318,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         },
         {
@@ -367,7 +359,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -398,7 +390,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -447,11 +439,11 @@
       "name": "AssertMerkleTreeAccount",
       "accounts": [
         {
-          "name": "merkleTree",
+          "name": "targetMerkleTree",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Merkle tree account"
+            "Target merkle tree account to be asserted"
           ]
         },
         {
@@ -459,7 +451,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Root account"
+            "The current root of the merkle tree"
           ]
         },
         {
@@ -505,28 +497,6 @@
             "name": "assertion",
             "type": {
               "defined": "DataValueAssertion"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AccountDataDeltaAssertion",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "offsetLeft",
-            "type": "u16"
-          },
-          {
-            "name": "offsetRight",
-            "type": "u16"
-          },
-          {
-            "name": "assertion",
-            "type": {
-              "defined": "DataValueDeltaAssertion"
             }
           }
         ]
@@ -736,6 +706,48 @@
       }
     },
     {
+      "name": "AccountDeltaAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "AccountInfo",
+            "fields": [
+              {
+                "name": "a_offset",
+                "type": "u16"
+              },
+              {
+                "name": "assertion",
+                "type": {
+                  "defined": "AccountInfoDeltaAssertion"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Data",
+            "fields": [
+              {
+                "name": "a_offset",
+                "type": "u16"
+              },
+              {
+                "name": "b_offset",
+                "type": "u16"
+              },
+              {
+                "name": "assertion",
+                "type": {
+                  "defined": "DataValueDeltaAssertion"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "DataValueDeltaAssertion",
       "type": {
         "kind": "enum",
@@ -867,6 +879,66 @@
                 "name": "operator",
                 "type": {
                   "defined": "BytesOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountInfoDeltaAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Lamports",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "DataLength",
+            "fields": [
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Owner",
+            "fields": [
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "RentEpoch",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
                 }
               }
             ]

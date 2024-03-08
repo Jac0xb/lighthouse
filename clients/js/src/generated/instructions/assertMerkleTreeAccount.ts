@@ -45,7 +45,7 @@ import {
 
 export type AssertMerkleTreeAccountInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMerkleTree extends string | IAccountMeta<string> = string,
+  TAccountTargetMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
   TAccountSplAccountCompression extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -53,9 +53,9 @@ export type AssertMerkleTreeAccountInstruction<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountMerkleTree extends string
-        ? ReadonlyAccount<TAccountMerkleTree>
-        : TAccountMerkleTree,
+      TAccountTargetMerkleTree extends string
+        ? ReadonlyAccount<TAccountTargetMerkleTree>
+        : TAccountTargetMerkleTree,
       TAccountRoot extends string
         ? ReadonlyAccount<TAccountRoot>
         : TAccountRoot,
@@ -68,7 +68,7 @@ export type AssertMerkleTreeAccountInstruction<
 
 export type AssertMerkleTreeAccountInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMerkleTree extends string | IAccountMeta<string> = string,
+  TAccountTargetMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
   TAccountSplAccountCompression extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -76,9 +76,9 @@ export type AssertMerkleTreeAccountInstructionWithSigners<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountMerkleTree extends string
-        ? ReadonlyAccount<TAccountMerkleTree>
-        : TAccountMerkleTree,
+      TAccountTargetMerkleTree extends string
+        ? ReadonlyAccount<TAccountTargetMerkleTree>
+        : TAccountTargetMerkleTree,
       TAccountRoot extends string
         ? ReadonlyAccount<TAccountRoot>
         : TAccountRoot,
@@ -130,13 +130,13 @@ export function getAssertMerkleTreeAccountInstructionDataCodec(): Codec<
 }
 
 export type AssertMerkleTreeAccountInput<
-  TAccountMerkleTree extends string,
+  TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string
 > = {
-  /** Merkle tree account */
-  merkleTree: Address<TAccountMerkleTree>;
-  /** Root account */
+  /** Target merkle tree account to be asserted */
+  targetMerkleTree: Address<TAccountTargetMerkleTree>;
+  /** The current root of the merkle tree */
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
@@ -145,13 +145,13 @@ export type AssertMerkleTreeAccountInput<
 };
 
 export type AssertMerkleTreeAccountInputWithSigners<
-  TAccountMerkleTree extends string,
+  TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string
 > = {
-  /** Merkle tree account */
-  merkleTree: Address<TAccountMerkleTree>;
-  /** Root account */
+  /** Target merkle tree account to be asserted */
+  targetMerkleTree: Address<TAccountTargetMerkleTree>;
+  /** The current root of the merkle tree */
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
@@ -160,47 +160,47 @@ export type AssertMerkleTreeAccountInputWithSigners<
 };
 
 export function getAssertMerkleTreeAccountInstruction<
-  TAccountMerkleTree extends string,
+  TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: AssertMerkleTreeAccountInputWithSigners<
-    TAccountMerkleTree,
+    TAccountTargetMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
   >
 ): AssertMerkleTreeAccountInstructionWithSigners<
   TProgram,
-  TAccountMerkleTree,
+  TAccountTargetMerkleTree,
   TAccountRoot,
   TAccountSplAccountCompression
 >;
 export function getAssertMerkleTreeAccountInstruction<
-  TAccountMerkleTree extends string,
+  TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: AssertMerkleTreeAccountInput<
-    TAccountMerkleTree,
+    TAccountTargetMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
   >
 ): AssertMerkleTreeAccountInstruction<
   TProgram,
-  TAccountMerkleTree,
+  TAccountTargetMerkleTree,
   TAccountRoot,
   TAccountSplAccountCompression
 >;
 export function getAssertMerkleTreeAccountInstruction<
-  TAccountMerkleTree extends string,
+  TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: AssertMerkleTreeAccountInput<
-    TAccountMerkleTree,
+    TAccountTargetMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression
   >
@@ -213,13 +213,16 @@ export function getAssertMerkleTreeAccountInstruction<
   type AccountMetas = Parameters<
     typeof getAssertMerkleTreeAccountInstructionRaw<
       TProgram,
-      TAccountMerkleTree,
+      TAccountTargetMerkleTree,
       TAccountRoot,
       TAccountSplAccountCompression
     >
   >[0];
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    merkleTree: { value: input.merkleTree ?? null, isWritable: false },
+    targetMerkleTree: {
+      value: input.targetMerkleTree ?? null,
+      isWritable: false,
+    },
     root: { value: input.root ?? null, isWritable: false },
     splAccountCompression: {
       value: input.splAccountCompression ?? null,
@@ -248,15 +251,15 @@ export function getAssertMerkleTreeAccountInstruction<
 
 export function getAssertMerkleTreeAccountInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMerkleTree extends string | IAccountMeta<string> = string,
+  TAccountTargetMerkleTree extends string | IAccountMeta<string> = string,
   TAccountRoot extends string | IAccountMeta<string> = string,
   TAccountSplAccountCompression extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 >(
   accounts: {
-    merkleTree: TAccountMerkleTree extends string
-      ? Address<TAccountMerkleTree>
-      : TAccountMerkleTree;
+    targetMerkleTree: TAccountTargetMerkleTree extends string
+      ? Address<TAccountTargetMerkleTree>
+      : TAccountTargetMerkleTree;
     root: TAccountRoot extends string ? Address<TAccountRoot> : TAccountRoot;
     splAccountCompression: TAccountSplAccountCompression extends string
       ? Address<TAccountSplAccountCompression>
@@ -268,7 +271,7 @@ export function getAssertMerkleTreeAccountInstructionRaw<
 ) {
   return {
     accounts: [
-      accountMetaWithDefault(accounts.merkleTree, AccountRole.READONLY),
+      accountMetaWithDefault(accounts.targetMerkleTree, AccountRole.READONLY),
       accountMetaWithDefault(accounts.root, AccountRole.READONLY),
       accountMetaWithDefault(
         accounts.splAccountCompression,
@@ -280,7 +283,7 @@ export function getAssertMerkleTreeAccountInstructionRaw<
     programAddress,
   } as AssertMerkleTreeAccountInstruction<
     TProgram,
-    TAccountMerkleTree,
+    TAccountTargetMerkleTree,
     TAccountRoot,
     TAccountSplAccountCompression,
     TRemainingAccounts
@@ -293,9 +296,9 @@ export type ParsedAssertMerkleTreeAccountInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Merkle tree account */
-    merkleTree: TAccountMetas[0];
-    /** Root account */
+    /** Target merkle tree account to be asserted */
+    targetMerkleTree: TAccountMetas[0];
+    /** The current root of the merkle tree */
     root: TAccountMetas[1];
     /** SPL account compression program */
     splAccountCompression: TAccountMetas[2];
@@ -324,7 +327,7 @@ export function parseAssertMerkleTreeAccountInstruction<
   return {
     programAddress: instruction.programAddress,
     accounts: {
-      merkleTree: getNextAccount(),
+      targetMerkleTree: getNextAccount(),
       root: getNextAccount(),
       splAccountCompression: getNextAccount(),
     },

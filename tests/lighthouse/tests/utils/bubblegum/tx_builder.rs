@@ -7,7 +7,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 
-use crate::utils::utils::process_transaction;
+use crate::utils::process_transaction;
 
 use super::{clone_keypair, instruction, tree::Tree, Error, LeafArgs, Result};
 

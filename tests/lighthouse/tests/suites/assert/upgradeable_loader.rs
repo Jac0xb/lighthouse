@@ -1,6 +1,6 @@
 use crate::utils::context::TestContext;
 use crate::utils::create_user_with_balance;
-use crate::utils::utils::{process_transaction_assert_success, set_account_from_rpc};
+use crate::utils::{process_transaction_assert_success, set_account_from_rpc};
 use lighthouse_client::instructions::AssertUpgradeableLoaderAccountBuilder;
 use lighthouse_client::types::{
     ComparableOperator, EquatableOperator, UpgradeableLoaderStateAssertion,

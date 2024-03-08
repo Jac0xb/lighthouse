@@ -1,9 +1,8 @@
+use super::LogLevel;
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 use solana_program::msg;
 use std::{fmt::Debug, ops::BitAnd};
-
-use super::{Assert, LogLevel};
 
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
@@ -63,17 +62,18 @@ pub struct EvaluationResult {
 }
 
 impl EvaluationResult {
-    pub fn log<U: Debug, T: Assert<U> + Debug>(&self, _log_level: &LogLevel, assertion: &T) {
-        msg!(
-            "{} {:?} {}",
-            if self.passed {
-                "[✓] PASSED"
-            } else {
-                "[✕] FAILED"
-            },
-            assertion,
-            self.output
-        );
+    pub fn log(&self, log_level: LogLevel) {
+        if log_level == LogLevel::PlaintextMsgLog {
+            msg!(
+                "{} {}",
+                if self.passed {
+                    "[✓] PASSED"
+                } else {
+                    "[✕] FAILED"
+                },
+                self.output
+            );
+        }
     }
 }
 
