@@ -1,6 +1,6 @@
 use crate::utils::context::TestContext;
+use crate::utils::process_transaction_assert_success;
 use crate::utils::tx_builder::TxBuilder;
-use crate::utils::utils::process_transaction_assert_success;
 use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse_client::instructions::AssertAccountDataBuilder;
 use lighthouse_client::types::{

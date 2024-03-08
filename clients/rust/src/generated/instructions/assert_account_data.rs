@@ -12,7 +12,7 @@ use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct AssertAccountData {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
 }
 
@@ -86,7 +86,7 @@ impl AssertAccountDataBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
@@ -142,7 +142,7 @@ impl AssertAccountDataBuilder {
 
 /// `assert_account_data` CPI accounts.
 pub struct AssertAccountDataCpiAccounts<'a, 'b> {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
@@ -150,7 +150,7 @@ pub struct AssertAccountDataCpiAccounts<'a, 'b> {
 pub struct AssertAccountDataCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertAccountDataInstructionArgs,
@@ -260,7 +260,7 @@ impl<'a, 'b> AssertAccountDataCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(
         &mut self,

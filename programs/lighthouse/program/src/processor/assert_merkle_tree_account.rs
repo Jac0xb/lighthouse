@@ -34,8 +34,9 @@ pub(crate) fn assert_merkle_tree_account<
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let result = assertion.evaluate(context, log_level)?;
-    if !result.passed {
+    let evaluation_result = assertion.evaluate(context, log_level.clone())?;
+    if !evaluation_result.passed {
+        evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());
     }
 

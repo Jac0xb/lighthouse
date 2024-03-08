@@ -117,7 +117,7 @@ export function getAssertMintAccountMultiInstructionDataCodec(): Codec<
 
 export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
   {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: Address<TAccountTargetAccount>;
     logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
     assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
@@ -126,7 +126,7 @@ export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
 export type AssertMintAccountMultiInputWithSigners<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
   assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
@@ -219,7 +219,7 @@ export type ParsedAssertMintAccountMultiInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
   data: AssertMintAccountMultiInstructionData;

@@ -116,7 +116,7 @@ export function getAssertUpgradeableLoaderAccountInstructionDataCodec(): Codec<
 export type AssertUpgradeableLoaderAccountInput<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertUpgradeableLoaderAccountInstructionDataArgs['logLevel'];
   assertion: AssertUpgradeableLoaderAccountInstructionDataArgs['assertion'];
@@ -125,7 +125,7 @@ export type AssertUpgradeableLoaderAccountInput<
 export type AssertUpgradeableLoaderAccountInputWithSigners<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertUpgradeableLoaderAccountInstructionDataArgs['logLevel'];
   assertion: AssertUpgradeableLoaderAccountInstructionDataArgs['assertion'];
@@ -222,7 +222,7 @@ export type ParsedAssertUpgradeableLoaderAccountInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
   data: AssertUpgradeableLoaderAccountInstructionData;

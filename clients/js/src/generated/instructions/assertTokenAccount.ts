@@ -114,7 +114,7 @@ export function getAssertTokenAccountInstructionDataCodec(): Codec<
 }
 
 export type AssertTokenAccountInput<TAccountTargetAccount extends string> = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
   assertion: AssertTokenAccountInstructionDataArgs['assertion'];
@@ -123,7 +123,7 @@ export type AssertTokenAccountInput<TAccountTargetAccount extends string> = {
 export type AssertTokenAccountInputWithSigners<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
   assertion: AssertTokenAccountInstructionDataArgs['assertion'];
@@ -210,7 +210,7 @@ export type ParsedAssertTokenAccountInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
   data: AssertTokenAccountInstructionData;

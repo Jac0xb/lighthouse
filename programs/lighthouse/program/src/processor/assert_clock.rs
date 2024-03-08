@@ -9,8 +9,9 @@ pub(crate) fn assert_clock<T: Assert<()> + Debug>(
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate((), log_level)?;
+    let evaluation_result = assertion.evaluate((), log_level.clone())?;
     if !evaluation_result.passed {
+        evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());
     }
 

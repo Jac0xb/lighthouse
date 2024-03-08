@@ -20,7 +20,6 @@ fi
 
 SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
-# npm run programs:build && npm run programs:test
 
 echo "Building programs..."
 
@@ -28,7 +27,7 @@ for p in ${PROGRAMS[@]}; do
     cd ${WORKING_DIR}/${p}
 
     echo "Running solana test-sbf for ${p}..."
-    RUST_LOG=error BPF_OUT_DIR=${WORKING_DIR}/.bin cargo test
+    RUST_LOG=error BPF_OUT_DIR=${WORKING_DIR}/.bin cargo test 2>&1
 done
 
 cd ${WORKING_DIR}/tests/lighthouse

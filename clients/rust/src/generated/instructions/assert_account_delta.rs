@@ -5,43 +5,43 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::DataValueDeltaAssertion;
+use crate::generated::types::AccountDeltaAssertion;
 use crate::generated::types::LogLevel;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
-pub struct AssertAccountDataDelta {
-    /// Left account
-    pub left_account: solana_program::pubkey::Pubkey,
-    /// Right account
-    pub right_account: solana_program::pubkey::Pubkey,
+pub struct AssertAccountDelta {
+    /// Account A where the delta is calculated from
+    pub account_a: solana_program::pubkey::Pubkey,
+    /// Account B where the delta is calculated to
+    pub account_b: solana_program::pubkey::Pubkey,
 }
 
-impl AssertAccountDataDelta {
+impl AssertAccountDelta {
     pub fn instruction(
         &self,
-        args: AssertAccountDataDeltaInstructionArgs,
+        args: AssertAccountDeltaInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: AssertAccountDataDeltaInstructionArgs,
+        args: AssertAccountDeltaInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.left_account,
+            self.account_a,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.right_account,
+            self.account_b,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertAccountDataDeltaInstructionData::new()
+        let mut data = AssertAccountDeltaInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = args.try_to_vec().unwrap();
@@ -56,11 +56,11 @@ impl AssertAccountDataDelta {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertAccountDataDeltaInstructionData {
+struct AssertAccountDeltaInstructionData {
     discriminator: u8,
 }
 
-impl AssertAccountDataDeltaInstructionData {
+impl AssertAccountDeltaInstructionData {
     fn new() -> Self {
         Self { discriminator: 3 }
     }
@@ -68,44 +68,40 @@ impl AssertAccountDataDeltaInstructionData {
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AssertAccountDataDeltaInstructionArgs {
+pub struct AssertAccountDeltaInstructionArgs {
     pub log_level: LogLevel,
-    pub offset_left: u16,
-    pub offset_right: u16,
-    pub assertion: DataValueDeltaAssertion,
+    pub assertion: AccountDeltaAssertion,
 }
 
-/// Instruction builder for `AssertAccountDataDelta`.
+/// Instruction builder for `AssertAccountDelta`.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` left_account
-///   1. `[]` right_account
+///   0. `[]` account_a
+///   1. `[]` account_b
 #[derive(Default)]
-pub struct AssertAccountDataDeltaBuilder {
-    left_account: Option<solana_program::pubkey::Pubkey>,
-    right_account: Option<solana_program::pubkey::Pubkey>,
+pub struct AssertAccountDeltaBuilder {
+    account_a: Option<solana_program::pubkey::Pubkey>,
+    account_b: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
-    offset_left: Option<u16>,
-    offset_right: Option<u16>,
-    assertion: Option<DataValueDeltaAssertion>,
+    assertion: Option<AccountDeltaAssertion>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl AssertAccountDataDeltaBuilder {
+impl AssertAccountDeltaBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Left account
+    /// Account A where the delta is calculated from
     #[inline(always)]
-    pub fn left_account(&mut self, left_account: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.left_account = Some(left_account);
+    pub fn account_a(&mut self, account_a: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.account_a = Some(account_a);
         self
     }
-    /// Right account
+    /// Account B where the delta is calculated to
     #[inline(always)]
-    pub fn right_account(&mut self, right_account: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.right_account = Some(right_account);
+    pub fn account_b(&mut self, account_b: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.account_b = Some(account_b);
         self
     }
     #[inline(always)]
@@ -114,17 +110,7 @@ impl AssertAccountDataDeltaBuilder {
         self
     }
     #[inline(always)]
-    pub fn offset_left(&mut self, offset_left: u16) -> &mut Self {
-        self.offset_left = Some(offset_left);
-        self
-    }
-    #[inline(always)]
-    pub fn offset_right(&mut self, offset_right: u16) -> &mut Self {
-        self.offset_right = Some(offset_right);
-        self
-    }
-    #[inline(always)]
-    pub fn assertion(&mut self, assertion: DataValueDeltaAssertion) -> &mut Self {
+    pub fn assertion(&mut self, assertion: AccountDeltaAssertion) -> &mut Self {
         self.assertion = Some(assertion);
         self
     }
@@ -148,14 +134,12 @@ impl AssertAccountDataDeltaBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = AssertAccountDataDelta {
-            left_account: self.left_account.expect("left_account is not set"),
-            right_account: self.right_account.expect("right_account is not set"),
+        let accounts = AssertAccountDelta {
+            account_a: self.account_a.expect("account_a is not set"),
+            account_b: self.account_b.expect("account_b is not set"),
         };
-        let args = AssertAccountDataDeltaInstructionArgs {
+        let args = AssertAccountDeltaInstructionArgs {
             log_level: self.log_level.clone().expect("log_level is not set"),
-            offset_left: self.offset_left.clone().expect("offset_left is not set"),
-            offset_right: self.offset_right.clone().expect("offset_right is not set"),
             assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
@@ -163,36 +147,36 @@ impl AssertAccountDataDeltaBuilder {
     }
 }
 
-/// `assert_account_data_delta` CPI accounts.
-pub struct AssertAccountDataDeltaCpiAccounts<'a, 'b> {
-    /// Left account
-    pub left_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Right account
-    pub right_account: &'b solana_program::account_info::AccountInfo<'a>,
+/// `assert_account_delta` CPI accounts.
+pub struct AssertAccountDeltaCpiAccounts<'a, 'b> {
+    /// Account A where the delta is calculated from
+    pub account_a: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Account B where the delta is calculated to
+    pub account_b: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `assert_account_data_delta` CPI instruction.
-pub struct AssertAccountDataDeltaCpi<'a, 'b> {
+/// `assert_account_delta` CPI instruction.
+pub struct AssertAccountDeltaCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Left account
-    pub left_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Right account
-    pub right_account: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Account A where the delta is calculated from
+    pub account_a: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Account B where the delta is calculated to
+    pub account_b: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: AssertAccountDataDeltaInstructionArgs,
+    pub __args: AssertAccountDeltaInstructionArgs,
 }
 
-impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
+impl<'a, 'b> AssertAccountDeltaCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: AssertAccountDataDeltaCpiAccounts<'a, 'b>,
-        args: AssertAccountDataDeltaInstructionArgs,
+        accounts: AssertAccountDeltaCpiAccounts<'a, 'b>,
+        args: AssertAccountDeltaInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
-            left_account: accounts.left_account,
-            right_account: accounts.right_account,
+            account_a: accounts.account_a,
+            account_b: accounts.account_b,
             __args: args,
         }
     }
@@ -231,11 +215,11 @@ impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.left_account.key,
+            *self.account_a.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.right_account.key,
+            *self.account_b.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
@@ -245,7 +229,7 @@ impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertAccountDataDeltaInstructionData::new()
+        let mut data = AssertAccountDeltaInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
@@ -258,8 +242,8 @@ impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.left_account.clone());
-        account_infos.push(self.right_account.clone());
+        account_infos.push(self.account_a.clone());
+        account_infos.push(self.account_b.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -272,46 +256,44 @@ impl<'a, 'b> AssertAccountDataDeltaCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `AssertAccountDataDelta` via CPI.
+/// Instruction builder for `AssertAccountDelta` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[]` left_account
-///   1. `[]` right_account
-pub struct AssertAccountDataDeltaCpiBuilder<'a, 'b> {
-    instruction: Box<AssertAccountDataDeltaCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` account_a
+///   1. `[]` account_b
+pub struct AssertAccountDeltaCpiBuilder<'a, 'b> {
+    instruction: Box<AssertAccountDeltaCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> AssertAccountDataDeltaCpiBuilder<'a, 'b> {
+impl<'a, 'b> AssertAccountDeltaCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(AssertAccountDataDeltaCpiBuilderInstruction {
+        let instruction = Box::new(AssertAccountDeltaCpiBuilderInstruction {
             __program: program,
-            left_account: None,
-            right_account: None,
+            account_a: None,
+            account_b: None,
             log_level: None,
-            offset_left: None,
-            offset_right: None,
             assertion: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
-    /// Left account
+    /// Account A where the delta is calculated from
     #[inline(always)]
-    pub fn left_account(
+    pub fn account_a(
         &mut self,
-        left_account: &'b solana_program::account_info::AccountInfo<'a>,
+        account_a: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.left_account = Some(left_account);
+        self.instruction.account_a = Some(account_a);
         self
     }
-    /// Right account
+    /// Account B where the delta is calculated to
     #[inline(always)]
-    pub fn right_account(
+    pub fn account_b(
         &mut self,
-        right_account: &'b solana_program::account_info::AccountInfo<'a>,
+        account_b: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.right_account = Some(right_account);
+        self.instruction.account_b = Some(account_b);
         self
     }
     #[inline(always)]
@@ -320,17 +302,7 @@ impl<'a, 'b> AssertAccountDataDeltaCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn offset_left(&mut self, offset_left: u16) -> &mut Self {
-        self.instruction.offset_left = Some(offset_left);
-        self
-    }
-    #[inline(always)]
-    pub fn offset_right(&mut self, offset_right: u16) -> &mut Self {
-        self.instruction.offset_right = Some(offset_right);
-        self
-    }
-    #[inline(always)]
-    pub fn assertion(&mut self, assertion: DataValueDeltaAssertion) -> &mut Self {
+    pub fn assertion(&mut self, assertion: AccountDeltaAssertion) -> &mut Self {
         self.instruction.assertion = Some(assertion);
         self
     }
@@ -375,40 +347,24 @@ impl<'a, 'b> AssertAccountDataDeltaCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = AssertAccountDataDeltaInstructionArgs {
+        let args = AssertAccountDeltaInstructionArgs {
             log_level: self
                 .instruction
                 .log_level
                 .clone()
                 .expect("log_level is not set"),
-            offset_left: self
-                .instruction
-                .offset_left
-                .clone()
-                .expect("offset_left is not set"),
-            offset_right: self
-                .instruction
-                .offset_right
-                .clone()
-                .expect("offset_right is not set"),
             assertion: self
                 .instruction
                 .assertion
                 .clone()
                 .expect("assertion is not set"),
         };
-        let instruction = AssertAccountDataDeltaCpi {
+        let instruction = AssertAccountDeltaCpi {
             __program: self.instruction.__program,
 
-            left_account: self
-                .instruction
-                .left_account
-                .expect("left_account is not set"),
+            account_a: self.instruction.account_a.expect("account_a is not set"),
 
-            right_account: self
-                .instruction
-                .right_account
-                .expect("right_account is not set"),
+            account_b: self.instruction.account_b.expect("account_b is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -418,14 +374,12 @@ impl<'a, 'b> AssertAccountDataDeltaCpiBuilder<'a, 'b> {
     }
 }
 
-struct AssertAccountDataDeltaCpiBuilderInstruction<'a, 'b> {
+struct AssertAccountDeltaCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    left_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    right_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    account_a: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    account_b: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
-    offset_left: Option<u16>,
-    offset_right: Option<u16>,
-    assertion: Option<DataValueDeltaAssertion>,
+    assertion: Option<AccountDeltaAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,
