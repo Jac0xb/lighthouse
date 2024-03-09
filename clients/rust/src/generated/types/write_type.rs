@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::AccountInfoField;
 use crate::generated::types::DataValue;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -12,11 +13,7 @@ use borsh::BorshSerialize;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WriteType {
-    AccountData {
-        offset: u16,
-        data_length: Option<u16>,
-    },
-    AccountInfo,
+    AccountData { offset: u16, data_length: u16 },
+    AccountInfoField(AccountInfoField),
     DataValue(DataValue),
-    Program,
 }

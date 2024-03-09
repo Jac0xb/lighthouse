@@ -7,15 +7,18 @@
  */
 
 export * from './assertAccountData';
-export * from './assertAccountDataDelta';
+export * from './assertAccountDelta';
 export * from './assertAccountInfo';
+export * from './assertAccountInfoMulti';
 export * from './assertMerkleTreeAccount';
 export * from './assertMintAccount';
 export * from './assertMintAccountMulti';
 export * from './assertStakeAccount';
+export * from './assertStakeAccountMulti';
 export * from './assertSysvarClock';
 export * from './assertTokenAccount';
 export * from './assertTokenAccountMulti';
 export * from './assertUpgradeableLoaderAccount';
-export * from './createMemoryAccount';
-export * from './write';
+export * from './assertUpgradeableLoaderAccountMulti';
+export * from './memoryClose';
+export * from './memoryWrite';

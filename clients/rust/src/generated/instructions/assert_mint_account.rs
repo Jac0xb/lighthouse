@@ -12,7 +12,7 @@ use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct AssertMintAccount {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
 }
 
@@ -56,7 +56,7 @@ struct AssertMintAccountInstructionData {
 
 impl AssertMintAccountInstructionData {
     fn new() -> Self {
-        Self { discriminator: 5 }
+        Self { discriminator: 6 }
     }
 }
 
@@ -84,7 +84,7 @@ impl AssertMintAccountBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
@@ -134,7 +134,7 @@ impl AssertMintAccountBuilder {
 
 /// `assert_mint_account` CPI accounts.
 pub struct AssertMintAccountCpiAccounts<'a, 'b> {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
@@ -142,7 +142,7 @@ pub struct AssertMintAccountCpiAccounts<'a, 'b> {
 pub struct AssertMintAccountCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertMintAccountInstructionArgs,
@@ -251,7 +251,7 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(
         &mut self,

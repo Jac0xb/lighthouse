@@ -8,10 +8,12 @@ use solana_program::{
     msg,
     program::{invoke, invoke_signed},
     program_error::ProgramError,
+    program_memory::sol_memcmp,
     program_option::COption,
     pubkey::Pubkey,
+    pubkey::PUBKEY_BYTES,
     rent::Rent,
-    system_instruction,
+    system_instruction, system_program,
 };
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
@@ -62,9 +64,7 @@ pub fn try_from_slice<T: BorshDeserialize + Sized>(
             start..end
         );
 
-        // err!(LighthouseError::RangeOutOfBounds)
-
-        ProgramError::Custom(0)
+        LighthouseError::RangeOutOfBounds
     })?;
 
     Ok(T::try_from_slice(slice)?)
@@ -137,9 +137,21 @@ pub fn out_of_bounds_err(r: Range<usize>) -> ProgramError {
     LighthouseError::RangeOutOfBounds.into()
 }
 
-macro_rules! log_compute {
-    () => {
-        #[cfg(all(feature = "sol-log", feature = "log"))]
-        ::solana_program::log::sol_log_compute_units();
-    };
+pub fn close<'info>(info: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
+    // Transfer tokens from the account to the sol_destination.
+    let dest_starting_lamports = sol_destination.lamports();
+    **sol_destination.lamports.borrow_mut() =
+        dest_starting_lamports.checked_add(info.lamports()).unwrap();
+    **info.lamports.borrow_mut() = 0;
+
+    info.assign(&system_program::ID);
+    info.realloc(0, false).map_err(Into::into)
+}
+
+pub fn is_closed(info: &AccountInfo) -> bool {
+    keys_equal(info.owner, &system_program::id()) && info.data_is_empty()
+}
+
+pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
+    sol_memcmp(key_a.as_ref(), key_b.as_ref(), PUBKEY_BYTES) == 0
 }

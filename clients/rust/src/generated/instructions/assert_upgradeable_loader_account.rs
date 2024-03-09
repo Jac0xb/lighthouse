@@ -12,7 +12,7 @@ use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct AssertUpgradeableLoaderAccount {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
 }
 
@@ -56,7 +56,7 @@ struct AssertUpgradeableLoaderAccountInstructionData {
 
 impl AssertUpgradeableLoaderAccountInstructionData {
     fn new() -> Self {
-        Self { discriminator: 10 }
+        Self { discriminator: 12 }
     }
 }
 
@@ -84,7 +84,7 @@ impl AssertUpgradeableLoaderAccountBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
@@ -134,7 +134,7 @@ impl AssertUpgradeableLoaderAccountBuilder {
 
 /// `assert_upgradeable_loader_account` CPI accounts.
 pub struct AssertUpgradeableLoaderAccountCpiAccounts<'a, 'b> {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
@@ -142,7 +142,7 @@ pub struct AssertUpgradeableLoaderAccountCpiAccounts<'a, 'b> {
 pub struct AssertUpgradeableLoaderAccountCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertUpgradeableLoaderAccountInstructionArgs,
@@ -251,7 +251,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(
         &mut self,

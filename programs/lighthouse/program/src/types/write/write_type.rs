@@ -1,49 +1,37 @@
-use super::DataValue;
+use super::{AccountInfoField, DataValue};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::account_info::AccountInfo;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum WriteType {
-    AccountData {
-        offset: u16,
-        data_length: Option<u16>,
-    },
-    AccountInfo,
+    AccountData { offset: u16, data_length: u16 },
+    AccountInfoField(AccountInfoField),
     DataValue(DataValue),
-    Program,
 }
 
 impl WriteType {
-    pub fn size(&self, account_info: Option<&AccountInfo<'_>>) -> Option<usize> {
+    pub fn data_length(&self) -> usize {
         match self {
             WriteType::AccountData {
-                offset: account_offset,
+                offset: _,
                 data_length,
-            } => {
-                if let Some(data_length) = data_length {
-                    Some(*data_length as usize)
-                } else {
-                    match account_info {
-                        Some(account_info) => Some(
-                            account_info
-                                .data_len()
-                                .checked_sub(*account_offset as usize)?,
-                        ),
-                        None => None,
-                    }
-                }
-            }
-            WriteType::AccountInfo => Some(8),
-            WriteType::DataValue(memory_value) => match memory_value {
-                DataValue::Bool(_) | DataValue::U8(_) | DataValue::I8(_) => Some(1),
-                DataValue::U16(_) | DataValue::I16(_) => Some(2),
-                DataValue::U32(_) | DataValue::I32(_) => Some(4),
-                DataValue::U64(_) | DataValue::I64(_) => Some(8),
-                DataValue::U128(_) | DataValue::I128(_) => Some(16),
-                DataValue::Bytes(bytes) => Some(bytes.len()),
-                DataValue::Pubkey(_) => Some(32),
+            } => *data_length as usize,
+            WriteType::AccountInfoField(field) => match field {
+                AccountInfoField::Key => 32,
+                AccountInfoField::Lamports => 8,
+                AccountInfoField::Owner => 32,
+                AccountInfoField::RentEpoch => 8,
+                AccountInfoField::DataLength => 8,
+                AccountInfoField::Executable => 1,
             },
-            WriteType::Program => Some(64),
+            WriteType::DataValue(memory_value) => match memory_value {
+                DataValue::Bool(_) | DataValue::U8(_) | DataValue::I8(_) => 1,
+                DataValue::U16(_) | DataValue::I16(_) => 2,
+                DataValue::U32(_) | DataValue::I32(_) => 4,
+                DataValue::U64(_) | DataValue::I64(_) => 8,
+                DataValue::U128(_) | DataValue::I128(_) => 16,
+                DataValue::Bytes(bytes) => bytes.len(),
+                DataValue::Pubkey(_) => 32,
+            },
         }
     }
 }

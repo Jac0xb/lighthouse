@@ -2,14 +2,11 @@ use super::{
     clone_keypair, compute_metadata_hashes,
     tx_builder::{
         BurnBuilder, CancelRedeemBuilder, CollectionVerificationInner, CreateBuilder,
-        CreatorVerificationInner, DelegateBuilder, DelegateInner, MintToCollectionV1Builder,
-        MintV1Builder, RedeemBuilder, SetDecompressibleStateBuilder, SetTreeDelegateBuilder,
-        TransferBuilder, TransferInner, TxBuilder, UnverifyCreatorBuilder, VerifyCollectionBuilder,
-        VerifyCreatorBuilder,
+        DelegateBuilder, DelegateInner, MintToCollectionV1Builder, MintV1Builder, RedeemBuilder,
+        SetTreeDelegateBuilder, TransferBuilder, TransferInner, TxBuilder, VerifyCollectionBuilder,
     },
     Error, LeafArgs, Result,
 };
-// use crate::utils::tx_builder::DecompressV1Builder;
 use anchor_lang::{self, AccountDeserialize};
 use bytemuck::try_from_bytes;
 use mpl_bubblegum::{
@@ -39,36 +36,22 @@ pub fn decompress_mint_auth_pda(mint_key: Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[mint_key.as_ref()], &mpl_bubblegum::ID).0
 }
 
-// A convenience object that records some of the parameters for compressed
-// trees and generates TX builders with the default configuration for each
-// operation.
-// TODO: finish implementing all operations.
 pub struct Tree<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> {
     pub tree_creator: Keypair,
     pub tree_delegate: Keypair,
     pub merkle_tree: Keypair,
     pub canopy_depth: u32,
     client: BanksClient,
-    // The will be kept in sync with changes to the leaves. Setting it up initially
-    // can take quite a lot of time for large depths (unless we add an alternative/
-    // optimization), so we'll generally use trees with less than the maximum possible
-    // depth for testing for now.
     proof_tree: MerkleTree,
-    // Keep track of how many mint TXs executed successfully such that we can automatically
-    // populate the `nonce` and `index` of leaf args instead of having to do it manually.
     num_minted: u64,
 }
 
 impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_BUFFER_SIZE> {
-    // This and `with_creator` use a bunch of defaults; things can be
-    // customized some more via the public access, or we can add extra
-    // methods to make things even easier.
     pub fn new(client: BanksClient) -> Self {
         Self::with_creator(&Keypair::new(), client)
     }
 
     pub fn with_creator(tree_creator: &Keypair, client: BanksClient) -> Self {
-        // Default proof tree construction.
         let proof_tree = MerkleTree::new(vec![Node::default(); 1 << MAX_DEPTH].as_slice());
 
         Tree {
@@ -124,8 +107,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
             + size_of::<ConcurrentMerkleTree<MAX_DEPTH, MAX_BUFFER_SIZE>>()
     }
 
-    // Helper method to execute a transaction with the specified arguments
-    // (i.e. single instruction) via the inner Banks client.
     pub async fn process_tx<T: Signers>(
         &mut self,
         instruction: Instruction,
@@ -204,12 +185,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         }
     }
 
-    // The `operation_tx` method instantiate a default builder object for a
-    // transaction that can be used to execute that particular operation (tree
-    // create in this case). The object can be modified (i.e. to use a
-    // different signer, payer, accounts, data, etc.) before execution.
-    // Moreover executions don't consume the builder, which can be modified
-    // some more and executed again etc.
     pub fn create_tree_tx(
         &mut self,
         payer: &Keypair,
@@ -234,8 +209,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         self.tx_builder(accounts, data, None, (), payer.pubkey(), &[payer])
     }
 
-    // Shorthand method for executing a create tree tx with the default config
-    // defined in the `_tx` method.
     pub async fn create(&mut self, payer: &Keypair) -> Result<()> {
         self.create_tree_tx(payer, false).execute(&[], &[]).await
     }
@@ -277,21 +250,9 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         )
     }
 
-    // This assumes the owner is the account paying for the tx. We can make things
-    // more configurable for any of the methods.
     pub async fn mint_v1(&mut self, tree_delegate: &Keypair, args: &mut LeafArgs) -> Result<()> {
         self.mint_v1_tx(tree_delegate, args).execute(&[], &[]).await
     }
-
-    // pub async fn mint_v1_non_owner(
-    //     &mut self,
-    //     tree_delegate: &Keypair,
-    //     args: &mut LeafArgs,
-    // ) -> Result<()> {
-    //     self.mint_v1_non_owner_tx(tree_delegate, args)
-    //         .execute(&[], &[])
-    //         .await
-    // }
 
     #[allow(clippy::too_many_arguments)]
     pub fn mint_to_collection_v1_tx<'a>(
@@ -525,8 +486,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
             index: args.index,
         };
 
-        // Cloning to avoid issues with the borrow checker when passing `&mut args`
-        // to the builder below.
         let owner = clone_keypair(&args.owner);
         let new_owner = clone_keypair(new_leaf_owner);
 
@@ -665,51 +624,6 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     pub async fn cancel_redeem(&mut self, args: &LeafArgs) -> Result<()> {
         self.cancel_redeem_tx(args).await?.execute(&[], &[]).await
     }
-
-    // pub fn decompress_v1_tx(
-    //     &mut self,
-    //     voucher: &Voucher,
-    //     args: &LeafArgs,
-    // ) -> DecompressV1Builder<MAX_DEPTH, MAX_BUFFER_SIZE> {
-    //     let mint = voucher.decompress_mint_pda();
-    //     let mint_authority = decompress_mint_auth_pda(mint);
-    //     let token_account = get_associated_token_address(&args.owner.pubkey(), &mint);
-    //     let metadata = Metadata::find_pda(&mint).0;
-    //     let master_edition = MasterEdition::find_pda(&mint).0;
-
-    //     let accounts = mpl_bubblegum::accounts::DecompressV1 {
-    //         voucher: voucher.pda(),
-    //         leaf_owner: args.owner.pubkey(),
-    //         token_account,
-    //         mint,
-    //         mint_authority,
-    //         metadata,
-    //         master_edition,
-    //         system_program: system_program::id(),
-    //         sysvar_rent: sysvar::rent::id(),
-    //         token_metadata_program: mpl_token_metadata::ID,
-    //         token_program: spl_token::id(),
-    //         associated_token_program: spl_associated_token_account::id(),
-    //         log_wrapper: spl_noop::id(),
-    //     };
-
-    //     let data = mpl_bubblegum::instruction::DecompressV1 {
-    //         metadata: args.metadata.clone(),
-    //     };
-
-    //     self.tx_builder(
-    //         accounts,
-    //         data,
-    //         None,
-    //         (),
-    //         args.owner.pubkey(),
-    //         &[&args.owner],
-    //     )
-    // }
-
-    // pub async fn decompress_v1(&mut self, voucher: &Voucher, args: &LeafArgs) -> Result<()> {
-    //     self.decompress_v1_tx(voucher, args).execute(&[], &[]).await
-    // }
 
     pub fn set_tree_delegate_tx(
         &mut self,
@@ -865,43 +779,4 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
             .map(|node| AccountMeta::new_readonly(Pubkey::new_from_array(node), false))
             .collect()
     }
-
-    // // Set Decompression Permission TX
-    // pub fn set_decompression_tx(
-    //     &mut self,
-    //     decompressable_state: DecompressibleState,
-    // ) -> SetDecompressibleStateBuilder<MAX_DEPTH, MAX_BUFFER_SIZE> {
-    //     let accounts = mpl_bubblegum::accounts::SetDecompressibleState {
-    //         tree_authority: self.authority(),
-    //         tree_creator: self.creator_pubkey(),
-    //     };
-
-    //     let data = mpl_bubblegum::instruction::SetDecompressibleState {
-    //         decompressable_state,
-    //     };
-
-    //     let tree_creator = Keypair::from_bytes(&self.tree_creator.to_bytes()).unwrap();
-    //     self.tx_builder(
-    //         accounts,
-    //         data,
-    //         None,
-    //         (),
-    //         self.creator_pubkey(),
-    //         &[&tree_creator],
-    //     )
-    // }
-
-    // // Enable Decompression
-    // pub async fn enable_decompression(&mut self) -> Result<()> {
-    //     self.set_decompression_tx(DecompressibleState::Enabled)
-    //         .execute(&[], &[])
-    //         .await
-    // }
-
-    // // Disable Decompression
-    // pub async fn disable_decompression(&mut self) -> Result<()> {
-    //     self.set_decompression_tx(DecompressibleState::Disabled)
-    //         .execute(&[], &[])
-    //         .await
-    // }
 }

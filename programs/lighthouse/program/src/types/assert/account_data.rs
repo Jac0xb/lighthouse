@@ -2,21 +2,21 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::operator::{
+    types::assert::operator::{
         BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
     },
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {
     pub offset: u16,
     pub assertion: DataValueAssertion,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum DataValueAssertion {
     Bool {
         value: bool,
@@ -72,11 +72,11 @@ pub enum DataValueAssertion {
     },
 }
 
-impl Assert<AccountInfo<'_>> for AccountDataAssertion {
+impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
     fn evaluate(
         &self,
-        account: &AccountInfo,
-        log_level: &LogLevel,
+        account: &AccountInfo<'_>,
+        log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
         let offset = self.offset as usize;
         let assertion = &self.assertion;
@@ -168,9 +168,14 @@ impl Assert<AccountInfo<'_>> for AccountDataAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = &data[offset..offset + assertion_value.len()];
-                let assertion_value = assertion_value.as_slice();
-                Ok(operator.evaluate(actual_value, assertion_value, log_level))
+                let actual_value = data
+                    .get(offset..offset + assertion_value.len())
+                    .ok_or_else(|| {
+                        msg!("Data range out of bounds");
+                        err!(LighthouseError::RangeOutOfBounds)
+                    })?;
+
+                Ok(operator.evaluate(actual_value, assertion_value.as_slice(), log_level))
             }
             DataValueAssertion::Pubkey {
                 value: assertion_value,
@@ -193,8 +198,8 @@ mod tests {
     use crate::{
         test_utils::create_test_account,
         types::{
+            assert::operator::{EquatableOperator, IntegerOperator},
             assert::{AccountDataAssertion, Assert, LogLevel},
-            operator::{EquatableOperator, IntegerOperator},
         },
     };
 
@@ -262,7 +267,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(
@@ -324,7 +329,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(
@@ -372,7 +377,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, &LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(

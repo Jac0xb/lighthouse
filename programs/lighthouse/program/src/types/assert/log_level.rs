@@ -1,12 +1,10 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Copy, Clone, PartialEq)]
 #[repr(u8)]
 pub enum LogLevel {
     Silent = 0,
-    PlaintextMsgLog = 1,
-    SerializedMsgLog = 2,
-    CpiLog = 3,
+    PlaintextMessage = 1,
 }
 
 impl LogLevel {
@@ -15,14 +13,6 @@ impl LogLevel {
     }
 
     pub fn is_plaintextmsg_log(&self) -> bool {
-        self == &LogLevel::PlaintextMsgLog
-    }
-
-    pub fn is_serializedmsg_log(&self) -> bool {
-        self == &LogLevel::SerializedMsgLog
-    }
-
-    pub fn is_cpi_log(&self) -> bool {
-        self == &LogLevel::CpiLog
+        self == &LogLevel::PlaintextMessage
     }
 }

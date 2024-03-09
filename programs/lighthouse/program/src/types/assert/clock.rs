@@ -1,12 +1,12 @@
 use super::{Assert, LogLevel};
 use crate::{
-    types::operator::{ComparableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, EvaluationResult, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::clock::Clock;
+use solana_program::{clock::Clock, sysvar::Sysvar};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum SysvarClockAssertion {
     Slot {
         value: u64,
@@ -30,8 +30,10 @@ pub enum SysvarClockAssertion {
     },
 }
 
-impl Assert<Clock> for SysvarClockAssertion {
-    fn evaluate(&self, clock: &Clock, log_level: &LogLevel) -> Result<Box<EvaluationResult>> {
+impl Assert<()> for SysvarClockAssertion {
+    fn evaluate(&self, _: (), log_level: LogLevel) -> Result<Box<EvaluationResult>> {
+        let clock = Clock::get()?;
+
         let result = match self {
             SysvarClockAssertion::Slot {
                 value: assertion_value,
@@ -83,27 +85,41 @@ impl Assert<Clock> for SysvarClockAssertion {
 mod tests {
     mod evaluate {
         use crate::types::{
+            assert::operator::ComparableOperator,
             assert::{Assert, LogLevel, SysvarClockAssertion},
-            operator::ComparableOperator,
         };
+        use solana_sdk::{
+            clock::Clock,
+            program_stubs::{set_syscall_stubs, SyscallStubs},
+        };
+
+        pub struct MockSyscallStubs;
+
+        impl SyscallStubs for MockSyscallStubs {
+            fn sol_get_clock_sysvar(&self, var_addr: *mut u8) -> u64 {
+                unsafe {
+                    *(var_addr as *mut _ as *mut Clock) = Clock {
+                        slot: 69,
+                        epoch_start_timestamp: 420,
+                        epoch: 1337,
+                        leader_schedule_epoch: 9001,
+                        unix_timestamp: 123456789,
+                    };
+                }
+                solana_program::entrypoint::SUCCESS
+            }
+        }
 
         #[test]
         fn evaluate_clock() {
-            let clock = solana_program::clock::Clock {
-                slot: 69,
-                epoch_start_timestamp: 420,
-                epoch: 1337,
-                leader_schedule_epoch: 9001,
-                unix_timestamp: 123456789,
-            };
+            set_syscall_stubs(Box::new(MockSyscallStubs {}));
 
             // Evaluate slot
-
             let result = SysvarClockAssertion::Slot {
                 value: 69,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -116,7 +132,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -131,7 +147,7 @@ mod tests {
                 value: 420,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -144,7 +160,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -159,7 +175,7 @@ mod tests {
                 value: 1337,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -172,7 +188,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -187,7 +203,7 @@ mod tests {
                 value: 9001,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -200,7 +216,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -215,7 +231,7 @@ mod tests {
                 value: 123456789,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -228,7 +244,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate(&clock, &LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

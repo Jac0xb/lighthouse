@@ -1,8 +1,8 @@
-use crate::utils::utils::{
+use crate::utils::CreateMintParameters;
+use crate::utils::{
     build_tx, process_transaction_assert_failure, process_transaction_assert_success,
     to_transaction_error,
 };
-use crate::utils::CreateMintParameters;
 use crate::utils::{context::TestContext, create_mint, create_user};
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::types::{
