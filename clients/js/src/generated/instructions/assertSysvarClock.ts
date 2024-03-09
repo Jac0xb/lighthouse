@@ -68,7 +68,7 @@ export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysv
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getSysvarClockAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 11 })
+    (value) => ({ ...value, discriminator: 14 })
   );
 }
 

@@ -101,7 +101,7 @@ export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<Asse
       ['logLevel', getLogLevelEncoder()],
       ['assertions', getArrayEncoder(getTokenAccountAssertionEncoder())],
     ]),
-    (value) => ({ ...value, discriminator: 8 })
+    (value) => ({ ...value, discriminator: 9 })
   );
 }
 
@@ -127,7 +127,7 @@ export type AssertTokenAccountMultiInput<
   TAccountTargetAccount extends string,
   TAccountLighthouseProgram extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   /** Lighthouse Program */
   lighthouseProgram: Address<TAccountLighthouseProgram>;
@@ -139,7 +139,7 @@ export type AssertTokenAccountMultiInputWithSigners<
   TAccountTargetAccount extends string,
   TAccountLighthouseProgram extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   /** Lighthouse Program */
   lighthouseProgram: Address<TAccountLighthouseProgram>;
@@ -264,7 +264,7 @@ export type ParsedAssertTokenAccountMultiInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
     /** Lighthouse Program */
     lighthouseProgram: TAccountMetas[1];

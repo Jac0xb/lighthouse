@@ -24,10 +24,16 @@ import {
   getI32Encoder,
   getI64Decoder,
   getI64Encoder,
+  getU16Decoder,
+  getU16Encoder,
 } from '@solana/codecs-numbers';
 import {
+  BytesOperator,
+  BytesOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
+  getBytesOperatorDecoder,
+  getBytesOperatorEncoder,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
 } from '.';
@@ -40,7 +46,8 @@ export type DataValueDeltaAssertion =
   | { __kind: 'U32'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I32'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'I64'; value: bigint; operator: IntegerOperator };
+  | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'Bytes'; length: number; operator: BytesOperator };
 
 export type DataValueDeltaAssertionArgs =
   | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
@@ -50,7 +57,8 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'U32'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I32'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs };
+  | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
+  | { __kind: 'Bytes'; length: number; operator: BytesOperatorArgs };
 
 export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
   return getDataEnumEncoder([
@@ -108,6 +116,13 @@ export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAsser
       getStructEncoder([
         ['value', getI128Encoder()],
         ['operator', getIntegerOperatorEncoder()],
+      ]),
+    ],
+    [
+      'Bytes',
+      getStructEncoder([
+        ['length', getU16Encoder()],
+        ['operator', getBytesOperatorEncoder()],
       ]),
     ],
   ]);
@@ -171,6 +186,13 @@ export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAsser
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
+    [
+      'Bytes',
+      getStructDecoder([
+        ['length', getU16Decoder()],
+        ['operator', getBytesOperatorDecoder()],
+      ]),
+    ],
   ]);
 }
 
@@ -217,6 +239,10 @@ export function dataValueDeltaAssertion(
   kind: 'I64',
   data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I64'>
 ): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I64'>;
+export function dataValueDeltaAssertion(
+  kind: 'Bytes',
+  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'Bytes'>
+): GetDataEnumKind<DataValueDeltaAssertionArgs, 'Bytes'>;
 export function dataValueDeltaAssertion<
   K extends DataValueDeltaAssertionArgs['__kind']
 >(kind: K, data?: any): Extract<DataValueDeltaAssertionArgs, { __kind: K }> {

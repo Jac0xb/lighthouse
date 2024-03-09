@@ -3,7 +3,7 @@
   "name": "lighthouse",
   "instructions": [
     {
-      "name": "CreateMemoryAccount",
+      "name": "MemoryWrite",
       "accounts": [
         {
           "name": "lighthouseProgram",
@@ -11,22 +11,6 @@
           "isSigner": false,
           "docs": [
             "Lighthouse program"
-          ]
-        },
-        {
-          "name": "payer",
-          "isMut": false,
-          "isSigner": true,
-          "docs": [
-            "Payer account"
-          ]
-        },
-        {
-          "name": "memoryAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Memory account"
           ]
         },
         {
@@ -35,31 +19,6 @@
           "isSigner": false,
           "docs": [
             "System program"
-          ]
-        }
-      ],
-      "args": [
-        {
-          "name": "createMemoryAccountParameters",
-          "type": {
-            "defined": "CreateMemoryAccountParameters"
-          }
-        }
-      ],
-      "discriminant": {
-        "type": "u8",
-        "value": 0
-      }
-    },
-    {
-      "name": "Write",
-      "accounts": [
-        {
-          "name": "lighthouseProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Lighthouse program"
           ]
         },
         {
@@ -89,10 +48,65 @@
       ],
       "args": [
         {
-          "name": "writeParameters",
+          "name": "memoryIndex",
+          "type": "u8"
+        },
+        {
+          "name": "memoryAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "memoryOffset",
+          "type": "u16"
+        },
+        {
+          "name": "writeType",
           "type": {
-            "defined": "WriteParameters"
+            "defined": "WriteType"
           }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    },
+    {
+      "name": "MemoryClose",
+      "accounts": [
+        {
+          "name": "lighthouseProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Lighthouse program"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Payer account"
+          ]
+        },
+        {
+          "name": "memoryAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Memory account"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "memoryIndex",
+          "type": "u8"
+        },
+        {
+          "name": "memoryAccountBump",
+          "type": "u8"
         }
       ],
       "discriminant": {
@@ -108,7 +122,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -132,22 +146,22 @@
       }
     },
     {
-      "name": "AssertAccountDataDelta",
+      "name": "AssertAccountDelta",
       "accounts": [
         {
-          "name": "leftAccount",
+          "name": "accountA",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Left account"
+            "Account A where the delta is calculated from"
           ]
         },
         {
-          "name": "rightAccount",
+          "name": "accountB",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Right account"
+            "Account B where the delta is calculated to"
           ]
         }
       ],
@@ -161,7 +175,7 @@
         {
           "name": "assertion",
           "type": {
-            "defined": "AccountDataDeltaAssertion"
+            "defined": "AccountDeltaAssertion"
           }
         }
       ],
@@ -178,7 +192,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -202,6 +216,39 @@
       }
     },
     {
+      "name": "AssertAccountInfoMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "AccountInfoAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
+    },
+    {
       "name": "AssertMintAccount",
       "accounts": [
         {
@@ -209,7 +256,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -229,7 +276,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 6
       }
     },
     {
@@ -240,7 +287,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -262,7 +309,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 7
       }
     },
     {
@@ -273,7 +320,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -293,7 +340,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 8
       }
     },
     {
@@ -304,7 +351,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         },
         {
@@ -334,7 +381,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 8
+        "value": 9
       }
     },
     {
@@ -345,7 +392,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -365,7 +412,40 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 9
+        "value": 10
+      }
+    },
+    {
+      "name": "AssertStakeAccountMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "StakeAccountAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 11
       }
     },
     {
@@ -376,7 +456,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Target account"
+            "Target account to be asserted"
           ]
         }
       ],
@@ -396,7 +476,40 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 12
+      }
+    },
+    {
+      "name": "AssertUpgradeableLoaderAccountMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "UpgradeableLoaderStateAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 13
       }
     },
     {
@@ -418,18 +531,18 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 11
+        "value": 14
       }
     },
     {
       "name": "AssertMerkleTreeAccount",
       "accounts": [
         {
-          "name": "merkleTree",
+          "name": "targetMerkleTree",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Merkle tree account"
+            "Target merkle tree account to be asserted"
           ]
         },
         {
@@ -437,7 +550,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Root account"
+            "The current root of the merkle tree"
           ]
         },
         {
@@ -465,53 +578,11 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 12
+        "value": 15
       }
     }
   ],
   "types": [
-    {
-      "name": "CreateMemoryAccountParameters",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "memoryIndex",
-            "type": "u8"
-          },
-          {
-            "name": "memoryAccountSize",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WriteParameters",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "memoryIndex",
-            "type": "u8"
-          },
-          {
-            "name": "memoryAccountBump",
-            "type": "u8"
-          },
-          {
-            "name": "memoryOffset",
-            "type": "u16"
-          },
-          {
-            "name": "writeType",
-            "type": {
-              "defined": "WriteType"
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "AccountDataAssertion",
       "type": {
@@ -526,60 +597,6 @@
             "type": {
               "defined": "DataValueAssertion"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AccountDataDeltaAssertion",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "offsetLeft",
-            "type": "u16"
-          },
-          {
-            "name": "offsetRight",
-            "type": "u16"
-          },
-          {
-            "name": "assertion",
-            "type": {
-              "defined": "DataValueDeltaAssertion"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "AccountInfoData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": "publicKey"
-          },
-          {
-            "name": "lamports",
-            "type": "u64"
-          },
-          {
-            "name": "dataLength",
-            "type": "u64"
-          },
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "rentEpoch",
-            "type": "u64"
-          },
-          {
-            "name": "executable",
-            "type": "bool"
           }
         ]
       }
@@ -788,6 +805,48 @@
       }
     },
     {
+      "name": "AccountDeltaAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "AccountInfo",
+            "fields": [
+              {
+                "name": "a_offset",
+                "type": "u16"
+              },
+              {
+                "name": "assertion",
+                "type": {
+                  "defined": "AccountInfoDeltaAssertion"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Data",
+            "fields": [
+              {
+                "name": "a_offset",
+                "type": "u16"
+              },
+              {
+                "name": "b_offset",
+                "type": "u16"
+              },
+              {
+                "name": "assertion",
+                "type": {
+                  "defined": "DataValueDeltaAssertion"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "DataValueDeltaAssertion",
       "type": {
         "kind": "enum",
@@ -908,6 +967,81 @@
                 "name": "operator",
                 "type": {
                   "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Bytes",
+            "fields": [
+              {
+                "name": "length",
+                "type": "u16"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "BytesOperator"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountInfoDeltaAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Lamports",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "DataLength",
+            "fields": [
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Owner",
+            "fields": [
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "RentEpoch",
+            "fields": [
+              {
+                "name": "value",
+                "type": "i128"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "ComparableOperator"
                 }
               }
             ]
@@ -1170,6 +1304,41 @@
       }
     },
     {
+      "name": "KnownProgram",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "System"
+          },
+          {
+            "name": "Token"
+          },
+          {
+            "name": "Token2022"
+          },
+          {
+            "name": "Rent"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Vote"
+          },
+          {
+            "name": "BpfLoader"
+          },
+          {
+            "name": "UpgradeableLoader"
+          },
+          {
+            "name": "SysvarConfig"
+          }
+        ]
+      }
+    },
+    {
       "name": "LogLevel",
       "type": {
         "kind": "enum",
@@ -1178,13 +1347,7 @@
             "name": "Silent"
           },
           {
-            "name": "PlaintextMsgLog"
-          },
-          {
-            "name": "SerializedMsgLog"
-          },
-          {
-            "name": "CpiLog"
+            "name": "PlaintextMessage"
           }
         ]
       }
@@ -1298,6 +1461,92 @@
                 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "IntegerOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          },
+          {
+            "name": "Contains"
+          },
+          {
+            "name": "DoesNotContain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComparableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquatableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BytesOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
           }
         ]
       }
@@ -1854,122 +2103,27 @@
       }
     },
     {
-      "name": "KnownProgram",
+      "name": "AccountInfoField",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "System"
+            "name": "Key"
           },
           {
-            "name": "Token"
+            "name": "Lamports"
           },
           {
-            "name": "Token2022"
+            "name": "DataLength"
           },
           {
-            "name": "Rent"
+            "name": "Owner"
           },
           {
-            "name": "Stake"
+            "name": "RentEpoch"
           },
           {
-            "name": "Vote"
-          },
-          {
-            "name": "BpfLoader"
-          },
-          {
-            "name": "UpgradeableLoader"
-          },
-          {
-            "name": "SysvarConfig"
-          }
-        ]
-      }
-    },
-    {
-      "name": "IntegerOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          },
-          {
-            "name": "Contains"
-          },
-          {
-            "name": "DoesNotContain"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ComparableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          }
-        ]
-      }
-    },
-    {
-      "name": "EquatableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          }
-        ]
-      }
-    },
-    {
-      "name": "BytesOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
+            "name": "Executable"
           }
         ]
       }
@@ -2074,14 +2228,17 @@
               },
               {
                 "name": "data_length",
-                "type": {
-                  "option": "u16"
-                }
+                "type": "u16"
               }
             ]
           },
           {
-            "name": "AccountInfo"
+            "name": "AccountInfoField",
+            "fields": [
+              {
+                "defined": "AccountInfoField"
+              }
+            ]
           },
           {
             "name": "DataValue",
@@ -2090,9 +2247,6 @@
                 "defined": "DataValue"
               }
             ]
-          },
-          {
-            "name": "Program"
           }
         ]
       }

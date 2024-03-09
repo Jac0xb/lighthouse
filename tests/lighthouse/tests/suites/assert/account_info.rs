@@ -1,10 +1,10 @@
 use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::context::TestContext;
 use crate::utils::tx_builder::TxBuilder;
-use crate::utils::utils::{
+use crate::utils::{create_mint, create_test_account, create_user, CreateMintParameters};
+use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use crate::utils::{create_mint, create_test_account, create_user, CreateMintParameters};
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertAccountInfoBuilder;
 use lighthouse_client::types::{AccountInfoAssertion, ComparableOperator, EquatableOperator};
@@ -54,7 +54,7 @@ async fn test_hijack_account_ownership() {
                 .ix(),
             AssertAccountInfoBuilder::new()
                 .target_account(protected_user.pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(AccountInfoAssertion::Owner {
                     value: system_program::id(),
                     operator: EquatableOperator::Equal,
@@ -93,7 +93,7 @@ async fn test_account_balance() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::Lamports {
                 value: user_balance - 5000,
                 operator: ComparableOperator::Equal,
@@ -128,7 +128,7 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(test_account.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
                 start: None,
@@ -172,7 +172,7 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
                 start: None,
@@ -191,7 +191,7 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
                 start: Some(30),
@@ -210,7 +210,7 @@ async fn data_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+            .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
                 start: Some(30),

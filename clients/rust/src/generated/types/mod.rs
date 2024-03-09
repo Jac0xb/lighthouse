@@ -5,8 +5,10 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+pub(crate) mod r#account_delta_assertion;
 pub(crate) mod r#account_info_assertion;
-pub(crate) mod r#account_info_data;
+pub(crate) mod r#account_info_delta_assertion;
+pub(crate) mod r#account_info_field;
 pub(crate) mod r#bytes_operator;
 pub(crate) mod r#comparable_operator;
 pub(crate) mod r#data_value;
@@ -31,8 +33,10 @@ pub(crate) mod r#upgradeable_program_assertion;
 pub(crate) mod r#upgradeable_program_data_assertion;
 pub(crate) mod r#write_type;
 
+pub use self::r#account_delta_assertion::*;
 pub use self::r#account_info_assertion::*;
-pub use self::r#account_info_data::*;
+pub use self::r#account_info_delta_assertion::*;
+pub use self::r#account_info_field::*;
 pub use self::r#bytes_operator::*;
 pub use self::r#comparable_operator::*;
 pub use self::r#data_value::*;

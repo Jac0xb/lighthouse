@@ -91,7 +91,7 @@ export function getAssertMintAccountInstructionDataEncoder(): Encoder<AssertMint
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getMintAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 5 })
+    (value) => ({ ...value, discriminator: 6 })
   );
 }
 
@@ -114,7 +114,7 @@ export function getAssertMintAccountInstructionDataCodec(): Codec<
 }
 
 export type AssertMintAccountInput<TAccountTargetAccount extends string> = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertMintAccountInstructionDataArgs['logLevel'];
   assertion: AssertMintAccountInstructionDataArgs['assertion'];
@@ -123,7 +123,7 @@ export type AssertMintAccountInput<TAccountTargetAccount extends string> = {
 export type AssertMintAccountInputWithSigners<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertMintAccountInstructionDataArgs['logLevel'];
   assertion: AssertMintAccountInstructionDataArgs['assertion'];
@@ -210,7 +210,7 @@ export type ParsedAssertMintAccountInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
   data: AssertMintAccountInstructionData;

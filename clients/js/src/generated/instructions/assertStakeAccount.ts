@@ -91,7 +91,7 @@ export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertSta
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getStakeAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 9 })
+    (value) => ({ ...value, discriminator: 10 })
   );
 }
 
@@ -114,7 +114,7 @@ export function getAssertStakeAccountInstructionDataCodec(): Codec<
 }
 
 export type AssertStakeAccountInput<TAccountTargetAccount extends string> = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
   assertion: AssertStakeAccountInstructionDataArgs['assertion'];
@@ -123,7 +123,7 @@ export type AssertStakeAccountInput<TAccountTargetAccount extends string> = {
 export type AssertStakeAccountInputWithSigners<
   TAccountTargetAccount extends string
 > = {
-  /** Target account */
+  /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
   assertion: AssertStakeAccountInstructionDataArgs['assertion'];
@@ -210,7 +210,7 @@ export type ParsedAssertStakeAccountInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Target account */
+    /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
   data: AssertStakeAccountInstructionData;

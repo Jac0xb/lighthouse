@@ -1,6 +1,6 @@
 use crate::utils::context::TestContext;
 use crate::utils::create_user_with_balance;
-use crate::utils::utils::{process_transaction_assert_success, set_account_from_rpc};
+use crate::utils::{process_transaction_assert_success, set_account_from_rpc};
 use lighthouse_client::instructions::AssertUpgradeableLoaderAccountBuilder;
 use lighthouse_client::types::{
     ComparableOperator, EquatableOperator, UpgradeableLoaderStateAssertion,
@@ -60,7 +60,7 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Program,
                     operator: EquatableOperator::Equal,
@@ -68,7 +68,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::Program(
                     UpgradeableProgramAssertion::ProgramDataAddress {
                         value: programdata_address,
@@ -110,7 +110,7 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::ProgramData,
                     operator: EquatableOperator::Equal,
@@ -118,7 +118,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: upgrade_authority_address,
@@ -128,7 +128,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMsgLog)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: slot,

@@ -183,6 +183,7 @@ pub mod blackhat {
         Ok(())
     }
 
+    #[allow(unused_variables)]
     pub fn enable_bitflip<'info>(
         ctx: Context<'_, '_, '_, 'info, EnableBitflip<'info>>,
         pda_bytes: [u8; 32],

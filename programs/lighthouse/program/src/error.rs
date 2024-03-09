@@ -51,6 +51,16 @@ pub enum LighthouseError {
     CrossProgramInvokeViolation = 6016,
 }
 
+impl LighthouseError {
+    pub fn map_multi_err(e: ProgramError, i: u32) -> ProgramError {
+        if e == LighthouseError::AssertionFailed.into() {
+            ProgramError::Custom(0x1100 + i)
+        } else {
+            e
+        }
+    }
+}
+
 impl From<LighthouseError> for ProgramError {
     fn from(e: LighthouseError) -> Self {
         ProgramError::Custom(e as u32)

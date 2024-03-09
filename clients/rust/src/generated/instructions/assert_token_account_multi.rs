@@ -12,7 +12,7 @@ use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct AssertTokenAccountMulti {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
     /// Lighthouse Program
     pub lighthouse_program: solana_program::pubkey::Pubkey,
@@ -62,7 +62,7 @@ struct AssertTokenAccountMultiInstructionData {
 
 impl AssertTokenAccountMultiInstructionData {
     fn new() -> Self {
-        Self { discriminator: 8 }
+        Self { discriminator: 9 }
     }
 }
 
@@ -92,7 +92,7 @@ impl AssertTokenAccountMultiBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
@@ -154,7 +154,7 @@ impl AssertTokenAccountMultiBuilder {
 
 /// `assert_token_account_multi` CPI accounts.
 pub struct AssertTokenAccountMultiCpiAccounts<'a, 'b> {
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// Lighthouse Program
     pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -164,7 +164,7 @@ pub struct AssertTokenAccountMultiCpiAccounts<'a, 'b> {
 pub struct AssertTokenAccountMultiCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Target account
+    /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// Lighthouse Program
     pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -283,7 +283,7 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Target account
+    /// Target account to be asserted
     #[inline(always)]
     pub fn target_account(
         &mut self,

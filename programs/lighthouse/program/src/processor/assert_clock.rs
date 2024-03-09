@@ -3,18 +3,15 @@ use crate::{
     types::assert::{Assert, LogLevel},
     utils::Result,
 };
-use solana_program::{clock::Clock, sysvar::Sysvar};
 use std::fmt::Debug;
 
-pub(crate) fn assert_clock<T: Assert<Clock> + Debug>(
+pub(crate) fn assert_clock<T: Assert<()> + Debug>(
     assertion: &T,
-    log_level: &LogLevel,
+    log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate(&Clock::get()?, log_level)?;
-
-    evaluation_result.log(log_level, assertion);
-
+    let evaluation_result = assertion.evaluate((), log_level)?;
     if !evaluation_result.passed {
+        evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());
     }
 

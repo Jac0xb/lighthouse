@@ -6,8 +6,10 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './accountDeltaAssertion';
 export * from './accountInfoAssertion';
-export * from './accountInfoData';
+export * from './accountInfoDeltaAssertion';
+export * from './accountInfoField';
 export * from './bytesOperator';
 export * from './comparableOperator';
 export * from './dataValue';
