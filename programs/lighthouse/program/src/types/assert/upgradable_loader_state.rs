@@ -111,10 +111,10 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
             },
             _ => Box::new(EvaluationResult {
                 passed: false,
-                output: format!(
+                output: Some(format!(
                     "Account is not in program state was {}",
                     get_state_enum(upgradable_loader_state)
-                ),
+                )),
             }),
         };
 
@@ -147,10 +147,10 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
             },
             _ => Box::new(EvaluationResult {
                 passed: false,
-                output: format!(
+                output: Some(format!(
                     "Account is not in program state was {}",
                     get_state_enum(upgradable_loader_state)
-                ),
+                )),
             }),
         };
 
@@ -192,10 +192,10 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
             },
             _ => Box::new(EvaluationResult {
                 passed: false,
-                output: format!(
+                output: Some(format!(
                     "Account is not in program data state was {}",
                     get_state_enum(upgradable_loader_state)
-                ),
+                )),
             }),
         })
     }

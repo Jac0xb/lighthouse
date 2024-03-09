@@ -142,15 +142,15 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 match (delegate, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
-                        output: "None == None".to_string(),
+                        output: Some("None == None".to_string()),
                     }),
                     (COption::Some(token_account_delegate), None) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("{} != None", token_account_delegate),
+                        output: Some(format!("{} != None", token_account_delegate)),
                     }),
                     (COption::None, Some(assertion_pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {}", assertion_pubkey),
+                        output: Some(format!("None != {}", assertion_pubkey)),
                     }),
                     (COption::Some(token_account_delegate), Some(assertion_pubkey)) => {
                         operator.evaluate(&token_account_delegate, assertion_pubkey, log_level)
@@ -179,15 +179,15 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 match (actual_is_native, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
-                        output: "None == None".to_string(),
+                        output: Some("None == None".to_string()),
                     }),
                     (COption::Some(token_account_is_native), None) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("{:?} != None", token_account_is_native),
+                        output: Some(format!("{:?} != None", token_account_is_native)),
                     }),
                     (COption::None, Some(is_native)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {:?}", is_native),
+                        output: Some(format!("None != {:?}", is_native)),
                     }),
                     (COption::Some(token_account_is_native), Some(is_native)) => {
                         operator.evaluate(&token_account_is_native, is_native, log_level)
@@ -224,17 +224,17 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 match (close_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
-                        output: "None == None".to_string(),
+                        output: Some("None == None".to_string()),
                     }),
                     (COption::Some(token_account_close_authority), None) => {
                         Box::new(EvaluationResult {
                             passed: false,
-                            output: format!("{} != None", token_account_close_authority),
+                            output: Some(format!("{} != None", token_account_close_authority)),
                         })
                     }
                     (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {}", pubkey),
+                        output: Some(format!("None != {}", pubkey)),
                     }),
                     (COption::Some(token_account_close_authority), Some(pubkey)) => {
                         operator.evaluate(&token_account_close_authority, pubkey, log_level)

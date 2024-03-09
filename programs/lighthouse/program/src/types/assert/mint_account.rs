@@ -66,15 +66,15 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 match (mint_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
-                        output: "None == None".to_string(),
+                        output: Some("None == None".to_string()),
                     }),
                     (COption::Some(mint_authority), None) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("{:?} != None", mint_authority),
+                        output: Some(format!("{:?} != None", mint_authority)),
                     }),
                     (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {:?}", pubkey),
+                        output: Some(format!("None != {:?}", pubkey)),
                     }),
                     (COption::Some(mint_authority), Some(pubkey)) => {
                         operator.evaluate(&mint_authority, pubkey, log_level)
@@ -134,15 +134,15 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 match (freeze_authority, assertion_value) {
                     (COption::None, None) => Box::new(EvaluationResult {
                         passed: true,
-                        output: "None == None".to_string(),
+                        output: Some("None == None".to_string()),
                     }),
                     (COption::Some(freeze_authority), None) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("{:?} != None", freeze_authority),
+                        output: Some(format!("{:?} != None", freeze_authority)),
                     }),
                     (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("None != {:?}", pubkey),
+                        output: Some(format!("None != {:?}", pubkey)),
                     }),
                     (COption::Some(freeze_authority), Some(pubkey)) => {
                         operator.evaluate(&freeze_authority, pubkey, log_level)
