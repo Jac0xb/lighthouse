@@ -6,6 +6,7 @@ use crate::{
 use solana_program::account_info::{next_account_info, AccountInfo};
 use std::{fmt::Debug, slice::Iter};
 
+#[derive(Clone)]
 pub(crate) struct AssertTargetAccountContext<'a, 'info> {
     pub(crate) target_account: &'a AccountInfo<'info>,
 }
@@ -23,7 +24,7 @@ pub(crate) fn assert_target_account<'a, 'info, T: Assert<&'a AccountInfo<'info>>
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate(assert_context.target_account, log_level.clone())?;
+    let evaluation_result = assertion.evaluate(assert_context.target_account, log_level)?;
     if !evaluation_result.passed {
         evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());

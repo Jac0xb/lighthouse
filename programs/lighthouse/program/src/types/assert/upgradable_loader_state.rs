@@ -3,7 +3,7 @@ use crate::{
     err, err_msg,
     error::LighthouseError,
     types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
-    utils::Result,
+    utils::{keys_equal, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -40,7 +40,7 @@ impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
         account: &AccountInfo<'_>,
         log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
-        if account.owner != &bpf_loader_upgradeable::id() {
+        if !keys_equal(account.owner, &bpf_loader_upgradeable::id()) {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 

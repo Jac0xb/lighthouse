@@ -8,7 +8,7 @@ use crate::{
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {
@@ -168,9 +168,14 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = &data[offset..offset + assertion_value.len()];
-                let assertion_value = assertion_value.as_slice();
-                Ok(operator.evaluate(actual_value, assertion_value, log_level))
+                let actual_value = data
+                    .get(offset..offset + assertion_value.len())
+                    .ok_or_else(|| {
+                        msg!("Data range out of bounds");
+                        err!(LighthouseError::RangeOutOfBounds)
+                    })?;
+
+                Ok(operator.evaluate(actual_value, assertion_value.as_slice(), log_level))
             }
             DataValueAssertion::Pubkey {
                 value: assertion_value,
@@ -262,7 +267,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(
@@ -324,7 +329,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(
@@ -372,7 +377,7 @@ mod tests {
             };
 
             let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMsgLog)
+                .evaluate(&account_info, LogLevel::PlaintextMessage)
                 .unwrap();
 
             assert_eq!(

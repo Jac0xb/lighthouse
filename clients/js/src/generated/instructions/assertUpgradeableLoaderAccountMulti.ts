@@ -37,15 +37,15 @@ import {
 import {
   LogLevel,
   LogLevelArgs,
-  MintAccountAssertion,
-  MintAccountAssertionArgs,
+  UpgradeableLoaderStateAssertion,
+  UpgradeableLoaderStateAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getMintAccountAssertionDecoder,
-  getMintAccountAssertionEncoder,
+  getUpgradeableLoaderStateAssertionDecoder,
+  getUpgradeableLoaderStateAssertionEncoder,
 } from '../types';
 
-export type AssertMintAccountMultiInstruction<
+export type AssertUpgradeableLoaderAccountMultiInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -60,7 +60,7 @@ export type AssertMintAccountMultiInstruction<
     ]
   >;
 
-export type AssertMintAccountMultiInstructionWithSigners<
+export type AssertUpgradeableLoaderAccountMultiInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -75,89 +75,101 @@ export type AssertMintAccountMultiInstructionWithSigners<
     ]
   >;
 
-export type AssertMintAccountMultiInstructionData = {
+export type AssertUpgradeableLoaderAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<MintAccountAssertion>;
+  assertions: Array<UpgradeableLoaderStateAssertion>;
 };
 
-export type AssertMintAccountMultiInstructionDataArgs = {
+export type AssertUpgradeableLoaderAccountMultiInstructionDataArgs = {
   logLevel: LogLevelArgs;
-  assertions: Array<MintAccountAssertionArgs>;
+  assertions: Array<UpgradeableLoaderStateAssertionArgs>;
 };
 
-export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<AssertMintAccountMultiInstructionDataArgs> {
+export function getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(): Encoder<AssertUpgradeableLoaderAccountMultiInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getMintAccountAssertionEncoder())],
+      [
+        'assertions',
+        getArrayEncoder(getUpgradeableLoaderStateAssertionEncoder()),
+      ],
     ]),
-    (value) => ({ ...value, discriminator: 7 })
+    (value) => ({ ...value, discriminator: 13 })
   );
 }
 
-export function getAssertMintAccountMultiInstructionDataDecoder(): Decoder<AssertMintAccountMultiInstructionData> {
+export function getAssertUpgradeableLoaderAccountMultiInstructionDataDecoder(): Decoder<AssertUpgradeableLoaderAccountMultiInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getMintAccountAssertionDecoder())],
+    [
+      'assertions',
+      getArrayDecoder(getUpgradeableLoaderStateAssertionDecoder()),
+    ],
   ]);
 }
 
-export function getAssertMintAccountMultiInstructionDataCodec(): Codec<
-  AssertMintAccountMultiInstructionDataArgs,
-  AssertMintAccountMultiInstructionData
+export function getAssertUpgradeableLoaderAccountMultiInstructionDataCodec(): Codec<
+  AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
+  AssertUpgradeableLoaderAccountMultiInstructionData
 > {
   return combineCodec(
-    getAssertMintAccountMultiInstructionDataEncoder(),
-    getAssertMintAccountMultiInstructionDataDecoder()
+    getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(),
+    getAssertUpgradeableLoaderAccountMultiInstructionDataDecoder()
   );
 }
 
-export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
-  {
-    /** Target account to be asserted */
-    targetAccount: Address<TAccountTargetAccount>;
-    logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
-    assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
-  };
-
-export type AssertMintAccountMultiInputWithSigners<
+export type AssertUpgradeableLoaderAccountMultiInput<
   TAccountTargetAccount extends string
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
-  assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
+  logLevel: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['assertions'];
 };
 
-export function getAssertMintAccountMultiInstruction<
+export type AssertUpgradeableLoaderAccountMultiInputWithSigners<
+  TAccountTargetAccount extends string
+> = {
+  /** Target account to be asserted */
+  targetAccount: Address<TAccountTargetAccount>;
+  logLevel: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['assertions'];
+};
+
+export function getAssertUpgradeableLoaderAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertMintAccountMultiInputWithSigners<TAccountTargetAccount>
-): AssertMintAccountMultiInstructionWithSigners<
+  input: AssertUpgradeableLoaderAccountMultiInputWithSigners<TAccountTargetAccount>
+): AssertUpgradeableLoaderAccountMultiInstructionWithSigners<
   TProgram,
   TAccountTargetAccount
 >;
-export function getAssertMintAccountMultiInstruction<
+export function getAssertUpgradeableLoaderAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertMintAccountMultiInput<TAccountTargetAccount>
-): AssertMintAccountMultiInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertMintAccountMultiInstruction<
+  input: AssertUpgradeableLoaderAccountMultiInput<TAccountTargetAccount>
+): AssertUpgradeableLoaderAccountMultiInstruction<
+  TProgram,
+  TAccountTargetAccount
+>;
+export function getAssertUpgradeableLoaderAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertMintAccountMultiInput<TAccountTargetAccount>): IInstruction {
+>(
+  input: AssertUpgradeableLoaderAccountMultiInput<TAccountTargetAccount>
+): IInstruction {
   // Program address.
   const programAddress =
     'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
 
   // Original accounts.
   type AccountMetas = Parameters<
-    typeof getAssertMintAccountMultiInstructionRaw<
+    typeof getAssertUpgradeableLoaderAccountMultiInstructionRaw<
       TProgram,
       TAccountTargetAccount
     >
@@ -176,16 +188,16 @@ export function getAssertMintAccountMultiInstruction<
     programAddress
   );
 
-  const instruction = getAssertMintAccountMultiInstructionRaw(
+  const instruction = getAssertUpgradeableLoaderAccountMultiInstructionRaw(
     accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertMintAccountMultiInstructionDataArgs,
+    args as AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
     programAddress
   );
 
   return instruction;
 }
 
-export function getAssertMintAccountMultiInstructionRaw<
+export function getAssertUpgradeableLoaderAccountMultiInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -195,7 +207,7 @@ export function getAssertMintAccountMultiInstructionRaw<
       ? Address<TAccountTargetAccount>
       : TAccountTargetAccount;
   },
-  args: AssertMintAccountMultiInstructionDataArgs,
+  args: AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
   programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
   remainingAccounts?: TRemainingAccounts
 ) {
@@ -204,16 +216,18 @@ export function getAssertMintAccountMultiInstructionRaw<
       accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
     ],
-    data: getAssertMintAccountMultiInstructionDataEncoder().encode(args),
+    data: getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder().encode(
+      args
+    ),
     programAddress,
-  } as AssertMintAccountMultiInstruction<
+  } as AssertUpgradeableLoaderAccountMultiInstruction<
     TProgram,
     TAccountTargetAccount,
     TRemainingAccounts
   >;
 }
 
-export type ParsedAssertMintAccountMultiInstruction<
+export type ParsedAssertUpgradeableLoaderAccountMultiInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
 > = {
@@ -222,17 +236,20 @@ export type ParsedAssertMintAccountMultiInstruction<
     /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
-  data: AssertMintAccountMultiInstructionData;
+  data: AssertUpgradeableLoaderAccountMultiInstructionData;
 };
 
-export function parseAssertMintAccountMultiInstruction<
+export function parseAssertUpgradeableLoaderAccountMultiInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[]
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
-): ParsedAssertMintAccountMultiInstruction<TProgram, TAccountMetas> {
+): ParsedAssertUpgradeableLoaderAccountMultiInstruction<
+  TProgram,
+  TAccountMetas
+> {
   if (instruction.accounts.length < 1) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
@@ -248,7 +265,7 @@ export function parseAssertMintAccountMultiInstruction<
     accounts: {
       targetAccount: getNextAccount(),
     },
-    data: getAssertMintAccountMultiInstructionDataDecoder().decode(
+    data: getAssertUpgradeableLoaderAccountMultiInstructionDataDecoder().decode(
       instruction.data
     ),
   };

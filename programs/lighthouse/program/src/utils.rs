@@ -8,8 +8,10 @@ use solana_program::{
     msg,
     program::{invoke, invoke_signed},
     program_error::ProgramError,
+    program_memory::sol_memcmp,
     program_option::COption,
     pubkey::Pubkey,
+    pubkey::PUBKEY_BYTES,
     rent::Rent,
     system_instruction, system_program,
 };
@@ -147,5 +149,9 @@ pub fn close<'info>(info: AccountInfo<'info>, sol_destination: AccountInfo<'info
 }
 
 pub fn is_closed(info: &AccountInfo) -> bool {
-    info.owner == &system_program::id() && info.data_is_empty()
+    keys_equal(info.owner, &system_program::id()) && info.data_is_empty()
+}
+
+pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
+    sol_memcmp(key_a.as_ref(), key_b.as_ref(), PUBKEY_BYTES) == 0
 }

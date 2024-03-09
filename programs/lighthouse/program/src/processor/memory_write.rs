@@ -78,14 +78,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             )?
         };
 
-        if !memory_account.key().eq(memory_account_info.key) {
-            return Err(LighthouseError::AccountKeyMismatch.into());
-        }
         let source_account = next_account_info(account_iter)?;
-
-        if source_account.key.eq(&memory_account.key()) {
-            return Err(LighthouseError::AccountKeyMismatch.into());
-        }
 
         Ok(Self {
             system_program,

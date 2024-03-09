@@ -1,8 +1,8 @@
 use super::LogLevel;
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
-use solana_program::msg;
-use std::{fmt::Debug, ops::BitAnd};
+use solana_program::{msg, program_memory::sol_memcmp};
+use std::{fmt::Debug, mem, ops::BitAnd, slice};
 
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
@@ -63,7 +63,7 @@ pub struct EvaluationResult {
 
 impl EvaluationResult {
     pub fn log(&self, log_level: LogLevel) {
-        if log_level == LogLevel::PlaintextMsgLog {
+        if log_level == LogLevel::PlaintextMessage {
             msg!(
                 "{} {}",
                 if self.passed {
@@ -93,7 +93,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
-            output: if log_level == LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMessage {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -144,7 +144,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                     actual_value & assertion_value == T::zero()
                 }
             },
-            output: if log_level == LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMessage {
                 format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
@@ -177,10 +177,32 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
-                EquatableOperator::Equal => T::eq(actual_value, assertion_value),
-                EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
+                EquatableOperator::Equal => unsafe {
+                    let actual_bytes = slice::from_raw_parts(
+                        (actual_value as *const T) as *const u8,
+                        mem::size_of::<T>(),
+                    );
+                    let assertion_bytes = slice::from_raw_parts(
+                        (assertion_value as *const T) as *const u8,
+                        mem::size_of::<T>(),
+                    );
+
+                    sol_memcmp(actual_bytes, assertion_bytes, mem::size_of::<T>()) == 0
+                },
+                EquatableOperator::NotEqual => unsafe {
+                    let actual_bytes = slice::from_raw_parts(
+                        (actual_value as *const T) as *const u8,
+                        mem::size_of::<T>(),
+                    );
+                    let assertion_bytes = slice::from_raw_parts(
+                        (assertion_value as *const T) as *const u8,
+                        mem::size_of::<T>(),
+                    );
+
+                    sol_memcmp(actual_bytes, assertion_bytes, mem::size_of::<T>()) != 0
+                },
             },
-            output: if log_level == LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMessage {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,
@@ -213,16 +235,24 @@ where
                     let actual_value = actual_value.as_ref();
                     let assertion_value = assertion_value.as_ref();
 
-                    actual_value == assertion_value
+                    if actual_value.len() == assertion_value.len() {
+                        sol_memcmp(actual_value, assertion_value, assertion_value.len()) == 0
+                    } else {
+                        false
+                    }
                 }
                 BytesOperator::NotEqual => {
                     let actual_value = actual_value.as_ref();
                     let assertion_value = assertion_value.as_ref();
 
-                    actual_value != assertion_value
+                    if actual_value.len() == assertion_value.len() {
+                        sol_memcmp(actual_value, assertion_value, assertion_value.len()) != 0
+                    } else {
+                        true
+                    }
                 }
             },
-            output: if log_level == LogLevel::PlaintextMsgLog {
+            output: if log_level == LogLevel::PlaintextMessage {
                 format!(
                     "{:?} {} {:?}",
                     actual_value,

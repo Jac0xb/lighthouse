@@ -91,7 +91,7 @@ export function getAssertMintAccountInstructionDataEncoder(): Encoder<AssertMint
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getMintAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 5 })
+    (value) => ({ ...value, discriminator: 6 })
   );
 }
 

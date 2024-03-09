@@ -31,7 +31,7 @@ pub(crate) fn assert_account_delta<
 ) -> Result<()> {
     let evaluation_result = assertion.evaluate(
         (assert_context.left_account, assert_context.right_account),
-        log_level.clone(),
+        log_level,
     )?;
     if !evaluation_result.passed {
         evaluation_result.log(log_level);

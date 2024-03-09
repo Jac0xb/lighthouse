@@ -37,15 +37,15 @@ import {
 import {
   LogLevel,
   LogLevelArgs,
-  MintAccountAssertion,
-  MintAccountAssertionArgs,
+  StakeAccountAssertion,
+  StakeAccountAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getMintAccountAssertionDecoder,
-  getMintAccountAssertionEncoder,
+  getStakeAccountAssertionDecoder,
+  getStakeAccountAssertionEncoder,
 } from '../types';
 
-export type AssertMintAccountMultiInstruction<
+export type AssertStakeAccountMultiInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -60,7 +60,7 @@ export type AssertMintAccountMultiInstruction<
     ]
   >;
 
-export type AssertMintAccountMultiInstructionWithSigners<
+export type AssertStakeAccountMultiInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -75,89 +75,89 @@ export type AssertMintAccountMultiInstructionWithSigners<
     ]
   >;
 
-export type AssertMintAccountMultiInstructionData = {
+export type AssertStakeAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<MintAccountAssertion>;
+  assertions: Array<StakeAccountAssertion>;
 };
 
-export type AssertMintAccountMultiInstructionDataArgs = {
+export type AssertStakeAccountMultiInstructionDataArgs = {
   logLevel: LogLevelArgs;
-  assertions: Array<MintAccountAssertionArgs>;
+  assertions: Array<StakeAccountAssertionArgs>;
 };
 
-export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<AssertMintAccountMultiInstructionDataArgs> {
+export function getAssertStakeAccountMultiInstructionDataEncoder(): Encoder<AssertStakeAccountMultiInstructionDataArgs> {
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getMintAccountAssertionEncoder())],
+      ['assertions', getArrayEncoder(getStakeAccountAssertionEncoder())],
     ]),
-    (value) => ({ ...value, discriminator: 7 })
+    (value) => ({ ...value, discriminator: 11 })
   );
 }
 
-export function getAssertMintAccountMultiInstructionDataDecoder(): Decoder<AssertMintAccountMultiInstructionData> {
+export function getAssertStakeAccountMultiInstructionDataDecoder(): Decoder<AssertStakeAccountMultiInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getMintAccountAssertionDecoder())],
+    ['assertions', getArrayDecoder(getStakeAccountAssertionDecoder())],
   ]);
 }
 
-export function getAssertMintAccountMultiInstructionDataCodec(): Codec<
-  AssertMintAccountMultiInstructionDataArgs,
-  AssertMintAccountMultiInstructionData
+export function getAssertStakeAccountMultiInstructionDataCodec(): Codec<
+  AssertStakeAccountMultiInstructionDataArgs,
+  AssertStakeAccountMultiInstructionData
 > {
   return combineCodec(
-    getAssertMintAccountMultiInstructionDataEncoder(),
-    getAssertMintAccountMultiInstructionDataDecoder()
+    getAssertStakeAccountMultiInstructionDataEncoder(),
+    getAssertStakeAccountMultiInstructionDataDecoder()
   );
 }
 
-export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
+export type AssertStakeAccountMultiInput<TAccountTargetAccount extends string> =
   {
     /** Target account to be asserted */
     targetAccount: Address<TAccountTargetAccount>;
-    logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
-    assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
+    logLevel: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
+    assertions: AssertStakeAccountMultiInstructionDataArgs['assertions'];
   };
 
-export type AssertMintAccountMultiInputWithSigners<
+export type AssertStakeAccountMultiInputWithSigners<
   TAccountTargetAccount extends string
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertMintAccountMultiInstructionDataArgs['logLevel'];
-  assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
+  logLevel: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
+  assertions: AssertStakeAccountMultiInstructionDataArgs['assertions'];
 };
 
-export function getAssertMintAccountMultiInstruction<
+export function getAssertStakeAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertMintAccountMultiInputWithSigners<TAccountTargetAccount>
-): AssertMintAccountMultiInstructionWithSigners<
+  input: AssertStakeAccountMultiInputWithSigners<TAccountTargetAccount>
+): AssertStakeAccountMultiInstructionWithSigners<
   TProgram,
   TAccountTargetAccount
 >;
-export function getAssertMintAccountMultiInstruction<
+export function getAssertStakeAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertMintAccountMultiInput<TAccountTargetAccount>
-): AssertMintAccountMultiInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertMintAccountMultiInstruction<
+  input: AssertStakeAccountMultiInput<TAccountTargetAccount>
+): AssertStakeAccountMultiInstruction<TProgram, TAccountTargetAccount>;
+export function getAssertStakeAccountMultiInstruction<
   TAccountTargetAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertMintAccountMultiInput<TAccountTargetAccount>): IInstruction {
+>(input: AssertStakeAccountMultiInput<TAccountTargetAccount>): IInstruction {
   // Program address.
   const programAddress =
     'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
 
   // Original accounts.
   type AccountMetas = Parameters<
-    typeof getAssertMintAccountMultiInstructionRaw<
+    typeof getAssertStakeAccountMultiInstructionRaw<
       TProgram,
       TAccountTargetAccount
     >
@@ -176,16 +176,16 @@ export function getAssertMintAccountMultiInstruction<
     programAddress
   );
 
-  const instruction = getAssertMintAccountMultiInstructionRaw(
+  const instruction = getAssertStakeAccountMultiInstructionRaw(
     accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertMintAccountMultiInstructionDataArgs,
+    args as AssertStakeAccountMultiInstructionDataArgs,
     programAddress
   );
 
   return instruction;
 }
 
-export function getAssertMintAccountMultiInstructionRaw<
+export function getAssertStakeAccountMultiInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -195,7 +195,7 @@ export function getAssertMintAccountMultiInstructionRaw<
       ? Address<TAccountTargetAccount>
       : TAccountTargetAccount;
   },
-  args: AssertMintAccountMultiInstructionDataArgs,
+  args: AssertStakeAccountMultiInstructionDataArgs,
   programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
   remainingAccounts?: TRemainingAccounts
 ) {
@@ -204,16 +204,16 @@ export function getAssertMintAccountMultiInstructionRaw<
       accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
     ],
-    data: getAssertMintAccountMultiInstructionDataEncoder().encode(args),
+    data: getAssertStakeAccountMultiInstructionDataEncoder().encode(args),
     programAddress,
-  } as AssertMintAccountMultiInstruction<
+  } as AssertStakeAccountMultiInstruction<
     TProgram,
     TAccountTargetAccount,
     TRemainingAccounts
   >;
 }
 
-export type ParsedAssertMintAccountMultiInstruction<
+export type ParsedAssertStakeAccountMultiInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
 > = {
@@ -222,17 +222,17 @@ export type ParsedAssertMintAccountMultiInstruction<
     /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
-  data: AssertMintAccountMultiInstructionData;
+  data: AssertStakeAccountMultiInstructionData;
 };
 
-export function parseAssertMintAccountMultiInstruction<
+export function parseAssertStakeAccountMultiInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[]
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
-): ParsedAssertMintAccountMultiInstruction<TProgram, TAccountMetas> {
+): ParsedAssertStakeAccountMultiInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 1) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
@@ -248,7 +248,7 @@ export function parseAssertMintAccountMultiInstruction<
     accounts: {
       targetAccount: getNextAccount(),
     },
-    data: getAssertMintAccountMultiInstructionDataDecoder().decode(
+    data: getAssertStakeAccountMultiInstructionDataDecoder().decode(
       instruction.data
     ),
   };

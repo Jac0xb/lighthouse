@@ -216,6 +216,39 @@
       }
     },
     {
+      "name": "AssertAccountInfoMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "AccountInfoAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
+    },
+    {
       "name": "AssertMintAccount",
       "accounts": [
         {
@@ -243,7 +276,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 6
       }
     },
     {
@@ -276,7 +309,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 7
       }
     },
     {
@@ -307,7 +340,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 8
       }
     },
     {
@@ -348,7 +381,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 8
+        "value": 9
       }
     },
     {
@@ -379,7 +412,40 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 9
+        "value": 10
+      }
+    },
+    {
+      "name": "AssertStakeAccountMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "StakeAccountAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 11
       }
     },
     {
@@ -410,7 +476,40 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 12
+      }
+    },
+    {
+      "name": "AssertUpgradeableLoaderAccountMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "vec": {
+              "defined": "UpgradeableLoaderStateAssertion"
+            }
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 13
       }
     },
     {
@@ -432,7 +531,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 11
+        "value": 14
       }
     },
     {
@@ -479,7 +578,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 12
+        "value": 15
       }
     }
   ],
@@ -876,6 +975,10 @@
             "name": "Bytes",
             "fields": [
               {
+                "name": "length",
+                "type": "u16"
+              },
+              {
                 "name": "operator",
                 "type": {
                   "defined": "BytesOperator"
@@ -1244,7 +1347,7 @@
             "name": "Silent"
           },
           {
-            "name": "PlaintextMsgLog"
+            "name": "PlaintextMessage"
           }
         ]
       }

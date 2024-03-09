@@ -24,6 +24,8 @@ import {
   getI32Encoder,
   getI64Decoder,
   getI64Encoder,
+  getU16Decoder,
+  getU16Encoder,
 } from '@solana/codecs-numbers';
 import {
   BytesOperator,
@@ -45,7 +47,7 @@ export type DataValueDeltaAssertion =
   | { __kind: 'I32'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; operator: BytesOperator };
+  | { __kind: 'Bytes'; length: number; operator: BytesOperator };
 
 export type DataValueDeltaAssertionArgs =
   | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
@@ -56,7 +58,7 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'I32'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; operator: BytesOperatorArgs };
+  | { __kind: 'Bytes'; length: number; operator: BytesOperatorArgs };
 
 export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
   return getDataEnumEncoder([
@@ -116,7 +118,13 @@ export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAsser
         ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
-    ['Bytes', getStructEncoder([['operator', getBytesOperatorEncoder()]])],
+    [
+      'Bytes',
+      getStructEncoder([
+        ['length', getU16Encoder()],
+        ['operator', getBytesOperatorEncoder()],
+      ]),
+    ],
   ]);
 }
 
@@ -178,7 +186,13 @@ export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAsser
         ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
-    ['Bytes', getStructDecoder([['operator', getBytesOperatorDecoder()]])],
+    [
+      'Bytes',
+      getStructDecoder([
+        ['length', getU16Decoder()],
+        ['operator', getBytesOperatorDecoder()],
+      ]),
+    ],
   ]);
 }
 

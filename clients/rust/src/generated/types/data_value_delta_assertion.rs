@@ -46,6 +46,7 @@ pub enum DataValueDeltaAssertion {
         operator: IntegerOperator,
     },
     Bytes {
+        length: u16,
         operator: BytesOperator,
     },
 }

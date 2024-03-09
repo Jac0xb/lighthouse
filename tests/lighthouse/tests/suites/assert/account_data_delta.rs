@@ -28,7 +28,7 @@ async fn slippage_check() {
         &[
             MemoryWriteBuilder::new()
                 .memory_account(memory_account)
-                .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
+                .lighthouse_program(lighthouse_client::ID)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
@@ -62,7 +62,7 @@ async fn slippage_check() {
         &[
             MemoryWriteBuilder::new()
                 .memory_account(memory_account)
-                .lighthouse_program(lighthouse_client::programs::LIGHTHOUSE_ID)
+                .lighthouse_program(lighthouse_client::ID)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
@@ -76,7 +76,7 @@ async fn slippage_check() {
                 1e9 as u64,
             ),
             AssertAccountDeltaBuilder::new()
-                .log_level(LogLevel::PlaintextMsgLog)
+                .log_level(LogLevel::PlaintextMessage)
                 .account_a(memory_account)
                 .account_b(user.encodable_pubkey())
                 .assertion(AccountDeltaAssertion::AccountInfo {

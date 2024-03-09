@@ -6,7 +6,7 @@ use crate::{
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize)]
 pub enum AccountDeltaAssertion {
@@ -56,6 +56,7 @@ pub enum DataValueDeltaAssertion {
         operator: IntegerOperator,
     },
     Bytes {
+        length: u16,
         operator: BytesOperator,
     },
 }
@@ -175,11 +176,21 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         Ok(operator.evaluate(&diff_value, assertion_value, log_level))
                     }
-                    DataValueDeltaAssertion::Bytes { operator } => {
-                        let a_value = &a_account_data[a_offset..];
-                        let b_value = &b_account_data[b_offset..];
+                    DataValueDeltaAssertion::Bytes { operator, length } => {
+                        let a_value = a_account_data
+                            .get(a_offset..(a_offset + *length as usize))
+                            .ok_or_else(|| {
+                                msg!("Failed to read bytes from account_a");
+                                err!(LighthouseError::RangeOutOfBounds)
+                            })?;
+                        let b_value = b_account_data
+                            .get(b_offset..(b_offset + *length as usize))
+                            .ok_or_else(|| {
+                                msg!("Failed to read bytes from account_b");
+                                err!(LighthouseError::RangeOutOfBounds)
+                            })?;
 
-                        Ok(operator.evaluate(&a_value, &b_value, log_level))
+                        Ok(operator.evaluate(a_value, b_value, log_level))
                     }
                 }
             }
@@ -296,7 +307,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -314,7 +325,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -349,7 +360,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -367,7 +378,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -402,7 +413,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -421,7 +432,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -456,7 +467,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -475,7 +486,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -503,13 +514,14 @@ mod tests {
             b_offset: 4,
             assertion: DataValueDeltaAssertion::Bytes {
                 operator: crate::types::assert::operator::BytesOperator::Equal,
+                length: 32,
             },
         };
 
         let result = assertion
             .evaluate(
                 (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -520,13 +532,14 @@ mod tests {
             b_offset: 0,
             assertion: DataValueDeltaAssertion::Bytes {
                 operator: crate::types::assert::operator::BytesOperator::Equal,
+                length: 32,
             },
         };
 
         let result = reverse_assertion
             .evaluate(
                 (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -562,7 +575,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -589,7 +602,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -616,7 +629,7 @@ mod tests {
         let result = reverse_assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
@@ -650,7 +663,7 @@ mod tests {
         let result = assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMsgLog,
+                LogLevel::PlaintextMessage,
             )
             .unwrap();
 
