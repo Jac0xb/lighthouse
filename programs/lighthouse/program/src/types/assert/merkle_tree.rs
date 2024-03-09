@@ -42,12 +42,12 @@ impl<'a, 'info> Assert<&AssertMerkleTreeAccountContext<'a, 'info>> for MerkleTre
                 if let Err(e) = result {
                     Ok(Box::new(EvaluationResult {
                         passed: false,
-                        output: format!("VerifyLeaf CPI failed: {:?}", e),
+                        output: Some(format!("VerifyLeaf CPI failed: {:?}", e)),
                     }))
                 } else {
                     Ok(Box::new(EvaluationResult {
                         passed: true,
-                        output: "Merkle tree leaf verified".to_string(),
+                        output: Some("Merkle tree leaf verified".to_string()),
                     }))
                 }
             }

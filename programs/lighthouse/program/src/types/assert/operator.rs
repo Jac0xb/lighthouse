@@ -58,7 +58,7 @@ pub enum BytesOperator {
 
 pub struct EvaluationResult {
     pub passed: bool,
-    pub output: String,
+    pub output: Option<String>,
 }
 
 impl EvaluationResult {
@@ -71,7 +71,11 @@ impl EvaluationResult {
                 } else {
                     "[✕] FAILED"
                 },
-                self.output
+                if let Some(output) = &self.output {
+                    output
+                } else {
+                    ""
+                }
             );
         }
     }
@@ -94,7 +98,7 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                 ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
             },
             output: if log_level == LogLevel::PlaintextMessage {
-                format!(
+                Some(format!(
                     "{:?} {} {:?}",
                     actual_value,
                     match self {
@@ -108,9 +112,9 @@ impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for Compa
                             LESS_THAN_OR_EQUAL_SYMBOL.to_string(),
                     },
                     assertion_value
-                )
+                ))
             } else {
-                "".to_string()
+                None
             },
         })
     }
@@ -145,7 +149,7 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                 }
             },
             output: if log_level == LogLevel::PlaintextMessage {
-                format!(
+                Some(format!(
                     "{:?} (actual) {} {:?} (expected)",
                     actual_value,
                     match self {
@@ -160,9 +164,9 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
                         IntegerOperator::DoesNotContain => DOES_NOT_CONTAIN_SYMBOL.to_string(),
                     },
                     assertion_value
-                )
+                ))
             } else {
-                "".to_string()
+                None
             },
         })
     }
@@ -203,7 +207,7 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
                 },
             },
             output: if log_level == LogLevel::PlaintextMessage {
-                format!(
+                Some(format!(
                     "{:?} {} {:?}",
                     actual_value,
                     match self {
@@ -211,9 +215,9 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
                         EquatableOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
                     },
                     assertion_value
-                )
+                ))
             } else {
-                "".to_string()
+                None
             },
         })
     }
@@ -253,7 +257,7 @@ where
                 }
             },
             output: if log_level == LogLevel::PlaintextMessage {
-                format!(
+                Some(format!(
                     "{:?} {} {:?}",
                     actual_value,
                     match self {
@@ -261,9 +265,9 @@ where
                         BytesOperator::NotEqual => NOT_EQUAL_SYMBOL.to_string(),
                     },
                     assertion_value
-                )
+                ))
             } else {
-                "".to_string()
+                None
             },
         })
     }

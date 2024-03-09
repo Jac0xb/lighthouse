@@ -82,7 +82,9 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
-                        output: "Stake account is not in a state that has meta field".to_string(),
+                        output: Some(
+                            "Stake account is not in a state that has meta field".to_string(),
+                        ),
                     }),
                 }
             }
@@ -98,7 +100,9 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
-                        output: "Stake account is not in a state that has stake field".to_string(),
+                        output: Some(
+                            "Stake account is not in a state that has stake field".to_string(),
+                        ),
                     }),
                 }
             }
@@ -123,7 +127,9 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
                     }
                     _ => Box::new(EvaluationResult {
                         passed: false,
-                        output: "Stake account is not in a state that has stake field".to_string(),
+                        output: Some(
+                            "Stake account is not in a state that has stake field".to_string(),
+                        ),
                     }),
                 }
             }

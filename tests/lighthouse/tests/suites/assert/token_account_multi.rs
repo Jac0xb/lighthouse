@@ -82,6 +82,8 @@ async fn test_basic() {
     process_transaction_assert_success(context, tx)
         .await
         .unwrap();
+
+    panic!("Test not implemented");
 }
 
 #[tokio::test]
