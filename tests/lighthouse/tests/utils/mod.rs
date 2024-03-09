@@ -29,7 +29,7 @@ pub fn find_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::p
             user.as_ref(),
             &[memory_index],
         ],
-        &lighthouse_client::programs::LIGHTHOUSE_ID,
+        &lighthouse_client::ID,
     )
 }
 
@@ -43,11 +43,7 @@ pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 
 pub fn program_test() -> ProgramTest {
-    let mut test = ProgramTest::new(
-        "lighthouse",
-        lighthouse_client::programs::LIGHTHOUSE_ID,
-        None,
-    );
+    let mut test = ProgramTest::new("lighthouse", lighthouse_client::ID, None);
     test.add_program("blackhat", blackhat::id(), None);
     test.add_program("test_program", test_program::id(), None);
     test.add_program(

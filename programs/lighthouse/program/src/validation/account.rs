@@ -1,7 +1,7 @@
 use super::{Program, Signer, SystemProgram};
 use crate::{
     error::LighthouseError,
-    utils::{create_account, Result},
+    utils::{create_account, keys_equal, Result},
 };
 use solana_program::{
     account_info::AccountInfo, msg, program::invoke, pubkey::Pubkey, rent::Rent,
@@ -76,7 +76,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
         system_program: &'_ Program<'a, 'info, SystemProgram>,
         seeds: &'_ [Vec<u8>],
     ) -> Result<bool> {
-        if account_info.owner == &system_program.key() {
+        if keys_equal(account_info.owner, &system_program.key()) {
             create_account(
                 payer.as_ref(),
                 account_info,
@@ -246,14 +246,14 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                     }
                 }
                 AccountValidation::IsProgramOwned(owner) => {
-                    if account.lamports() != 0 && account.owner.eq(owner) {
+                    if account.lamports() != 0 && keys_equal(account.owner, owner) {
                     } else {
                         msg!("account inited condition failed: {:?}", account.key);
                         return Err(LighthouseError::AccountValidationFailed.into());
                     }
                 }
                 AccountValidation::IsNotOwned => {
-                    if account.lamports() == 0 && account.owner.eq(&system_program::ID) {
+                    if account.lamports() == 0 && keys_equal(account.owner, &system_program::ID) {
                     } else {
                         msg!("account not inited condition failed: {:?}", account.key);
                         return Err(LighthouseError::AccountValidationFailed.into());
@@ -270,7 +270,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                         let (generated_pda, _) =
                             Pubkey::find_program_address(seeds.as_slice(), program_id);
 
-                        if account.key != &generated_pda {
+                        if !keys_equal(account.key, &generated_pda) {
                             msg!(
                                 "program derived address condition failed: expected {:?} actual {:?}",
                                 account.key,
@@ -293,7 +293,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                             LighthouseError::AccountValidationFailed
                         })?;
 
-                        if account.key != &derived_address {
+                        if !keys_equal(account.key, &derived_address) {
                             msg!(
                                 "program derived address condition failed: expected {:?} actual {:?}",
                                 account.key,
@@ -304,7 +304,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                     }
                 }
                 AccountValidation::KeyEquals(key) => {
-                    if account.key.eq(key) {
+                    if keys_equal(account.key, key) {
                     } else {
                         msg!(
                             "account key condition failed: expected {:?} actual {:?}",
@@ -331,6 +331,7 @@ mod tests {
     use super::{AccountValidation, CheckedAccount, InitializeType};
     use crate::{
         error::LighthouseError,
+        utils::keys_equal,
         validation::{DerivedAddress, MemoryAccount, MemoryAccountSeeds, Program, Signer},
         Result,
     };
@@ -611,7 +612,7 @@ mod tests {
                     }
 
                     // don't touch the account if the owner does not change
-                    if account.owner.eq(&owner) {
+                    if keys_equal(account.owner, &owner) {
                         return Ok(());
                     }
 

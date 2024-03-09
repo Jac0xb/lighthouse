@@ -6,29 +6,36 @@
 //!
 
 use crate::generated::types::LogLevel;
-use crate::generated::types::SysvarClockAssertion;
+use crate::generated::types::StakeAccountAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
-pub struct AssertSysvarClock {}
+pub struct AssertStakeAccountMulti {
+    /// Target account to be asserted
+    pub target_account: solana_program::pubkey::Pubkey,
+}
 
-impl AssertSysvarClock {
+impl AssertStakeAccountMulti {
     pub fn instruction(
         &self,
-        args: AssertSysvarClockInstructionArgs,
+        args: AssertStakeAccountMultiInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: AssertSysvarClockInstructionArgs,
+        args: AssertStakeAccountMultiInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(0 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.target_account,
+            false,
+        ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertSysvarClockInstructionData::new()
+        let mut data = AssertStakeAccountMultiInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = args.try_to_vec().unwrap();
@@ -43,37 +50,45 @@ impl AssertSysvarClock {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertSysvarClockInstructionData {
+struct AssertStakeAccountMultiInstructionData {
     discriminator: u8,
 }
 
-impl AssertSysvarClockInstructionData {
+impl AssertStakeAccountMultiInstructionData {
     fn new() -> Self {
-        Self { discriminator: 14 }
+        Self { discriminator: 11 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AssertSysvarClockInstructionArgs {
+pub struct AssertStakeAccountMultiInstructionArgs {
     pub log_level: LogLevel,
-    pub assertion: SysvarClockAssertion,
+    pub assertions: Vec<StakeAccountAssertion>,
 }
 
-/// Instruction builder for `AssertSysvarClock`.
+/// Instruction builder for `AssertStakeAccountMulti`.
 ///
 /// ### Accounts:
 ///
+///   0. `[]` target_account
 #[derive(Default)]
-pub struct AssertSysvarClockBuilder {
+pub struct AssertStakeAccountMultiBuilder {
+    target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
-    assertion: Option<SysvarClockAssertion>,
+    assertions: Option<Vec<StakeAccountAssertion>>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl AssertSysvarClockBuilder {
+impl AssertStakeAccountMultiBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+    /// Target account to be asserted
+    #[inline(always)]
+    pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.target_account = Some(target_account);
+        self
     }
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
@@ -81,8 +96,8 @@ impl AssertSysvarClockBuilder {
         self
     }
     #[inline(always)]
-    pub fn assertion(&mut self, assertion: SysvarClockAssertion) -> &mut Self {
-        self.assertion = Some(assertion);
+    pub fn assertions(&mut self, assertions: Vec<StakeAccountAssertion>) -> &mut Self {
+        self.assertions = Some(assertions);
         self
     }
     /// Add an aditional account to the instruction.
@@ -105,31 +120,43 @@ impl AssertSysvarClockBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = AssertSysvarClock {};
-        let args = AssertSysvarClockInstructionArgs {
+        let accounts = AssertStakeAccountMulti {
+            target_account: self.target_account.expect("target_account is not set"),
+        };
+        let args = AssertStakeAccountMultiInstructionArgs {
             log_level: self.log_level.clone().expect("log_level is not set"),
-            assertion: self.assertion.clone().expect("assertion is not set"),
+            assertions: self.assertions.clone().expect("assertions is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `assert_sysvar_clock` CPI instruction.
-pub struct AssertSysvarClockCpi<'a, 'b> {
-    /// The program to invoke.
-    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The arguments for the instruction.
-    pub __args: AssertSysvarClockInstructionArgs,
+/// `assert_stake_account_multi` CPI accounts.
+pub struct AssertStakeAccountMultiCpiAccounts<'a, 'b> {
+    /// Target account to be asserted
+    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
+/// `assert_stake_account_multi` CPI instruction.
+pub struct AssertStakeAccountMultiCpi<'a, 'b> {
+    /// The program to invoke.
+    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Target account to be asserted
+    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The arguments for the instruction.
+    pub __args: AssertStakeAccountMultiInstructionArgs,
+}
+
+impl<'a, 'b> AssertStakeAccountMultiCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        args: AssertSysvarClockInstructionArgs,
+        accounts: AssertStakeAccountMultiCpiAccounts<'a, 'b>,
+        args: AssertStakeAccountMultiInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
+            target_account: accounts.target_account,
             __args: args,
         }
     }
@@ -166,7 +193,11 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(0 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.target_account.key,
+            false,
+        ));
         remaining_accounts.iter().for_each(|remaining_account| {
             accounts.push(solana_program::instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
@@ -174,7 +205,7 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertSysvarClockInstructionData::new()
+        let mut data = AssertStakeAccountMultiInstructionData::new()
             .try_to_vec()
             .unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
@@ -185,8 +216,9 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(0 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(1 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
+        account_infos.push(self.target_account.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -199,23 +231,34 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `AssertSysvarClock` via CPI.
+/// Instruction builder for `AssertStakeAccountMulti` via CPI.
 ///
 /// ### Accounts:
 ///
-pub struct AssertSysvarClockCpiBuilder<'a, 'b> {
-    instruction: Box<AssertSysvarClockCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` target_account
+pub struct AssertStakeAccountMultiCpiBuilder<'a, 'b> {
+    instruction: Box<AssertStakeAccountMultiCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
+impl<'a, 'b> AssertStakeAccountMultiCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(AssertSysvarClockCpiBuilderInstruction {
+        let instruction = Box::new(AssertStakeAccountMultiCpiBuilderInstruction {
             __program: program,
+            target_account: None,
             log_level: None,
-            assertion: None,
+            assertions: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
+    }
+    /// Target account to be asserted
+    #[inline(always)]
+    pub fn target_account(
+        &mut self,
+        target_account: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.target_account = Some(target_account);
+        self
     }
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
@@ -223,8 +266,8 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn assertion(&mut self, assertion: SysvarClockAssertion) -> &mut Self {
-        self.instruction.assertion = Some(assertion);
+    pub fn assertions(&mut self, assertions: Vec<StakeAccountAssertion>) -> &mut Self {
+        self.instruction.assertions = Some(assertions);
         self
     }
     /// Add an additional account to the instruction.
@@ -268,20 +311,25 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = AssertSysvarClockInstructionArgs {
+        let args = AssertStakeAccountMultiInstructionArgs {
             log_level: self
                 .instruction
                 .log_level
                 .clone()
                 .expect("log_level is not set"),
-            assertion: self
+            assertions: self
                 .instruction
-                .assertion
+                .assertions
                 .clone()
-                .expect("assertion is not set"),
+                .expect("assertions is not set"),
         };
-        let instruction = AssertSysvarClockCpi {
+        let instruction = AssertStakeAccountMultiCpi {
             __program: self.instruction.__program,
+
+            target_account: self
+                .instruction
+                .target_account
+                .expect("target_account is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -291,10 +339,11 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
     }
 }
 
-struct AssertSysvarClockCpiBuilderInstruction<'a, 'b> {
+struct AssertStakeAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
+    target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
-    assertion: Option<SysvarClockAssertion>,
+    assertions: Option<Vec<StakeAccountAssertion>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

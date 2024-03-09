@@ -119,7 +119,7 @@ mod tests {
                 value: 69,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -132,7 +132,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -147,7 +147,7 @@ mod tests {
                 value: 420,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -160,7 +160,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -175,7 +175,7 @@ mod tests {
                 value: 1337,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -188,7 +188,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -203,7 +203,7 @@ mod tests {
                 value: 9001,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -216,7 +216,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);
@@ -231,7 +231,7 @@ mod tests {
                 value: 123456789,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(result.passed, "{:?}", result.output);
@@ -244,7 +244,7 @@ mod tests {
                 value: 1600,
                 operator: ComparableOperator::Equal,
             }
-            .evaluate((), LogLevel::PlaintextMsgLog);
+            .evaluate((), LogLevel::PlaintextMessage);
 
             if let Ok(result) = result {
                 assert!(!result.passed, "{:?}", result.output);

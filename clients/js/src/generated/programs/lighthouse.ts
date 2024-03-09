@@ -39,12 +39,15 @@ export enum LighthouseInstruction {
   AssertAccountData,
   AssertAccountDelta,
   AssertAccountInfo,
+  AssertAccountInfoMulti,
   AssertMintAccount,
   AssertMintAccountMulti,
   AssertTokenAccount,
   AssertTokenAccountMulti,
   AssertStakeAccount,
+  AssertStakeAccountMulti,
   AssertUpgradeableLoaderAccount,
+  AssertUpgradeableLoaderAccountMulti,
   AssertSysvarClock,
   AssertMerkleTreeAccount,
 }
@@ -70,27 +73,36 @@ export function identifyLighthouseInstruction(
     return LighthouseInstruction.AssertAccountInfo;
   }
   if (memcmp(data, getU8Encoder().encode(5), 0)) {
-    return LighthouseInstruction.AssertMintAccount;
+    return LighthouseInstruction.AssertAccountInfoMulti;
   }
   if (memcmp(data, getU8Encoder().encode(6), 0)) {
-    return LighthouseInstruction.AssertMintAccountMulti;
+    return LighthouseInstruction.AssertMintAccount;
   }
   if (memcmp(data, getU8Encoder().encode(7), 0)) {
-    return LighthouseInstruction.AssertTokenAccount;
+    return LighthouseInstruction.AssertMintAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(8), 0)) {
-    return LighthouseInstruction.AssertTokenAccountMulti;
+    return LighthouseInstruction.AssertTokenAccount;
   }
   if (memcmp(data, getU8Encoder().encode(9), 0)) {
-    return LighthouseInstruction.AssertStakeAccount;
+    return LighthouseInstruction.AssertTokenAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(10), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
+    return LighthouseInstruction.AssertStakeAccount;
   }
   if (memcmp(data, getU8Encoder().encode(11), 0)) {
-    return LighthouseInstruction.AssertSysvarClock;
+    return LighthouseInstruction.AssertStakeAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(12), 0)) {
+    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
+  }
+  if (memcmp(data, getU8Encoder().encode(13), 0)) {
+    return LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
+  }
+  if (memcmp(data, getU8Encoder().encode(14), 0)) {
+    return LighthouseInstruction.AssertSysvarClock;
+  }
+  if (memcmp(data, getU8Encoder().encode(15), 0)) {
     return LighthouseInstruction.AssertMerkleTreeAccount;
   }
   throw new Error(

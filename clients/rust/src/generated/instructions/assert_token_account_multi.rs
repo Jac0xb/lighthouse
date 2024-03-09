@@ -62,7 +62,7 @@ struct AssertTokenAccountMultiInstructionData {
 
 impl AssertTokenAccountMultiInstructionData {
     fn new() -> Self {
-        Self { discriminator: 8 }
+        Self { discriminator: 9 }
     }
 }
 
