@@ -11,16 +11,20 @@ import {
   getAddressDecoder,
   getAddressEncoder,
 } from '@solana/addresses';
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  combineCodec,
   getDataEnumDecoder,
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
-import { getU64Decoder, getU64Encoder } from '@solana/codecs-numbers';
+  getU64Decoder,
+  getU64Encoder,
+} from '@solana/codecs';
 import {
   ComparableOperator,
   ComparableOperatorArgs,

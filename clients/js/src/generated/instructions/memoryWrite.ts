@@ -12,18 +12,14 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  mapEncoder,
-} from '@solana/codecs-core';
-import {
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
-import {
   getU16Decoder,
   getU16Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs-numbers';
+  mapEncoder,
+} from '@solana/codecs';
 import {
   AccountRole,
   IAccountMeta,
@@ -35,9 +31,12 @@ import {
   WritableAccount,
 } from '@solana/instructions';
 import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
+import { findMemoryAccountPda } from '../pdas';
 import {
   ResolvedAccount,
   accountMetaWithDefault,
+  expectAddress,
+  expectSome,
   getAccountMetasWithSigners,
 } from '../shared';
 import {
@@ -49,10 +48,10 @@ import {
 
 export type MemoryWriteInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
-  TAccountSystemProgram extends
+  TAccountProgramId extends
     | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
@@ -61,9 +60,9 @@ export type MemoryWriteInstruction<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
+      TAccountProgramId extends string
+        ? ReadonlyAccount<TAccountProgramId>
+        : TAccountProgramId,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
@@ -82,10 +81,10 @@ export type MemoryWriteInstruction<
 
 export type MemoryWriteInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
-  TAccountSystemProgram extends
+  TAccountProgramId extends
     | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
@@ -94,9 +93,9 @@ export type MemoryWriteInstructionWithSigners<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
+      TAccountProgramId extends string
+        ? ReadonlyAccount<TAccountProgramId>
+        : TAccountProgramId,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
@@ -162,15 +161,184 @@ export function getMemoryWriteInstructionDataCodec(): Codec<
   );
 }
 
-export type MemoryWriteInput<
-  TAccountLighthouseProgram extends string,
+export type MemoryWriteAsyncInput<
+  TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
   TAccountSourceAccount extends string
 > = {
   /** Lighthouse program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
+  programId?: Address<TAccountProgramId>;
+  /** System program */
+  systemProgram?: Address<TAccountSystemProgram>;
+  /** Payer account */
+  payer: Address<TAccountPayer>;
+  /** Memory account */
+  memoryAccount?: Address<TAccountMemoryAccount>;
+  /** System program */
+  sourceAccount: Address<TAccountSourceAccount>;
+  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
+  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
+  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
+  writeType: MemoryWriteInstructionDataArgs['writeType'];
+};
+
+export type MemoryWriteAsyncInputWithSigners<
+  TAccountProgramId extends string,
+  TAccountSystemProgram extends string,
+  TAccountPayer extends string,
+  TAccountMemoryAccount extends string,
+  TAccountSourceAccount extends string
+> = {
+  /** Lighthouse program */
+  programId?: Address<TAccountProgramId>;
+  /** System program */
+  systemProgram?: Address<TAccountSystemProgram>;
+  /** Payer account */
+  payer: TransactionSigner<TAccountPayer>;
+  /** Memory account */
+  memoryAccount?: Address<TAccountMemoryAccount>;
+  /** System program */
+  sourceAccount: Address<TAccountSourceAccount>;
+  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
+  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
+  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
+  writeType: MemoryWriteInstructionDataArgs['writeType'];
+};
+
+export async function getMemoryWriteInstructionAsync<
+  TAccountProgramId extends string,
+  TAccountSystemProgram extends string,
+  TAccountPayer extends string,
+  TAccountMemoryAccount extends string,
+  TAccountSourceAccount extends string,
+  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+>(
+  input: MemoryWriteAsyncInputWithSigners<
+    TAccountProgramId,
+    TAccountSystemProgram,
+    TAccountPayer,
+    TAccountMemoryAccount,
+    TAccountSourceAccount
+  >
+): Promise<
+  MemoryWriteInstructionWithSigners<
+    TProgram,
+    TAccountProgramId,
+    TAccountSystemProgram,
+    TAccountPayer,
+    TAccountMemoryAccount,
+    TAccountSourceAccount
+  >
+>;
+export async function getMemoryWriteInstructionAsync<
+  TAccountProgramId extends string,
+  TAccountSystemProgram extends string,
+  TAccountPayer extends string,
+  TAccountMemoryAccount extends string,
+  TAccountSourceAccount extends string,
+  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+>(
+  input: MemoryWriteAsyncInput<
+    TAccountProgramId,
+    TAccountSystemProgram,
+    TAccountPayer,
+    TAccountMemoryAccount,
+    TAccountSourceAccount
+  >
+): Promise<
+  MemoryWriteInstruction<
+    TProgram,
+    TAccountProgramId,
+    TAccountSystemProgram,
+    TAccountPayer,
+    TAccountMemoryAccount,
+    TAccountSourceAccount
+  >
+>;
+export async function getMemoryWriteInstructionAsync<
+  TAccountProgramId extends string,
+  TAccountSystemProgram extends string,
+  TAccountPayer extends string,
+  TAccountMemoryAccount extends string,
+  TAccountSourceAccount extends string,
+  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+>(
+  input: MemoryWriteAsyncInput<
+    TAccountProgramId,
+    TAccountSystemProgram,
+    TAccountPayer,
+    TAccountMemoryAccount,
+    TAccountSourceAccount
+  >
+): Promise<IInstruction> {
+  // Program address.
+  const programAddress =
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+
+  // Original accounts.
+  type AccountMetas = Parameters<
+    typeof getMemoryWriteInstructionRaw<
+      TProgram,
+      TAccountProgramId,
+      TAccountSystemProgram,
+      TAccountPayer,
+      TAccountMemoryAccount,
+      TAccountSourceAccount
+    >
+  >[0];
+  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
+    programId: { value: input.programId ?? null, isWritable: false },
+    systemProgram: { value: input.systemProgram ?? null, isWritable: false },
+    payer: { value: input.payer ?? null, isWritable: false },
+    memoryAccount: { value: input.memoryAccount ?? null, isWritable: true },
+    sourceAccount: { value: input.sourceAccount ?? null, isWritable: false },
+  };
+
+  // Original args.
+  const args = { ...input };
+
+  // Resolve default values.
+  if (!accounts.programId.value) {
+    accounts.programId.value = programAddress;
+    accounts.programId.isWritable = false;
+  }
+  if (!accounts.systemProgram.value) {
+    accounts.systemProgram.value = '<pubkey>' as Address<'<pubkey>'>;
+  }
+  if (!accounts.memoryAccount.value) {
+    accounts.memoryAccount.value = await findMemoryAccountPda({
+      payer: expectAddress(accounts.payer.value),
+      memoryIndex: expectSome(args.memoryIndex),
+    });
+  }
+
+  // Get account metas and signers.
+  const accountMetas = getAccountMetasWithSigners(
+    accounts,
+    'programId',
+    programAddress
+  );
+
+  const instruction = getMemoryWriteInstructionRaw(
+    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
+    args as MemoryWriteInstructionDataArgs,
+    programAddress
+  );
+
+  return instruction;
+}
+
+export type MemoryWriteInput<
+  TAccountProgramId extends string,
+  TAccountSystemProgram extends string,
+  TAccountPayer extends string,
+  TAccountMemoryAccount extends string,
+  TAccountSourceAccount extends string
+> = {
+  /** Lighthouse program */
+  programId?: Address<TAccountProgramId>;
   /** System program */
   systemProgram?: Address<TAccountSystemProgram>;
   /** Payer account */
@@ -186,14 +354,14 @@ export type MemoryWriteInput<
 };
 
 export type MemoryWriteInputWithSigners<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
   TAccountSourceAccount extends string
 > = {
   /** Lighthouse program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
+  programId?: Address<TAccountProgramId>;
   /** System program */
   systemProgram?: Address<TAccountSystemProgram>;
   /** Payer account */
@@ -209,7 +377,7 @@ export type MemoryWriteInputWithSigners<
 };
 
 export function getMemoryWriteInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
@@ -217,7 +385,7 @@ export function getMemoryWriteInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryWriteInputWithSigners<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
     TAccountMemoryAccount,
@@ -225,14 +393,14 @@ export function getMemoryWriteInstruction<
   >
 ): MemoryWriteInstructionWithSigners<
   TProgram,
-  TAccountLighthouseProgram,
+  TAccountProgramId,
   TAccountSystemProgram,
   TAccountPayer,
   TAccountMemoryAccount,
   TAccountSourceAccount
 >;
 export function getMemoryWriteInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
@@ -240,7 +408,7 @@ export function getMemoryWriteInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryWriteInput<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
     TAccountMemoryAccount,
@@ -248,14 +416,14 @@ export function getMemoryWriteInstruction<
   >
 ): MemoryWriteInstruction<
   TProgram,
-  TAccountLighthouseProgram,
+  TAccountProgramId,
   TAccountSystemProgram,
   TAccountPayer,
   TAccountMemoryAccount,
   TAccountSourceAccount
 >;
 export function getMemoryWriteInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
@@ -263,7 +431,7 @@ export function getMemoryWriteInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryWriteInput<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
     TAccountMemoryAccount,
@@ -278,7 +446,7 @@ export function getMemoryWriteInstruction<
   type AccountMetas = Parameters<
     typeof getMemoryWriteInstructionRaw<
       TProgram,
-      TAccountLighthouseProgram,
+      TAccountProgramId,
       TAccountSystemProgram,
       TAccountPayer,
       TAccountMemoryAccount,
@@ -286,10 +454,7 @@ export function getMemoryWriteInstruction<
     >
   >[0];
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    lighthouseProgram: {
-      value: input.lighthouseProgram ?? null,
-      isWritable: false,
-    },
+    programId: { value: input.programId ?? null, isWritable: false },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
     payer: { value: input.payer ?? null, isWritable: false },
     memoryAccount: { value: input.memoryAccount ?? null, isWritable: true },
@@ -300,9 +465,12 @@ export function getMemoryWriteInstruction<
   const args = { ...input };
 
   // Resolve default values.
+  if (!accounts.programId.value) {
+    accounts.programId.value = programAddress;
+    accounts.programId.isWritable = false;
+  }
   if (!accounts.systemProgram.value) {
-    accounts.systemProgram.value =
-      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
+    accounts.systemProgram.value = '<pubkey>' as Address<'<pubkey>'>;
   }
 
   // Get account metas and signers.
@@ -323,19 +491,19 @@ export function getMemoryWriteInstruction<
 
 export function getMemoryWriteInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
-  TAccountSystemProgram extends
+  TAccountProgramId extends
     | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 >(
   accounts: {
-    lighthouseProgram: TAccountLighthouseProgram extends string
-      ? Address<TAccountLighthouseProgram>
-      : TAccountLighthouseProgram;
+    programId?: TAccountProgramId extends string
+      ? Address<TAccountProgramId>
+      : TAccountProgramId;
     systemProgram?: TAccountSystemProgram extends string
       ? Address<TAccountSystemProgram>
       : TAccountSystemProgram;
@@ -355,10 +523,16 @@ export function getMemoryWriteInstructionRaw<
 ) {
   return {
     accounts: [
-      accountMetaWithDefault(accounts.lighthouseProgram, AccountRole.READONLY),
       accountMetaWithDefault(
-        accounts.systemProgram ??
-          ('11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>),
+        accounts.programId ?? {
+          address:
+            'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
+          role: AccountRole.READONLY,
+        },
+        AccountRole.READONLY
+      ),
+      accountMetaWithDefault(
+        accounts.systemProgram ?? ('<pubkey>' as Address<'<pubkey>'>),
         AccountRole.READONLY
       ),
       accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
@@ -370,7 +544,7 @@ export function getMemoryWriteInstructionRaw<
     programAddress,
   } as MemoryWriteInstruction<
     TProgram,
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
     TAccountMemoryAccount,
@@ -386,7 +560,7 @@ export type ParsedMemoryWriteInstruction<
   programAddress: Address<TProgram>;
   accounts: {
     /** Lighthouse program */
-    lighthouseProgram: TAccountMetas[0];
+    programId: TAccountMetas[0];
     /** System program */
     systemProgram: TAccountMetas[1];
     /** Payer account */
@@ -420,7 +594,7 @@ export function parseMemoryWriteInstruction<
   return {
     programAddress: instruction.programAddress,
     accounts: {
-      lighthouseProgram: getNextAccount(),
+      programId: getNextAccount(),
       systemProgram: getNextAccount(),
       payer: getNextAccount(),
       memoryAccount: getNextAccount(),

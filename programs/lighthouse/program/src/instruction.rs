@@ -12,7 +12,7 @@ use shank::ShankInstruction;
 #[derive(BorshSerialize, BorshDeserialize, ShankInstruction)]
 #[rustfmt::skip]
 pub(crate) enum LighthouseInstruction {
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "program_id", desc = "Lighthouse program")]
     #[account(1, name = "system_program", desc = "System program")]
     #[account(2, name = "payer", desc = "Payer account", signer)]
     #[account(3, name = "memory_account", desc = "Memory account", writable)]
@@ -24,7 +24,7 @@ pub(crate) enum LighthouseInstruction {
         write_type: WriteType,
     },
 
-    #[account(0, name = "lighthouse_program", desc = "Lighthouse program")]
+    #[account(0, name = "program_id", desc = "Lighthouse program")]
     #[account(1, name = "payer", desc = "Payer account", signer)]
     #[account(2, name = "memory_account", desc = "Memory account", writable)]
     MemoryClose { memory_index: u8, memory_account_bump: u8 },

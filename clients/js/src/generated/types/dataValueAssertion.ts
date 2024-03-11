@@ -11,20 +11,19 @@ import {
   getAddressDecoder,
   getAddressEncoder,
 } from '@solana/addresses';
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  combineCodec,
   getBooleanDecoder,
   getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
   getDataEnumDecoder,
   getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs-data-structures';
-import {
   getI128Decoder,
   getI128Encoder,
   getI16Decoder,
@@ -35,6 +34,8 @@ import {
   getI64Encoder,
   getI8Decoder,
   getI8Encoder,
+  getStructDecoder,
+  getStructEncoder,
   getU128Decoder,
   getU128Encoder,
   getU16Decoder,
@@ -45,7 +46,7 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs-numbers';
+} from '@solana/codecs';
 import {
   BytesOperator,
   BytesOperatorArgs,

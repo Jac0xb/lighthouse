@@ -6,11 +6,14 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
+  combineCodec,
   getScalarEnumDecoder,
   getScalarEnumEncoder,
-} from '@solana/codecs-data-structures';
+} from '@solana/codecs';
 
 export enum LogLevel {
   Silent,

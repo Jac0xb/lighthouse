@@ -11,15 +11,18 @@ import {
   getAddressDecoder,
   getAddressEncoder,
 } from '@solana/addresses';
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  combineCodec,
   getDataEnumDecoder,
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
+} from '@solana/codecs';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
