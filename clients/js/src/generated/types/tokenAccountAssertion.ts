@@ -51,7 +51,7 @@ export type TokenAccountAssertion =
   | { __kind: 'Amount'; value: bigint; operator: ComparableOperator }
   | { __kind: 'Delegate'; value: Option<Address>; operator: EquatableOperator }
   | { __kind: 'State'; value: number; operator: ComparableOperator }
-  | { __kind: 'IsNative'; value: Option<bigint>; operator: ComparableOperator }
+  | { __kind: 'IsNative'; value: Option<bigint>; operator: EquatableOperator }
   | { __kind: 'DelegatedAmount'; value: bigint; operator: ComparableOperator }
   | {
       __kind: 'CloseAuthority';
@@ -77,7 +77,7 @@ export type TokenAccountAssertionArgs =
   | {
       __kind: 'IsNative';
       value: OptionOrNullable<number | bigint>;
-      operator: ComparableOperatorArgs;
+      operator: EquatableOperatorArgs;
     }
   | {
       __kind: 'DelegatedAmount';
@@ -132,7 +132,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
       'IsNative',
       getStructEncoder([
         ['value', getOptionEncoder(getU64Encoder())],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
@@ -194,7 +194,7 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
       'IsNative',
       getStructDecoder([
         ['value', getOptionDecoder(getU64Decoder())],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [

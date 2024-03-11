@@ -25,8 +25,10 @@ pub(crate) fn assert_target_account<'a, 'info, T: Assert<&'a AccountInfo<'info>>
     log_level: LogLevel,
 ) -> Result<()> {
     let evaluation_result = assertion.evaluate(assert_context.target_account, log_level)?;
+
+    evaluation_result.log(log_level);
+
     if !evaluation_result.passed {
-        evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());
     }
 

@@ -40,7 +40,7 @@ impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
         account: &AccountInfo<'_>,
         log_level: LogLevel,
     ) -> Result<Box<EvaluationResult>> {
-        if !keys_equal(account.owner, &bpf_loader_upgradeable::id()) {
+        if !keys_equal(account.owner, &bpf_loader_upgradeable::ID) {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 

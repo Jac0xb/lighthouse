@@ -353,14 +353,6 @@
           "docs": [
             "Target account to be asserted"
           ]
-        },
-        {
-          "name": "lighthouseProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Lighthouse Program"
-          ]
         }
       ],
       "args": [
@@ -1902,7 +1894,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]

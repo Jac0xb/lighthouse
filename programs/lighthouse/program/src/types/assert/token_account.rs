@@ -6,7 +6,7 @@ use crate::{
     utils::{out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
 use spl_token_2022::state::AccountState;
 
@@ -34,7 +34,7 @@ pub enum TokenAccountAssertion {
     },
     IsNative {
         value: Option<u64>,
-        operator: ComparableOperator,
+        operator: EquatableOperator,
     },
     DelegatedAmount {
         value: u64,
@@ -88,10 +88,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 0..32;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let data_slice = data.get(0..32).ok_or_else(|| out_of_bounds_err(0..32))?;
                 let mint = Pubkey::try_from(data_slice).map_err(|e| {
                     err_msg!("Failed to deserialize mint from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -103,10 +100,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 32..64;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let data_slice = data.get(32..64).ok_or_else(|| out_of_bounds_err(32..64))?;
                 let owner = Pubkey::try_from(data_slice).map_err(|e| {
                     err_msg!("Failed to deserialize owner from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -118,10 +112,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 64..72;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let data_slice = data.get(64..72).ok_or_else(|| out_of_bounds_err(64..72))?;
                 let actual_amount = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize amount from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -133,29 +124,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 72..108;
                 let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                    .get(72..108)
+                    .ok_or_else(|| out_of_bounds_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
-                match (delegate, assertion_value) {
-                    (COption::None, None) => Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("None == None".to_string()),
-                    }),
-                    (COption::Some(token_account_delegate), None) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("{} != None", token_account_delegate)),
-                    }),
-                    (COption::None, Some(assertion_pubkey)) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("None != {}", assertion_pubkey)),
-                    }),
-                    (COption::Some(token_account_delegate), Some(assertion_pubkey)) => {
-                        operator.evaluate(&token_account_delegate, assertion_pubkey, log_level)
-                    }
-                }
+                operator.evaluate(&delegate, assertion_value, log_level)
             }
             TokenAccountAssertion::State {
                 value: assertion_value,
@@ -165,43 +139,22 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
                 operator.evaluate(actual_state, assertion_value, log_level)
             }
-            TokenAccountAssertion::IsNative {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_range = 109..121;
+            TokenAccountAssertion::IsNative { value, operator } => {
                 let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                    .get(109..121)
+                    .ok_or_else(|| out_of_bounds_err(109..121))?;
 
                 let actual_is_native = unpack_coption_u64(data_slice)?;
 
-                match (actual_is_native, assertion_value) {
-                    (COption::None, None) => Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("None == None".to_string()),
-                    }),
-                    (COption::Some(token_account_is_native), None) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("{:?} != None", token_account_is_native)),
-                    }),
-                    (COption::None, Some(is_native)) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("None != {:?}", is_native)),
-                    }),
-                    (COption::Some(token_account_is_native), Some(is_native)) => {
-                        operator.evaluate(&token_account_is_native, is_native, log_level)
-                    }
-                }
+                operator.evaluate(&actual_is_native, value, log_level)
             }
             TokenAccountAssertion::DelegatedAmount {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 121..129;
                 let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                    .get(121..129)
+                    .ok_or_else(|| out_of_bounds_err(121..129))?;
 
                 let actual_delegated_amount =
                     u64::from_le_bytes(data_slice.try_into().map_err(|e| {
@@ -211,50 +164,22 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
                 operator.evaluate(&actual_delegated_amount, assertion_value, log_level)
             }
-            TokenAccountAssertion::CloseAuthority {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_range = 129..165;
+            TokenAccountAssertion::CloseAuthority { value, operator } => {
                 let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                    .get(129..165)
+                    .ok_or_else(|| out_of_bounds_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
-                match (close_authority, assertion_value) {
-                    (COption::None, None) => Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("None == None".to_string()),
-                    }),
-                    (COption::Some(token_account_close_authority), None) => {
-                        Box::new(EvaluationResult {
-                            passed: false,
-                            output: Some(format!("{} != None", token_account_close_authority)),
-                        })
-                    }
-                    (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("None != {}", pubkey)),
-                    }),
-                    (COption::Some(token_account_close_authority), Some(pubkey)) => {
-                        operator.evaluate(&token_account_close_authority, pubkey, log_level)
-                    }
-                }
+                operator.evaluate(&close_authority, value, log_level)
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
-                let mint_range = 0..32;
-                let mint_data = data
-                    .get(mint_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(mint_range))?;
+                let mint_data = data.get(0..32).ok_or_else(|| out_of_bounds_err(0..32))?;
                 let mint = Pubkey::try_from(mint_data).map_err(|e| {
                     err_msg!("Failed to deserialize mint from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
-                let owner_range = 32..64;
-                let owner_data = data
-                    .get(owner_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(owner_range))?;
+                let owner_data = data.get(32..64).ok_or_else(|| out_of_bounds_err(32..64))?;
                 let owner = Pubkey::try_from(owner_data).map_err(|e| {
                     err_msg!("Failed to deserialize owner from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -273,6 +198,10 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
 #[cfg(test)]
 mod tests {
+    use solana_sdk::program_error::ProgramError;
+
+    use crate::types::assert::EvaluationResult;
+
     mod evaluate {
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
@@ -282,10 +211,13 @@ mod tests {
         use spl_token_2022::state::{Account, AccountState};
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{
-            assert::operator::{ComparableOperator, EquatableOperator},
-            assert::{Assert, LogLevel, TokenAccountAssertion},
+        use crate::types::assert::{
+            operator::{ComparableOperator, EquatableOperator},
+            token_account::tests::assert_failed,
+            Assert, LogLevel, TokenAccountAssertion,
         };
+
+        use super::assert_passed;
 
         #[test]
         fn evaluate_token_account_no_delegate_no_close_authority() {
@@ -335,12 +267,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = TokenAccountAssertion::Amount {
                 value: 1600,
@@ -348,12 +275,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             //
             // Assert on mint
@@ -364,12 +286,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on owner
@@ -380,12 +297,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on delegate
@@ -397,12 +309,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = TokenAccountAssertion::Delegate {
                 value: Some(owner.encodable_pubkey()),
@@ -410,12 +317,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on state
@@ -427,12 +329,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = TokenAccountAssertion::State {
                 value: AccountState::Frozen as u8,
@@ -440,12 +337,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             let result = TokenAccountAssertion::State {
                 value: AccountState::Uninitialized as u8,
@@ -453,12 +345,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             //
             // Assert on is_native
@@ -466,16 +353,11 @@ mod tests {
 
             let result = TokenAccountAssertion::IsNative {
                 value: Some(1),
-                operator: ComparableOperator::Equal,
+                operator: EquatableOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on delegated_amount
@@ -486,12 +368,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on close_authority
@@ -503,12 +380,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = TokenAccountAssertion::CloseAuthority {
                 value: Some(owner.encodable_pubkey()),
@@ -516,12 +388,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
         }
 
         #[test]
@@ -573,12 +440,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             let result = TokenAccountAssertion::Delegate {
                 value: Some(delegate.encodable_pubkey()),
@@ -602,12 +464,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             let result = TokenAccountAssertion::CloseAuthority {
                 value: Some(close_authority.encodable_pubkey()),
@@ -615,12 +472,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
         }
 
         #[test]
@@ -670,12 +522,7 @@ mod tests {
                 let result = TokenAccountAssertion::TokenAccountOwnerIsDerived
                     .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-                if let Ok(result) = result {
-                    assert!(result.passed, "{:?}", result.output);
-                } else {
-                    let error = result.err().unwrap();
-                    panic!("{:?}", error);
-                }
+                assert_passed(result);
             }
 
             // None derived owner
@@ -714,13 +561,81 @@ mod tests {
                 let result = TokenAccountAssertion::TokenAccountOwnerIsDerived
                     .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-                if let Ok(result) = result {
-                    assert!(!result.passed, "{:?}", result.output);
-                } else {
-                    let error = result.err().unwrap();
-                    panic!("{:?}", error);
-                }
+                assert_failed(result);
             }
+        }
+
+        #[test]
+        fn evaluate_option() {
+            let mint = Keypair::new();
+            let owner = Keypair::new();
+            let delegate = Keypair::new();
+            let close_authority = Keypair::new();
+
+            //
+            {
+                let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+                Account::pack(
+                    Account {
+                        mint: mint.encodable_pubkey(),
+                        owner: owner.encodable_pubkey(),
+                        amount: 69,
+                        delegate: COption::Some(delegate.encodable_pubkey()),
+                        state: AccountState::Initialized,
+                        is_native: COption::Some(1),
+                        delegated_amount: 42,
+                        close_authority: COption::Some(close_authority.encodable_pubkey()),
+                    },
+                    serialized_token_account,
+                )
+                .unwrap();
+
+                let lamports_data: &mut u64 = &mut 0;
+                let key = Keypair::new().encodable_pubkey();
+                let account_info = AccountInfo::new(
+                    &key,
+                    false,
+                    false,
+                    lamports_data,
+                    serialized_token_account,
+                    &spl_token_2022::ID,
+                    false,
+                    0,
+                );
+
+                let result = TokenAccountAssertion::IsNative {
+                    value: Some(1),
+                    operator: EquatableOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage);
+
+                assert_passed(result);
+
+                let result = TokenAccountAssertion::IsNative {
+                    value: None,
+                    operator: EquatableOperator::Equal,
+                };
+
+                assert_failed(result.evaluate(&account_info, LogLevel::PlaintextMessage));
+            }
+        }
+    }
+
+    fn assert_passed(result: Result<Box<EvaluationResult>, ProgramError>) {
+        if let Ok(result) = result {
+            assert!(result.passed, "{:?}", result.output);
+        } else {
+            let error = result.err().unwrap();
+            panic!("{:?}", error);
+        }
+    }
+
+    fn assert_failed(result: Result<Box<EvaluationResult>, ProgramError>) {
+        if let Ok(result) = result {
+            assert!(!result.passed, "{:?}", result.output);
+        } else {
+            let error = result.err().unwrap();
+            panic!("{:?}", error);
         }
     }
 }

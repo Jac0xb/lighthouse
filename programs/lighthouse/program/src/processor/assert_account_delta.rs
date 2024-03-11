@@ -33,8 +33,10 @@ pub(crate) fn assert_account_delta<
         (assert_context.left_account, assert_context.right_account),
         log_level,
     )?;
+
+    evaluation_result.log(log_level);
+
     if !evaluation_result.passed {
-        evaluation_result.log(log_level);
         return Err(LighthouseError::AssertionFailed.into());
     }
 

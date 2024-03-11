@@ -52,7 +52,6 @@ pub(crate) enum LighthouseInstruction {
     AssertTokenAccount { log_level: LogLevel, assertion: TokenAccountAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    #[account(1, name = "lighthouse_program", desc = "Lighthouse Program")]
     AssertTokenAccountMulti { log_level: LogLevel, assertions: Vec<TokenAccountAssertion> },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
@@ -77,7 +76,7 @@ pub(crate) enum LighthouseInstruction {
 }
 
 impl LighthouseInstruction {
-    pub fn get_name(&self) -> &'static str {
+    pub const fn get_name(&self) -> &'static str {
         match self {
             LighthouseInstruction::MemoryWrite { .. } => "MemoryWrite",
             LighthouseInstruction::MemoryClose { .. } => "MemoryClose",
