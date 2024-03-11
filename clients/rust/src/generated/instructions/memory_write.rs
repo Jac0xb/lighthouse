@@ -94,7 +94,7 @@ pub struct MemoryWriteInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` program_id
-///   1. `[optional]` system_program (default to `<pubkey>`)
+///   1. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   2. `[signer]` payer
 ///   3. `[writable]` memory_account
 ///   4. `[]` source_account
@@ -122,7 +122,7 @@ impl MemoryWriteBuilder {
         self.program_id = Some(program_id);
         self
     }
-    /// `[optional account, default to '<pubkey>']`
+    /// `[optional account, default to '11111111111111111111111111111111']`
     /// System program
     #[inline(always)]
     pub fn system_program(&mut self, system_program: solana_program::pubkey::Pubkey) -> &mut Self {
@@ -191,7 +191,7 @@ impl MemoryWriteBuilder {
             program_id: self.program_id.expect("program_id is not set"),
             system_program: self
                 .system_program
-                .unwrap_or(solana_program::pubkey!("<pubkey>")),
+                .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
             payer: self.payer.expect("payer is not set"),
             memory_account: self.memory_account.expect("memory_account is not set"),
             source_account: self.source_account.expect("source_account is not set"),

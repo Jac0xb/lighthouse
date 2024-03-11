@@ -31,12 +31,9 @@ import {
   WritableAccount,
 } from '@solana/instructions';
 import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
-import { findMemoryAccountPda } from '../pdas';
 import {
   ResolvedAccount,
   accountMetaWithDefault,
-  expectAddress,
-  expectSome,
   getAccountMetasWithSigners,
 } from '../shared';
 import {
@@ -51,7 +48,9 @@ export type MemoryWriteInstruction<
   TAccountProgramId extends
     | string
     | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
+  TAccountSystemProgram extends
+    | string
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
@@ -84,7 +83,9 @@ export type MemoryWriteInstructionWithSigners<
   TAccountProgramId extends
     | string
     | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
+  TAccountSystemProgram extends
+    | string
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
@@ -159,175 +160,6 @@ export function getMemoryWriteInstructionDataCodec(): Codec<
     getMemoryWriteInstructionDataEncoder(),
     getMemoryWriteInstructionDataDecoder()
   );
-}
-
-export type MemoryWriteAsyncInput<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
-  TAccountSourceAccount extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** System program */
-  systemProgram?: Address<TAccountSystemProgram>;
-  /** Payer account */
-  payer: Address<TAccountPayer>;
-  /** Memory account */
-  memoryAccount?: Address<TAccountMemoryAccount>;
-  /** System program */
-  sourceAccount: Address<TAccountSourceAccount>;
-  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
-  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
-  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
-  writeType: MemoryWriteInstructionDataArgs['writeType'];
-};
-
-export type MemoryWriteAsyncInputWithSigners<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
-  TAccountSourceAccount extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** System program */
-  systemProgram?: Address<TAccountSystemProgram>;
-  /** Payer account */
-  payer: TransactionSigner<TAccountPayer>;
-  /** Memory account */
-  memoryAccount?: Address<TAccountMemoryAccount>;
-  /** System program */
-  sourceAccount: Address<TAccountSourceAccount>;
-  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
-  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
-  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
-  writeType: MemoryWriteInstructionDataArgs['writeType'];
-};
-
-export async function getMemoryWriteInstructionAsync<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteAsyncInputWithSigners<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemoryAccount,
-    TAccountSourceAccount
-  >
-): Promise<
-  MemoryWriteInstructionWithSigners<
-    TProgram,
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemoryAccount,
-    TAccountSourceAccount
-  >
->;
-export async function getMemoryWriteInstructionAsync<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteAsyncInput<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemoryAccount,
-    TAccountSourceAccount
-  >
-): Promise<
-  MemoryWriteInstruction<
-    TProgram,
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemoryAccount,
-    TAccountSourceAccount
-  >
->;
-export async function getMemoryWriteInstructionAsync<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteAsyncInput<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemoryAccount,
-    TAccountSourceAccount
-  >
-): Promise<IInstruction> {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getMemoryWriteInstructionRaw<
-      TProgram,
-      TAccountProgramId,
-      TAccountSystemProgram,
-      TAccountPayer,
-      TAccountMemoryAccount,
-      TAccountSourceAccount
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    programId: { value: input.programId ?? null, isWritable: false },
-    systemProgram: { value: input.systemProgram ?? null, isWritable: false },
-    payer: { value: input.payer ?? null, isWritable: false },
-    memoryAccount: { value: input.memoryAccount ?? null, isWritable: true },
-    sourceAccount: { value: input.sourceAccount ?? null, isWritable: false },
-  };
-
-  // Original args.
-  const args = { ...input };
-
-  // Resolve default values.
-  if (!accounts.programId.value) {
-    accounts.programId.value = programAddress;
-    accounts.programId.isWritable = false;
-  }
-  if (!accounts.systemProgram.value) {
-    accounts.systemProgram.value = '<pubkey>' as Address<'<pubkey>'>;
-  }
-  if (!accounts.memoryAccount.value) {
-    accounts.memoryAccount.value = await findMemoryAccountPda({
-      payer: expectAddress(accounts.payer.value),
-      memoryIndex: expectSome(args.memoryIndex),
-    });
-  }
-
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getMemoryWriteInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as MemoryWriteInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
 }
 
 export type MemoryWriteInput<
@@ -470,7 +302,8 @@ export function getMemoryWriteInstruction<
     accounts.programId.isWritable = false;
   }
   if (!accounts.systemProgram.value) {
-    accounts.systemProgram.value = '<pubkey>' as Address<'<pubkey>'>;
+    accounts.systemProgram.value =
+      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
   }
 
   // Get account metas and signers.
@@ -494,7 +327,9 @@ export function getMemoryWriteInstructionRaw<
   TAccountProgramId extends
     | string
     | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends string | IAccountMeta<string> = '<pubkey>',
+  TAccountSystemProgram extends
+    | string
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
@@ -532,7 +367,8 @@ export function getMemoryWriteInstructionRaw<
         AccountRole.READONLY
       ),
       accountMetaWithDefault(
-        accounts.systemProgram ?? ('<pubkey>' as Address<'<pubkey>'>),
+        accounts.systemProgram ??
+          ('11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>),
         AccountRole.READONLY
       ),
       accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
