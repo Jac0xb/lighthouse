@@ -11,29 +11,28 @@ import {
   getAddressDecoder,
   getAddressEncoder,
 } from '@solana/addresses';
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  Option,
+  OptionOrNullable,
+  combineCodec,
   getDataEnumDecoder,
   getDataEnumEncoder,
+  getOptionDecoder,
+  getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
-  getUnitDecoder,
-  getUnitEncoder,
-} from '@solana/codecs-data-structures';
-import {
   getU64Decoder,
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs-numbers';
-import {
-  Option,
-  OptionOrNullable,
-  getOptionDecoder,
-  getOptionEncoder,
-} from '@solana/options';
+  getUnitDecoder,
+  getUnitEncoder,
+} from '@solana/codecs';
 import {
   ComparableOperator,
   ComparableOperatorArgs,
@@ -51,7 +50,7 @@ export type TokenAccountAssertion =
   | { __kind: 'Amount'; value: bigint; operator: ComparableOperator }
   | { __kind: 'Delegate'; value: Option<Address>; operator: EquatableOperator }
   | { __kind: 'State'; value: number; operator: ComparableOperator }
-  | { __kind: 'IsNative'; value: Option<bigint>; operator: ComparableOperator }
+  | { __kind: 'IsNative'; value: Option<bigint>; operator: EquatableOperator }
   | { __kind: 'DelegatedAmount'; value: bigint; operator: ComparableOperator }
   | {
       __kind: 'CloseAuthority';
@@ -77,7 +76,7 @@ export type TokenAccountAssertionArgs =
   | {
       __kind: 'IsNative';
       value: OptionOrNullable<number | bigint>;
-      operator: ComparableOperatorArgs;
+      operator: EquatableOperatorArgs;
     }
   | {
       __kind: 'DelegatedAmount';
@@ -132,7 +131,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
       'IsNative',
       getStructEncoder([
         ['value', getOptionEncoder(getU64Encoder())],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
@@ -194,7 +193,7 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
       'IsNative',
       getStructDecoder([
         ['value', getOptionDecoder(getU64Decoder())],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [

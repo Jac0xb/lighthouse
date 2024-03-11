@@ -1,5 +1,5 @@
 pub mod account_data;
-pub mod account_data_delta;
+pub mod account_delta;
 pub mod account_info;
 pub mod clock;
 pub mod known_program;
@@ -12,7 +12,7 @@ pub mod token_account;
 pub mod upgradable_loader_state;
 
 pub use account_data::*;
-pub use account_data_delta::*;
+pub use account_delta::*;
 pub use account_info::*;
 pub use clock::*;
 pub use known_program::*;

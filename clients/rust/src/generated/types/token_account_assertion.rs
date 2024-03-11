@@ -44,7 +44,7 @@ pub enum TokenAccountAssertion {
     },
     IsNative {
         value: Option<u64>,
-        operator: ComparableOperator,
+        operator: EquatableOperator,
     },
     DelegatedAmount {
         value: u64,

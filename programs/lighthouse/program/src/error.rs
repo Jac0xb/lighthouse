@@ -54,7 +54,7 @@ pub enum LighthouseError {
 impl LighthouseError {
     pub fn map_multi_err(e: ProgramError, i: u32) -> ProgramError {
         if e == LighthouseError::AssertionFailed.into() {
-            ProgramError::Custom(0x1100 + i)
+            ProgramError::Custom(0x1900 + i)
         } else {
             e
         }

@@ -11,7 +11,7 @@ use borsh::BorshSerialize;
 /// Accounts.
 pub struct MemoryClose {
     /// Lighthouse program
-    pub lighthouse_program: solana_program::pubkey::Pubkey,
+    pub program_id: solana_program::pubkey::Pubkey,
     /// Payer account
     pub payer: solana_program::pubkey::Pubkey,
     /// Memory account
@@ -33,7 +33,7 @@ impl MemoryClose {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.lighthouse_program,
+            self.program_id,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -78,12 +78,12 @@ pub struct MemoryCloseInstructionArgs {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` lighthouse_program
+///   0. `[]` program_id
 ///   1. `[signer]` payer
 ///   2. `[writable]` memory_account
 #[derive(Default)]
 pub struct MemoryCloseBuilder {
-    lighthouse_program: Option<solana_program::pubkey::Pubkey>,
+    program_id: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     memory_account: Option<solana_program::pubkey::Pubkey>,
     memory_index: Option<u8>,
@@ -97,11 +97,8 @@ impl MemoryCloseBuilder {
     }
     /// Lighthouse program
     #[inline(always)]
-    pub fn lighthouse_program(
-        &mut self,
-        lighthouse_program: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.lighthouse_program = Some(lighthouse_program);
+    pub fn program_id(&mut self, program_id: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.program_id = Some(program_id);
         self
     }
     /// Payer account
@@ -147,9 +144,7 @@ impl MemoryCloseBuilder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = MemoryClose {
-            lighthouse_program: self
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
+            program_id: self.program_id.expect("program_id is not set"),
             payer: self.payer.expect("payer is not set"),
             memory_account: self.memory_account.expect("memory_account is not set"),
         };
@@ -168,7 +163,7 @@ impl MemoryCloseBuilder {
 /// `memory_close` CPI accounts.
 pub struct MemoryCloseCpiAccounts<'a, 'b> {
     /// Lighthouse program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
@@ -180,7 +175,7 @@ pub struct MemoryCloseCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Lighthouse program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
@@ -197,7 +192,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
-            lighthouse_program: accounts.lighthouse_program,
+            program_id: accounts.program_id,
             payer: accounts.payer,
             memory_account: accounts.memory_account,
             __args: args,
@@ -238,7 +233,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.lighthouse_program.key,
+            *self.program_id.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -267,7 +262,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(3 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.lighthouse_program.clone());
+        account_infos.push(self.program_id.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.memory_account.clone());
         remaining_accounts
@@ -286,7 +281,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` lighthouse_program
+///   0. `[]` program_id
 ///   1. `[signer]` payer
 ///   2. `[writable]` memory_account
 pub struct MemoryCloseCpiBuilder<'a, 'b> {
@@ -297,7 +292,7 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(MemoryCloseCpiBuilderInstruction {
             __program: program,
-            lighthouse_program: None,
+            program_id: None,
             payer: None,
             memory_account: None,
             memory_index: None,
@@ -308,11 +303,11 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
     }
     /// Lighthouse program
     #[inline(always)]
-    pub fn lighthouse_program(
+    pub fn program_id(
         &mut self,
-        lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+        program_id: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.lighthouse_program = Some(lighthouse_program);
+        self.instruction.program_id = Some(program_id);
         self
     }
     /// Payer account
@@ -396,10 +391,7 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
         let instruction = MemoryCloseCpi {
             __program: self.instruction.__program,
 
-            lighthouse_program: self
-                .instruction
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
+            program_id: self.instruction.program_id.expect("program_id is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
 
@@ -418,7 +410,7 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
 
 struct MemoryCloseCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    lighthouse_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     memory_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     memory_index: Option<u8>,

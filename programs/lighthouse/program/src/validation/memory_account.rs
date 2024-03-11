@@ -33,12 +33,12 @@ impl<'a, 'info> DerivedAddress<MemoryAccountSeeds<'a>> for MemoryAccount<'a, 'in
 }
 
 impl<'a, 'info> CheckedAccount<'a, 'info> for MemoryAccount<'a, 'info> {
-    fn get_validations() -> Vec<AccountValidation<'a>> {
-        vec![AccountValidation::IsProgramOwned(crate::ID)]
-    }
-
     fn info(&self) -> &'a AccountInfo<'info> {
         self.info
+    }
+
+    fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
+        None
     }
 
     fn new(account: &'a AccountInfo<'info>) -> Self {

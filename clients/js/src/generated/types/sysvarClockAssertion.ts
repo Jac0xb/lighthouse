@@ -6,21 +6,22 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  combineCodec,
   getDataEnumDecoder,
   getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs-data-structures';
-import {
   getI64Decoder,
   getI64Encoder,
+  getStructDecoder,
+  getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs-numbers';
+} from '@solana/codecs';
 import {
   ComparableOperator,
   ComparableOperatorArgs,
