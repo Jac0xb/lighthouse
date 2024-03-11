@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::types::assert::operator::{
     ComparableOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
 };
-use crate::utils::Result;
+use crate::utils::{keys_equal, Result};
 use crate::{err, err_msg, error::LighthouseError};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::msg;
@@ -45,7 +45,7 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        if ![solana_program::stake::program::id()].contains(account.owner) {
+        if !keys_equal(account.owner, &solana_program::stake::program::ID) {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 

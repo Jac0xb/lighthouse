@@ -14,40 +14,41 @@ const programDir = path.join(
 // Instanciate Kinobi.
 const kinobi = k.createFromIdls([path.join(programDir, 'lighthouse.json')]);
 
-// Update accounts.
-// kinobi.update(
-//   k.updateAccountsVisitor({
-//     counter: {
-//       seeds: [
-//         k.constantPdaSeedNodeFromString('counter'),
-//         k.variablePdaSeedNode(
-//           'authority',
-//           k.publicKeyTypeNode(),
-//           'The authority of the counter account'
-//         ),
-//       ],
-//     },
-//   })
-// );
+// Memory account PDA
+kinobi.update(
+  k.addPdasVisitor({
+    lighthouse: [
+      k.pdaNode('memory_account', [
+        k.constantPdaSeedNodeFromString('memory'),
+        k.variablePdaSeedNode('payer', k.publicKeyTypeNode()),
+        k.variablePdaSeedNode('memory_index', k.numberTypeNode('u8')),
+      ]),
+    ],
+  })
+);
 
-// Update instructions.
 // kinobi.update(
 //   k.updateInstructionsVisitor({
-//     create: {
-//       byteDeltas: [k.instructionByteDeltaNode(k.accountLinkNode('counter'))],
+//     memoryWrite: {
 //       accounts: {
-//         counter: { defaultValue: k.pdaValueNode('counter') },
-//         payer: { defaultValue: k.accountValueNode('authority') },
+//         systemProgram: {
+//           defaultValue: k.publicKeyValueNode('<pubkey>'),
+//         },
+//         memoryAccount: {
+//           defaultValue: k.pdaValueNode('memory_account'),
+//         },
 //       },
 //     },
 //   })
 // );
 
-// Set ShankAccount discriminator.
-// const key = (name) => ({ field: 'key', value: k.enumValueNode('Key', name) });
+// kinobi.accept(k.consoleLogVisitor(k.getDebugStringVisitor({ indent: true })));
+
 // kinobi.update(
-//   k.setAccountDiscriminatorFromFieldVisitor({
-//     counter: key('counter'),
+//   k.setStructDefaultValuesVisitor({
+//     memoryWrite: {
+//       memory_index: k.numberValueNode(0),
+//     },
 //   })
 // );
 

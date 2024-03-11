@@ -12,15 +12,14 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  mapEncoder,
-} from '@solana/codecs-core';
-import {
   getArrayDecoder,
   getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
-import { getU8Decoder, getU8Encoder } from '@solana/codecs-numbers';
+  getU8Decoder,
+  getU8Encoder,
+  mapEncoder,
+} from '@solana/codecs';
 import {
   AccountRole,
   IAccountMeta,
@@ -48,7 +47,6 @@ import {
 export type AssertTokenAccountMultiInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
@@ -57,9 +55,6 @@ export type AssertTokenAccountMultiInstruction<
       TAccountTargetAccount extends string
         ? ReadonlyAccount<TAccountTargetAccount>
         : TAccountTargetAccount,
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
       ...TRemainingAccounts
     ]
   >;
@@ -67,7 +62,6 @@ export type AssertTokenAccountMultiInstruction<
 export type AssertTokenAccountMultiInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
@@ -76,9 +70,6 @@ export type AssertTokenAccountMultiInstructionWithSigners<
       TAccountTargetAccount extends string
         ? ReadonlyAccount<TAccountTargetAccount>
         : TAccountTargetAccount,
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
       ...TRemainingAccounts
     ]
   >;
@@ -123,68 +114,42 @@ export function getAssertTokenAccountMultiInstructionDataCodec(): Codec<
   );
 }
 
-export type AssertTokenAccountMultiInput<
-  TAccountTargetAccount extends string,
-  TAccountLighthouseProgram extends string
-> = {
-  /** Target account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  /** Lighthouse Program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
-  logLevel: AssertTokenAccountMultiInstructionDataArgs['logLevel'];
-  assertions: AssertTokenAccountMultiInstructionDataArgs['assertions'];
-};
+export type AssertTokenAccountMultiInput<TAccountTargetAccount extends string> =
+  {
+    /** Target account to be asserted */
+    targetAccount: Address<TAccountTargetAccount>;
+    logLevel: AssertTokenAccountMultiInstructionDataArgs['logLevel'];
+    assertions: AssertTokenAccountMultiInstructionDataArgs['assertions'];
+  };
 
 export type AssertTokenAccountMultiInputWithSigners<
-  TAccountTargetAccount extends string,
-  TAccountLighthouseProgram extends string
+  TAccountTargetAccount extends string
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  /** Lighthouse Program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
   logLevel: AssertTokenAccountMultiInstructionDataArgs['logLevel'];
   assertions: AssertTokenAccountMultiInstructionDataArgs['assertions'];
 };
 
 export function getAssertTokenAccountMultiInstruction<
   TAccountTargetAccount extends string,
-  TAccountLighthouseProgram extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertTokenAccountMultiInputWithSigners<
-    TAccountTargetAccount,
-    TAccountLighthouseProgram
-  >
+  input: AssertTokenAccountMultiInputWithSigners<TAccountTargetAccount>
 ): AssertTokenAccountMultiInstructionWithSigners<
   TProgram,
-  TAccountTargetAccount,
-  TAccountLighthouseProgram
+  TAccountTargetAccount
 >;
 export function getAssertTokenAccountMultiInstruction<
   TAccountTargetAccount extends string,
-  TAccountLighthouseProgram extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertTokenAccountMultiInput<
-    TAccountTargetAccount,
-    TAccountLighthouseProgram
-  >
-): AssertTokenAccountMultiInstruction<
-  TProgram,
-  TAccountTargetAccount,
-  TAccountLighthouseProgram
->;
+  input: AssertTokenAccountMultiInput<TAccountTargetAccount>
+): AssertTokenAccountMultiInstruction<TProgram, TAccountTargetAccount>;
 export function getAssertTokenAccountMultiInstruction<
   TAccountTargetAccount extends string,
-  TAccountLighthouseProgram extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertTokenAccountMultiInput<
-    TAccountTargetAccount,
-    TAccountLighthouseProgram
-  >
-): IInstruction {
+>(input: AssertTokenAccountMultiInput<TAccountTargetAccount>): IInstruction {
   // Program address.
   const programAddress =
     'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
@@ -193,16 +158,11 @@ export function getAssertTokenAccountMultiInstruction<
   type AccountMetas = Parameters<
     typeof getAssertTokenAccountMultiInstructionRaw<
       TProgram,
-      TAccountTargetAccount,
-      TAccountLighthouseProgram
+      TAccountTargetAccount
     >
   >[0];
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
     targetAccount: { value: input.targetAccount ?? null, isWritable: false },
-    lighthouseProgram: {
-      value: input.lighthouseProgram ?? null,
-      isWritable: false,
-    },
   };
 
   // Original args.
@@ -227,16 +187,12 @@ export function getAssertTokenAccountMultiInstruction<
 export function getAssertTokenAccountMultiInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 >(
   accounts: {
     targetAccount: TAccountTargetAccount extends string
       ? Address<TAccountTargetAccount>
       : TAccountTargetAccount;
-    lighthouseProgram: TAccountLighthouseProgram extends string
-      ? Address<TAccountLighthouseProgram>
-      : TAccountLighthouseProgram;
   },
   args: AssertTokenAccountMultiInstructionDataArgs,
   programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
@@ -245,7 +201,6 @@ export function getAssertTokenAccountMultiInstructionRaw<
   return {
     accounts: [
       accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
-      accountMetaWithDefault(accounts.lighthouseProgram, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
     ],
     data: getAssertTokenAccountMultiInstructionDataEncoder().encode(args),
@@ -253,7 +208,6 @@ export function getAssertTokenAccountMultiInstructionRaw<
   } as AssertTokenAccountMultiInstruction<
     TProgram,
     TAccountTargetAccount,
-    TAccountLighthouseProgram,
     TRemainingAccounts
   >;
 }
@@ -266,8 +220,6 @@ export type ParsedAssertTokenAccountMultiInstruction<
   accounts: {
     /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
-    /** Lighthouse Program */
-    lighthouseProgram: TAccountMetas[1];
   };
   data: AssertTokenAccountMultiInstructionData;
 };
@@ -280,7 +232,7 @@ export function parseAssertTokenAccountMultiInstruction<
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
 ): ParsedAssertTokenAccountMultiInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 2) {
+  if (instruction.accounts.length < 1) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
   }
@@ -294,7 +246,6 @@ export function parseAssertTokenAccountMultiInstruction<
     programAddress: instruction.programAddress,
     accounts: {
       targetAccount: getNextAccount(),
-      lighthouseProgram: getNextAccount(),
     },
     data: getAssertTokenAccountMultiInstructionDataDecoder().decode(
       instruction.data

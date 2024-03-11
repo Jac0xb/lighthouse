@@ -11,8 +11,8 @@ impl<'a, 'info> CheckedAccount<'a, 'info> for Signer<'a, 'info>
 where
     'info: 'a,
 {
-    fn get_validations() -> Vec<AccountValidation<'a>> {
-        vec![AccountValidation::IsSigner]
+    fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
+        Some(vec![AccountValidation::IsSigner])
     }
 
     fn info(&self) -> &'a AccountInfo<'info> {

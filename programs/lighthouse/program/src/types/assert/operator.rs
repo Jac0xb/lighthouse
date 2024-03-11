@@ -2,7 +2,7 @@ use super::LogLevel;
 use borsh::{BorshDeserialize, BorshSerialize};
 use num_traits::PrimInt;
 use solana_program::{msg, program_memory::sol_memcmp};
-use std::{fmt::Debug, mem, ops::BitAnd, slice};
+use std::{fmt::Debug, ops::BitAnd};
 
 const EQUAL_SYMBOL: &str = "==";
 const NOT_EQUAL_SYMBOL: &str = "!=";
@@ -42,18 +42,6 @@ pub enum ComparableOperator {
     LessThan,
     GreaterThanOrEqual,
     LessThanOrEqual,
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum EquatableOperator {
-    Equal,
-    NotEqual,
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum BytesOperator {
-    Equal,
-    NotEqual,
 }
 
 pub struct EvaluationResult {
@@ -172,6 +160,12 @@ impl<T: PrimInt + BitAnd + Debug + Eq + Sized> Operator<T> for IntegerOperator {
     }
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+pub enum EquatableOperator {
+    Equal,
+    NotEqual,
+}
+
 impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
     fn evaluate(
         &self,
@@ -181,30 +175,8 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
     ) -> Box<EvaluationResult> {
         Box::new(EvaluationResult {
             passed: match self {
-                EquatableOperator::Equal => unsafe {
-                    let actual_bytes = slice::from_raw_parts(
-                        (actual_value as *const T) as *const u8,
-                        mem::size_of::<T>(),
-                    );
-                    let assertion_bytes = slice::from_raw_parts(
-                        (assertion_value as *const T) as *const u8,
-                        mem::size_of::<T>(),
-                    );
-
-                    sol_memcmp(actual_bytes, assertion_bytes, mem::size_of::<T>()) == 0
-                },
-                EquatableOperator::NotEqual => unsafe {
-                    let actual_bytes = slice::from_raw_parts(
-                        (actual_value as *const T) as *const u8,
-                        mem::size_of::<T>(),
-                    );
-                    let assertion_bytes = slice::from_raw_parts(
-                        (assertion_value as *const T) as *const u8,
-                        mem::size_of::<T>(),
-                    );
-
-                    sol_memcmp(actual_bytes, assertion_bytes, mem::size_of::<T>()) != 0
-                },
+                EquatableOperator::Equal => T::eq(actual_value, assertion_value),
+                EquatableOperator::NotEqual => T::ne(actual_value, assertion_value),
             },
             output: if log_level == LogLevel::PlaintextMessage {
                 Some(format!(
@@ -221,6 +193,12 @@ impl<T: PartialEq + Eq + Debug + Sized> Operator<T> for EquatableOperator {
             },
         })
     }
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+pub enum BytesOperator {
+    Equal,
+    NotEqual,
 }
 
 impl<T> Operator<T> for BytesOperator

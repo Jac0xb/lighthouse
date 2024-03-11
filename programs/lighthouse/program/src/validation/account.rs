@@ -58,7 +58,8 @@ pub(crate) enum InitializeType<'b, 'a, 'info> {
 pub(crate) trait CheckedAccount<'a, 'info: 'a> {
     fn new(account: &'a AccountInfo<'info>) -> Self;
     fn info(&self) -> &'a AccountInfo<'info>;
-    fn get_validations() -> Vec<AccountValidation<'a>>;
+
+    fn get_validations() -> Option<Vec<AccountValidation<'a>>>;
 
     fn info_as_owned(&self) -> AccountInfo<'info> {
         self.info().clone()
@@ -189,133 +190,119 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
             }
         }
 
-        let static_validations = Self::get_validations();
-        let validations = if let Some(validations) = validations {
-            static_validations
-                .iter()
-                .chain(validations.iter())
-                .collect::<Vec<_>>()
-        } else {
-            static_validations.iter().collect::<Vec<_>>()
-        };
+        Self::check_conditions(account_info, validations)?;
+        Self::check_conditions(account_info, Self::get_validations().as_ref())?;
 
-        Self::check_conditions(account_info, &validations)?;
         Ok(Self::new(account_info))
     }
 
     fn new_checked(
-        info: &'a AccountInfo<'info>,
+        account_info: &'a AccountInfo<'info>,
         validations: Option<&Vec<AccountValidation>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let static_validations = Self::get_validations();
-
-        let validations = if let Some(validations) = validations {
-            static_validations
-                .iter()
-                .chain(validations.iter())
-                .collect::<Vec<_>>()
-        } else {
-            static_validations.iter().collect::<Vec<_>>()
-        };
-
-        Self::check_conditions(info, &validations)?;
-        Ok(Self::new(info))
+        Self::check_conditions(account_info, validations)?;
+        Self::check_conditions(account_info, Self::get_validations().as_ref())?;
+        Ok(Self::new(account_info))
     }
 
     fn check_conditions(
         account: &AccountInfo<'info>,
-        validations: &Vec<&AccountValidation>,
+        validations: Option<&Vec<AccountValidation>>,
     ) -> Result<()> {
-        for validation in validations {
-            match validation {
-                AccountValidation::IsWritable => {
-                    if account.is_writable {
-                    } else {
-                        msg!("account is writable condition failed: {:?}", account.key);
-                        return Err(LighthouseError::AccountValidationFailed.into());
+        if let Some(validations) = validations {
+            for validation in validations {
+                match validation {
+                    AccountValidation::IsWritable => {
+                        if account.is_writable {
+                        } else {
+                            msg!("account is writable condition failed: {:?}", account.key);
+                            return Err(LighthouseError::AccountValidationFailed.into());
+                        }
                     }
-                }
-                AccountValidation::IsSigner => {
-                    if account.is_signer {
-                    } else {
-                        msg!("account is signer condition failed: {:?}", account.key);
-                        return Err(LighthouseError::AccountValidationFailed.into());
+                    AccountValidation::IsSigner => {
+                        if account.is_signer {
+                        } else {
+                            msg!("account is signer condition failed: {:?}", account.key);
+                            return Err(LighthouseError::AccountValidationFailed.into());
+                        }
                     }
-                }
-                AccountValidation::IsProgramOwned(owner) => {
-                    if account.lamports() != 0 && keys_equal(account.owner, owner) {
-                    } else {
-                        msg!("account inited condition failed: {:?}", account.key);
-                        return Err(LighthouseError::AccountValidationFailed.into());
+                    AccountValidation::IsProgramOwned(owner) => {
+                        if account.lamports() != 0 && keys_equal(account.owner, owner) {
+                        } else {
+                            msg!("account inited condition failed: {:?}", account.key);
+                            return Err(LighthouseError::AccountValidationFailed.into());
+                        }
                     }
-                }
-                AccountValidation::IsNotOwned => {
-                    if account.lamports() == 0 && keys_equal(account.owner, &system_program::ID) {
-                    } else {
-                        msg!("account not inited condition failed: {:?}", account.key);
-                        return Err(LighthouseError::AccountValidationFailed.into());
+                    AccountValidation::IsNotOwned => {
+                        if account.lamports() == 0 && keys_equal(account.owner, &system_program::ID)
+                        {
+                        } else {
+                            msg!("account not inited condition failed: {:?}", account.key);
+                            return Err(LighthouseError::AccountValidationFailed.into());
+                        }
                     }
-                }
-                &&AccountValidation::IsProgramDerivedAddress {
-                    seeds,
-                    program_id,
-                    find_bump,
-                } => {
-                    if find_bump {
-                        let seeds = seeds.iter().map(|seed| seed.as_slice()).collect::<Vec<_>>();
+                    AccountValidation::IsProgramDerivedAddress {
+                        seeds,
+                        program_id,
+                        find_bump,
+                    } => {
+                        if *find_bump {
+                            let seeds =
+                                seeds.iter().map(|seed| seed.as_slice()).collect::<Vec<_>>();
 
-                        let (generated_pda, _) =
-                            Pubkey::find_program_address(seeds.as_slice(), program_id);
+                            let (generated_pda, _) =
+                                Pubkey::find_program_address(seeds.as_slice(), program_id);
 
-                        if !keys_equal(account.key, &generated_pda) {
-                            msg!(
+                            if !keys_equal(account.key, &generated_pda) {
+                                msg!(
                                 "program derived address condition failed: expected {:?} actual {:?}",
                                 account.key,
                                 generated_pda
                             );
 
-                            return Err(LighthouseError::AccountValidationFailed.into());
-                        }
-                    } else {
-                        let derived_address = Pubkey::create_program_address(
-                            seeds
-                                .iter()
-                                .map(|seed| seed.as_slice())
-                                .collect::<Vec<&[u8]>>()
-                                .as_slice(),
-                            program_id,
-                        )
-                        .map_err(|err| {
-                            msg!("failed to create program address: {:?} {:?}", seeds, err);
-                            LighthouseError::AccountValidationFailed
-                        })?;
+                                return Err(LighthouseError::AccountValidationFailed.into());
+                            }
+                        } else {
+                            let derived_address = Pubkey::create_program_address(
+                                seeds
+                                    .iter()
+                                    .map(|seed| seed.as_slice())
+                                    .collect::<Vec<&[u8]>>()
+                                    .as_slice(),
+                                program_id,
+                            )
+                            .map_err(|err| {
+                                msg!("failed to create program address: {:?} {:?}", seeds, err);
+                                LighthouseError::AccountValidationFailed
+                            })?;
 
-                        if !keys_equal(account.key, &derived_address) {
-                            msg!(
+                            if !keys_equal(account.key, &derived_address) {
+                                msg!(
                                 "program derived address condition failed: expected {:?} actual {:?}",
                                 account.key,
                                 derived_address
                             );
+                                return Err(LighthouseError::AccountValidationFailed.into());
+                            }
+                        }
+                    }
+                    AccountValidation::KeyEquals(key) => {
+                        if keys_equal(account.key, key) {
+                        } else {
+                            msg!(
+                                "account key condition failed: expected {:?} actual {:?}",
+                                account.key,
+                                key
+                            );
                             return Err(LighthouseError::AccountValidationFailed.into());
                         }
                     }
-                }
-                AccountValidation::KeyEquals(key) => {
-                    if keys_equal(account.key, key) {
-                    } else {
-                        msg!(
-                            "account key condition failed: expected {:?} actual {:?}",
-                            account.key,
-                            key
-                        );
-                        return Err(LighthouseError::AccountValidationFailed.into());
+                    AccountValidation::CustomValidation(condition) => {
+                        condition(account)?;
                     }
-                }
-                AccountValidation::CustomValidation(condition) => {
-                    condition(account)?;
                 }
             }
         }
@@ -361,12 +348,12 @@ mod tests {
             Self { account }
         }
 
-        fn info(&self) -> &'a AccountInfo<'info> {
-            self.account
+        fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
+            None
         }
 
-        fn get_validations() -> Vec<AccountValidation<'a>> {
-            vec![]
+        fn info(&self) -> &'a AccountInfo<'info> {
+            self.account
         }
     }
 

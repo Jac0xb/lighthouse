@@ -6,7 +6,7 @@
       "name": "MemoryWrite",
       "accounts": [
         {
-          "name": "lighthouseProgram",
+          "name": "programId",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -75,7 +75,7 @@
       "name": "MemoryClose",
       "accounts": [
         {
-          "name": "lighthouseProgram",
+          "name": "programId",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -352,14 +352,6 @@
           "isSigner": false,
           "docs": [
             "Target account to be asserted"
-          ]
-        },
-        {
-          "name": "lighthouseProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Lighthouse Program"
           ]
         }
       ],
@@ -1902,7 +1894,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]

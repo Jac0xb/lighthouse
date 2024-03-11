@@ -2,11 +2,11 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     types::assert::operator::{EquatableOperator, EvaluationResult, IntegerOperator, Operator},
-    utils::{out_of_bounds_err, Result},
+    utils::{keys_equal, out_of_bounds_err, Result},
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, program_option::COption, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
 pub enum MintAccountAssertion {
@@ -42,7 +42,9 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        if ![spl_token::ID, spl_token_2022::ID].contains(account.owner) {
+        if !keys_equal(account.owner, &spl_token::ID)
+            && !keys_equal(account.owner, &spl_token_2022::ID)
+        {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 
@@ -63,23 +65,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
 
                 let mint_authority = unpack_coption_key(data_slice)?;
 
-                match (mint_authority, assertion_value) {
-                    (COption::None, None) => Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("None == None".to_string()),
-                    }),
-                    (COption::Some(mint_authority), None) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("{:?} != None", mint_authority)),
-                    }),
-                    (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("None != {:?}", pubkey)),
-                    }),
-                    (COption::Some(mint_authority), Some(pubkey)) => {
-                        operator.evaluate(&mint_authority, pubkey, log_level)
-                    }
-                }
+                operator.evaluate(&mint_authority, assertion_value, log_level)
             }
             MintAccountAssertion::Supply {
                 value: assertion_value,
@@ -131,23 +117,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
 
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
-                match (freeze_authority, assertion_value) {
-                    (COption::None, None) => Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("None == None".to_string()),
-                    }),
-                    (COption::Some(freeze_authority), None) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("{:?} != None", freeze_authority)),
-                    }),
-                    (COption::None, Some(pubkey)) => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("None != {:?}", pubkey)),
-                    }),
-                    (COption::Some(freeze_authority), Some(pubkey)) => {
-                        operator.evaluate(&freeze_authority, pubkey, log_level)
-                    }
-                }
+                operator.evaluate(&freeze_authority, assertion_value, log_level)
             }
         };
 

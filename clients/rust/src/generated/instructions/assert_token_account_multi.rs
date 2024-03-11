@@ -14,8 +14,6 @@ use borsh::BorshSerialize;
 pub struct AssertTokenAccountMulti {
     /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
-    /// Lighthouse Program
-    pub lighthouse_program: solana_program::pubkey::Pubkey,
 }
 
 impl AssertTokenAccountMulti {
@@ -31,13 +29,9 @@ impl AssertTokenAccountMulti {
         args: AssertTokenAccountMultiInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.target_account,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.lighthouse_program,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
@@ -78,11 +72,9 @@ pub struct AssertTokenAccountMultiInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-///   1. `[]` lighthouse_program
 #[derive(Default)]
 pub struct AssertTokenAccountMultiBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
-    lighthouse_program: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
     assertions: Option<Vec<TokenAccountAssertion>>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
@@ -96,15 +88,6 @@ impl AssertTokenAccountMultiBuilder {
     #[inline(always)]
     pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.target_account = Some(target_account);
-        self
-    }
-    /// Lighthouse Program
-    #[inline(always)]
-    pub fn lighthouse_program(
-        &mut self,
-        lighthouse_program: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.lighthouse_program = Some(lighthouse_program);
         self
     }
     #[inline(always)]
@@ -139,9 +122,6 @@ impl AssertTokenAccountMultiBuilder {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = AssertTokenAccountMulti {
             target_account: self.target_account.expect("target_account is not set"),
-            lighthouse_program: self
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
         };
         let args = AssertTokenAccountMultiInstructionArgs {
             log_level: self.log_level.clone().expect("log_level is not set"),
@@ -156,8 +136,6 @@ impl AssertTokenAccountMultiBuilder {
 pub struct AssertTokenAccountMultiCpiAccounts<'a, 'b> {
     /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Lighthouse Program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
 /// `assert_token_account_multi` CPI instruction.
@@ -166,8 +144,6 @@ pub struct AssertTokenAccountMultiCpi<'a, 'b> {
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Target account to be asserted
     pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Lighthouse Program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertTokenAccountMultiInstructionArgs,
 }
@@ -181,7 +157,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
         Self {
             __program: program,
             target_account: accounts.target_account,
-            lighthouse_program: accounts.lighthouse_program,
             __args: args,
         }
     }
@@ -218,13 +193,9 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.target_account.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.lighthouse_program.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
@@ -245,10 +216,9 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(1 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.target_account.clone());
-        account_infos.push(self.lighthouse_program.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -266,7 +236,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-///   1. `[]` lighthouse_program
 pub struct AssertTokenAccountMultiCpiBuilder<'a, 'b> {
     instruction: Box<AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b>>,
 }
@@ -276,7 +245,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         let instruction = Box::new(AssertTokenAccountMultiCpiBuilderInstruction {
             __program: program,
             target_account: None,
-            lighthouse_program: None,
             log_level: None,
             assertions: None,
             __remaining_accounts: Vec::new(),
@@ -290,15 +258,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         target_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.target_account = Some(target_account);
-        self
-    }
-    /// Lighthouse Program
-    #[inline(always)]
-    pub fn lighthouse_program(
-        &mut self,
-        lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.lighthouse_program = Some(lighthouse_program);
         self
     }
     #[inline(always)]
@@ -371,11 +330,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
                 .instruction
                 .target_account
                 .expect("target_account is not set"),
-
-            lighthouse_program: self
-                .instruction
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -388,7 +342,6 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
 struct AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    lighthouse_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
     assertions: Option<Vec<TokenAccountAssertion>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.

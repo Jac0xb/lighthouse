@@ -12,7 +12,7 @@ use borsh::BorshSerialize;
 /// Accounts.
 pub struct MemoryWrite {
     /// Lighthouse program
-    pub lighthouse_program: solana_program::pubkey::Pubkey,
+    pub program_id: solana_program::pubkey::Pubkey,
     /// System program
     pub system_program: solana_program::pubkey::Pubkey,
     /// Payer account
@@ -38,7 +38,7 @@ impl MemoryWrite {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.lighthouse_program,
+            self.program_id,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -93,14 +93,14 @@ pub struct MemoryWriteInstructionArgs {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` lighthouse_program
+///   0. `[]` program_id
 ///   1. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   2. `[signer]` payer
 ///   3. `[writable]` memory_account
 ///   4. `[]` source_account
 #[derive(Default)]
 pub struct MemoryWriteBuilder {
-    lighthouse_program: Option<solana_program::pubkey::Pubkey>,
+    program_id: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     memory_account: Option<solana_program::pubkey::Pubkey>,
@@ -118,11 +118,8 @@ impl MemoryWriteBuilder {
     }
     /// Lighthouse program
     #[inline(always)]
-    pub fn lighthouse_program(
-        &mut self,
-        lighthouse_program: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.lighthouse_program = Some(lighthouse_program);
+    pub fn program_id(&mut self, program_id: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.program_id = Some(program_id);
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -191,9 +188,7 @@ impl MemoryWriteBuilder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = MemoryWrite {
-            lighthouse_program: self
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
+            program_id: self.program_id.expect("program_id is not set"),
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
@@ -221,7 +216,7 @@ impl MemoryWriteBuilder {
 /// `memory_write` CPI accounts.
 pub struct MemoryWriteCpiAccounts<'a, 'b> {
     /// Lighthouse program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer account
@@ -237,7 +232,7 @@ pub struct MemoryWriteCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Lighthouse program
-    pub lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer account
@@ -258,7 +253,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
-            lighthouse_program: accounts.lighthouse_program,
+            program_id: accounts.program_id,
             system_program: accounts.system_program,
             payer: accounts.payer,
             memory_account: accounts.memory_account,
@@ -301,7 +296,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.lighthouse_program.key,
+            *self.program_id.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -338,7 +333,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(5 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.lighthouse_program.clone());
+        account_infos.push(self.program_id.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.memory_account.clone());
@@ -359,7 +354,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` lighthouse_program
+///   0. `[]` program_id
 ///   1. `[]` system_program
 ///   2. `[signer]` payer
 ///   3. `[writable]` memory_account
@@ -372,7 +367,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(MemoryWriteCpiBuilderInstruction {
             __program: program,
-            lighthouse_program: None,
+            program_id: None,
             system_program: None,
             payer: None,
             memory_account: None,
@@ -387,11 +382,11 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
     }
     /// Lighthouse program
     #[inline(always)]
-    pub fn lighthouse_program(
+    pub fn program_id(
         &mut self,
-        lighthouse_program: &'b solana_program::account_info::AccountInfo<'a>,
+        program_id: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.lighthouse_program = Some(lighthouse_program);
+        self.instruction.program_id = Some(program_id);
         self
     }
     /// System program
@@ -513,10 +508,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         let instruction = MemoryWriteCpi {
             __program: self.instruction.__program,
 
-            lighthouse_program: self
-                .instruction
-                .lighthouse_program
-                .expect("lighthouse_program is not set"),
+            program_id: self.instruction.program_id.expect("program_id is not set"),
 
             system_program: self
                 .instruction
@@ -545,7 +537,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
 
 struct MemoryWriteCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    lighthouse_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     memory_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
