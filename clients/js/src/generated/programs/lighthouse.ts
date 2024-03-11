@@ -7,13 +7,31 @@
  */
 
 import { Address } from '@solana/addresses';
-import { getU8Encoder } from '@solana/codecs-numbers';
+import { getU8Encoder } from '@solana/codecs';
 import { Program, ProgramWithErrors } from '@solana/programs';
 import {
   LighthouseProgramError,
   LighthouseProgramErrorCode,
   getLighthouseProgramErrorFromCode,
 } from '../errors';
+import {
+  ParsedAssertAccountDataInstruction,
+  ParsedAssertAccountDeltaInstruction,
+  ParsedAssertAccountInfoInstruction,
+  ParsedAssertAccountInfoMultiInstruction,
+  ParsedAssertMerkleTreeAccountInstruction,
+  ParsedAssertMintAccountInstruction,
+  ParsedAssertMintAccountMultiInstruction,
+  ParsedAssertStakeAccountInstruction,
+  ParsedAssertStakeAccountMultiInstruction,
+  ParsedAssertSysvarClockInstruction,
+  ParsedAssertTokenAccountInstruction,
+  ParsedAssertTokenAccountMultiInstruction,
+  ParsedAssertUpgradeableLoaderAccountInstruction,
+  ParsedAssertUpgradeableLoaderAccountMultiInstruction,
+  ParsedMemoryCloseInstruction,
+  ParsedMemoryWriteInstruction,
+} from '../instructions';
 import { memcmp } from '../shared';
 
 export const LIGHTHOUSE_PROGRAM_ADDRESS =
@@ -109,3 +127,55 @@ export function identifyLighthouseInstruction(
     'The provided instruction could not be identified as a lighthouse instruction.'
   );
 }
+
+export type ParsedLighthouseInstruction<
+  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+> =
+  | ({
+      instructionType: LighthouseInstruction.MemoryWrite;
+    } & ParsedMemoryWriteInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.MemoryClose;
+    } & ParsedMemoryCloseInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertAccountData;
+    } & ParsedAssertAccountDataInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertAccountDelta;
+    } & ParsedAssertAccountDeltaInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertAccountInfo;
+    } & ParsedAssertAccountInfoInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertAccountInfoMulti;
+    } & ParsedAssertAccountInfoMultiInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertMintAccount;
+    } & ParsedAssertMintAccountInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertMintAccountMulti;
+    } & ParsedAssertMintAccountMultiInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertTokenAccount;
+    } & ParsedAssertTokenAccountInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertTokenAccountMulti;
+    } & ParsedAssertTokenAccountMultiInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertStakeAccount;
+    } & ParsedAssertStakeAccountInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertStakeAccountMulti;
+    } & ParsedAssertStakeAccountMultiInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccount;
+    } & ParsedAssertUpgradeableLoaderAccountInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
+    } & ParsedAssertUpgradeableLoaderAccountMultiInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertSysvarClock;
+    } & ParsedAssertSysvarClockInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertMerkleTreeAccount;
+    } & ParsedAssertMerkleTreeAccountInstruction<TProgram>);

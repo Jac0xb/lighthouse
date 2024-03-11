@@ -12,13 +12,12 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  mapEncoder,
-} from '@solana/codecs-core';
-import {
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
-import { getU8Decoder, getU8Encoder } from '@solana/codecs-numbers';
+  getU8Decoder,
+  getU8Encoder,
+  mapEncoder,
+} from '@solana/codecs';
 import {
   AccountRole,
   IAccountMeta,
@@ -38,7 +37,9 @@ import {
 
 export type MemoryCloseInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
+  TAccountProgramId extends
+    | string
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -46,9 +47,9 @@ export type MemoryCloseInstruction<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
+      TAccountProgramId extends string
+        ? ReadonlyAccount<TAccountProgramId>
+        : TAccountProgramId,
       TAccountPayer extends string
         ? ReadonlySignerAccount<TAccountPayer>
         : TAccountPayer,
@@ -61,7 +62,9 @@ export type MemoryCloseInstruction<
 
 export type MemoryCloseInstructionWithSigners<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
+  TAccountProgramId extends
+    | string
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
@@ -69,9 +72,9 @@ export type MemoryCloseInstructionWithSigners<
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountLighthouseProgram extends string
-        ? ReadonlyAccount<TAccountLighthouseProgram>
-        : TAccountLighthouseProgram,
+      TAccountProgramId extends string
+        ? ReadonlyAccount<TAccountProgramId>
+        : TAccountProgramId,
       TAccountPayer extends string
         ? ReadonlySignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
@@ -124,12 +127,12 @@ export function getMemoryCloseInstructionDataCodec(): Codec<
 }
 
 export type MemoryCloseInput<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string
 > = {
   /** Lighthouse program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
+  programId?: Address<TAccountProgramId>;
   /** Payer account */
   payer: Address<TAccountPayer>;
   /** Memory account */
@@ -139,12 +142,12 @@ export type MemoryCloseInput<
 };
 
 export type MemoryCloseInputWithSigners<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string
 > = {
   /** Lighthouse program */
-  lighthouseProgram: Address<TAccountLighthouseProgram>;
+  programId?: Address<TAccountProgramId>;
   /** Payer account */
   payer: TransactionSigner<TAccountPayer>;
   /** Memory account */
@@ -154,47 +157,47 @@ export type MemoryCloseInputWithSigners<
 };
 
 export function getMemoryCloseInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryCloseInputWithSigners<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountPayer,
     TAccountMemoryAccount
   >
 ): MemoryCloseInstructionWithSigners<
   TProgram,
-  TAccountLighthouseProgram,
+  TAccountProgramId,
   TAccountPayer,
   TAccountMemoryAccount
 >;
 export function getMemoryCloseInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryCloseInput<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountPayer,
     TAccountMemoryAccount
   >
 ): MemoryCloseInstruction<
   TProgram,
-  TAccountLighthouseProgram,
+  TAccountProgramId,
   TAccountPayer,
   TAccountMemoryAccount
 >;
 export function getMemoryCloseInstruction<
-  TAccountLighthouseProgram extends string,
+  TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemoryAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: MemoryCloseInput<
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountPayer,
     TAccountMemoryAccount
   >
@@ -207,22 +210,25 @@ export function getMemoryCloseInstruction<
   type AccountMetas = Parameters<
     typeof getMemoryCloseInstructionRaw<
       TProgram,
-      TAccountLighthouseProgram,
+      TAccountProgramId,
       TAccountPayer,
       TAccountMemoryAccount
     >
   >[0];
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    lighthouseProgram: {
-      value: input.lighthouseProgram ?? null,
-      isWritable: false,
-    },
+    programId: { value: input.programId ?? null, isWritable: false },
     payer: { value: input.payer ?? null, isWritable: false },
     memoryAccount: { value: input.memoryAccount ?? null, isWritable: true },
   };
 
   // Original args.
   const args = { ...input };
+
+  // Resolve default values.
+  if (!accounts.programId.value) {
+    accounts.programId.value = programAddress;
+    accounts.programId.isWritable = false;
+  }
 
   // Get account metas and signers.
   const accountMetas = getAccountMetasWithSigners(
@@ -242,15 +248,17 @@ export function getMemoryCloseInstruction<
 
 export function getMemoryCloseInstructionRaw<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountLighthouseProgram extends string | IAccountMeta<string> = string,
+  TAccountProgramId extends
+    | string
+    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemoryAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 >(
   accounts: {
-    lighthouseProgram: TAccountLighthouseProgram extends string
-      ? Address<TAccountLighthouseProgram>
-      : TAccountLighthouseProgram;
+    programId?: TAccountProgramId extends string
+      ? Address<TAccountProgramId>
+      : TAccountProgramId;
     payer: TAccountPayer extends string
       ? Address<TAccountPayer>
       : TAccountPayer;
@@ -264,7 +272,14 @@ export function getMemoryCloseInstructionRaw<
 ) {
   return {
     accounts: [
-      accountMetaWithDefault(accounts.lighthouseProgram, AccountRole.READONLY),
+      accountMetaWithDefault(
+        accounts.programId ?? {
+          address:
+            'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
+          role: AccountRole.READONLY,
+        },
+        AccountRole.READONLY
+      ),
       accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
       accountMetaWithDefault(accounts.memoryAccount, AccountRole.WRITABLE),
       ...(remainingAccounts ?? []),
@@ -273,7 +288,7 @@ export function getMemoryCloseInstructionRaw<
     programAddress,
   } as MemoryCloseInstruction<
     TProgram,
-    TAccountLighthouseProgram,
+    TAccountProgramId,
     TAccountPayer,
     TAccountMemoryAccount,
     TRemainingAccounts
@@ -287,7 +302,7 @@ export type ParsedMemoryCloseInstruction<
   programAddress: Address<TProgram>;
   accounts: {
     /** Lighthouse program */
-    lighthouseProgram: TAccountMetas[0];
+    programId: TAccountMetas[0];
     /** Payer account */
     payer: TAccountMetas[1];
     /** Memory account */
@@ -317,7 +332,7 @@ export function parseMemoryCloseInstruction<
   return {
     programAddress: instruction.programAddress,
     accounts: {
-      lighthouseProgram: getNextAccount(),
+      programId: getNextAccount(),
       payer: getNextAccount(),
       memoryAccount: getNextAccount(),
     },

@@ -78,14 +78,12 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             )?
         };
 
-        let source_account = next_account_info(account_iter)?;
-
         Ok(Self {
             system_program,
             lighthouse_program,
             payer,
             memory_account,
-            source_account,
+            source_account: next_account_info(account_iter)?,
         })
     }
 }

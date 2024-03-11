@@ -11,21 +11,22 @@ import {
   getAddressDecoder,
   getAddressEncoder,
 } from '@solana/addresses';
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs-data-structures';
-import {
   Option,
   OptionOrNullable,
+  combineCodec,
+  getDataEnumDecoder,
+  getDataEnumEncoder,
   getOptionDecoder,
   getOptionEncoder,
-} from '@solana/options';
+  getStructDecoder,
+  getStructEncoder,
+} from '@solana/codecs';
 import {
   EquatableOperator,
   EquatableOperatorArgs,

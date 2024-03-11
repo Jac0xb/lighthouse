@@ -238,9 +238,8 @@ fn build_safe_send_token_transaction(
                 .payer(wallet_keypair.pubkey())
                 .source_account(token_account)
                 .memory_account(memory_account)
-                .lighthouse_program(lighthouse_client::ID)
-                .memory_offset(0)
                 .memory_index(0)
+                .memory_offset(0)
                 .memory_account_bump(memory_account_bump)
                 .write_type(WriteType::AccountData {
                     offset: 0,
@@ -285,7 +284,6 @@ fn build_safe_send_token_transaction(
             MemoryCloseBuilder::new()
                 .payer(wallet_keypair.pubkey())
                 .memory_account(memory_account)
-                .lighthouse_program(lighthouse_client::ID)
                 .memory_account_bump(memory_account_bump)
                 .memory_index(0)
                 .instruction(),

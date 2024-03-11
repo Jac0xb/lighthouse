@@ -11,7 +11,6 @@ pub mod types {
 }
 
 pub mod instructions {
-
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
         AssertMerkleTreeAccountBuilder, AssertMintAccountMultiBuilder, AssertStakeAccountBuilder,

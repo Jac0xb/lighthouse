@@ -6,7 +6,7 @@
       "name": "MemoryWrite",
       "accounts": [
         {
-          "name": "lighthouseProgram",
+          "name": "programId",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -75,7 +75,7 @@
       "name": "MemoryClose",
       "accounts": [
         {
-          "name": "lighthouseProgram",
+          "name": "programId",
           "isMut": false,
           "isSigner": false,
           "docs": [

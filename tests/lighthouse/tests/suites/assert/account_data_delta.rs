@@ -28,7 +28,6 @@ async fn slippage_check() {
         &[
             MemoryWriteBuilder::new()
                 .memory_account(memory_account)
-                .lighthouse_program(lighthouse_client::ID)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))

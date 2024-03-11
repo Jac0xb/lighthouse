@@ -6,18 +6,22 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Codec, Decoder, Encoder, combineCodec } from '@solana/codecs-core';
 import {
+  Codec,
+  Decoder,
+  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
+  combineCodec,
   getBytesDecoder,
   getBytesEncoder,
   getDataEnumDecoder,
   getDataEnumEncoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs-data-structures';
-import { getU32Decoder, getU32Encoder } from '@solana/codecs-numbers';
+  getU32Decoder,
+  getU32Encoder,
+} from '@solana/codecs';
 
 export type MerkleTreeAssertion = {
   __kind: 'VerifyLeaf';
