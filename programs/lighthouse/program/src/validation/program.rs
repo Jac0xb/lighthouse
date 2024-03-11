@@ -11,8 +11,8 @@ impl<'a, 'info, T: Id> CheckedAccount<'a, 'info> for Program<'a, 'info, T>
 where
     'info: 'a,
 {
-    fn get_validations() -> Vec<AccountValidation<'a>> {
-        vec![AccountValidation::KeyEquals(T::id())]
+    fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
+        Some(vec![AccountValidation::KeyEquals(T::id())])
     }
 
     fn info(&self) -> &'a AccountInfo<'info> {

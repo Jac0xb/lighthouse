@@ -12,7 +12,6 @@ use solana_program::declare_id;
 pub use utils::Result;
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
-
 pub mod lighthouse {
     use crate::processor;
     use crate::processor::*;
@@ -35,7 +34,7 @@ pub mod lighthouse {
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
         if instruction.get_log_level() == LogLevel::PlaintextMessage {
-            msg!("Lighthouse instruction: {:?}", instruction.get_name());
+            msg!("Instruction: {:?}", instruction.get_name());
         }
 
         match instruction {

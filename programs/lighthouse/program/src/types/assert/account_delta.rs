@@ -78,6 +78,10 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                 let (a_account, b_account) = accounts;
 
+                if a_account.data_is_empty() || b_account.data_is_empty() {
+                    return Err(LighthouseError::AccountNotInitialized.into());
+                }
+
                 let a_account_data = a_account.try_borrow_data().map_err(|e| {
                     err_msg!("Cannot borrow data for left target account", e);
                     err!(LighthouseError::AccountBorrowFailed)

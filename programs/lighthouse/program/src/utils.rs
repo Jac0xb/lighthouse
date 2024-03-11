@@ -9,7 +9,6 @@ use solana_program::{
     program::{invoke, invoke_signed},
     program_error::ProgramError,
     program_memory::sol_memcmp,
-    program_option::COption,
     pubkey::Pubkey,
     pubkey::PUBKEY_BYTES,
     rent::Rent,
@@ -18,13 +17,13 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
-pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
+pub fn unpack_coption_key(src: &[u8]) -> Result<Option<Pubkey>> {
     let tag = &src[0..4];
     let body = &src[4..36];
 
     match *tag {
-        [0, 0, 0, 0] => Ok(COption::None),
-        [1, 0, 0, 0] => Ok(COption::Some(Pubkey::new_from_array(
+        [0, 0, 0, 0] => Ok(Option::None),
+        [1, 0, 0, 0] => Ok(Option::Some(Pubkey::new_from_array(
             body.try_into().unwrap(),
         ))),
         _ => {
@@ -34,13 +33,13 @@ pub fn unpack_coption_key(src: &[u8]) -> Result<COption<Pubkey>> {
     }
 }
 
-pub fn unpack_coption_u64(src: &[u8]) -> Result<COption<u64>> {
+pub fn unpack_coption_u64(src: &[u8]) -> Result<Option<u64>> {
     let tag = &src[0..4];
     let body = &src[4..12];
 
     match *tag {
-        [0, 0, 0, 0] => Ok(COption::None),
-        [1, 0, 0, 0] => Ok(COption::Some(u64::from_le_bytes(body.try_into().unwrap()))),
+        [0, 0, 0, 0] => Ok(Option::None),
+        [1, 0, 0, 0] => Ok(Option::Some(u64::from_le_bytes(body.try_into().unwrap()))),
         _ => {
             msg!("Failed to deserialize COption<u64> src: {:?}", src);
             Err(LighthouseError::FailedToDeserialize.into())
@@ -154,4 +153,8 @@ pub fn is_closed(info: &AccountInfo) -> bool {
 
 pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
     sol_memcmp(key_a.as_ref(), key_b.as_ref(), PUBKEY_BYTES) == 0
+}
+
+pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
+    keys.iter().any(|k| keys_equal(k, key))
 }
