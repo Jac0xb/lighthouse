@@ -1,6 +1,7 @@
 use crate::utils::context::TestContext;
+use crate::utils::create_user_with_balance;
 use crate::utils::process_transaction_assert_success;
-use crate::utils::{create_user_with_balance, find_memory_account};
+use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
     AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, IntegerOperator, LogLevel,
@@ -22,23 +23,23 @@ async fn slippage_check() {
         .await
         .unwrap();
 
-    let (memory_account, bump) = find_memory_account(user.encodable_pubkey(), 0);
+    let (memory, bump) = find_memory_pda(user.encodable_pubkey(), 0);
 
     let tx = Transaction::new_signed_with_payer(
         &[
             MemoryWriteBuilder::new()
-                .memory_account(memory_account)
+                .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
                 .program_id(lighthouse_client::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
-                .memory_index(0)
-                .memory_offset(0)
-                .memory_account_bump(bump)
+                .memory_id(0)
+                .write_offset(0)
+                .memory_bump(bump)
                 .instruction(),
             AssertAccountDeltaBuilder::new()
                 .log_level(LogLevel::Silent)
-                .account_a(memory_account)
+                .account_a(memory)
                 .account_b(user.encodable_pubkey())
                 .assertion(AccountDeltaAssertion::AccountInfo {
                     a_offset: 0,
@@ -61,14 +62,14 @@ async fn slippage_check() {
     let tx = Transaction::new_signed_with_payer(
         &[
             MemoryWriteBuilder::new()
-                .memory_account(memory_account)
+                .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
                 .program_id(lighthouse_client::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
-                .memory_index(0)
-                .memory_offset(0)
-                .memory_account_bump(bump)
+                .memory_id(0)
+                .write_offset(0)
+                .memory_bump(bump)
                 .instruction(),
             system_instruction::transfer(
                 &user.encodable_pubkey(),
@@ -77,7 +78,7 @@ async fn slippage_check() {
             ),
             AssertAccountDeltaBuilder::new()
                 .log_level(LogLevel::PlaintextMessage)
-                .account_a(memory_account)
+                .account_a(memory)
                 .account_b(user.encodable_pubkey())
                 .assertion(AccountDeltaAssertion::AccountInfo {
                     a_offset: 0,

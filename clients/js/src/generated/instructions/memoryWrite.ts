@@ -52,7 +52,7 @@ export type MemoryWriteInstruction<
     | string
     | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemoryAccount extends string | IAccountMeta<string> = string,
+  TAccountMemory extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 > = IInstruction<TProgram> &
@@ -68,9 +68,9 @@ export type MemoryWriteInstruction<
       TAccountPayer extends string
         ? ReadonlySignerAccount<TAccountPayer>
         : TAccountPayer,
-      TAccountMemoryAccount extends string
-        ? WritableAccount<TAccountMemoryAccount>
-        : TAccountMemoryAccount,
+      TAccountMemory extends string
+        ? WritableAccount<TAccountMemory>
+        : TAccountMemory,
       TAccountSourceAccount extends string
         ? ReadonlyAccount<TAccountSourceAccount>
         : TAccountSourceAccount,
@@ -87,7 +87,7 @@ export type MemoryWriteInstructionWithSigners<
     | string
     | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemoryAccount extends string | IAccountMeta<string> = string,
+  TAccountMemory extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 > = IInstruction<TProgram> &
@@ -104,9 +104,9 @@ export type MemoryWriteInstructionWithSigners<
         ? ReadonlySignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
         : TAccountPayer,
-      TAccountMemoryAccount extends string
-        ? WritableAccount<TAccountMemoryAccount>
-        : TAccountMemoryAccount,
+      TAccountMemory extends string
+        ? WritableAccount<TAccountMemory>
+        : TAccountMemory,
       TAccountSourceAccount extends string
         ? ReadonlyAccount<TAccountSourceAccount>
         : TAccountSourceAccount,
@@ -116,16 +116,16 @@ export type MemoryWriteInstructionWithSigners<
 
 export type MemoryWriteInstructionData = {
   discriminator: number;
-  memoryIndex: number;
-  memoryAccountBump: number;
-  memoryOffset: number;
+  memoryId: number;
+  memoryBump: number;
+  writeOffset: number;
   writeType: WriteType;
 };
 
 export type MemoryWriteInstructionDataArgs = {
-  memoryIndex: number;
-  memoryAccountBump: number;
-  memoryOffset: number;
+  memoryId: number;
+  memoryBump: number;
+  writeOffset: number;
   writeType: WriteTypeArgs;
 };
 
@@ -133,9 +133,9 @@ export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstr
   return mapEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
-      ['memoryIndex', getU8Encoder()],
-      ['memoryAccountBump', getU8Encoder()],
-      ['memoryOffset', getU16Encoder()],
+      ['memoryId', getU8Encoder()],
+      ['memoryBump', getU8Encoder()],
+      ['writeOffset', getU16Encoder()],
       ['writeType', getWriteTypeEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 0 })
@@ -145,9 +145,9 @@ export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstr
 export function getMemoryWriteInstructionDataDecoder(): Decoder<MemoryWriteInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
-    ['memoryIndex', getU8Decoder()],
-    ['memoryAccountBump', getU8Decoder()],
-    ['memoryOffset', getU16Decoder()],
+    ['memoryId', getU8Decoder()],
+    ['memoryBump', getU8Decoder()],
+    ['writeOffset', getU16Decoder()],
     ['writeType', getWriteTypeDecoder()],
   ]);
 }
@@ -166,7 +166,7 @@ export type MemoryWriteInput<
   TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
+  TAccountMemory extends string,
   TAccountSourceAccount extends string
 > = {
   /** Lighthouse program */
@@ -176,12 +176,12 @@ export type MemoryWriteInput<
   /** Payer account */
   payer: Address<TAccountPayer>;
   /** Memory account */
-  memoryAccount: Address<TAccountMemoryAccount>;
+  memory: Address<TAccountMemory>;
   /** System program */
   sourceAccount: Address<TAccountSourceAccount>;
-  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
-  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
-  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
+  memoryId: MemoryWriteInstructionDataArgs['memoryId'];
+  memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
+  writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
   writeType: MemoryWriteInstructionDataArgs['writeType'];
 };
 
@@ -189,7 +189,7 @@ export type MemoryWriteInputWithSigners<
   TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
+  TAccountMemory extends string,
   TAccountSourceAccount extends string
 > = {
   /** Lighthouse program */
@@ -199,12 +199,12 @@ export type MemoryWriteInputWithSigners<
   /** Payer account */
   payer: TransactionSigner<TAccountPayer>;
   /** Memory account */
-  memoryAccount: Address<TAccountMemoryAccount>;
+  memory: Address<TAccountMemory>;
   /** System program */
   sourceAccount: Address<TAccountSourceAccount>;
-  memoryIndex: MemoryWriteInstructionDataArgs['memoryIndex'];
-  memoryAccountBump: MemoryWriteInstructionDataArgs['memoryAccountBump'];
-  memoryOffset: MemoryWriteInstructionDataArgs['memoryOffset'];
+  memoryId: MemoryWriteInstructionDataArgs['memoryId'];
+  memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
+  writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
   writeType: MemoryWriteInstructionDataArgs['writeType'];
 };
 
@@ -212,7 +212,7 @@ export function getMemoryWriteInstruction<
   TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
+  TAccountMemory extends string,
   TAccountSourceAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
@@ -220,7 +220,7 @@ export function getMemoryWriteInstruction<
     TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
-    TAccountMemoryAccount,
+    TAccountMemory,
     TAccountSourceAccount
   >
 ): MemoryWriteInstructionWithSigners<
@@ -228,14 +228,14 @@ export function getMemoryWriteInstruction<
   TAccountProgramId,
   TAccountSystemProgram,
   TAccountPayer,
-  TAccountMemoryAccount,
+  TAccountMemory,
   TAccountSourceAccount
 >;
 export function getMemoryWriteInstruction<
   TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
+  TAccountMemory extends string,
   TAccountSourceAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
@@ -243,7 +243,7 @@ export function getMemoryWriteInstruction<
     TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
-    TAccountMemoryAccount,
+    TAccountMemory,
     TAccountSourceAccount
   >
 ): MemoryWriteInstruction<
@@ -251,14 +251,14 @@ export function getMemoryWriteInstruction<
   TAccountProgramId,
   TAccountSystemProgram,
   TAccountPayer,
-  TAccountMemoryAccount,
+  TAccountMemory,
   TAccountSourceAccount
 >;
 export function getMemoryWriteInstruction<
   TAccountProgramId extends string,
   TAccountSystemProgram extends string,
   TAccountPayer extends string,
-  TAccountMemoryAccount extends string,
+  TAccountMemory extends string,
   TAccountSourceAccount extends string,
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
@@ -266,7 +266,7 @@ export function getMemoryWriteInstruction<
     TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
-    TAccountMemoryAccount,
+    TAccountMemory,
     TAccountSourceAccount
   >
 ): IInstruction {
@@ -281,7 +281,7 @@ export function getMemoryWriteInstruction<
       TAccountProgramId,
       TAccountSystemProgram,
       TAccountPayer,
-      TAccountMemoryAccount,
+      TAccountMemory,
       TAccountSourceAccount
     >
   >[0];
@@ -289,7 +289,7 @@ export function getMemoryWriteInstruction<
     programId: { value: input.programId ?? null, isWritable: false },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
     payer: { value: input.payer ?? null, isWritable: false },
-    memoryAccount: { value: input.memoryAccount ?? null, isWritable: true },
+    memory: { value: input.memory ?? null, isWritable: true },
     sourceAccount: { value: input.sourceAccount ?? null, isWritable: false },
   };
 
@@ -331,7 +331,7 @@ export function getMemoryWriteInstructionRaw<
     | string
     | IAccountMeta<string> = '11111111111111111111111111111111',
   TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemoryAccount extends string | IAccountMeta<string> = string,
+  TAccountMemory extends string | IAccountMeta<string> = string,
   TAccountSourceAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends Array<IAccountMeta<string>> = []
 >(
@@ -345,9 +345,9 @@ export function getMemoryWriteInstructionRaw<
     payer: TAccountPayer extends string
       ? Address<TAccountPayer>
       : TAccountPayer;
-    memoryAccount: TAccountMemoryAccount extends string
-      ? Address<TAccountMemoryAccount>
-      : TAccountMemoryAccount;
+    memory: TAccountMemory extends string
+      ? Address<TAccountMemory>
+      : TAccountMemory;
     sourceAccount: TAccountSourceAccount extends string
       ? Address<TAccountSourceAccount>
       : TAccountSourceAccount;
@@ -372,7 +372,7 @@ export function getMemoryWriteInstructionRaw<
         AccountRole.READONLY
       ),
       accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
-      accountMetaWithDefault(accounts.memoryAccount, AccountRole.WRITABLE),
+      accountMetaWithDefault(accounts.memory, AccountRole.WRITABLE),
       accountMetaWithDefault(accounts.sourceAccount, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
     ],
@@ -383,7 +383,7 @@ export function getMemoryWriteInstructionRaw<
     TAccountProgramId,
     TAccountSystemProgram,
     TAccountPayer,
-    TAccountMemoryAccount,
+    TAccountMemory,
     TAccountSourceAccount,
     TRemainingAccounts
   >;
@@ -402,7 +402,7 @@ export type ParsedMemoryWriteInstruction<
     /** Payer account */
     payer: TAccountMetas[2];
     /** Memory account */
-    memoryAccount: TAccountMetas[3];
+    memory: TAccountMetas[3];
     /** System program */
     sourceAccount: TAccountMetas[4];
   };
@@ -433,7 +433,7 @@ export function parseMemoryWriteInstruction<
       programId: getNextAccount(),
       systemProgram: getNextAccount(),
       payer: getNextAccount(),
-      memoryAccount: getNextAccount(),
+      memory: getNextAccount(),
       sourceAccount: getNextAccount(),
     },
     data: getMemoryWriteInstructionDataDecoder().decode(instruction.data),

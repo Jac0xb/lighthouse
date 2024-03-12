@@ -2,37 +2,34 @@ use super::{AccountValidation, CheckedAccount, DerivedAddress};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(Clone)]
-pub struct MemoryAccount<'a, 'info> {
+pub struct Memory<'a, 'info> {
     info: &'a AccountInfo<'info>,
 }
 
-pub struct MemoryAccountSeeds<'a> {
+pub struct MemorySeeds<'a> {
     pub payer: &'a Pubkey,
-    pub memory_index: u8,
+    pub memory_id: u8,
     pub bump: Option<u8>,
 }
 
-impl<'a, 'info> DerivedAddress<MemoryAccountSeeds<'a>> for MemoryAccount<'a, 'info> {
-    fn get_seeds(seeds: MemoryAccountSeeds<'a>) -> Vec<Vec<u8>> {
-        let MemoryAccountSeeds {
+impl<'a, 'info> DerivedAddress<MemorySeeds<'a>> for Memory<'a, 'info> {
+    fn get_seeds(seeds: MemorySeeds<'a>) -> Vec<Vec<u8>> {
+        let MemorySeeds {
             payer,
-            memory_index,
+            memory_id,
             bump,
         } = seeds;
 
         vec![
             b"memory".to_vec(),
             payer.to_bytes().to_vec(),
-            if let Some(bump) = bump {
-                vec![memory_index, bump]
-            } else {
-                vec![memory_index]
-            },
+            vec![memory_id],
+            bump.map_or_else(std::vec::Vec::new, |b| vec![b]),
         ]
     }
 }
 
-impl<'a, 'info> CheckedAccount<'a, 'info> for MemoryAccount<'a, 'info> {
+impl<'a, 'info> CheckedAccount<'a, 'info> for Memory<'a, 'info> {
     fn info(&self) -> &'a AccountInfo<'info> {
         self.info
     }

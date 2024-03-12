@@ -2,8 +2,8 @@ use crate::error::LighthouseError;
 use crate::types::write::{AccountInfoField, DataValue, WriteType};
 use crate::utils::Result;
 use crate::validation::{
-    AccountValidation, CheckedAccount, DerivedAddress, InitializeType, LighthouseProgram,
-    MemoryAccount, MemoryAccountSeeds, Program, Signer, SystemProgram,
+    AccountValidation, CheckedAccount, DerivedAddress, InitializeType, LighthouseProgram, Memory,
+    MemorySeeds, Program, Signer, SystemProgram,
 };
 use crate::{err, err_msg};
 use borsh::BorshSerialize;
@@ -20,34 +20,34 @@ pub(crate) struct MemoryWriteContext<'a, 'info> {
     pub lighthouse_program: Program<'a, 'info, LighthouseProgram>,
     pub system_program: Program<'a, 'info, SystemProgram>,
     pub payer: Signer<'a, 'info>,
-    pub memory_account: MemoryAccount<'a, 'info>,
+    pub memory: Memory<'a, 'info>,
     pub source_account: &'a AccountInfo<'info>,
 }
 
 impl<'a, 'info> MemoryWriteContext<'a, 'info> {
     pub(crate) fn load(
         account_iter: &mut Iter<'a, AccountInfo<'info>>,
-        memory_index: u8,
-        memory_offset: u16,
-        memory_account_bump: u8,
+        memory_id: u8,
+        write_offset: u16,
+        memory_bump: u8,
         write_type: &WriteType,
     ) -> Result<Self> {
         let lighthouse_program = Program::new_checked(next_account_info(account_iter)?, None)?;
         let system_program = Program::new_checked(next_account_info(account_iter).unwrap(), None)?;
         let payer = Signer::new_checked(next_account_info(account_iter)?, None)?;
 
-        let seeds = &MemoryAccount::get_seeds(MemoryAccountSeeds {
+        let seeds = &Memory::get_seeds(MemorySeeds {
             payer: payer.key,
-            memory_index,
-            bump: Some(memory_account_bump),
+            memory_id,
+            bump: Some(memory_bump),
         });
 
-        let required_space = (memory_offset as usize) + write_type.data_length();
+        let required_space = (write_offset as usize) + write_type.data_length();
 
-        let memory_account_info = next_account_info(account_iter)?;
-        let memory_account = if memory_account_info.try_data_len()? < required_space {
-            MemoryAccount::new_init_checked(
-                memory_account_info,
+        let memory_info = next_account_info(account_iter)?;
+        let memory = if memory_info.try_data_len()? < required_space {
+            Memory::new_init_checked(
+                memory_info,
                 InitializeType::InitOrReallocIfNeeded {
                     space: required_space,
                     payer: &payer,
@@ -65,8 +65,8 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
                 ]),
             )?
         } else {
-            MemoryAccount::new_checked(
-                memory_account_info,
+            Memory::new_checked(
+                memory_info,
                 Some(&vec![
                     AccountValidation::IsWritable,
                     AccountValidation::IsProgramDerivedAddress {
@@ -82,7 +82,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             system_program,
             lighthouse_program,
             payer,
-            memory_account,
+            memory,
             source_account: next_account_info(account_iter)?,
         })
     }
@@ -98,11 +98,11 @@ pub(crate) fn memory_write(
         return Err(LighthouseError::CrossProgramInvokeViolation.into());
     }
 
-    let memory_account = context.memory_account.clone();
+    let memory = context.memory.clone();
     let source_account = context.source_account;
 
-    let memory_offset = offset as usize;
-    let memory_ref = &mut memory_account.info().try_borrow_mut_data()?;
+    let write_offset = offset as usize;
+    let memory_ref = &mut memory.info().try_borrow_mut_data()?;
 
     match write_type {
         WriteType::DataValue(data_value) => {
@@ -128,7 +128,7 @@ pub(crate) fn memory_write(
             };
             let data_length = write_type.data_length();
 
-            let memory_write_range = memory_offset..(memory_offset + data_length);
+            let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref
                     .get_mut(memory_write_range.clone())
@@ -136,7 +136,7 @@ pub(crate) fn memory_write(
                         msg!(
                             "DataValue write - range out of bounds {:?} write length {:?}",
                             memory_write_range,
-                            memory_account.info().data_len()
+                            memory.info().data_len()
                         );
                         LighthouseError::RangeOutOfBounds
                     })?;
@@ -161,7 +161,7 @@ pub(crate) fn memory_write(
                 LighthouseError::RangeOutOfBounds
             })?;
 
-            let memory_write_range = memory_offset..(memory_offset + data_length);
+            let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref
                     .get_mut(memory_write_range.clone())
@@ -212,7 +212,7 @@ pub(crate) fn memory_write(
             };
             let data_length = write_type.data_length();
 
-            let memory_write_range = memory_offset..(memory_offset + data_length);
+            let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref
                     .get_mut(memory_write_range.clone())
