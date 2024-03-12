@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    types::assert::operator::{EquatableOperator, EvaluationResult, IntegerOperator, Operator},
+    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
     utils::{keys_equal, out_of_bounds_err, Result},
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
@@ -33,11 +33,7 @@ pub enum MintAccountAssertion {
 }
 
 impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
@@ -53,7 +49,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
-        let result = match self {
+        match self {
             MintAccountAssertion::MintAuthority {
                 value: assertion_value,
                 operator,
@@ -119,9 +115,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
 
                 operator.evaluate(&freeze_authority, assertion_value, log_level)
             }
-        };
-
-        Ok(result)
+        }
     }
 }
 
@@ -135,9 +129,12 @@ mod tests {
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::{
-            assert::operator::{EquatableOperator, IntegerOperator},
-            assert::{Assert, LogLevel, MintAccountAssertion},
+        use crate::{
+            test_utils::{assert_failed, assert_passed},
+            types::assert::{
+                operator::{EquatableOperator, IntegerOperator},
+                Assert, LogLevel, MintAccountAssertion,
+            },
         };
 
         #[test]
@@ -183,12 +180,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = MintAccountAssertion::MintAuthority {
                 value: Some(Keypair::new().encodable_pubkey()),
@@ -196,13 +188,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             //
             // Assert on supply
             //
@@ -213,12 +199,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = MintAccountAssertion::Supply {
                 value: 1600,
@@ -226,13 +207,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             //
             // Assert on decimals
             //
@@ -243,12 +218,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = MintAccountAssertion::Decimals {
                 value: 3,
@@ -256,13 +226,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             //
             // Assert on is_initialized
             //
@@ -273,12 +237,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = MintAccountAssertion::IsInitialized {
                 value: false,
@@ -286,13 +245,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             //
             // Assert on freeze_authority
             //
@@ -303,12 +256,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = MintAccountAssertion::FreezeAuthority {
                 value: Some(Keypair::new().encodable_pubkey()),
@@ -316,12 +264,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
         }
 
         #[test]
@@ -369,26 +312,14 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             let result = MintAccountAssertion::MintAuthority {
                 value: Some(freeze_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             //
             // Assert on freeze_authority
             //
@@ -399,25 +330,14 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             let result = MintAccountAssertion::FreezeAuthority {
                 value: Some(mint_authority.encodable_pubkey()),
                 operator: EquatableOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
         }
     }
 }

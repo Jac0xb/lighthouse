@@ -1,5 +1,4 @@
 use crate::{
-    error::LighthouseError,
     types::assert::{Assert, LogLevel},
     Result,
 };
@@ -29,16 +28,8 @@ pub(crate) fn assert_account_delta<
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate(
+    assertion.evaluate(
         (assert_context.left_account, assert_context.right_account),
         log_level,
-    )?;
-
-    evaluation_result.log(log_level);
-
-    if !evaluation_result.passed {
-        return Err(LighthouseError::AssertionFailed.into());
-    }
-
-    Ok(())
+    )
 }

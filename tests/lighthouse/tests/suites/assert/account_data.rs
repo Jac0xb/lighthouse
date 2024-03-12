@@ -4,7 +4,7 @@ use crate::utils::tx_builder::TxBuilder;
 use crate::utils::{create_test_account, create_user_with_balance};
 use lighthouse_client::instructions::AssertAccountDataBuilder;
 use lighthouse_client::types::{
-    BytesOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
+    ByteSliceOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -118,7 +118,7 @@ async fn borsh_account_data() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(70)
                 .instruction(),
@@ -174,7 +174,7 @@ async fn borsh_account_data() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(107)
                 .instruction(),
@@ -183,7 +183,7 @@ async fn borsh_account_data() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(110)
                 .instruction(),
@@ -205,7 +205,7 @@ async fn borsh_account_data() {
                         .cloned()
                         .chain(vec![255; 32])
                         .collect::<Vec<u8>>(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(143)
                 .instruction(),

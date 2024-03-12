@@ -1,5 +1,4 @@
 use crate::{
-    error::LighthouseError,
     types::assert::{Assert, LogLevel},
     utils::Result,
 };
@@ -9,13 +8,5 @@ pub(crate) fn assert_clock<T: Assert<()> + Debug>(
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate((), log_level)?;
-
-    evaluation_result.log(log_level);
-
-    if !evaluation_result.passed {
-        return Err(LighthouseError::AssertionFailed.into());
-    }
-
-    Ok(())
+    assertion.evaluate((), log_level)
 }

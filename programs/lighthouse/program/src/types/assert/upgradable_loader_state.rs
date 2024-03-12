@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
     utils::{keys_equal, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -35,11 +35,7 @@ pub enum UpgradeableLoaderStateAssertion {
 }
 
 impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         if !keys_equal(account.owner, &bpf_loader_upgradeable::ID) {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
@@ -72,7 +68,7 @@ impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
                     return Err(LighthouseError::FailedToDeserialize.into());
                 }
 
-                Ok(operator.evaluate(&actual_state, &casted_assertion_value, log_level))
+                operator.evaluate(&actual_state, &casted_assertion_value, log_level)
             }
             UpgradeableLoaderStateAssertion::Buffer(assertion) => {
                 let state = get_state()?;
@@ -101,24 +97,22 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
         log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
-        let result = match &upgradable_loader_state {
+    ) -> Result<()> {
+        match &upgradable_loader_state {
             UpgradeableLoaderState::Buffer { authority_address } => match &self {
                 UpgradableBufferAssertion::Authority {
                     value: assertion_value,
                     operator,
                 } => operator.evaluate(authority_address, assertion_value, log_level),
             },
-            _ => Box::new(EvaluationResult {
-                passed: false,
-                output: Some(format!(
+            _ => {
+                msg!(
                     "Account is not in program state was {}",
                     get_state_enum(upgradable_loader_state)
-                )),
-            }),
-        };
-
-        Ok(result)
+                );
+                Err(LighthouseError::AssertionFailed.into())
+            }
+        }
     }
 }
 
@@ -135,8 +129,8 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
         log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
-        let result = match &upgradable_loader_state {
+    ) -> Result<()> {
+        match &upgradable_loader_state {
             UpgradeableLoaderState::Program {
                 programdata_address,
             } => match &self {
@@ -145,16 +139,14 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
                     operator,
                 } => operator.evaluate(programdata_address, assertion_value, log_level),
             },
-            _ => Box::new(EvaluationResult {
-                passed: false,
-                output: Some(format!(
+            _ => {
+                msg!(
                     "Account is not in program state was {}",
                     get_state_enum(upgradable_loader_state)
-                )),
-            }),
-        };
-
-        Ok(result)
+                );
+                Err(LighthouseError::AssertionFailed.into())
+            }
+        }
     }
 }
 
@@ -175,8 +167,8 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
         &self,
         upgradable_loader_state: &UpgradeableLoaderState,
         log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
-        Ok(match &upgradable_loader_state {
+    ) -> Result<()> {
+        match &upgradable_loader_state {
             UpgradeableLoaderState::ProgramData {
                 upgrade_authority_address,
                 slot,
@@ -190,14 +182,14 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                     operator,
                 } => operator.evaluate(slot, assertion_value, log_level),
             },
-            _ => Box::new(EvaluationResult {
-                passed: false,
-                output: Some(format!(
+            _ => {
+                msg!(
                     "Account is not in program data state was {}",
                     get_state_enum(upgradable_loader_state)
-                )),
-            }),
-        })
+                );
+                Err(LighthouseError::AssertionFailed.into())
+            }
+        }
     }
 }
 
