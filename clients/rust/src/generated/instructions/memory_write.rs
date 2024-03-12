@@ -18,7 +18,7 @@ pub struct MemoryWrite {
     /// Payer account
     pub payer: solana_program::pubkey::Pubkey,
     /// Memory account
-    pub memory_account: solana_program::pubkey::Pubkey,
+    pub memory: solana_program::pubkey::Pubkey,
     /// System program
     pub source_account: solana_program::pubkey::Pubkey,
 }
@@ -49,7 +49,7 @@ impl MemoryWrite {
             self.payer, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.memory_account,
+            self.memory,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -83,9 +83,9 @@ impl MemoryWriteInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MemoryWriteInstructionArgs {
-    pub memory_index: u8,
-    pub memory_account_bump: u8,
-    pub memory_offset: u16,
+    pub memory_id: u8,
+    pub memory_bump: u8,
+    pub write_offset: u16,
     pub write_type: WriteType,
 }
 
@@ -96,18 +96,18 @@ pub struct MemoryWriteInstructionArgs {
 ///   0. `[]` program_id
 ///   1. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   2. `[signer]` payer
-///   3. `[writable]` memory_account
+///   3. `[writable]` memory
 ///   4. `[]` source_account
 #[derive(Default)]
 pub struct MemoryWriteBuilder {
     program_id: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
-    memory_account: Option<solana_program::pubkey::Pubkey>,
+    memory: Option<solana_program::pubkey::Pubkey>,
     source_account: Option<solana_program::pubkey::Pubkey>,
-    memory_index: Option<u8>,
-    memory_account_bump: Option<u8>,
-    memory_offset: Option<u16>,
+    memory_id: Option<u8>,
+    memory_bump: Option<u8>,
+    write_offset: Option<u16>,
     write_type: Option<WriteType>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
@@ -137,8 +137,8 @@ impl MemoryWriteBuilder {
     }
     /// Memory account
     #[inline(always)]
-    pub fn memory_account(&mut self, memory_account: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.memory_account = Some(memory_account);
+    pub fn memory(&mut self, memory: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.memory = Some(memory);
         self
     }
     /// System program
@@ -148,18 +148,18 @@ impl MemoryWriteBuilder {
         self
     }
     #[inline(always)]
-    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
-        self.memory_index = Some(memory_index);
+    pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
+        self.memory_id = Some(memory_id);
         self
     }
     #[inline(always)]
-    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
-        self.memory_account_bump = Some(memory_account_bump);
+    pub fn memory_bump(&mut self, memory_bump: u8) -> &mut Self {
+        self.memory_bump = Some(memory_bump);
         self
     }
     #[inline(always)]
-    pub fn memory_offset(&mut self, memory_offset: u16) -> &mut Self {
-        self.memory_offset = Some(memory_offset);
+    pub fn write_offset(&mut self, write_offset: u16) -> &mut Self {
+        self.write_offset = Some(write_offset);
         self
     }
     #[inline(always)]
@@ -193,19 +193,13 @@ impl MemoryWriteBuilder {
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
             payer: self.payer.expect("payer is not set"),
-            memory_account: self.memory_account.expect("memory_account is not set"),
+            memory: self.memory.expect("memory is not set"),
             source_account: self.source_account.expect("source_account is not set"),
         };
         let args = MemoryWriteInstructionArgs {
-            memory_index: self.memory_index.clone().expect("memory_index is not set"),
-            memory_account_bump: self
-                .memory_account_bump
-                .clone()
-                .expect("memory_account_bump is not set"),
-            memory_offset: self
-                .memory_offset
-                .clone()
-                .expect("memory_offset is not set"),
+            memory_id: self.memory_id.clone().expect("memory_id is not set"),
+            memory_bump: self.memory_bump.clone().expect("memory_bump is not set"),
+            write_offset: self.write_offset.clone().expect("write_offset is not set"),
             write_type: self.write_type.clone().expect("write_type is not set"),
         };
 
@@ -222,7 +216,7 @@ pub struct MemoryWriteCpiAccounts<'a, 'b> {
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
-    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub memory: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub source_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
@@ -238,7 +232,7 @@ pub struct MemoryWriteCpi<'a, 'b> {
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
-    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub memory: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub source_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
@@ -256,7 +250,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
             program_id: accounts.program_id,
             system_program: accounts.system_program,
             payer: accounts.payer,
-            memory_account: accounts.memory_account,
+            memory: accounts.memory,
             source_account: accounts.source_account,
             __args: args,
         }
@@ -308,7 +302,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.memory_account.key,
+            *self.memory.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -336,7 +330,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
         account_infos.push(self.program_id.clone());
         account_infos.push(self.system_program.clone());
         account_infos.push(self.payer.clone());
-        account_infos.push(self.memory_account.clone());
+        account_infos.push(self.memory.clone());
         account_infos.push(self.source_account.clone());
         remaining_accounts
             .iter()
@@ -357,7 +351,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
 ///   0. `[]` program_id
 ///   1. `[]` system_program
 ///   2. `[signer]` payer
-///   3. `[writable]` memory_account
+///   3. `[writable]` memory
 ///   4. `[]` source_account
 pub struct MemoryWriteCpiBuilder<'a, 'b> {
     instruction: Box<MemoryWriteCpiBuilderInstruction<'a, 'b>>,
@@ -370,11 +364,11 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
             program_id: None,
             system_program: None,
             payer: None,
-            memory_account: None,
+            memory: None,
             source_account: None,
-            memory_index: None,
-            memory_account_bump: None,
-            memory_offset: None,
+            memory_id: None,
+            memory_bump: None,
+            write_offset: None,
             write_type: None,
             __remaining_accounts: Vec::new(),
         });
@@ -406,11 +400,11 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
     }
     /// Memory account
     #[inline(always)]
-    pub fn memory_account(
+    pub fn memory(
         &mut self,
-        memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+        memory: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.memory_account = Some(memory_account);
+        self.instruction.memory = Some(memory);
         self
     }
     /// System program
@@ -423,18 +417,18 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
-        self.instruction.memory_index = Some(memory_index);
+    pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
+        self.instruction.memory_id = Some(memory_id);
         self
     }
     #[inline(always)]
-    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
-        self.instruction.memory_account_bump = Some(memory_account_bump);
+    pub fn memory_bump(&mut self, memory_bump: u8) -> &mut Self {
+        self.instruction.memory_bump = Some(memory_bump);
         self
     }
     #[inline(always)]
-    pub fn memory_offset(&mut self, memory_offset: u16) -> &mut Self {
-        self.instruction.memory_offset = Some(memory_offset);
+    pub fn write_offset(&mut self, write_offset: u16) -> &mut Self {
+        self.instruction.write_offset = Some(write_offset);
         self
     }
     #[inline(always)]
@@ -484,21 +478,21 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = MemoryWriteInstructionArgs {
-            memory_index: self
+            memory_id: self
                 .instruction
-                .memory_index
+                .memory_id
                 .clone()
-                .expect("memory_index is not set"),
-            memory_account_bump: self
+                .expect("memory_id is not set"),
+            memory_bump: self
                 .instruction
-                .memory_account_bump
+                .memory_bump
                 .clone()
-                .expect("memory_account_bump is not set"),
-            memory_offset: self
+                .expect("memory_bump is not set"),
+            write_offset: self
                 .instruction
-                .memory_offset
+                .write_offset
                 .clone()
-                .expect("memory_offset is not set"),
+                .expect("write_offset is not set"),
             write_type: self
                 .instruction
                 .write_type
@@ -517,10 +511,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
 
             payer: self.instruction.payer.expect("payer is not set"),
 
-            memory_account: self
-                .instruction
-                .memory_account
-                .expect("memory_account is not set"),
+            memory: self.instruction.memory.expect("memory is not set"),
 
             source_account: self
                 .instruction
@@ -540,11 +531,11 @@ struct MemoryWriteCpiBuilderInstruction<'a, 'b> {
     program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    memory_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    memory: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     source_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    memory_index: Option<u8>,
-    memory_account_bump: Option<u8>,
-    memory_offset: Option<u16>,
+    memory_id: Option<u8>,
+    memory_bump: Option<u8>,
+    write_offset: Option<u16>,
     write_type: Option<WriteType>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(

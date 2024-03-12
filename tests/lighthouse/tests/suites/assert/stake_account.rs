@@ -1,43 +1,50 @@
 use crate::utils::context::TestContext;
-use crate::utils::create_user_with_balance;
-use crate::utils::{process_transaction_assert_success, set_account_from_rpc};
+use crate::utils::process_transaction_assert_success;
+use crate::utils::{create_user_with_balance, set_account_from_refs};
 use lighthouse_client::instructions::AssertStakeAccountBuilder;
 use lighthouse_client::types::{
     EquatableOperator, MetaAssertion, StakeAccountAssertion, StakeStateType,
 };
-use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program_test::tokio;
-use solana_sdk::commitment_config::CommitmentConfig;
+use solana_sdk::clock::Clock;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::stake;
 use solana_sdk::stake::instruction::{delegate_stake, initialize};
 use solana_sdk::stake::state::Lockup;
 use solana_sdk::system_instruction::create_account_with_seed;
 use solana_sdk::transaction::Transaction;
+use solana_sdk::{stake, vote};
+use solana_vote_program::vote_state::{VoteInit, VoteState, VoteStateVersions};
+use std::mem::size_of;
 use std::str::FromStr;
 
 ///
 /// Tests all data types using the `StakeAccount` assertion.
 ///
 #[tokio::test]
-async fn test_borsh_account_data() {
-    let context = &mut TestContext::new().await.unwrap();
+async fn test() {
+    let context: &mut TestContext = &mut TestContext::new().await.unwrap();
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
         .unwrap();
-
-    // Clone a vote account from devnet.
-    let connection = RpcClient::new_with_commitment(
-        String::from("https://api.devnet.solana.com"),
-        CommitmentConfig::confirmed(),
-    );
 
     let vote_pubkey =
         solana_sdk::pubkey::Pubkey::from_str("HRACkkKxJHZ22QRfky7QEsSRgxiskQVdK23XS13tjEGM")
             .unwrap();
 
-    set_account_from_rpc(context, &connection, &vote_pubkey).await;
+    let vote_state = vote::state::VoteState::new(
+        &VoteInit {
+            node_pubkey: user.encodable_pubkey(),
+            authorized_voter: user.encodable_pubkey(),
+            authorized_withdrawer: user.encodable_pubkey(),
+            commission: 0,
+        },
+        &Clock::default(),
+    );
+
+    let output = &mut vec![0; size_of::<VoteState>()];
+    VoteState::serialize(&VoteStateVersions::Current(Box::new(vote_state)), output).unwrap();
+    set_account_from_refs(context, &vote_pubkey, output, &vote::program::id()).await;
 
     let derived_account =
         Pubkey::create_with_seed(&user.encodable_pubkey(), "stake:0", &stake::program::id())

@@ -1,19 +1,16 @@
 use crate::utils::context::TestContext;
-use crate::utils::create_user_with_balance;
-use crate::utils::{process_transaction_assert_success, set_account_from_rpc};
+use crate::utils::process_transaction_assert_success;
+use crate::utils::{create_user_with_balance, set_account_from_refs};
 use lighthouse_client::instructions::AssertUpgradeableLoaderAccountBuilder;
 use lighthouse_client::types::{
     ComparableOperator, EquatableOperator, UpgradeableLoaderStateAssertion,
     UpgradeableLoaderStateType, UpgradeableProgramAssertion, UpgradeableProgramDataAssertion,
 };
-use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program_test::tokio;
-use solana_sdk::account_utils::StateMut;
-use solana_sdk::bpf_loader_upgradeable::UpgradeableLoaderState;
-use solana_sdk::commitment_config::CommitmentConfig;
+use solana_sdk::bpf_loader_upgradeable::{self, UpgradeableLoaderState};
+use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::transaction::Transaction;
-use std::str::FromStr;
 
 ///
 /// Tests all data types using the `StakeAccount` assertion.
@@ -25,36 +22,20 @@ async fn test_upgradeable_loader() {
         .await
         .unwrap();
 
-    // Clone a vote account from devnet.
-    let connection = RpcClient::new_with_commitment(
-        String::from("https://api.devnet.solana.com/"),
-        CommitmentConfig::confirmed(),
-    );
-
-    let program_pubkey =
-        solana_sdk::pubkey::Pubkey::from_str("M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K")
-            .unwrap();
-
-    set_account_from_rpc(context, &connection, &program_pubkey).await;
-
-    let program_account = context
-        .client()
-        .get_account(program_pubkey)
-        .await
-        .unwrap()
-        .unwrap();
-
-    let programdata_address = if let Ok(UpgradeableLoaderState::Program {
+    let upgrade_authority = Keypair::new().encodable_pubkey();
+    let programdata_address = Keypair::new().encodable_pubkey();
+    let program_pubkey = Keypair::new().encodable_pubkey();
+    let program = UpgradeableLoaderState::Program {
         programdata_address,
-    }) = program_account.state()
-    {
-        programdata_address
-    } else {
-        panic!(
-            "{} is not an upgradeable loader Buffer or Program account",
-            program_pubkey
-        )
     };
+    let serialized_program = bincode::serialize(&program).unwrap();
+    set_account_from_refs(
+        context,
+        &program_pubkey,
+        &serialized_program,
+        &bpf_loader_upgradeable::ID,
+    )
+    .await;
 
     let tx = Transaction::new_signed_with_payer(
         &[
@@ -86,25 +67,18 @@ async fn test_upgradeable_loader() {
         .await
         .unwrap();
 
-    set_account_from_rpc(context, &connection, &programdata_address).await;
-    let program_data_address_account = context
-        .client()
-        .get_account(programdata_address)
-        .await
-        .unwrap()
-        .unwrap();
-
-    let state: UpgradeableLoaderState = program_data_address_account.state().unwrap();
-
-    let (slot, upgrade_authority_address) = if let UpgradeableLoaderState::ProgramData {
-        slot,
-        upgrade_authority_address,
-    } = state
-    {
-        (slot, upgrade_authority_address)
-    } else {
-        panic!("Not a program")
+    let programdata_state = UpgradeableLoaderState::ProgramData {
+        slot: u64::MAX,
+        upgrade_authority_address: Some(upgrade_authority),
     };
+    let serialized_programdata = bincode::serialize(&programdata_state).unwrap();
+    set_account_from_refs(
+        context,
+        &programdata_address,
+        &serialized_programdata,
+        &bpf_loader_upgradeable::ID,
+    )
+    .await;
 
     let tx = Transaction::new_signed_with_payer(
         &[
@@ -121,7 +95,7 @@ async fn test_upgradeable_loader() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
-                        value: upgrade_authority_address,
+                        value: Some(upgrade_authority),
                         operator: EquatableOperator::Equal,
                     },
                 ))
@@ -131,7 +105,7 @@ async fn test_upgradeable_loader() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
-                        value: slot,
+                        value: u64::MAX,
                         operator: ComparableOperator::Equal,
                     },
                 ))

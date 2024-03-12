@@ -24,13 +24,9 @@ pub mod errors {
     pub use crate::generated::errors::*;
 }
 
-pub fn get_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+pub fn get_memory(user: Pubkey, memory_id: u8) -> (solana_program::pubkey::Pubkey, u8) {
     solana_program::pubkey::Pubkey::find_program_address(
-        &[
-            "memory".to_string().as_ref(),
-            user.as_ref(),
-            &[memory_index],
-        ],
+        &["memory".to_string().as_ref(), user.as_ref(), &[memory_id]],
         &crate::ID,
     )
 }

@@ -22,13 +22,9 @@ use solana_sdk::{
 };
 use std::result;
 
-pub fn find_memory_account(user: Pubkey, memory_index: u8) -> (solana_program::pubkey::Pubkey, u8) {
+pub fn find_memory(user: Pubkey, memory_id: u8) -> (solana_program::pubkey::Pubkey, u8) {
     solana_program::pubkey::Pubkey::find_program_address(
-        &[
-            "memory".to_string().as_ref(),
-            user.as_ref(),
-            &[memory_index],
-        ],
+        &["memory".to_string().as_ref(), user.as_ref(), &[memory_id]],
         &lighthouse_client::ID,
     )
 }
@@ -466,6 +462,24 @@ pub async fn set_account_from_rpc(
     let mut shared_account =
         AccountSharedData::new(account.lamports, account.data.len(), &account.owner);
     shared_account.set_data_from_slice(account.data.as_slice());
+
+    context
+        .program_context
+        .set_account(account_pubkey, &shared_account);
+}
+
+pub async fn set_account_from_refs(
+    context: &mut TestContext,
+    account_pubkey: &Pubkey,
+    data: &[u8],
+    owner: &Pubkey,
+) {
+    let lamports = context
+        .get_minimum_balance_for_rent_exemption(data.len())
+        .await;
+
+    let mut shared_account = AccountSharedData::new(lamports, data.len(), owner);
+    shared_account.set_data_from_slice(data);
 
     context
         .program_context

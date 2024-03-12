@@ -319,7 +319,7 @@ mod tests {
     use crate::{
         error::LighthouseError,
         utils::keys_equal,
-        validation::{DerivedAddress, MemoryAccount, MemoryAccountSeeds, Program, Signer},
+        validation::{DerivedAddress, Memory, MemorySeeds, Program, Signer},
         Result,
     };
     use solana_sdk::{
@@ -363,7 +363,7 @@ mod tests {
         let key = system_program::id();
         let owner = Keypair::new().encodable_pubkey();
         let lamports = &mut min_rent.clone();
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 8];
 
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 0);
 
@@ -410,11 +410,11 @@ mod tests {
     #[allow(clippy::type_complexity)]
     fn find_memory_pda(
         payer: &Pubkey,
-        memory_index: u8,
+        memory_id: u8,
     ) -> Result<(Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>)> {
-        let seeds = MemoryAccount::get_seeds(MemoryAccountSeeds {
+        let seeds = Memory::get_seeds(MemorySeeds {
             payer,
-            memory_index,
+            memory_id,
             bump: None,
         });
 
@@ -444,7 +444,7 @@ mod tests {
         let owner = Keypair::new().encodable_pubkey();
 
         let lamports = &mut 0;
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 8];
 
         let (key, _bump, seeds_without_bump, seeds) = find_memory_pda(&payer, 0).unwrap();
 
@@ -574,6 +574,7 @@ mod tests {
                         new_account.assign(&owner);
 
                         let data_ptr = data.as_mut_ptr();
+                        *(data_ptr.offset(-8) as *mut u64) = space;
                         *data = from_raw_parts_mut(data_ptr, space as usize)
                     }
 
@@ -631,6 +632,7 @@ mod tests {
 
                     unsafe {
                         let data_ptr = data.as_mut_ptr();
+                        *(data_ptr.offset(-8) as *mut u64) = space;
                         *data = from_raw_parts_mut(data_ptr, space as usize)
                     }
 
@@ -691,12 +693,14 @@ mod tests {
         }
     }
 
+    // Where crashing starts
+
     #[test]
     fn new_init_checked__init() {
         set_syscall_stubs(Box::new(MockSyscallStubs {}));
 
         let lamports = &mut 0;
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 16];
         let sysprog_account = AccountInfo::new(
             &system_program::ID,
             false,
@@ -710,7 +714,7 @@ mod tests {
         let sys_program = Program::new(&sysprog_account);
 
         let lamports = &mut 100_000_000;
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 16];
         let key = Keypair::new().encodable_pubkey();
         let signer_account_info = AccountInfo::new(
             &key,
@@ -725,7 +729,7 @@ mod tests {
         let signer = Signer::new(&signer_account_info);
 
         let lamports = &mut 0;
-        let data: &mut [u8] = &mut [0u8; 2048];
+        let data: &mut [u8] = &mut vec![0u8; 2048];
         let key = Keypair::new().encodable_pubkey();
 
         let owner = system_program::id();
@@ -804,7 +808,7 @@ mod tests {
         set_syscall_stubs(Box::new(MockSyscallStubs {}));
 
         let lamports = &mut 0;
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 8];
         let sysprog_account = AccountInfo::new(
             &system_program::ID,
             false,
@@ -818,7 +822,7 @@ mod tests {
         let sys_program = Program::new(&sysprog_account);
 
         let lamports = &mut 100_000_000;
-        let data: &mut [u8] = &mut [0u8; 8];
+        let data: &mut [u8] = &mut vec![0u8; 8];
         let key = Keypair::new().encodable_pubkey();
         let signer_account_info = AccountInfo::new(
             &key,

@@ -15,7 +15,7 @@ pub struct MemoryClose {
     /// Payer account
     pub payer: solana_program::pubkey::Pubkey,
     /// Memory account
-    pub memory_account: solana_program::pubkey::Pubkey,
+    pub memory: solana_program::pubkey::Pubkey,
 }
 
 impl MemoryClose {
@@ -40,7 +40,7 @@ impl MemoryClose {
             self.payer, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.memory_account,
+            self.memory,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
@@ -70,8 +70,8 @@ impl MemoryCloseInstructionData {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MemoryCloseInstructionArgs {
-    pub memory_index: u8,
-    pub memory_account_bump: u8,
+    pub memory_id: u8,
+    pub memory_bump: u8,
 }
 
 /// Instruction builder for `MemoryClose`.
@@ -80,14 +80,14 @@ pub struct MemoryCloseInstructionArgs {
 ///
 ///   0. `[]` program_id
 ///   1. `[signer]` payer
-///   2. `[writable]` memory_account
+///   2. `[writable]` memory
 #[derive(Default)]
 pub struct MemoryCloseBuilder {
     program_id: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
-    memory_account: Option<solana_program::pubkey::Pubkey>,
-    memory_index: Option<u8>,
-    memory_account_bump: Option<u8>,
+    memory: Option<solana_program::pubkey::Pubkey>,
+    memory_id: Option<u8>,
+    memory_bump: Option<u8>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -109,18 +109,18 @@ impl MemoryCloseBuilder {
     }
     /// Memory account
     #[inline(always)]
-    pub fn memory_account(&mut self, memory_account: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.memory_account = Some(memory_account);
+    pub fn memory(&mut self, memory: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.memory = Some(memory);
         self
     }
     #[inline(always)]
-    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
-        self.memory_index = Some(memory_index);
+    pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
+        self.memory_id = Some(memory_id);
         self
     }
     #[inline(always)]
-    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
-        self.memory_account_bump = Some(memory_account_bump);
+    pub fn memory_bump(&mut self, memory_bump: u8) -> &mut Self {
+        self.memory_bump = Some(memory_bump);
         self
     }
     /// Add an aditional account to the instruction.
@@ -146,14 +146,11 @@ impl MemoryCloseBuilder {
         let accounts = MemoryClose {
             program_id: self.program_id.expect("program_id is not set"),
             payer: self.payer.expect("payer is not set"),
-            memory_account: self.memory_account.expect("memory_account is not set"),
+            memory: self.memory.expect("memory is not set"),
         };
         let args = MemoryCloseInstructionArgs {
-            memory_index: self.memory_index.clone().expect("memory_index is not set"),
-            memory_account_bump: self
-                .memory_account_bump
-                .clone()
-                .expect("memory_account_bump is not set"),
+            memory_id: self.memory_id.clone().expect("memory_id is not set"),
+            memory_bump: self.memory_bump.clone().expect("memory_bump is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -167,7 +164,7 @@ pub struct MemoryCloseCpiAccounts<'a, 'b> {
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
-    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub memory: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
 /// `memory_close` CPI instruction.
@@ -179,7 +176,7 @@ pub struct MemoryCloseCpi<'a, 'b> {
     /// Payer account
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
-    pub memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub memory: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: MemoryCloseInstructionArgs,
 }
@@ -194,7 +191,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
             __program: program,
             program_id: accounts.program_id,
             payer: accounts.payer,
-            memory_account: accounts.memory_account,
+            memory: accounts.memory,
             __args: args,
         }
     }
@@ -241,7 +238,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.memory_account.key,
+            *self.memory.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
@@ -264,7 +261,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
         account_infos.push(self.__program.clone());
         account_infos.push(self.program_id.clone());
         account_infos.push(self.payer.clone());
-        account_infos.push(self.memory_account.clone());
+        account_infos.push(self.memory.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -283,7 +280,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
 ///
 ///   0. `[]` program_id
 ///   1. `[signer]` payer
-///   2. `[writable]` memory_account
+///   2. `[writable]` memory
 pub struct MemoryCloseCpiBuilder<'a, 'b> {
     instruction: Box<MemoryCloseCpiBuilderInstruction<'a, 'b>>,
 }
@@ -294,9 +291,9 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
             __program: program,
             program_id: None,
             payer: None,
-            memory_account: None,
-            memory_index: None,
-            memory_account_bump: None,
+            memory: None,
+            memory_id: None,
+            memory_bump: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -318,21 +315,21 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
     }
     /// Memory account
     #[inline(always)]
-    pub fn memory_account(
+    pub fn memory(
         &mut self,
-        memory_account: &'b solana_program::account_info::AccountInfo<'a>,
+        memory: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.memory_account = Some(memory_account);
+        self.instruction.memory = Some(memory);
         self
     }
     #[inline(always)]
-    pub fn memory_index(&mut self, memory_index: u8) -> &mut Self {
-        self.instruction.memory_index = Some(memory_index);
+    pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
+        self.instruction.memory_id = Some(memory_id);
         self
     }
     #[inline(always)]
-    pub fn memory_account_bump(&mut self, memory_account_bump: u8) -> &mut Self {
-        self.instruction.memory_account_bump = Some(memory_account_bump);
+    pub fn memory_bump(&mut self, memory_bump: u8) -> &mut Self {
+        self.instruction.memory_bump = Some(memory_bump);
         self
     }
     /// Add an additional account to the instruction.
@@ -377,16 +374,16 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = MemoryCloseInstructionArgs {
-            memory_index: self
+            memory_id: self
                 .instruction
-                .memory_index
+                .memory_id
                 .clone()
-                .expect("memory_index is not set"),
-            memory_account_bump: self
+                .expect("memory_id is not set"),
+            memory_bump: self
                 .instruction
-                .memory_account_bump
+                .memory_bump
                 .clone()
-                .expect("memory_account_bump is not set"),
+                .expect("memory_bump is not set"),
         };
         let instruction = MemoryCloseCpi {
             __program: self.instruction.__program,
@@ -395,10 +392,7 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
 
             payer: self.instruction.payer.expect("payer is not set"),
 
-            memory_account: self
-                .instruction
-                .memory_account
-                .expect("memory_account is not set"),
+            memory: self.instruction.memory.expect("memory is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -412,9 +406,9 @@ struct MemoryCloseCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    memory_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    memory_index: Option<u8>,
-    memory_account_bump: Option<u8>,
+    memory: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    memory_id: Option<u8>,
+    memory_bump: Option<u8>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,
