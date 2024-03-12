@@ -18,15 +18,18 @@ const kinobi = k.createFromIdls([path.join(programDir, 'lighthouse.json')]);
 kinobi.update(
   k.addPdasVisitor({
     lighthouse: [
-      k.pdaNode('memory_account', [
+      k.pdaNode('memory', [
         k.constantPdaSeedNodeFromString('memory'),
         k.variablePdaSeedNode('payer', k.publicKeyTypeNode()),
-        k.variablePdaSeedNode('memory_index', k.numberTypeNode('u8')),
+        k.variablePdaSeedNode('memory_id', k.numberTypeNode('u8')),
       ]),
     ],
   })
 );
 
+//
+// How to set a default value for an account in an instruction.
+//
 // kinobi.update(
 //   k.updateInstructionsVisitor({
 //     memoryWrite: {
@@ -35,19 +38,25 @@ kinobi.update(
 //           defaultValue: k.publicKeyValueNode('<pubkey>'),
 //         },
 //         memoryAccount: {
-//           defaultValue: k.pdaValueNode('memory_account'),
+//           defaultValue: k.pdaValueNode('memory'),
 //         },
 //       },
 //     },
 //   })
 // );
 
+//
+// How to long the kinobi tree
+//
 // kinobi.accept(k.consoleLogVisitor(k.getDebugStringVisitor({ indent: true })));
 
+//
+// Setting a default value for an instruction arg.
+//
 // kinobi.update(
 //   k.setStructDefaultValuesVisitor({
 //     memoryWrite: {
-//       memory_index: k.numberValueNode(0),
+//       memory_id: k.numberValueNode(0),
 //     },
 //   })
 // );
