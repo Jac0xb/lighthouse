@@ -28,3 +28,11 @@ pub fn create_test_account() -> TestAccountV1 {
 pub fn assert_is_program_error(err: ProgramError, expected_error: ProgramError) {
     assert_eq!(err, expected_error);
 }
+
+pub fn assert_passed(result: Result<(), ProgramError>) {
+    assert!(result.is_ok(), "{:?}", result)
+}
+
+pub fn assert_failed(result: Result<(), ProgramError>) {
+    assert!(result.is_err(), "{:?}", result)
+}

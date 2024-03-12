@@ -2,7 +2,7 @@ use super::{Assert, ComparableOperator, EquatableOperator, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{BytesOperator, EvaluationResult, IntegerOperator, Operator},
+    types::assert::operator::{ByteSliceOperator, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -57,7 +57,7 @@ pub enum DataValueDeltaAssertion {
     },
     Bytes {
         length: u16,
-        operator: BytesOperator,
+        operator: ByteSliceOperator,
     },
 }
 
@@ -66,7 +66,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
         &self,
         accounts: (&'a AccountInfo<'info>, &'a AccountInfo<'info>),
         log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    ) -> Result<()> {
         match self {
             AccountDeltaAssertion::Data {
                 a_offset,
@@ -101,7 +101,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i16 - a_value as i16;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::I8 {
                         value: assertion_value,
@@ -112,7 +112,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i16 - a_value as i16;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::U16 {
                         value: assertion_value,
@@ -123,7 +123,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i32 - a_value as i32;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::I16 {
                         value: assertion_value,
@@ -134,7 +134,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i32 - a_value as i32;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::U32 {
                         value: assertion_value,
@@ -145,7 +145,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i64 - a_value as i64;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::I32 {
                         value: assertion_value,
@@ -156,7 +156,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i64 - a_value as i64;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::U64 {
                         value: assertion_value,
@@ -167,7 +167,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i128 - a_value as i128;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::I64 {
                         value: assertion_value,
@@ -178,7 +178,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i128 - a_value as i128;
 
-                        Ok(operator.evaluate(&diff_value, assertion_value, log_level))
+                        operator.evaluate(&diff_value, assertion_value, log_level)
                     }
                     DataValueDeltaAssertion::Bytes { operator, length } => {
                         let a_value = a_account_data
@@ -194,7 +194,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                                 err!(LighthouseError::RangeOutOfBounds)
                             })?;
 
-                        Ok(operator.evaluate(a_value, b_value, log_level))
+                        operator.evaluate(a_value, b_value, log_level)
                     }
                 }
             }
@@ -218,18 +218,18 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_lamports as i128 - a_lamports as i128;
 
-                        Ok(operator.evaluate(&diff_value, value, log_level))
+                        operator.evaluate(&diff_value, value, log_level)
                     }
                     AccountInfoDeltaAssertion::DataLength { operator } => {
                         let a_data_len = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
                         let b_data_len = b_account.data_len() as u64;
 
-                        Ok(operator.evaluate(&a_data_len, &b_data_len, log_level))
+                        operator.evaluate(&a_data_len, &b_data_len, log_level)
                     }
                     AccountInfoDeltaAssertion::Owner { operator } => {
                         let a_owner = try_from_slice::<Pubkey>(&a_account_data, a_offset, None)?;
 
-                        Ok(operator.evaluate(&a_owner, b_account.owner, log_level))
+                        operator.evaluate(&a_owner, b_account.owner, log_level)
                     }
                     AccountInfoDeltaAssertion::RentEpoch { value, operator } => {
                         let a_rent_epoch = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
@@ -237,7 +237,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_rent_epoch as i128 - a_rent_epoch as i128;
 
-                        Ok(operator.evaluate(&diff_value, value, log_level))
+                        operator.evaluate(&diff_value, value, log_level)
                     }
                 }
             }
@@ -272,12 +272,11 @@ pub enum AccountInfoDeltaAssertion {
 #[cfg(test)]
 mod tests {
     use solana_sdk::{
-        account_info::AccountInfo, msg, signature::Keypair, signer::EncodableKeypair,
-        system_program,
+        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
     };
 
     use crate::{
-        test_utils::create_test_account,
+        test_utils::{assert_passed, create_test_account},
         types::assert::{
             operator::IntegerOperator, AccountDeltaAssertion, AccountInfoDeltaAssertion, Assert,
             DataValueDeltaAssertion, EquatableOperator, LogLevel,
@@ -308,14 +307,12 @@ mod tests {
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info, &b_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
             a_offset: 0,
@@ -326,14 +323,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&b_account_info, &a_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
     }
 
     #[test]
@@ -361,14 +356,12 @@ mod tests {
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info.clone(), &b_account_info.clone()),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
             a_offset: 0,
@@ -379,14 +372,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&b_account_info, &a_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
     }
 
     #[test]
@@ -414,15 +405,12 @@ mod tests {
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info.clone(), &b_account_info.clone()),
+            LogLevel::PlaintextMessage,
+        );
 
-        msg!("{:?}", result.output);
-        assert!(result.passed);
+        assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
             a_offset: 0,
@@ -433,14 +421,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&b_account_info, &a_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
     }
 
     #[test]
@@ -468,15 +454,12 @@ mod tests {
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info.clone(), &b_account_info.clone()),
+            LogLevel::PlaintextMessage,
+        );
 
-        msg!("{:?}", result.output);
-        assert!(result.passed);
+        assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
             a_offset: 0,
@@ -487,14 +470,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&b_account_info, &a_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
     }
 
     #[test]
@@ -517,37 +498,33 @@ mod tests {
             a_offset: 0,
             b_offset: 4,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::operator::BytesOperator::Equal,
+                operator: crate::types::assert::operator::ByteSliceOperator::Equal,
                 length: 32,
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info.clone(), &b_account_info.clone()),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info.clone(), &b_account_info.clone()),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
             a_offset: 4,
             b_offset: 0,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::operator::BytesOperator::Equal,
+                operator: crate::types::assert::operator::ByteSliceOperator::Equal,
                 length: 32,
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&b_account_info, &a_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&b_account_info, &a_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed);
+        assert_passed(result);
     }
 
     #[test]
@@ -576,14 +553,12 @@ mod tests {
             },
         };
 
-        let result = assertion
+        assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
                 LogLevel::PlaintextMessage,
             )
             .unwrap();
-
-        assert!(result.passed, "{:?}", result.output);
 
         // Negative Value (100 to 0 = -100)
 
@@ -603,14 +578,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
+        reverse_assertion
             .evaluate(
                 (&a_account_info, &b_account_info),
                 LogLevel::PlaintextMessage,
             )
             .unwrap();
-
-        assert!(result.passed, "{:?}", result.output);
 
         // Negative Value (100 to 0 <= -50)
 
@@ -630,14 +603,12 @@ mod tests {
             },
         };
 
-        let result = reverse_assertion
-            .evaluate(
-                (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = reverse_assertion.evaluate(
+            (&a_account_info, &b_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed, "{:?}", result.output);
+        assert_passed(result);
     }
 
     #[test]
@@ -664,13 +635,11 @@ mod tests {
             },
         };
 
-        let result = assertion
-            .evaluate(
-                (&a_account_info, &b_account_info),
-                LogLevel::PlaintextMessage,
-            )
-            .unwrap();
+        let result = assertion.evaluate(
+            (&a_account_info, &b_account_info),
+            LogLevel::PlaintextMessage,
+        );
 
-        assert!(result.passed, "{:?}", result.output);
+        assert_passed(result);
     }
 }

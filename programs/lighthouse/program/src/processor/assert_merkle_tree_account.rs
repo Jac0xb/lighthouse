@@ -1,5 +1,4 @@
 use crate::{
-    error::LighthouseError,
     types::assert::{Assert, LogLevel},
     utils::Result,
     validation::{CheckedAccount, Program, SplAccountCompressionProgram},
@@ -34,13 +33,5 @@ pub(crate) fn assert_merkle_tree_account<
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    let evaluation_result = assertion.evaluate(context, log_level)?;
-
-    evaluation_result.log(log_level);
-
-    if !evaluation_result.passed {
-        return Err(LighthouseError::AssertionFailed.into());
-    }
-
-    Ok(())
+    assertion.evaluate(context, log_level)
 }

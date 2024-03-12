@@ -10,7 +10,7 @@ export * from './accountDeltaAssertion';
 export * from './accountInfoAssertion';
 export * from './accountInfoDeltaAssertion';
 export * from './accountInfoField';
-export * from './bytesOperator';
+export * from './byteSliceOperator';
 export * from './comparableOperator';
 export * from './dataValue';
 export * from './dataValueAssertion';

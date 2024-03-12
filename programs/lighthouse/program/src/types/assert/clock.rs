@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::{
-    types::assert::operator::{ComparableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -31,10 +31,10 @@ pub enum SysvarClockAssertion {
 }
 
 impl Assert<()> for SysvarClockAssertion {
-    fn evaluate(&self, _: (), log_level: LogLevel) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, _: (), log_level: LogLevel) -> Result<()> {
         let clock = Clock::get()?;
 
-        let result = match self {
+        match self {
             SysvarClockAssertion::Slot {
                 value: assertion_value,
                 operator,
@@ -75,18 +75,16 @@ impl Assert<()> for SysvarClockAssertion {
 
                 operator.evaluate(&actual_unix_timestamp, assertion_value, log_level)
             }
-        };
-
-        Ok(result)
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     mod evaluate {
-        use crate::types::{
-            assert::operator::ComparableOperator,
-            assert::{Assert, LogLevel, SysvarClockAssertion},
+        use crate::{
+            test_utils::{assert_failed, assert_passed},
+            types::assert::{operator::ComparableOperator, Assert, LogLevel, SysvarClockAssertion},
         };
         use solana_sdk::{
             clock::Clock,
@@ -121,12 +119,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = SysvarClockAssertion::Slot {
                 value: 1600,
@@ -134,12 +127,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
 
             // Evaluate epoch_start_timestamp
 
@@ -149,12 +137,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = SysvarClockAssertion::EpochStartTimestamp {
                 value: 1600,
@@ -162,13 +145,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             // Evaluate epoch
 
             let result = SysvarClockAssertion::Epoch {
@@ -177,12 +154,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = SysvarClockAssertion::Epoch {
                 value: 1600,
@@ -190,13 +162,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             // Evaluate leader_schedule_epoch
 
             let result = SysvarClockAssertion::LeaderScheduleEpoch {
@@ -205,12 +171,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = SysvarClockAssertion::LeaderScheduleEpoch {
                 value: 1600,
@@ -218,13 +179,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
-
+            assert_failed(result);
             // Evaluate unix_timestamp
 
             let result = SysvarClockAssertion::UnixTimestamp {
@@ -233,12 +188,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             let result = SysvarClockAssertion::UnixTimestamp {
                 value: 1600,
@@ -246,12 +196,7 @@ mod tests {
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(!result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_failed(result);
         }
     }
 }

@@ -29,12 +29,12 @@ import {
   getU16Encoder,
 } from '@solana/codecs';
 import {
-  BytesOperator,
-  BytesOperatorArgs,
+  ByteSliceOperator,
+  ByteSliceOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getBytesOperatorDecoder,
-  getBytesOperatorEncoder,
+  getByteSliceOperatorDecoder,
+  getByteSliceOperatorEncoder,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
 } from '.';
@@ -48,7 +48,7 @@ export type DataValueDeltaAssertion =
   | { __kind: 'I32'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; length: number; operator: BytesOperator };
+  | { __kind: 'Bytes'; length: number; operator: ByteSliceOperator };
 
 export type DataValueDeltaAssertionArgs =
   | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
@@ -59,7 +59,7 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'I32'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; length: number; operator: BytesOperatorArgs };
+  | { __kind: 'Bytes'; length: number; operator: ByteSliceOperatorArgs };
 
 export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
   return getDataEnumEncoder([
@@ -123,7 +123,7 @@ export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAsser
       'Bytes',
       getStructEncoder([
         ['length', getU16Encoder()],
-        ['operator', getBytesOperatorEncoder()],
+        ['operator', getByteSliceOperatorEncoder()],
       ]),
     ],
   ]);
@@ -191,7 +191,7 @@ export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAsser
       'Bytes',
       getStructDecoder([
         ['length', getU16Decoder()],
-        ['operator', getBytesOperatorDecoder()],
+        ['operator', getByteSliceOperatorDecoder()],
       ]),
     ],
   ]);

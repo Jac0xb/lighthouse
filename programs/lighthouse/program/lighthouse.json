@@ -773,7 +773,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "BytesOperator"
+                  "defined": "ByteSliceOperator"
                 }
               }
             ]
@@ -973,7 +973,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "BytesOperator"
+                  "defined": "ByteSliceOperator"
                 }
               }
             ]
@@ -1458,6 +1458,32 @@
       }
     },
     {
+      "name": "ComparableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          }
+        ]
+      }
+    },
+    {
       "name": "IntegerOperator",
       "type": {
         "kind": "enum",
@@ -1490,32 +1516,6 @@
       }
     },
     {
-      "name": "ComparableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          }
-        ]
-      }
-    },
-    {
       "name": "EquatableOperator",
       "type": {
         "kind": "enum",
@@ -1530,7 +1530,7 @@
       }
     },
     {
-      "name": "BytesOperator",
+      "name": "ByteSliceOperator",
       "type": {
         "kind": "enum",
         "variants": [

@@ -48,14 +48,14 @@ import {
   getU8Encoder,
 } from '@solana/codecs';
 import {
-  BytesOperator,
-  BytesOperatorArgs,
+  ByteSliceOperator,
+  ByteSliceOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getBytesOperatorDecoder,
-  getBytesOperatorEncoder,
+  getByteSliceOperatorDecoder,
+  getByteSliceOperatorEncoder,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
   getIntegerOperatorDecoder,
@@ -74,7 +74,7 @@ export type DataValueAssertion =
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: BytesOperator }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: ByteSliceOperator }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
@@ -89,7 +89,7 @@ export type DataValueAssertionArgs =
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: BytesOperatorArgs }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: ByteSliceOperatorArgs }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
 
 export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> {
@@ -175,7 +175,7 @@ export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> 
       'Bytes',
       getStructEncoder([
         ['value', getBytesEncoder({ size: getU32Encoder() })],
-        ['operator', getBytesOperatorEncoder()],
+        ['operator', getByteSliceOperatorEncoder()],
       ]),
     ],
     [
@@ -271,7 +271,7 @@ export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
       'Bytes',
       getStructDecoder([
         ['value', getBytesDecoder({ size: getU32Decoder() })],
-        ['operator', getBytesOperatorDecoder()],
+        ['operator', getByteSliceOperatorDecoder()],
       ]),
     ],
     [

@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::types::assert::operator::{
-    ComparableOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
+    ComparableOperator, EquatableOperator, IntegerOperator, Operator,
 };
 use crate::utils::{keys_equal, Result};
 use crate::{err, err_msg, error::LighthouseError};
@@ -36,11 +36,7 @@ pub enum StakeAccountAssertion {
 }
 
 impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
@@ -55,7 +51,7 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
-        let result = match self {
+        match self {
             StakeAccountAssertion::State {
                 value: assertion_value,
                 operator,
@@ -78,14 +74,12 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
 
                 match stake_account {
                     StakeStateV2::Initialized(meta) | StakeStateV2::Stake(meta, _, _) => {
-                        meta_assertion.evaluate(&meta, log_level)?
+                        meta_assertion.evaluate(&meta, log_level)
                     }
-                    _ => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(
-                            "Stake account is not in a state that has meta field".to_string(),
-                        ),
-                    }),
+                    _ => {
+                        msg!("Stake account is not in a state that has meta field");
+                        Err(LighthouseError::AssertionFailed.into())
+                    }
                 }
             }
             StakeAccountAssertion::StakeAssertion(stake_assertion) => {
@@ -95,15 +89,11 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
                 })?;
 
                 match stake_account {
-                    StakeStateV2::Stake(_, stake, _) => {
-                        stake_assertion.evaluate(&stake, log_level)?
+                    StakeStateV2::Stake(_, stake, _) => stake_assertion.evaluate(&stake, log_level),
+                    _ => {
+                        msg!("Stake account is not in a state that has stake field");
+                        Err(LighthouseError::AssertionFailed.into())
                     }
-                    _ => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(
-                            "Stake account is not in a state that has stake field".to_string(),
-                        ),
-                    }),
                 }
             }
             StakeAccountAssertion::StakeFlags { value, operator } => {
@@ -125,17 +115,13 @@ impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
 
                         operator.evaluate(&actual_stake_flag, value, log_level)
                     }
-                    _ => Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(
-                            "Stake account is not in a state that has stake field".to_string(),
-                        ),
-                    }),
+                    _ => {
+                        msg!("Stake account is not in a state that has stake field");
+                        Err(LighthouseError::AssertionFailed.into())
+                    }
                 }
             }
-        };
-
-        Ok(result)
+        }
     }
 }
 
@@ -168,8 +154,8 @@ pub enum MetaAssertion {
 }
 
 impl Assert<&StakeMeta> for MetaAssertion {
-    fn evaluate(&self, meta: &StakeMeta, log_level: LogLevel) -> Result<Box<EvaluationResult>> {
-        let result = match self {
+    fn evaluate(&self, meta: &StakeMeta, log_level: LogLevel) -> Result<()> {
+        match self {
             MetaAssertion::RentExemptReserve {
                 value: assertion_value,
                 operator,
@@ -194,9 +180,7 @@ impl Assert<&StakeMeta> for MetaAssertion {
                 value: assertion_value,
                 operator,
             } => operator.evaluate(&meta.lockup.custodian, assertion_value, log_level),
-        };
-
-        Ok(result)
+        }
     }
 }
 
@@ -225,8 +209,8 @@ pub enum StakeAssertion {
 }
 
 impl Assert<&StakeInfo> for StakeAssertion {
-    fn evaluate(&self, stake: &StakeInfo, log_level: LogLevel) -> Result<Box<EvaluationResult>> {
-        let result = match self {
+    fn evaluate(&self, stake: &StakeInfo, log_level: LogLevel) -> Result<()> {
+        match self {
             StakeAssertion::DelegationVoterPubkey {
                 value: assertion_value,
                 operator,
@@ -255,8 +239,6 @@ impl Assert<&StakeInfo> for StakeAssertion {
                 value: assertion_value,
                 operator,
             } => operator.evaluate(&stake.credits_observed, assertion_value, log_level),
-        };
-
-        Ok(result)
+        }
     }
 }

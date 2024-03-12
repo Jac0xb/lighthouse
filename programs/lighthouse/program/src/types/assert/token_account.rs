@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
     utils::{out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -65,11 +65,7 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
 }
 
 impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         if account.data_is_empty() {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
@@ -83,7 +79,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
-        let result = match self {
+        match self {
             TokenAccountAssertion::Mint {
                 value: assertion_value,
                 operator,
@@ -190,18 +186,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
                 EquatableOperator::Equal.evaluate(account.key, &expected_ata, log_level)
             }
-        };
-
-        Ok(result)
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use solana_sdk::program_error::ProgramError;
-
-    use crate::types::assert::EvaluationResult;
-
     mod evaluate {
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
@@ -211,13 +201,13 @@ mod tests {
         use spl_token_2022::state::{Account, AccountState};
         use std::{cell::RefCell, rc::Rc};
 
-        use crate::types::assert::{
-            operator::{ComparableOperator, EquatableOperator},
-            token_account::tests::assert_failed,
-            Assert, LogLevel, TokenAccountAssertion,
+        use crate::{
+            test_utils::{assert_failed, assert_passed},
+            types::assert::{
+                operator::{ComparableOperator, EquatableOperator},
+                Assert, LogLevel, TokenAccountAssertion,
+            },
         };
-
-        use super::assert_passed;
 
         #[test]
         fn evaluate_token_account_no_delegate_no_close_authority() {
@@ -448,12 +438,7 @@ mod tests {
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            if let Ok(result) = result {
-                assert!(result.passed, "{:?}", result.output);
-            } else {
-                let error = result.err().unwrap();
-                panic!("{:?}", error);
-            }
+            assert_passed(result);
 
             //
             // Assert on close_authority
@@ -618,24 +603,6 @@ mod tests {
 
                 assert_failed(result.evaluate(&account_info, LogLevel::PlaintextMessage));
             }
-        }
-    }
-
-    fn assert_passed(result: Result<Box<EvaluationResult>, ProgramError>) {
-        if let Ok(result) = result {
-            assert!(result.passed, "{:?}", result.output);
-        } else {
-            let error = result.err().unwrap();
-            panic!("{:?}", error);
-        }
-    }
-
-    fn assert_failed(result: Result<Box<EvaluationResult>, ProgramError>) {
-        if let Ok(result) = result {
-            assert!(!result.passed, "{:?}", result.output);
-        } else {
-            let error = result.err().unwrap();
-            panic!("{:?}", error);
         }
     }
 }

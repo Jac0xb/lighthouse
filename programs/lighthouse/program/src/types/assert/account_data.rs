@@ -2,9 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{
-        BytesOperator, EquatableOperator, EvaluationResult, IntegerOperator, Operator,
-    },
+    types::assert::operator::{ByteSliceOperator, EquatableOperator, IntegerOperator, Operator},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -64,7 +62,7 @@ pub enum DataValueAssertion {
     },
     Bytes {
         value: Vec<u8>,
-        operator: BytesOperator,
+        operator: ByteSliceOperator,
     },
     Pubkey {
         value: Pubkey,
@@ -73,11 +71,7 @@ pub enum DataValueAssertion {
 }
 
 impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         let offset = self.offset as usize;
         let assertion = &self.assertion;
 
@@ -92,77 +86,77 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                 operator,
             } => {
                 let actual_value = try_from_slice::<bool>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::U8 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u8>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::I8 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i8>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::U16 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u16>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::I16 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i16>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::U32 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u32>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::I32 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i32>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::U64 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u64>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::I64 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i64>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::U128 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<u128>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::I128 {
                 value: assertion_value,
                 operator,
             } => {
                 let actual_value = try_from_slice::<i128>(&data, offset, None)?;
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
             DataValueAssertion::Bytes {
                 value: assertion_value,
@@ -175,7 +169,7 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                         err!(LighthouseError::RangeOutOfBounds)
                     })?;
 
-                Ok(operator.evaluate(actual_value, assertion_value.as_slice(), log_level))
+                operator.evaluate(actual_value, assertion_value.as_slice(), log_level)
             }
             DataValueAssertion::Pubkey {
                 value: assertion_value,
@@ -183,11 +177,17 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
             } => {
                 let actual_value = try_from_slice::<Pubkey>(&data, offset, None)?;
 
-                Ok(operator.evaluate(&actual_value, assertion_value, log_level))
+                operator.evaluate(&actual_value, assertion_value, log_level)
             }
         }
     }
 }
+
+///
+///
+///
+///
+///
 
 #[cfg(test)]
 mod tests {
@@ -196,10 +196,10 @@ mod tests {
     };
 
     use crate::{
-        test_utils::create_test_account,
-        types::{
-            assert::operator::{EquatableOperator, IntegerOperator},
-            assert::{AccountDataAssertion, Assert, LogLevel},
+        test_utils::{assert_failed, assert_passed, create_test_account},
+        types::assert::{
+            operator::{EquatableOperator, IntegerOperator},
+            AccountDataAssertion, Assert, LogLevel,
         },
     };
 
@@ -266,15 +266,13 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMessage)
-                .unwrap();
+            let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            assert_eq!(
-                result.passed, should_pass,
-                "{:?} {:?}",
-                assertion, result.output
-            );
+            if should_pass {
+                assert_passed(result);
+            } else {
+                assert_failed(result);
+            }
         }
 
         let assertions = vec![
@@ -328,15 +326,13 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMessage)
-                .unwrap();
+            let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            assert_eq!(
-                result.passed, should_pass,
-                "{:?} {:?}",
-                assertion, result.output
-            );
+            if should_pass {
+                assert_passed(result);
+            } else {
+                assert_failed(result);
+            }
         }
 
         let assertions = vec![
@@ -376,15 +372,13 @@ mod tests {
                 assertion,
             };
 
-            let result = assertion
-                .evaluate(&account_info, LogLevel::PlaintextMessage)
-                .unwrap();
+            let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
-            assert_eq!(
-                result.passed, should_pass,
-                "{:?} {:?}",
-                assertion, result.output
-            );
+            if should_pass {
+                assert_passed(result);
+            } else {
+                assert_failed(result);
+            }
         }
     }
 }
