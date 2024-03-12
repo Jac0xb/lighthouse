@@ -1,7 +1,7 @@
 use anchor_spl::associated_token;
 use borsh::BorshDeserialize;
 use clap::{Parser, Subcommand};
-use lighthouse_client::get_memory;
+use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{
     AssertAccountDeltaBuilder, AssertAccountInfoBuilder, AssertStakeAccountBuilder,
     MemoryCloseBuilder, MemoryWriteBuilder,
@@ -229,7 +229,7 @@ fn build_safe_send_token_transaction(
     destination_user: &Pubkey,
 ) -> Transaction {
     let token_account = get_associated_token_address(&wallet_keypair.pubkey(), mint);
-    let (memory, memory_bump) = get_memory(wallet_keypair.pubkey(), 0);
+    let (memory, memory_bump) = find_memory_pda(wallet_keypair.pubkey(), 0);
     let dest_token_account = get_associated_token_address(destination_user, mint);
 
     let tx = Transaction::new_signed_with_payer(

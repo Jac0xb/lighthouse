@@ -1,5 +1,6 @@
+use crate::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_test_account, create_user};
-use crate::utils::{find_memory, process_transaction_assert_success};
+use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{AssertAccountDataBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
     ByteSliceOperator, DataValue, DataValueAssertion, EquatableOperator, IntegerOperator, WriteType,
@@ -31,7 +32,7 @@ async fn test_write() {
         .unwrap();
     let account_data_length = account.data.len() as u64;
 
-    let (memory, memory_bump) = find_memory(user.encodable_pubkey(), 0);
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
 
     let tx = Transaction::new_signed_with_payer(
         &[MemoryWriteBuilder::new()
@@ -267,7 +268,7 @@ async fn test_write_u64() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user(context).await.unwrap();
 
-    let (memory, memory_bump) = find_memory(user.encodable_pubkey(), 0);
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
 
     // Assert that data was properly written to memory.
     let tx = Transaction::new_signed_with_payer(

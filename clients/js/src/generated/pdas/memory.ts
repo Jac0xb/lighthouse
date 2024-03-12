@@ -14,14 +14,14 @@ import {
 } from '@solana/addresses';
 import { getStringEncoder, getU8Encoder } from '@solana/codecs';
 
-export type MemoryAccountSeeds = {
+export type MemorySeeds = {
   payer: Address;
 
-  memoryIndex: number;
+  memoryId: number;
 };
 
-export async function findMemoryAccountPda(
-  seeds: MemoryAccountSeeds,
+export async function findMemoryPda(
+  seeds: MemorySeeds,
   config: { programAddress?: Address | undefined } = {}
 ): Promise<ProgramDerivedAddress> {
   const {
@@ -32,7 +32,7 @@ export async function findMemoryAccountPda(
     seeds: [
       getStringEncoder({ size: 'variable' }).encode('memory'),
       getAddressEncoder().encode(seeds.payer),
-      getU8Encoder().encode(seeds.memoryIndex),
+      getU8Encoder().encode(seeds.memoryId),
     ],
   });
 }

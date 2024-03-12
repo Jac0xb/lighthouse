@@ -22,13 +22,6 @@ use solana_sdk::{
 };
 use std::result;
 
-pub fn find_memory(user: Pubkey, memory_id: u8) -> (solana_program::pubkey::Pubkey, u8) {
-    solana_program::pubkey::Pubkey::find_program_address(
-        &["memory".to_string().as_ref(), user.as_ref(), &[memory_id]],
-        &lighthouse_client::ID,
-    )
-}
-
 use self::{
     context::{TestContext, DEFAULT_LAMPORTS_FUND_AMOUNT},
     error::Error,

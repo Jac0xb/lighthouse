@@ -1,6 +1,7 @@
 use crate::utils::context::TestContext;
+use crate::utils::create_user_with_balance;
 use crate::utils::process_transaction_assert_success;
-use crate::utils::{create_user_with_balance, find_memory};
+use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
     AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, IntegerOperator, LogLevel,
@@ -22,7 +23,7 @@ async fn slippage_check() {
         .await
         .unwrap();
 
-    let (memory, bump) = find_memory(user.encodable_pubkey(), 0);
+    let (memory, bump) = find_memory_pda(user.encodable_pubkey(), 0);
 
     let tx = Transaction::new_signed_with_payer(
         &[
