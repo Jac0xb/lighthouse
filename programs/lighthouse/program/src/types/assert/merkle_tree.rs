@@ -1,4 +1,4 @@
-use super::{Assert, EvaluationResult, LogLevel};
+use super::{Assert, LogLevel};
 use crate::{processor::AssertMerkleTreeAccountContext, utils::Result, validation::CheckedAccount};
 use anchor_lang::context::CpiContext;
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -17,7 +17,7 @@ impl<'a, 'info> Assert<&AssertMerkleTreeAccountContext<'a, 'info>> for MerkleTre
         &self,
         context: &AssertMerkleTreeAccountContext<'a, 'info>,
         _log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
+    ) -> Result<()> {
         let accounts = spl_account_compression::cpi::accounts::VerifyLeaf {
             merkle_tree: context.merkle_tree.clone(),
         };
@@ -31,25 +31,14 @@ impl<'a, 'info> Assert<&AssertMerkleTreeAccountContext<'a, 'info>> for MerkleTre
                     CpiContext::new(context.spl_account_compression.info_as_owned(), accounts)
                         .with_remaining_accounts(context.proof_path.to_vec());
 
-                let result = spl_account_compression::cpi::verify_leaf(
+                spl_account_compression::cpi::verify_leaf(
                     cpi_context,
                     context.root.key.to_bytes(),
                     leaf_hash,
                     leaf_index,
-                );
+                )?;
 
-                // CPI failing, fails everything so this won't ever happen
-                if let Err(e) = result {
-                    Ok(Box::new(EvaluationResult {
-                        passed: false,
-                        output: Some(format!("VerifyLeaf CPI failed: {:?}", e)),
-                    }))
-                } else {
-                    Ok(Box::new(EvaluationResult {
-                        passed: true,
-                        output: Some("Merkle tree leaf verified".to_string()),
-                    }))
-                }
+                Ok(())
             }
         }
     }

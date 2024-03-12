@@ -2,7 +2,7 @@ use crate::utils::{context::TestContext, create_test_account, create_user};
 use crate::utils::{find_memory_account, process_transaction_assert_success};
 use lighthouse_client::instructions::{AssertAccountDataBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
-    BytesOperator, DataValue, DataValueAssertion, EquatableOperator, IntegerOperator, WriteType,
+    ByteSliceOperator, DataValue, DataValueAssertion, EquatableOperator, IntegerOperator, WriteType,
 };
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
@@ -160,7 +160,7 @@ async fn test_write() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(62)
                 .instruction(),
@@ -216,7 +216,7 @@ async fn test_write() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(99)
                 .instruction(),
@@ -225,7 +225,7 @@ async fn test_write() {
                 .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(102)
                 .instruction(),
@@ -247,7 +247,7 @@ async fn test_write() {
                         .cloned()
                         .chain(vec![255; 32])
                         .collect::<Vec<u8>>(),
-                    operator: BytesOperator::Equal,
+                    operator: ByteSliceOperator::Equal,
                 })
                 .offset(135)
                 .instruction(),
