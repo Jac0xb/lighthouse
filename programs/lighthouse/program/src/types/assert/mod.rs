@@ -27,5 +27,5 @@ pub use upgradable_loader_state::*;
 use crate::utils::Result;
 
 pub trait Assert<T> {
-    fn evaluate(&self, parameters: T, log_level: LogLevel) -> Result<Box<EvaluationResult>>;
+    fn evaluate(&self, parameters: T, log_level: LogLevel) -> Result<()>;
 }

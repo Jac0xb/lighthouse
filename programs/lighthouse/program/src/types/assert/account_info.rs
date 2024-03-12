@@ -1,7 +1,7 @@
 use super::{Assert, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, EvaluationResult, Operator},
+    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -53,12 +53,8 @@ pub enum AccountInfoAssertion {
 }
 
 impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
-    fn evaluate(
-        &self,
-        account: &AccountInfo<'_>,
-        log_level: LogLevel,
-    ) -> Result<Box<EvaluationResult>> {
-        let result = match self {
+    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
+        match self {
             AccountInfoAssertion::Key { value, operator } => {
                 operator.evaluate(account.unsigned_key(), value, log_level)
             }
@@ -106,8 +102,6 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
             AccountInfoAssertion::KnownOwner { value, operator } => {
                 operator.evaluate(account.owner, &value.to_pubkey(), log_level)
             }
-        };
-
-        Ok(result)
+        }
     }
 }

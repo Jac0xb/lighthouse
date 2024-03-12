@@ -24,6 +24,7 @@ pub mod lighthouse {
 
     #[cfg(not(feature = "no-entrypoint"))]
     solana_program::entrypoint!(process_instruction);
+
     pub fn process_instruction(
         _program_id: &Pubkey,
         accounts: &[AccountInfo],
