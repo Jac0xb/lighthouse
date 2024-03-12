@@ -30,7 +30,7 @@
           ]
         },
         {
-          "name": "memoryAccount",
+          "name": "memory",
           "isMut": true,
           "isSigner": false,
           "docs": [
@@ -48,15 +48,15 @@
       ],
       "args": [
         {
-          "name": "memoryIndex",
+          "name": "memoryId",
           "type": "u8"
         },
         {
-          "name": "memoryAccountBump",
+          "name": "memoryBump",
           "type": "u8"
         },
         {
-          "name": "memoryOffset",
+          "name": "writeOffset",
           "type": "u16"
         },
         {
@@ -91,7 +91,7 @@
           ]
         },
         {
-          "name": "memoryAccount",
+          "name": "memory",
           "isMut": true,
           "isSigner": false,
           "docs": [
@@ -101,11 +101,11 @@
       ],
       "args": [
         {
-          "name": "memoryIndex",
+          "name": "memoryId",
           "type": "u8"
         },
         {
-          "name": "memoryAccountBump",
+          "name": "memoryBump",
           "type": "u8"
         }
       ],

@@ -40,29 +40,26 @@ pub mod lighthouse {
 
         match instruction {
             LighthouseInstruction::MemoryWrite {
-                memory_index,
-                memory_account_bump,
-                memory_offset,
+                memory_id,
+                memory_bump,
+                write_offset,
                 write_type,
             } => {
                 let context = MemoryWriteContext::load(
                     &mut accounts.iter(),
-                    memory_index,
-                    memory_offset,
-                    memory_account_bump,
+                    memory_id,
+                    write_offset,
+                    memory_bump,
                     &write_type,
                 )?;
-                processor::memory_write(&context, memory_offset, &write_type)?;
+                processor::memory_write(&context, write_offset, &write_type)?;
             }
             LighthouseInstruction::MemoryClose {
-                memory_index,
-                memory_account_bump,
+                memory_id,
+                memory_bump,
             } => {
-                let context = MemoryCloseContext::load(
-                    &mut accounts.iter(),
-                    memory_index,
-                    memory_account_bump,
-                )?;
+                let context =
+                    MemoryCloseContext::load(&mut accounts.iter(), memory_id, memory_bump)?;
                 processor::memory_close(&context)?;
             }
             LighthouseInstruction::AssertAccountData {

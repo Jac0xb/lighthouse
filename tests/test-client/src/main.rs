@@ -1,7 +1,7 @@
 use anchor_spl::associated_token;
 use borsh::BorshDeserialize;
 use clap::{Parser, Subcommand};
-use lighthouse_client::get_memory_account;
+use lighthouse_client::get_memory;
 use lighthouse_client::instructions::{
     AssertAccountDeltaBuilder, AssertAccountInfoBuilder, AssertStakeAccountBuilder,
     MemoryCloseBuilder, MemoryWriteBuilder,
@@ -229,7 +229,7 @@ fn build_safe_send_token_transaction(
     destination_user: &Pubkey,
 ) -> Transaction {
     let token_account = get_associated_token_address(&wallet_keypair.pubkey(), mint);
-    let (memory_account, memory_account_bump) = get_memory_account(wallet_keypair.pubkey(), 0);
+    let (memory, memory_bump) = get_memory(wallet_keypair.pubkey(), 0);
     let dest_token_account = get_associated_token_address(destination_user, mint);
 
     let tx = Transaction::new_signed_with_payer(
@@ -237,10 +237,10 @@ fn build_safe_send_token_transaction(
             MemoryWriteBuilder::new()
                 .payer(wallet_keypair.pubkey())
                 .source_account(token_account)
-                .memory_account(memory_account)
-                .memory_index(0)
-                .memory_offset(0)
-                .memory_account_bump(memory_account_bump)
+                .memory(memory)
+                .memory_id(0)
+                .write_offset(0)
+                .memory_bump(memory_bump)
                 .write_type(WriteType::AccountData {
                     offset: 0,
                     data_length: 72,
@@ -256,7 +256,7 @@ fn build_safe_send_token_transaction(
             )
             .unwrap(),
             AssertAccountDeltaBuilder::new()
-                .account_a(memory_account)
+                .account_a(memory)
                 .account_b(token_account)
                 .assertion(AccountDeltaAssertion::Data {
                     a_offset: 0,
@@ -269,7 +269,7 @@ fn build_safe_send_token_transaction(
                 .log_level(LogLevel::Silent)
                 .instruction(),
             AssertAccountDeltaBuilder::new()
-                .account_a(memory_account)
+                .account_a(memory)
                 .account_b(token_account)
                 .assertion(AccountDeltaAssertion::Data {
                     a_offset: 64,
@@ -283,9 +283,9 @@ fn build_safe_send_token_transaction(
                 .instruction(),
             MemoryCloseBuilder::new()
                 .payer(wallet_keypair.pubkey())
-                .memory_account(memory_account)
-                .memory_account_bump(memory_account_bump)
-                .memory_index(0)
+                .memory(memory)
+                .memory_bump(memory_bump)
+                .memory_id(0)
                 .instruction(),
         ],
         Some(&wallet_keypair.pubkey()),

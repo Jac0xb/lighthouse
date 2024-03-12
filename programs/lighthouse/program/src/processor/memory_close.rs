@@ -1,7 +1,7 @@
 use crate::utils::{close, Result};
 use crate::validation::{
-    AccountValidation, CheckedAccount, DerivedAddress, LighthouseProgram, MemoryAccount,
-    MemoryAccountSeeds, Program, Signer,
+    AccountValidation, CheckedAccount, DerivedAddress, LighthouseProgram, Memory, MemorySeeds,
+    Program, Signer,
 };
 use solana_program::account_info::{next_account_info, AccountInfo};
 use std::slice::Iter;
@@ -10,25 +10,25 @@ use std::slice::Iter;
 pub(crate) struct MemoryCloseContext<'a, 'info> {
     pub lighthouse_program: Program<'a, 'info, LighthouseProgram>,
     pub payer: Signer<'a, 'info>,
-    pub memory_account: MemoryAccount<'a, 'info>,
+    pub memory: Memory<'a, 'info>,
 }
 
 impl<'a, 'info> MemoryCloseContext<'a, 'info> {
     pub(crate) fn load(
         account_iter: &mut Iter<'a, AccountInfo<'info>>,
-        memory_index: u8,
-        memory_account_bump: u8,
+        memory_id: u8,
+        memory_bump: u8,
     ) -> Result<Self> {
         let lighthouse_program = Program::new_checked(next_account_info(account_iter)?, None)?;
         let payer = Signer::new_checked(next_account_info(account_iter)?, None)?;
 
-        let seeds = &MemoryAccount::get_seeds(MemoryAccountSeeds {
+        let seeds = &Memory::get_seeds(MemorySeeds {
             payer: payer.key,
-            memory_index,
-            bump: Some(memory_account_bump),
+            memory_id,
+            bump: Some(memory_bump),
         });
 
-        let memory_account = MemoryAccount::new_checked(
+        let memory = Memory::new_checked(
             next_account_info(account_iter)?,
             Some(&vec![
                 AccountValidation::IsWritable,
@@ -44,14 +44,14 @@ impl<'a, 'info> MemoryCloseContext<'a, 'info> {
         Ok(Self {
             lighthouse_program,
             payer,
-            memory_account,
+            memory,
         })
     }
 }
 
 pub(crate) fn memory_close(context: &MemoryCloseContext) -> Result<()> {
     close(
-        context.memory_account.info_as_owned(),
+        context.memory.info_as_owned(),
         context.payer.info_as_owned(),
     )?;
 
