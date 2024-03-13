@@ -107,7 +107,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
             },
             _ => {
                 msg!(
-                    "Account is not in program state was {}",
+                    "Account is not in buffer state was {}",
                     get_state_enum(upgradable_loader_state)
                 );
                 Err(LighthouseError::AssertionFailed.into())

@@ -14,7 +14,7 @@ use shank::ShankInstruction;
 pub(crate) enum LighthouseInstruction {
     #[account(0, name = "program_id", desc = "Lighthouse program")]
     #[account(1, name = "system_program", desc = "System program")]
-    #[account(2, name = "payer", desc = "Payer account", signer)]
+    #[account(2, name = "payer", desc = "Payer account", signer, writable)]
     #[account(3, name = "memory", desc = "Memory account", writable)]
     #[account(4, name = "source_account", desc = "Account to be written to memory")]
     MemoryWrite { 
@@ -25,7 +25,7 @@ pub(crate) enum LighthouseInstruction {
     },
 
     #[account(0, name = "program_id", desc = "Lighthouse program")]
-    #[account(1, name = "payer", desc = "Payer account", signer)]
+    #[account(1, name = "payer", desc = "Payer account", signer, writable)]
     #[account(2, name = "memory", desc = "Memory account", writable)]
     MemoryClose { memory_id: u8, memory_bump: u8 },
 

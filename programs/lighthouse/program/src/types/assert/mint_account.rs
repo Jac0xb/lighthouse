@@ -34,10 +34,6 @@ pub enum MintAccountAssertion {
 
 impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if account.data_is_empty() {
-            return Err(LighthouseError::AccountNotInitialized.into());
-        }
-
         if !keys_equal(account.owner, &spl_token::ID)
             && !keys_equal(account.owner, &spl_token_2022::ID)
         {
@@ -54,11 +50,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 0..36;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
-
+                let data_slice = data.get(0..36).ok_or_else(|| out_of_bounds_err(0..36))?;
                 let mint_authority = unpack_coption_key(data_slice)?;
 
                 operator.evaluate(&mint_authority, assertion_value, log_level)
@@ -67,10 +59,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 36..44;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let data_slice = data.get(36..44).ok_or_else(|| out_of_bounds_err(36..44))?;
                 let actual_supply = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize supply from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -82,10 +71,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 44..45;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
+                let data_slice = data.get(44..45).ok_or_else(|| out_of_bounds_err(44..45))?;
                 let actual_decimals = u8::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize decimals from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -106,11 +92,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_range = 46..82;
-                let data_slice = data
-                    .get(data_range.clone())
-                    .ok_or_else(|| out_of_bounds_err(data_range))?;
-
+                let data_slice = data.get(46..82).ok_or_else(|| out_of_bounds_err(46..82))?;
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
                 operator.evaluate(&freeze_authority, assertion_value, log_level)

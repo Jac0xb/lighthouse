@@ -20,7 +20,10 @@ impl<'a, 'info> MemoryCloseContext<'a, 'info> {
         memory_bump: u8,
     ) -> Result<Self> {
         let lighthouse_program = Program::new_checked(next_account_info(account_iter)?, None)?;
-        let payer = Signer::new_checked(next_account_info(account_iter)?, None)?;
+        let payer = Signer::new_checked(
+            next_account_info(account_iter)?,
+            Some(&vec![AccountValidation::IsWritable]),
+        )?;
 
         let seeds = &Memory::get_seeds(MemorySeeds {
             payer: payer.key,
@@ -53,7 +56,5 @@ pub(crate) fn memory_close(context: &MemoryCloseContext) -> Result<()> {
     close(
         context.memory.info_as_owned(),
         context.payer.info_as_owned(),
-    )?;
-
-    Ok(())
+    )
 }

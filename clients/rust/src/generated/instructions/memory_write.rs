@@ -19,7 +19,7 @@ pub struct MemoryWrite {
     pub payer: solana_program::pubkey::Pubkey,
     /// Memory account
     pub memory: solana_program::pubkey::Pubkey,
-    /// System program
+    /// Account to be written to memory
     pub source_account: solana_program::pubkey::Pubkey,
 }
 
@@ -45,7 +45,7 @@ impl MemoryWrite {
             self.system_program,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -95,7 +95,7 @@ pub struct MemoryWriteInstructionArgs {
 ///
 ///   0. `[]` program_id
 ///   1. `[optional]` system_program (default to `11111111111111111111111111111111`)
-///   2. `[signer]` payer
+///   2. `[writable, signer]` payer
 ///   3. `[writable]` memory
 ///   4. `[]` source_account
 #[derive(Default)]
@@ -141,7 +141,7 @@ impl MemoryWriteBuilder {
         self.memory = Some(memory);
         self
     }
-    /// System program
+    /// Account to be written to memory
     #[inline(always)]
     pub fn source_account(&mut self, source_account: solana_program::pubkey::Pubkey) -> &mut Self {
         self.source_account = Some(source_account);
@@ -217,7 +217,7 @@ pub struct MemoryWriteCpiAccounts<'a, 'b> {
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
     pub memory: &'b solana_program::account_info::AccountInfo<'a>,
-    /// System program
+    /// Account to be written to memory
     pub source_account: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
@@ -233,7 +233,7 @@ pub struct MemoryWriteCpi<'a, 'b> {
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Memory account
     pub memory: &'b solana_program::account_info::AccountInfo<'a>,
-    /// System program
+    /// Account to be written to memory
     pub source_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: MemoryWriteInstructionArgs,
@@ -297,7 +297,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
             *self.system_program.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
         ));
@@ -350,7 +350,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
 ///
 ///   0. `[]` program_id
 ///   1. `[]` system_program
-///   2. `[signer]` payer
+///   2. `[writable, signer]` payer
 ///   3. `[writable]` memory
 ///   4. `[]` source_account
 pub struct MemoryWriteCpiBuilder<'a, 'b> {
@@ -407,7 +407,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         self.instruction.memory = Some(memory);
         self
     }
-    /// System program
+    /// Account to be written to memory
     #[inline(always)]
     pub fn source_account(
         &mut self,

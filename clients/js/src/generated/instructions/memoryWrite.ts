@@ -27,8 +27,8 @@ import {
   IInstructionWithAccounts,
   IInstructionWithData,
   ReadonlyAccount,
-  ReadonlySignerAccount,
   WritableAccount,
+  WritableSignerAccount,
 } from '@solana/instructions';
 import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
 import {
@@ -66,7 +66,7 @@ export type MemoryWriteInstruction<
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
       TAccountPayer extends string
-        ? ReadonlySignerAccount<TAccountPayer>
+        ? WritableSignerAccount<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
         ? WritableAccount<TAccountMemory>
@@ -101,7 +101,7 @@ export type MemoryWriteInstructionWithSigners<
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
       TAccountPayer extends string
-        ? ReadonlySignerAccount<TAccountPayer> &
+        ? WritableSignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
@@ -177,7 +177,7 @@ export type MemoryWriteInput<
   payer: Address<TAccountPayer>;
   /** Memory account */
   memory: Address<TAccountMemory>;
-  /** System program */
+  /** Account to be written to memory */
   sourceAccount: Address<TAccountSourceAccount>;
   memoryId: MemoryWriteInstructionDataArgs['memoryId'];
   memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
@@ -200,7 +200,7 @@ export type MemoryWriteInputWithSigners<
   payer: TransactionSigner<TAccountPayer>;
   /** Memory account */
   memory: Address<TAccountMemory>;
-  /** System program */
+  /** Account to be written to memory */
   sourceAccount: Address<TAccountSourceAccount>;
   memoryId: MemoryWriteInstructionDataArgs['memoryId'];
   memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
@@ -288,7 +288,7 @@ export function getMemoryWriteInstruction<
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
     programId: { value: input.programId ?? null, isWritable: false },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
-    payer: { value: input.payer ?? null, isWritable: false },
+    payer: { value: input.payer ?? null, isWritable: true },
     memory: { value: input.memory ?? null, isWritable: true },
     sourceAccount: { value: input.sourceAccount ?? null, isWritable: false },
   };
@@ -371,7 +371,7 @@ export function getMemoryWriteInstructionRaw<
           ('11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>),
         AccountRole.READONLY
       ),
-      accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
+      accountMetaWithDefault(accounts.payer, AccountRole.WRITABLE_SIGNER),
       accountMetaWithDefault(accounts.memory, AccountRole.WRITABLE),
       accountMetaWithDefault(accounts.sourceAccount, AccountRole.READONLY),
       ...(remainingAccounts ?? []),
@@ -403,7 +403,7 @@ export type ParsedMemoryWriteInstruction<
     payer: TAccountMetas[2];
     /** Memory account */
     memory: TAccountMetas[3];
-    /** System program */
+    /** Account to be written to memory */
     sourceAccount: TAccountMetas[4];
   };
   data: MemoryWriteInstructionData;

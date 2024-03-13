@@ -83,11 +83,11 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                 }
 
                 let a_account_data = a_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for left target account", e);
+                    err_msg!("Cannot borrow data for account_a", e);
                     err!(LighthouseError::AccountBorrowFailed)
                 })?;
                 let b_account_data = b_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for right target account", e);
+                    err_msg!("Cannot borrow data for account_b", e);
                     err!(LighthouseError::AccountBorrowFailed)
                 })?;
 
@@ -205,7 +205,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                 let (a_account, b_account) = accounts;
 
                 let a_account_data = a_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for left target account", e);
+                    err_msg!("Cannot borrow data for account_a", e);
                     err!(LighthouseError::AccountBorrowFailed)
                 })?;
 
