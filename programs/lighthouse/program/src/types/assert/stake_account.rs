@@ -37,10 +37,6 @@ pub enum StakeAccountAssertion {
 
 impl Assert<&AccountInfo<'_>> for StakeAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if account.data_is_empty() {
-            return Err(LighthouseError::AccountNotInitialized.into());
-        }
-
         if !keys_equal(account.owner, &solana_program::stake::program::ID) {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }

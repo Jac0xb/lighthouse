@@ -3,7 +3,7 @@ use crate::{
     err, err_msg,
     error::LighthouseError,
     types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
-    utils::{out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
+    utils::{keys_equal, out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -66,11 +66,9 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
 
 impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if account.data_is_empty() {
-            return Err(LighthouseError::AccountNotInitialized.into());
-        }
-
-        if ![spl_token::ID, spl_token_2022::ID].contains(account.owner) {
+        if !keys_equal(account.owner, &spl_token::ID)
+            && !keys_equal(account.owner, &spl_token_2022::ID)
+        {
             return Err(LighthouseError::AccountOwnerMismatch.into());
         }
 

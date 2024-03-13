@@ -36,7 +36,7 @@ impl MemoryClose {
             self.program_id,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -79,7 +79,7 @@ pub struct MemoryCloseInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` program_id
-///   1. `[signer]` payer
+///   1. `[writable, signer]` payer
 ///   2. `[writable]` memory
 #[derive(Default)]
 pub struct MemoryCloseBuilder {
@@ -233,7 +233,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
             *self.program_id.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
         ));
@@ -279,7 +279,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` program_id
-///   1. `[signer]` payer
+///   1. `[writable, signer]` payer
 ///   2. `[writable]` memory
 pub struct MemoryCloseCpiBuilder<'a, 'b> {
     instruction: Box<MemoryCloseCpiBuilderInstruction<'a, 'b>>,

@@ -1,4 +1,4 @@
-use super::{Assert, KnownProgram, LogLevel};
+use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
     types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
@@ -56,10 +56,13 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         match self {
             AccountInfoAssertion::Key { value, operator } => {
-                operator.evaluate(account.unsigned_key(), value, log_level)
+                operator.evaluate(account.key, value, log_level)
             }
             AccountInfoAssertion::Owner { value, operator } => {
                 operator.evaluate(account.owner, value, log_level)
+            }
+            AccountInfoAssertion::KnownOwner { value, operator } => {
+                operator.evaluate(account.owner, &value.to_pubkey(), log_level)
             }
             AccountInfoAssertion::Lamports { value, operator } => {
                 operator.evaluate(&account.try_lamports()?, value, log_level)
@@ -97,10 +100,7 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                 let account_data = &account_data[start as usize..(start + length) as usize];
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
-                EquatableOperator::Equal.evaluate(&actual_hash, expected_hash, log_level)
-            }
-            AccountInfoAssertion::KnownOwner { value, operator } => {
-                operator.evaluate(account.owner, &value.to_pubkey(), log_level)
+                ByteSliceOperator::Equal.evaluate(&actual_hash, expected_hash, log_level)
             }
         }
     }

@@ -25,8 +25,8 @@ import {
   IInstructionWithAccounts,
   IInstructionWithData,
   ReadonlyAccount,
-  ReadonlySignerAccount,
   WritableAccount,
+  WritableSignerAccount,
 } from '@solana/instructions';
 import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
 import {
@@ -51,7 +51,7 @@ export type MemoryCloseInstruction<
         ? ReadonlyAccount<TAccountProgramId>
         : TAccountProgramId,
       TAccountPayer extends string
-        ? ReadonlySignerAccount<TAccountPayer>
+        ? WritableSignerAccount<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
         ? WritableAccount<TAccountMemory>
@@ -76,7 +76,7 @@ export type MemoryCloseInstructionWithSigners<
         ? ReadonlyAccount<TAccountProgramId>
         : TAccountProgramId,
       TAccountPayer extends string
-        ? ReadonlySignerAccount<TAccountPayer> &
+        ? WritableSignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
@@ -209,7 +209,7 @@ export function getMemoryCloseInstruction<
   >[0];
   const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
     programId: { value: input.programId ?? null, isWritable: false },
-    payer: { value: input.payer ?? null, isWritable: false },
+    payer: { value: input.payer ?? null, isWritable: true },
     memory: { value: input.memory ?? null, isWritable: true },
   };
 
@@ -272,7 +272,7 @@ export function getMemoryCloseInstructionRaw<
         },
         AccountRole.READONLY
       ),
-      accountMetaWithDefault(accounts.payer, AccountRole.READONLY_SIGNER),
+      accountMetaWithDefault(accounts.payer, AccountRole.WRITABLE_SIGNER),
       accountMetaWithDefault(accounts.memory, AccountRole.WRITABLE),
       ...(remainingAccounts ?? []),
     ],

@@ -12,7 +12,7 @@ impl LogLevel {
         self == &LogLevel::Silent
     }
 
-    pub fn is_plaintextmsg_log(&self) -> bool {
+    pub fn is_plaintext_message(&self) -> bool {
         self == &LogLevel::PlaintextMessage
     }
 }

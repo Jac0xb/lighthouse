@@ -34,7 +34,10 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
     ) -> Result<Self> {
         let lighthouse_program = Program::new_checked(next_account_info(account_iter)?, None)?;
         let system_program = Program::new_checked(next_account_info(account_iter).unwrap(), None)?;
-        let payer = Signer::new_checked(next_account_info(account_iter)?, None)?;
+        let payer = Signer::new_checked(
+            next_account_info(account_iter)?,
+            Some(&vec![AccountValidation::IsWritable]),
+        )?;
 
         let seeds = &Memory::get_seeds(MemorySeeds {
             payer: payer.key,
@@ -68,6 +71,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             Memory::new_checked(
                 memory_info,
                 Some(&vec![
+                    AccountValidation::IsProgramOwned(crate::ID),
                     AccountValidation::IsWritable,
                     AccountValidation::IsProgramDerivedAddress {
                         seeds,

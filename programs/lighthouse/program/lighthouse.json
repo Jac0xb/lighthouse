@@ -23,7 +23,7 @@
         },
         {
           "name": "payer",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "Payer account"
@@ -42,7 +42,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "System program"
+            "Account to be written to memory"
           ]
         }
       ],
@@ -84,7 +84,7 @@
         },
         {
           "name": "payer",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "Payer account"
