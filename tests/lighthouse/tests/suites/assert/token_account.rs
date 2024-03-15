@@ -1,21 +1,24 @@
 use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::context::TestContext;
 use crate::utils::tx_builder::TxBuilder;
-use crate::utils::{create_mint, create_user, CreateMintParameters};
+use crate::utils::{create_mint, create_user, set_account_from_refs, CreateMintParameters};
 use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
     to_transaction_error_u8,
 };
 use anchor_spl::associated_token::get_associated_token_address;
+use anchor_spl::token_2022;
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertTokenAccountBuilder;
 use lighthouse_client::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
+use solana_sdk::program_option::COption;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
+use spl_token::state::{Account, AccountState};
 
 // This tests the assumption that non-native accounts cannot be closed by a malicious actor.
 #[tokio::test]
@@ -381,6 +384,301 @@ async fn test_drain_token_account() {
         context,
         tx,
         to_transaction_error(1, LighthouseError::AssertionFailed),
+        None,
+    )
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn simple() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let (tx, mint) = create_mint(
+        context,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: Some(Some(user.pubkey())),
+            freeze_authority: None,
+            mint_to: Some((user.pubkey(), 69_000)),
+            decimals: 9,
+        },
+    )
+    .await
+    .unwrap();
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
+
+    let builder_fn = |assertion: TokenAccountAssertion| {
+        AssertTokenAccountBuilder::new()
+            .target_account(user_ata)
+            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .assertion(assertion)
+            .instruction()
+    };
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            builder_fn(TokenAccountAssertion::Mint {
+                value: mint.pubkey(),
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::Owner {
+                value: user.pubkey(),
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::Amount {
+                value: 69_000,
+                operator: ComparableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::State {
+                value: AccountState::Initialized as u8,
+                operator: ComparableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::IsNative {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::DelegatedAmount {
+                value: 0,
+                operator: ComparableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::TokenAccountOwnerIsDerived),
+        ],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let fail_ixs = vec![
+        builder_fn(TokenAccountAssertion::Mint {
+            value: mint.pubkey(),
+            operator: EquatableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::Owner {
+            value: user.pubkey(),
+            operator: EquatableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::Amount {
+            value: 69_000,
+            operator: ComparableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::Delegate {
+            value: None,
+            operator: EquatableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::State {
+            value: AccountState::Initialized as u8,
+            operator: ComparableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::IsNative {
+            value: None,
+            operator: EquatableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::DelegatedAmount {
+            value: 0,
+            operator: ComparableOperator::NotEqual,
+        }),
+        builder_fn(TokenAccountAssertion::CloseAuthority {
+            value: None,
+            operator: EquatableOperator::NotEqual,
+        }),
+    ];
+
+    for fail_ix in fail_ixs {
+        let tx = Transaction::new_signed_with_payer(
+            &[fail_ix],
+            Some(&user.pubkey()),
+            &[&user],
+            context.get_blockhash().await,
+        );
+
+        process_transaction_assert_failure(
+            context,
+            tx,
+            to_transaction_error(0, LighthouseError::AssertionFailed),
+            None,
+        )
+        .await
+        .unwrap();
+    }
+
+    // Test not derived
+
+    let account = Account {
+        mint: mint.pubkey(),
+        owner: Keypair::new().pubkey(),
+        amount: 69_000,
+        delegate: COption::None,
+        state: AccountState::Initialized,
+        is_native: COption::None,
+        delegated_amount: 0,
+        close_authority: COption::None,
+    };
+
+    let mut account_slice = [0u8; Account::LEN];
+    account.pack_into_slice(&mut account_slice);
+
+    set_account_from_refs(context, &user_ata, account_slice.as_ref(), &token_2022::ID).await;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[builder_fn(
+            TokenAccountAssertion::TokenAccountOwnerIsDerived,
+        )],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(0, LighthouseError::AssertionFailed),
+        None,
+    )
+    .await
+    .unwrap();
+
+    // Test option Some
+
+    let account = Account {
+        mint: mint.pubkey(),
+        owner: Keypair::new().pubkey(),
+        amount: 69_000,
+        delegate: COption::Some(Keypair::new().encodable_pubkey()),
+        state: AccountState::Frozen,
+        is_native: COption::Some(1),
+        delegated_amount: 420,
+        close_authority: COption::Some(Keypair::new().encodable_pubkey()),
+    };
+
+    let mut account_slice = [0u8; Account::LEN];
+    account.pack_into_slice(&mut account_slice);
+
+    set_account_from_refs(context, &user_ata, account_slice.as_ref(), &token_2022::ID).await;
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            builder_fn(TokenAccountAssertion::Delegate {
+                value: Some(account.delegate.unwrap()),
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::Delegate {
+                value: Some(Keypair::new().encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::Delegate {
+                value: None,
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::CloseAuthority {
+                value: Some(account.close_authority.unwrap()),
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::CloseAuthority {
+                value: Some(Keypair::new().encodable_pubkey()),
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::CloseAuthority {
+                value: None,
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::IsNative {
+                value: Some(1),
+                operator: EquatableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::IsNative {
+                value: Some(0),
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::IsNative {
+                value: None,
+                operator: EquatableOperator::NotEqual,
+            }),
+            builder_fn(TokenAccountAssertion::DelegatedAmount {
+                value: 420,
+                operator: ComparableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::State {
+                value: AccountState::Frozen as u8,
+                operator: ComparableOperator::Equal,
+            }),
+            builder_fn(TokenAccountAssertion::State {
+                value: AccountState::Initialized as u8,
+                operator: ComparableOperator::NotEqual,
+            }),
+        ],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    // Token account owner is derived fails
+
+    let tx = Transaction::new_signed_with_payer(
+        &[builder_fn(
+            TokenAccountAssertion::TokenAccountOwnerIsDerived,
+        )],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(0, LighthouseError::AssertionFailed),
+        None,
+    )
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn account_not_owned_by_token_program() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let tx = Transaction::new_signed_with_payer(
+        &[AssertTokenAccountBuilder::new()
+            .target_account(user.pubkey())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(TokenAccountAssertion::Owner {
+                value: user.encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            })
+            .instruction()],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(0, LighthouseError::AccountOwnerMismatch),
         None,
     )
     .await

@@ -102,7 +102,7 @@ async fn test() {
         .data;
     let stake_account = StakeStateV2::deserialize(&mut data.as_ref()).unwrap();
 
-    let (meta, stake, flags) = match stake_account {
+    let (meta, stake, _flags) = match stake_account {
         StakeStateV2::Stake(meta, stake, flags) => (meta, stake, flags),
         _ => panic!("Stake account is not in the initialized state"),
     };

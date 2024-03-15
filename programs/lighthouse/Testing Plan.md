@@ -90,7 +90,7 @@ Testing Plan
     - Stake Account
       - Happy Path
         - [] Test all assertion types
-          - [] Test all state enums ::State
+          - [x] Test all state enums ::State
           - [x] Test Meta
             - [x] Test all meta assertion types
           - [x] Test Stake
@@ -100,29 +100,27 @@ Testing Plan
         - [x] Account not owned by stake program
     - Token Account
       - Happy Path
-        - [] For delegate, is_native, and close_authority test negation of none/some with operator
-        - [] Make sure all assertion types are tested inline and blackbox (FAILURE AND SUCCESS CASES)
-        - [] Test fail case for bad toklen account owner is derived
+        - [x] For delegate, is_native, and close_authority test negation of none/some with operator
+        - [x] Make sure all assertion types are tested inline and blackbox (FAILURE AND SUCCESS CASES)
+        - [x] Test fail case for bad token account owner is derived
       - Failures
-        - [] Account not owned by token programs
-        - [] Account is empty
-        - [] Test with mint account
+        - [x] Account not owned by token programs
+        - [x] Account is empty
+        - [???] Test with mint account
     - Upgradeable Loader State
       - Happy Path
-        - [] Test all assertion types
-          - [] Test all state enums ::State
-          - [] Test all upgradeable loader state assertion types
-          - [] Test all buffer assertion types
-          - [] Test all program assertion types
-          - [] Test all program data assertion types
-          - [] Test uninitialized state
+        - [x] Test all assertion types
+          - [x] Test all state enums ::State
+          - [x] Test all upgradeable loader state assertion types
+          - [x] Test all buffer assertion types
+          - [x] Test all program assertion types
+          - [x] Test all program data assertion types
+          - [x] Test uninitialized state
       - Failures
-        - [] Account not owned by upgradeable loader program
-        - [] Account is empty
-        - [] Test empty account
-        - [] Test account not in program state
-        - [] Test account not in buffer state
-        - [] Test account not in program data state
+        - [x] Account not owned by upgradeable loader program
+        - [x] Test account not in program state
+        - [x] Test account not in buffer state
+        - [x] Test account not in program data state
     -
 
 - [] Look into memcpy syscall for memory write and using it.
