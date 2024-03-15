@@ -21,6 +21,17 @@ pub mod instructions {
     };
 }
 
+#[cfg(feature = "cpi")]
+pub mod cpi {
+    pub use crate::generated::instructions::{
+        AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
+        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
+        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
+        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
+        AssertUpgradeableLoaderAccountBuilder, MemoryCloseCpiBuilder, MemoryWriteCpiBuilder,
+    };
+}
+
 pub mod errors {
     pub use crate::generated::errors::*;
 }

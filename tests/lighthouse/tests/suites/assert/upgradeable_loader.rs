@@ -1,7 +1,6 @@
 use crate::utils::context::TestContext;
 use crate::utils::{create_user_with_balance, set_account_from_refs, to_transaction_error};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
-use anchor_lang::Key;
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertUpgradeableLoaderAccountBuilder;
 use lighthouse_client::types::{

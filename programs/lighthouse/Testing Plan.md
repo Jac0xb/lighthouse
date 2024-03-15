@@ -34,7 +34,7 @@ Testing Plan
       - [x] Memory account as not writable
       - [x] Payer as not writable
       - [x] Payer is not signer
-      - [] Try writing to memory from CPI
+      - [x] Try writing to memory from CPI
       - [x] Source Account read out of range for account data writetype
 - Types
 
@@ -89,7 +89,7 @@ Testing Plan
       - [] Test logging for operators
     - Stake Account
       - Happy Path
-        - [] Test all assertion types
+        - [x] Test all assertion types
           - [x] Test all state enums ::State
           - [x] Test Meta
             - [x] Test all meta assertion types

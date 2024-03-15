@@ -5225,6 +5225,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "arrayref",
+ "lighthouse-client",
  "solana-program",
 ]
 

@@ -1,9 +1,5 @@
 use super::{Assert, LogLevel};
-use crate::{
-    processor::AssertMerkleTreeAccountContext,
-    utils::{Key, Result},
-    validation::CheckedAccount,
-};
+use crate::{processor::AssertMerkleTreeAccountContext, utils::Result, validation::CheckedAccount};
 use anchor_lang::context::CpiContext;
 use borsh::{BorshDeserialize, BorshSerialize};
 use std::fmt::Debug;

@@ -2157,6 +2157,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "lighthouse-client"
+version = "0.1.0"
+dependencies = [
+ "borsh 0.10.3",
+ "num-derive 0.3.3",
+ "num-traits",
+ "solana-program",
+ "thiserror",
+]
+
+[[package]]
 name = "linux-raw-sys"
 version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5270,6 +5281,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "arrayref",
+ "lighthouse-client",
  "solana-program",
 ]
 

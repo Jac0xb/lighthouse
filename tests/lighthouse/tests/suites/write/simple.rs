@@ -1,9 +1,11 @@
 use crate::utils::{context::TestContext, create_test_account, create_user};
 use crate::utils::{
-    create_and_transfer_token_account_ix, create_mint, process_transaction_assert_success,
-    CreateMintParameters,
+    create_and_transfer_token_account_ix, create_mint, process_transaction_assert_failure,
+    process_transaction_assert_success, to_transaction_error, CreateMintParameters,
 };
+use anchor_lang::*;
 use borsh::BorshSerialize;
+use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::{
     AssertAccountDataBuilder, AssertAccountDeltaBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
 };
@@ -13,6 +15,7 @@ use lighthouse_client::types::{
 };
 use lighthouse_client::{find_memory_pda, find_memory_pda_bump_iterate};
 use solana_program_test::tokio;
+use solana_sdk::instruction::Instruction;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::system_program;
@@ -669,4 +672,39 @@ async fn write_to_another_bump() {
     process_transaction_assert_success(context, tx)
         .await
         .unwrap();
+}
+
+#[tokio::test]
+async fn cpi_check() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
+
+    let tx = Transaction::new_signed_with_payer(
+        &[Instruction {
+            program_id: test_program::ID,
+            accounts: test_program::accounts::Write {
+                signer: user.encodable_pubkey(),
+                source_account: user.encodable_pubkey(),
+                lighthouse: lighthouse_client::ID,
+                system_program: system_program::id(),
+                memory,
+            }
+            .to_account_metas(None),
+            data: test_program::instruction::Write { memory_bump }.data(),
+        }],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_failure(
+        context,
+        tx,
+        to_transaction_error(0, LighthouseError::CrossProgramInvokeViolation),
+        None,
+    )
+    .await
+    .unwrap();
 }
