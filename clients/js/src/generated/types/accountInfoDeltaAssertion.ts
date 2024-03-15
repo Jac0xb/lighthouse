@@ -37,7 +37,7 @@ import {
 
 export type AccountInfoDeltaAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'DataLength'; operator: ComparableOperator }
+  | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
   | { __kind: 'Owner'; operator: EquatableOperator }
   | { __kind: 'RentEpoch'; value: bigint; operator: ComparableOperator };
 
@@ -47,7 +47,11 @@ export type AccountInfoDeltaAssertionArgs =
       value: number | bigint;
       operator: IntegerOperatorArgs;
     }
-  | { __kind: 'DataLength'; operator: ComparableOperatorArgs }
+  | {
+      __kind: 'DataLength';
+      value: number | bigint;
+      operator: ComparableOperatorArgs;
+    }
   | { __kind: 'Owner'; operator: EquatableOperatorArgs }
   | {
       __kind: 'RentEpoch';
@@ -66,7 +70,10 @@ export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaA
     ],
     [
       'DataLength',
-      getStructEncoder([['operator', getComparableOperatorEncoder()]]),
+      getStructEncoder([
+        ['value', getI128Encoder()],
+        ['operator', getComparableOperatorEncoder()],
+      ]),
     ],
     ['Owner', getStructEncoder([['operator', getEquatableOperatorEncoder()]])],
     [
@@ -90,7 +97,10 @@ export function getAccountInfoDeltaAssertionDecoder(): Decoder<AccountInfoDeltaA
     ],
     [
       'DataLength',
-      getStructDecoder([['operator', getComparableOperatorDecoder()]]),
+      getStructDecoder([
+        ['value', getI128Decoder()],
+        ['operator', getComparableOperatorDecoder()],
+      ]),
     ],
     ['Owner', getStructDecoder([['operator', getEquatableOperatorDecoder()]])],
     [

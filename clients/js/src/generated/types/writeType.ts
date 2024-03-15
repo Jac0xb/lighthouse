@@ -25,10 +25,14 @@ import {
 import {
   AccountInfoField,
   AccountInfoFieldArgs,
+  ClockField,
+  ClockFieldArgs,
   DataValue,
   DataValueArgs,
   getAccountInfoFieldDecoder,
   getAccountInfoFieldEncoder,
+  getClockFieldDecoder,
+  getClockFieldEncoder,
   getDataValueDecoder,
   getDataValueEncoder,
 } from '.';
@@ -36,12 +40,14 @@ import {
 export type WriteType =
   | { __kind: 'AccountData'; offset: number; dataLength: number }
   | { __kind: 'AccountInfoField'; fields: [AccountInfoField] }
-  | { __kind: 'DataValue'; fields: [DataValue] };
+  | { __kind: 'DataValue'; fields: [DataValue] }
+  | { __kind: 'Clock'; fields: [ClockField] };
 
 export type WriteTypeArgs =
   | { __kind: 'AccountData'; offset: number; dataLength: number }
   | { __kind: 'AccountInfoField'; fields: [AccountInfoFieldArgs] }
-  | { __kind: 'DataValue'; fields: [DataValueArgs] };
+  | { __kind: 'DataValue'; fields: [DataValueArgs] }
+  | { __kind: 'Clock'; fields: [ClockFieldArgs] };
 
 export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
   return getDataEnumEncoder([
@@ -61,6 +67,10 @@ export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
     [
       'DataValue',
       getStructEncoder([['fields', getTupleEncoder([getDataValueEncoder()])]]),
+    ],
+    [
+      'Clock',
+      getStructEncoder([['fields', getTupleEncoder([getClockFieldEncoder()])]]),
     ],
   ]);
 }
@@ -84,6 +94,10 @@ export function getWriteTypeDecoder(): Decoder<WriteType> {
       'DataValue',
       getStructDecoder([['fields', getTupleDecoder([getDataValueDecoder()])]]),
     ],
+    [
+      'Clock',
+      getStructDecoder([['fields', getTupleDecoder([getClockFieldDecoder()])]]),
+    ],
   ]);
 }
 
@@ -104,6 +118,10 @@ export function writeType(
   kind: 'DataValue',
   data: GetDataEnumKindContent<WriteTypeArgs, 'DataValue'>['fields']
 ): GetDataEnumKind<WriteTypeArgs, 'DataValue'>;
+export function writeType(
+  kind: 'Clock',
+  data: GetDataEnumKindContent<WriteTypeArgs, 'Clock'>['fields']
+): GetDataEnumKind<WriteTypeArgs, 'Clock'>;
 export function writeType<K extends WriteTypeArgs['__kind']>(
   kind: K,
   data?: any

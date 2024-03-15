@@ -1,5 +1,11 @@
 use crate::utils::blackhat_program::BlackhatProgram;
+use crate::utils::context::TestContext;
 use crate::utils::tx_builder::TxBuilder;
+use crate::utils::{create_mint, create_user, CreateMintParameters};
+use crate::utils::{
+    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
+    to_transaction_error_u8,
+};
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertTokenAccountBuilder;
@@ -10,13 +16,6 @@ use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
-
-use crate::utils::context::TestContext;
-use crate::utils::{create_mint, create_user, CreateMintParameters};
-use crate::utils::{
-    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
-    to_transaction_error_u8,
-};
 
 // This tests the assumption that non-native accounts cannot be closed by a malicious actor.
 #[tokio::test]

@@ -15,14 +15,6 @@ use solana_program::pubkey::Pubkey;
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AccountInfoAssertion {
-    Key {
-        #[cfg_attr(
-            feature = "serde",
-            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
-        )]
-        value: Pubkey,
-        operator: EquatableOperator,
-    },
     Lamports {
         value: u64,
         operator: ComparableOperator,

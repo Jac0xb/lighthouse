@@ -19,6 +19,7 @@ pub enum AccountInfoDeltaAssertion {
         operator: IntegerOperator,
     },
     DataLength {
+        value: i128,
         operator: ComparableOperator,
     },
     Owner {

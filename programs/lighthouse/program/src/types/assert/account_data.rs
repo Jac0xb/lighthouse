@@ -80,6 +80,10 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
+        if data.is_empty() {
+            return Err(LighthouseError::AccountNotInitialized.into());
+        }
+
         match assertion {
             DataValueAssertion::Bool {
                 value: assertion_value,
@@ -183,27 +187,20 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
     }
 }
 
-///
-///
-///
-///
-///
-
 #[cfg(test)]
 mod tests {
-    use solana_sdk::{
-        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
-    };
-
+    use super::DataValueAssertion;
     use crate::{
+        error::LighthouseError,
         test_utils::{assert_failed, assert_passed, create_test_account},
         types::assert::{
             operator::{EquatableOperator, IntegerOperator},
-            AccountDataAssertion, Assert, LogLevel,
+            AccountDataAssertion, Assert, ByteSliceOperator, LogLevel,
         },
     };
-
-    use super::DataValueAssertion;
+    use solana_sdk::{
+        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
+    };
 
     #[test]
     fn evaluate() {
@@ -380,5 +377,377 @@ mod tests {
                 assert_failed(result);
             }
         }
+    }
+
+    #[test]
+    fn fail_try_from_slice() {
+        let key = system_program::id();
+        let lamports = &mut 0;
+
+        // Fail on u8
+
+        let data: &mut [u8] = &mut [0u8; 0];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U8 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i8
+
+        let data: &mut [u8] = &mut [0u8; 0];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::I8 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on u16
+
+        let data: &mut [u8] = &mut [0u8; 1];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U16 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i16
+
+        let data: &mut [u8] = &mut [0u8; 1];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::I16 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on u32
+
+        let data: &mut [u8] = &mut [0u8; 2];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U32 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i32
+
+        let data: &mut [u8] = &mut [0u8; 2];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::I32 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on u64
+
+        let data: &mut [u8] = &mut [0u8; 4];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U64 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i64
+
+        let data: &mut [u8] = &mut [0u8; 4];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::I64 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on u128
+
+        let data: &mut [u8] = &mut [0u8; 8];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U128 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i128
+
+        let data: &mut [u8] = &mut [0u8; 8];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::I128 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on pubkey
+
+        let data: &mut [u8] = &mut [0u8; 24];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::Pubkey {
+                value: Keypair::new().encodable_pubkey(),
+                operator: EquatableOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on bool
+
+        let data: &mut [u8] = &mut [0u8; 0];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::Bool {
+                value: true,
+                operator: EquatableOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on bytes
+
+        let data: &mut [u8] = &mut [0u8; 32];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::Bytes {
+                value: vec![u8::MAX; 33],
+                operator: ByteSliceOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+    }
+
+    #[test]
+    fn fail_try_from_slice_with_offset() {
+        let key = system_program::id();
+        let lamports = &mut 0;
+
+        // Fail on u16
+        let data: &mut [u8] = &mut [0u8; 8];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+        let assertion = AccountDataAssertion {
+            offset: 7,
+            assertion: DataValueAssertion::U16 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on i128
+        let data: &mut [u8] = &mut [0u8; 16];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+        let assertion = AccountDataAssertion {
+            offset: 9,
+            assertion: DataValueAssertion::I128 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        // Fail on bytes
+        let data: &mut [u8] = &mut [0u8; 32];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+        let assertion = AccountDataAssertion {
+            offset: 17,
+            assertion: DataValueAssertion::Bytes {
+                value: vec![u8::MAX; 16],
+                operator: ByteSliceOperator::Equal,
+            },
+        };
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+        } else {
+            panic!("Expected error");
+        }
+    }
+
+    #[test]
+    fn fail_to_borrow_account() {
+        let key = system_program::id();
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 64];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        let assertion = AccountDataAssertion {
+            offset: 0,
+            assertion: DataValueAssertion::U8 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            },
+        };
+
+        let data = account_info.try_borrow_mut_data().unwrap();
+
+        let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
+
+        if let Err(e) = result {
+            assert_eq!(e, LighthouseError::AccountBorrowFailed.into());
+        } else {
+            panic!("Expected error");
+        }
+
+        drop(data);
     }
 }

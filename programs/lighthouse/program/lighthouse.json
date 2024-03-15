@@ -1005,6 +1005,10 @@
             "name": "DataLength",
             "fields": [
               {
+                "name": "value",
+                "type": "i128"
+              },
+              {
                 "name": "operator",
                 "type": {
                   "defined": "ComparableOperator"
@@ -1046,21 +1050,6 @@
       "type": {
         "kind": "enum",
         "variants": [
-          {
-            "name": "Key",
-            "fields": [
-              {
-                "name": "value",
-                "type": "publicKey"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          },
           {
             "name": "Lamports",
             "fields": [
@@ -2121,6 +2110,29 @@
       }
     },
     {
+      "name": "ClockField",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Slot"
+          },
+          {
+            "name": "EpochStartTimestamp"
+          },
+          {
+            "name": "Epoch"
+          },
+          {
+            "name": "LeaderScheduleEpoch"
+          },
+          {
+            "name": "UnixTimestamp"
+          }
+        ]
+      }
+    },
+    {
       "name": "DataValue",
       "type": {
         "kind": "enum",
@@ -2237,6 +2249,14 @@
             "fields": [
               {
                 "defined": "DataValue"
+              }
+            ]
+          },
+          {
+            "name": "Clock",
+            "fields": [
+              {
+                "defined": "ClockField"
               }
             ]
           }

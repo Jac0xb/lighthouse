@@ -32,24 +32,24 @@ impl TestAccountV1 {
 }
 
 #[derive(Accounts)]
-pub struct CreateTestAccountV1<'info> {
+pub(crate) struct CreateTestAccountV1<'info> {
     #[account(mut)]
-    pub signer: Signer<'info>,
+    pub(crate) signer: Signer<'info>,
 
     #[account(
         init,
         space=512,
         payer=signer,
     )]
-    pub test_account: Account<'info, TestAccountV1>,
+    pub(crate) test_account: Account<'info, TestAccountV1>,
 
     /// CHECK: ...
-    pub slot_hashes: AccountInfo<'info>,
-    pub rent: Sysvar<'info, Rent>,
-    pub system_program: Program<'info, System>,
+    pub(crate) slot_hashes: AccountInfo<'info>,
+    pub(crate) rent: Sysvar<'info, Rent>,
+    pub(crate) system_program: Program<'info, System>,
 }
 
-pub fn create_test_account<'info>(
+pub(crate) fn create_test_account<'info>(
     ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
     random: bool,
 ) -> Result<()> {

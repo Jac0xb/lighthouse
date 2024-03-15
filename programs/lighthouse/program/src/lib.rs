@@ -35,7 +35,7 @@ pub mod lighthouse {
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
         if instruction.get_log_level() == LogLevel::PlaintextMessage {
-            msg!("Instruction: {:?}", instruction.get_name());
+            msg!("Instruction: {}", instruction.get_name());
         }
 
         match instruction {

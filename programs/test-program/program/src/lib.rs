@@ -12,7 +12,7 @@ declare_id!("Test111111111111111111111111111111111111111");
 pub mod test_program {
     use super::*;
 
-    pub fn create_test_account_v1<'info>(
+    pub(crate) fn create_test_account_v1<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateTestAccountV1<'info>>,
         random: bool,
     ) -> Result<()> {

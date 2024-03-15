@@ -1,5 +1,5 @@
 use crate::error::LighthouseError;
-use crate::types::write::{AccountInfoField, DataValue, WriteType};
+use crate::types::write::{AccountInfoField, ClockField, DataValue, WriteType};
 use crate::utils::Result;
 use crate::validation::{
     AccountValidation, CheckedAccount, DerivedAddress, InitializeType, LighthouseProgram, Memory,
@@ -9,10 +9,13 @@ use crate::{err, err_msg};
 use borsh::BorshSerialize;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
+    clock::Clock,
     instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT},
     msg,
     program_error::ProgramError,
+    sysvar::Sysvar,
 };
+
 use std::slice::Iter;
 
 #[allow(dead_code)]
@@ -201,12 +204,12 @@ pub(crate) fn memory_write(
                         LighthouseError::FailedToSerialize
                     })?
                 }
-                AccountInfoField::DataLength => {
-                    source_account.data_len().try_to_vec().map_err(|err| {
+                AccountInfoField::DataLength => (source_account.data_len() as u64)
+                    .try_to_vec()
+                    .map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.data_len", err);
                         LighthouseError::FailedToSerialize
-                    })?
-                }
+                    })?,
                 AccountInfoField::Executable => {
                     source_account.executable.try_to_vec().map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.executable", err);
@@ -225,6 +228,49 @@ pub(crate) fn memory_write(
                             "AccountInfo write - range out of bounds {:?}",
                             memory_write_range
                         );
+                        LighthouseError::RangeOutOfBounds
+                    })?;
+
+            memory_write_slice.copy_from_slice(&bytes);
+        }
+        WriteType::Clock(clock_field) => {
+            let clock = Clock::get()?;
+
+            let bytes = match clock_field {
+                ClockField::Slot => clock.slot.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.slot", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+                ClockField::EpochStartTimestamp => {
+                    clock.epoch_start_timestamp.try_to_vec().map_err(|err| {
+                        err_msg!("Failed to serialize Clock.epoch_start_timestamp", err);
+                        LighthouseError::FailedToSerialize
+                    })?
+                }
+                ClockField::Epoch => clock.epoch.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.epoch", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+                ClockField::LeaderScheduleEpoch => {
+                    clock.leader_schedule_epoch.try_to_vec().map_err(|err| {
+                        err_msg!("Failed to serialize Clock.leader_schedule_epoch", err);
+                        LighthouseError::FailedToSerialize
+                    })?
+                }
+                ClockField::UnixTimestamp => clock.unix_timestamp.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.unix_timestamp", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+            };
+
+            let data_length = write_type.data_length();
+
+            let memory_write_range = write_offset..(write_offset + data_length);
+            let memory_write_slice =
+                memory_ref
+                    .get_mut(memory_write_range.clone())
+                    .ok_or_else(|| {
+                        msg!("Clock write - range out of bounds {:?}", memory_write_range);
                         LighthouseError::RangeOutOfBounds
                     })?;
 

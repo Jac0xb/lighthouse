@@ -1,19 +1,23 @@
 use crate::utils::context::TestContext;
-use crate::utils::process_transaction_assert_success;
 use crate::utils::tx_builder::TxBuilder;
 use crate::utils::{create_test_account, create_user_with_balance};
+use crate::utils::{
+    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
+};
+use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertAccountDataBuilder;
 use lighthouse_client::types::{
     ByteSliceOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
 };
 use solana_program_test::tokio;
+use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
 
 ///
 /// Tests all data types using the `AccountData` assertion.
 ///
 #[tokio::test]
-async fn borsh_account_data() {
+async fn simple() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
@@ -219,6 +223,87 @@ async fn borsh_account_data() {
         context,
         tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
+    )
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn empty_account_fail() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user_with_balance(context, 10e9 as u64)
+        .await
+        .unwrap();
+
+    let test_account = create_test_account(context, &user, false).await.unwrap();
+
+    let mut tx = TxBuilder {
+        ixs: vec![AssertAccountDataBuilder::new()
+            .target_account(test_account.encodable_pubkey())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(DataValueAssertion::U8 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            })
+            .offset(1234)
+            .instruction()],
+        look_up_tables: None,
+    };
+
+    let blockhash = context.get_blockhash().await;
+
+    process_transaction_assert_failure(
+        context,
+        tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
+            .unwrap(),
+        to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+        None,
+    )
+    .await
+    .unwrap();
+
+    let mut tx = TxBuilder {
+        ixs: vec![AssertAccountDataBuilder::new()
+            .target_account(user.encodable_pubkey())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(DataValueAssertion::U128 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            })
+            .offset(0)
+            .instruction()],
+        look_up_tables: None,
+    };
+
+    process_transaction_assert_failure(
+        context,
+        tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
+            .unwrap(),
+        to_transaction_error(0, LighthouseError::AccountNotInitialized),
+        None,
+    )
+    .await
+    .unwrap();
+
+    let mut tx = TxBuilder {
+        ixs: vec![AssertAccountDataBuilder::new()
+            .target_account(Keypair::new().encodable_pubkey())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(DataValueAssertion::U128 {
+                value: 1,
+                operator: IntegerOperator::Equal,
+            })
+            .offset(0)
+            .instruction()],
+        look_up_tables: None,
+    };
+
+    process_transaction_assert_failure(
+        context,
+        tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
+            .unwrap(),
+        to_transaction_error(0, LighthouseError::AccountNotInitialized),
+        None,
     )
     .await
     .unwrap();

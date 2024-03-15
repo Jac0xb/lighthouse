@@ -13,10 +13,11 @@ pub mod types {
 pub mod instructions {
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertMerkleTreeAccountBuilder, AssertMintAccountMultiBuilder, AssertStakeAccountBuilder,
-        AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder, AssertTokenAccountBuilder,
-        AssertTokenAccountMultiBuilder, AssertUpgradeableLoaderAccountBuilder,
-        AssertUpgradeableLoaderAccountMultiBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
+        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
+        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
+        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
+        AssertUpgradeableLoaderAccountBuilder, AssertUpgradeableLoaderAccountMultiBuilder,
+        MemoryCloseBuilder, MemoryWriteBuilder,
     };
 }
 

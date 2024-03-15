@@ -1,18 +1,27 @@
-use crate::utils::process_transaction_assert_success;
 use crate::utils::{context::TestContext, create_test_account, create_user};
-use lighthouse_client::find_memory_pda;
-use lighthouse_client::instructions::{AssertAccountDataBuilder, MemoryWriteBuilder};
-use lighthouse_client::types::{
-    ByteSliceOperator, DataValue, DataValueAssertion, EquatableOperator, IntegerOperator, WriteType,
+use crate::utils::{
+    create_and_transfer_token_account_ix, create_mint, process_transaction_assert_success,
+    CreateMintParameters,
 };
+use borsh::BorshSerialize;
+use lighthouse_client::instructions::{
+    AssertAccountDataBuilder, AssertAccountDeltaBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
+};
+use lighthouse_client::types::{
+    AccountDeltaAssertion, ByteSliceOperator, DataValue, DataValueAssertion,
+    DataValueDeltaAssertion, EquatableOperator, IntegerOperator, LogLevel, WriteType,
+};
+use lighthouse_client::{find_memory_pda, find_memory_pda_bump_iterate};
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::system_program;
 use solana_sdk::transaction::Transaction;
+use spl_associated_token_account::get_associated_token_address;
+use std::u8::MAX;
 
 #[tokio::test]
-async fn test_write() {
+async fn write_account_data() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user(context).await.unwrap();
 
@@ -264,7 +273,77 @@ async fn test_write() {
 }
 
 #[tokio::test]
-async fn test_write_u64() {
+async fn write_account_type() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
+
+    let build_memory = |offset: u16, write_type: WriteType| {
+        MemoryWriteBuilder::new()
+            .payer(user.encodable_pubkey())
+            .source_account(user.encodable_pubkey())
+            .memory(memory)
+            .program_id(lighthouse_client::ID)
+            .memory_id(0)
+            .memory_bump(memory_bump)
+            .write_offset(offset)
+            .system_program(system_program::id())
+            .write_type(write_type)
+            .instruction()
+    };
+
+    let expected_blob = &mut vec![MAX; 94];
+    expected_blob.extend(user.encodable_pubkey().try_to_vec().unwrap().to_vec());
+    expected_blob.push(1);
+    expected_blob.push(0);
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            build_memory(0, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(1, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(2, WriteType::DataValue(DataValue::U16(u16::MAX))),
+            build_memory(4, WriteType::DataValue(DataValue::I16(-1))),
+            build_memory(6, WriteType::DataValue(DataValue::U32(u32::MAX))),
+            build_memory(10, WriteType::DataValue(DataValue::I32(-1))),
+            build_memory(14, WriteType::DataValue(DataValue::U64(u64::MAX))),
+            build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
+            build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
+            build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
+            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                94,
+                WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
+            ),
+            build_memory(126, WriteType::DataValue(DataValue::Bool(true))),
+            build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
+            AssertAccountDataBuilder::new()
+                .target_account(memory)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .assertion(DataValueAssertion::Bytes {
+                    value: expected_blob.clone(),
+                    operator: ByteSliceOperator::Equal,
+                })
+                .offset(0)
+                .instruction(),
+        ],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    // Test writing account data to memory.
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let memory_data = context.get_account(memory).await.unwrap().data;
+
+    assert_eq!(memory_data.len(), 128);
+    assert_eq!(memory_data.as_slice(), expected_blob.as_slice());
+}
+
+#[tokio::test]
+async fn write_reallocation() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user(context).await.unwrap();
 
@@ -366,6 +445,228 @@ async fn test_write_u64() {
     );
 
     process_transaction_assert_success(context, tx.clone())
+        .await
+        .unwrap();
+}
+
+//
+//  Tests the use where one craetes a memory account, writes token information to it
+//  and then transfers tokens and asserts afterwards that the delta is above threshold.
+//
+#[tokio::test]
+async fn token_transfer() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+    let dest = Keypair::new();
+
+    let (tx, mint) = create_mint(
+        context,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: None,
+            freeze_authority: None,
+            mint_to: Some((user.encodable_pubkey(), 100)),
+            decimals: 9,
+        },
+    )
+    .await
+    .unwrap();
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
+    let token_account =
+        get_associated_token_address(&user.encodable_pubkey(), &mint.encodable_pubkey());
+
+    let mut ixs = vec![MemoryWriteBuilder::new()
+        .payer(user.encodable_pubkey())
+        .source_account(token_account)
+        .program_id(lighthouse_client::ID)
+        .memory(memory)
+        .memory_id(0)
+        .write_offset(0)
+        .memory_bump(memory_bump)
+        .write_type(WriteType::AccountData {
+            offset: 0,
+            data_length: 72,
+        })
+        .instruction()];
+    ixs.extend(
+        create_and_transfer_token_account_ix(
+            context,
+            &user.encodable_pubkey(),
+            &mint.encodable_pubkey(),
+            &dest.encodable_pubkey(),
+            69,
+        )
+        .await
+        .unwrap(),
+    );
+    ixs.extend(vec![
+        AssertAccountDeltaBuilder::new()
+            .account_a(memory)
+            .account_b(token_account)
+            .assertion(AccountDeltaAssertion::Data {
+                a_offset: 0,
+                b_offset: 0,
+                assertion: DataValueDeltaAssertion::Bytes {
+                    operator: ByteSliceOperator::Equal,
+                    length: 64,
+                },
+            })
+            .log_level(LogLevel::Silent)
+            .instruction(),
+        AssertAccountDeltaBuilder::new()
+            .account_a(memory)
+            .account_b(token_account)
+            .assertion(AccountDeltaAssertion::Data {
+                a_offset: 64,
+                b_offset: 64,
+                assertion: DataValueDeltaAssertion::U64 {
+                    value: -70,
+                    operator: IntegerOperator::GreaterThan,
+                },
+            })
+            .log_level(LogLevel::PlaintextMessage)
+            .instruction(),
+        MemoryCloseBuilder::new()
+            .payer(user.encodable_pubkey())
+            .program_id(lighthouse_client::ID)
+            .memory(memory)
+            .memory_bump(memory_bump)
+            .memory_id(0)
+            .instruction(),
+    ]);
+
+    let tx = Transaction::new_signed_with_payer(
+        &ixs,
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn write_to_another_memory_index() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 8);
+
+    let build_memory = |offset: u16, write_type: WriteType| {
+        MemoryWriteBuilder::new()
+            .payer(user.encodable_pubkey())
+            .source_account(user.encodable_pubkey())
+            .memory(memory)
+            .program_id(lighthouse_client::ID)
+            .memory_id(8)
+            .memory_bump(memory_bump)
+            .write_offset(offset)
+            .system_program(system_program::id())
+            .write_type(write_type)
+            .instruction()
+    };
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            build_memory(0, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(1, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(2, WriteType::DataValue(DataValue::U16(u16::MAX))),
+            build_memory(4, WriteType::DataValue(DataValue::I16(-1))),
+            build_memory(6, WriteType::DataValue(DataValue::U32(u32::MAX))),
+            build_memory(10, WriteType::DataValue(DataValue::I32(-1))),
+            build_memory(14, WriteType::DataValue(DataValue::U64(u64::MAX))),
+            build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
+            build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
+            build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
+            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                94,
+                WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
+            ),
+            build_memory(126, WriteType::DataValue(DataValue::Bool(true))),
+            build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
+            AssertAccountDataBuilder::new()
+                .target_account(memory)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .assertion(DataValueAssertion::Bytes {
+                    value: vec![MAX; 94],
+                    operator: ByteSliceOperator::Equal,
+                })
+                .offset(0)
+                .instruction(),
+        ],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn write_to_another_bump() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+    let (memory, memory_bump) =
+        find_memory_pda_bump_iterate(user.encodable_pubkey(), 4, 4, None).unwrap();
+
+    let build_memory = |offset: u16, write_type: WriteType| {
+        MemoryWriteBuilder::new()
+            .payer(user.encodable_pubkey())
+            .source_account(user.encodable_pubkey())
+            .memory(memory)
+            .program_id(lighthouse_client::ID)
+            .memory_id(4)
+            .memory_bump(memory_bump)
+            .write_offset(offset)
+            .system_program(system_program::id())
+            .write_type(write_type)
+            .instruction()
+    };
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            build_memory(0, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(1, WriteType::DataValue(DataValue::U8(MAX))),
+            build_memory(2, WriteType::DataValue(DataValue::U16(u16::MAX))),
+            build_memory(4, WriteType::DataValue(DataValue::I16(-1))),
+            build_memory(6, WriteType::DataValue(DataValue::U32(u32::MAX))),
+            build_memory(10, WriteType::DataValue(DataValue::I32(-1))),
+            build_memory(14, WriteType::DataValue(DataValue::U64(u64::MAX))),
+            build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
+            build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
+            build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
+            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                94,
+                WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
+            ),
+            build_memory(126, WriteType::DataValue(DataValue::Bool(true))),
+            build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
+            AssertAccountDataBuilder::new()
+                .target_account(memory)
+                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .assertion(DataValueAssertion::Bytes {
+                    value: vec![MAX; 94],
+                    operator: ByteSliceOperator::Equal,
+                })
+                .offset(0)
+                .instruction(),
+        ],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
         .await
         .unwrap();
 }

@@ -146,6 +146,7 @@ mod tests {
             .evaluate((), LogLevel::PlaintextMessage);
 
             assert_failed(result);
+
             // Evaluate epoch
 
             let result = SysvarClockAssertion::Epoch {

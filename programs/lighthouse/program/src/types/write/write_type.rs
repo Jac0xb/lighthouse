@@ -1,4 +1,4 @@
-use super::{AccountInfoField, DataValue};
+use super::{AccountInfoField, ClockField, DataValue};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
@@ -6,6 +6,7 @@ pub enum WriteType {
     AccountData { offset: u16, data_length: u16 },
     AccountInfoField(AccountInfoField),
     DataValue(DataValue),
+    Clock(ClockField),
 }
 
 impl WriteType {
@@ -31,6 +32,13 @@ impl WriteType {
                 DataValue::U128(_) | DataValue::I128(_) => 16,
                 DataValue::Bytes(bytes) => bytes.len(),
                 DataValue::Pubkey(_) => 32,
+            },
+            WriteType::Clock(field) => match field {
+                ClockField::Slot => 8,
+                ClockField::EpochStartTimestamp => 8,
+                ClockField::Epoch => 8,
+                ClockField::LeaderScheduleEpoch => 8,
+                ClockField::UnixTimestamp => 8,
             },
         }
     }

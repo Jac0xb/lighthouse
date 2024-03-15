@@ -158,3 +158,18 @@ pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
 pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
     keys.iter().any(|k| keys_equal(k, key))
 }
+
+pub trait Key {
+    fn key(&self) -> Pubkey;
+}
+impl Key for Pubkey {
+    fn key(&self) -> Pubkey {
+        *self
+    }
+}
+
+impl<'info> Key for AccountInfo<'info> {
+    fn key(&self) -> Pubkey {
+        *self.key
+    }
+}

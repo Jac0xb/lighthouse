@@ -51,7 +51,6 @@ import {
 } from '.';
 
 export type AccountInfoAssertion =
-  | { __kind: 'Key'; value: Address; operator: EquatableOperator }
   | { __kind: 'Lamports'; value: bigint; operator: ComparableOperator }
   | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
@@ -68,7 +67,6 @@ export type AccountInfoAssertion =
     };
 
 export type AccountInfoAssertionArgs =
-  | { __kind: 'Key'; value: Address; operator: EquatableOperatorArgs }
   | {
       __kind: 'Lamports';
       value: number | bigint;
@@ -102,13 +100,6 @@ export type AccountInfoAssertionArgs =
 
 export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
   return getDataEnumEncoder([
-    [
-      'Key',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
     [
       'Lamports',
       getStructEncoder([
@@ -178,13 +169,6 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
 
 export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> {
   return getDataEnumDecoder([
-    [
-      'Key',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
     [
       'Lamports',
       getStructDecoder([
@@ -263,10 +247,6 @@ export function getAccountInfoAssertionCodec(): Codec<
 }
 
 // Data Enum Helpers.
-export function accountInfoAssertion(
-  kind: 'Key',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Key'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'Key'>;
 export function accountInfoAssertion(
   kind: 'Lamports',
   data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Lamports'>
