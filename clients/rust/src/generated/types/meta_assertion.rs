@@ -5,8 +5,8 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
+use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -16,7 +16,7 @@ use solana_program::pubkey::Pubkey;
 pub enum MetaAssertion {
     RentExemptReserve {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     AuthorizedStaker {
         #[cfg_attr(
@@ -36,11 +36,11 @@ pub enum MetaAssertion {
     },
     LockupUnixTimestamp {
         value: i64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     LockupEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     LockupCustodian {
         #[cfg_attr(

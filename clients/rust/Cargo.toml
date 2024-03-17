@@ -9,8 +9,8 @@ license-file = "../../LICENSE"
 crate-type = ["cdylib", "lib"]
 
 [features]
-test-sbf = []
 serde = ["dep:serde", "dep:serde_with"]
+cpi = []
 
 [dependencies]
 borsh = "^0.10"

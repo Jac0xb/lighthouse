@@ -6,6 +6,7 @@
 //!
 
 use crate::generated::types::AccountInfoField;
+use crate::generated::types::ClockField;
 use crate::generated::types::DataValue;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -16,4 +17,5 @@ pub enum WriteType {
     AccountData { offset: u16, data_length: u16 },
     AccountInfoField(AccountInfoField),
     DataValue(DataValue),
+    Clock(ClockField),
 }

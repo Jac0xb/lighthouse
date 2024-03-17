@@ -35,7 +35,7 @@ pub mod lighthouse {
             .or(Err(LighthouseError::InvalidInstructionData))?;
 
         if instruction.get_log_level() == LogLevel::PlaintextMessage {
-            msg!("Instruction: {:?}", instruction.get_name());
+            msg!("Instruction: {}", instruction.get_name());
         }
 
         match instruction {
@@ -45,127 +45,105 @@ pub mod lighthouse {
                 write_offset,
                 write_type,
             } => {
-                let context = MemoryWriteContext::load(
+                let ctx = MemoryWriteContext::load(
                     &mut accounts.iter(),
                     memory_id,
                     write_offset,
                     memory_bump,
                     &write_type,
                 )?;
-                processor::memory_write(&context, write_offset, &write_type)?;
+                processor::memory_write(&ctx, write_offset, &write_type)?;
             }
             LighthouseInstruction::MemoryClose {
                 memory_id,
                 memory_bump,
             } => {
-                let context =
-                    MemoryCloseContext::load(&mut accounts.iter(), memory_id, memory_bump)?;
-                processor::memory_close(&context)?;
+                let ctx = MemoryCloseContext::load(&mut accounts.iter(), memory_id, memory_bump)?;
+                processor::memory_close(&ctx)?;
             }
             LighthouseInstruction::AssertAccountData {
                 log_level,
                 assertion,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
+                processor::assert_target_account(ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertAccountDelta {
                 log_level,
                 assertion,
             } => {
-                let context = AssertAccountDeltaContext::load(&mut accounts.iter())?;
-                processor::assert_account_delta(&context, &assertion, log_level)?;
+                let ctx = AssertAccountDeltaContext::load(&mut accounts.iter())?;
+                processor::assert_account_delta(&ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertAccountInfo {
                 assertion,
                 log_level,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
+                processor::assert_target_account(ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertAccountInfoMulti {
                 log_level,
                 assertions,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                for (i, assertion) in assertions.iter().enumerate() {
-                    processor::assert_target_account(context.clone(), assertion, log_level)
-                        .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
-                }
+                let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
+                processor::assert_target_account_multi(ctx, &assertions, log_level)?;
             }
             LighthouseInstruction::AssertMintAccount {
                 log_level,
                 assertion,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertMintAccountContext::load(&mut accounts.iter())?;
+                processor::assert_mint_account(ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertMintAccountMulti {
                 log_level,
                 assertions,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                for (i, assertion) in assertions.iter().enumerate() {
-                    processor::assert_target_account(context.clone(), assertion, log_level)
-                        .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
-                }
+                let ctx = AssertMintAccountContext::load(&mut accounts.iter())?;
+                processor::assert_mint_account_multi(ctx, &assertions, log_level)?;
             }
             LighthouseInstruction::AssertTokenAccount {
                 log_level,
                 assertion,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertTokenAccountContext::load(&mut accounts.iter())?;
+                processor::assert_token_account(ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertTokenAccountMulti {
                 log_level,
                 assertions,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                for (i, assertion) in assertions.iter().enumerate() {
-                    processor::assert_target_account(context.clone(), assertion, log_level)
-                        .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
-                }
+                let ctx = AssertTokenAccountContext::load(&mut accounts.iter())?;
+                processor::assert_token_account_multi(ctx, &assertions, log_level)?;
             }
             LighthouseInstruction::AssertStakeAccount {
                 log_level,
                 assertion,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertStakeAccountContext::load(&mut accounts.iter())?;
+                processor::assert_stake_account(ctx, assertion, log_level)?;
             }
             LighthouseInstruction::AssertStakeAccountMulti {
                 log_level,
                 assertions,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                for (i, assertion) in assertions.iter().enumerate() {
-                    processor::assert_target_account(context.clone(), assertion, log_level)
-                        .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
-                }
+                let ctx = AssertStakeAccountContext::load(&mut accounts.iter())?;
+                processor::assert_stake_account_multi(ctx, &assertions, log_level)?
             }
             LighthouseInstruction::AssertUpgradeableLoaderAccount {
                 log_level,
                 assertion,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-                processor::assert_target_account(context, &assertion, log_level)?;
+                let ctx = AssertUpgradeableLoaderStateContext::load(&mut accounts.iter())?;
+                processor::assert_upgradeable_loader_state(ctx, &assertion, log_level)?;
             }
             LighthouseInstruction::AssertUpgradeableLoaderAccountMulti {
                 log_level,
                 assertions,
             } => {
-                let context = AssertTargetAccountContext::load(&mut accounts.iter())?;
-
-                for (i, assertion) in assertions.iter().enumerate() {
-                    processor::assert_target_account(context.clone(), assertion, log_level)
-                        .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
-                }
+                let ctx = AssertUpgradeableLoaderStateContext::load(&mut accounts.iter())?;
+                processor::assert_upgradeable_loader_state_multi(ctx, &assertions, log_level)?;
             }
             LighthouseInstruction::AssertSysvarClock {
                 log_level,
@@ -177,8 +155,8 @@ pub mod lighthouse {
                 log_level,
                 assertion,
             } => {
-                let context = AssertMerkleTreeAccountContext::load(&mut accounts.iter())?;
-                processor::assert_merkle_tree_account(&context, &assertion, log_level)?;
+                let ctx = AssertMerkleTreeAccountContext::load(&mut accounts.iter())?;
+                processor::assert_merkle_tree_account(&ctx, &assertion, log_level)?;
             }
         }
 

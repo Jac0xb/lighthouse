@@ -1,18 +1,13 @@
 use super::{Assert, LogLevel};
 use crate::{
-    err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
-    utils::{keys_equal, Result},
+    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{
-    account_info::AccountInfo, bpf_loader_upgradeable,
-    bpf_loader_upgradeable::UpgradeableLoaderState, msg, program_error::ProgramError,
-    pubkey::Pubkey,
-};
+use solana_program::{bpf_loader_upgradeable::UpgradeableLoaderState, msg, pubkey::Pubkey};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]
 #[repr(u8)]
 
 pub enum UpgradeableLoaderStateType {
@@ -34,51 +29,35 @@ pub enum UpgradeableLoaderStateAssertion {
     ProgramData(UpgradeableProgramDataAssertion),
 }
 
-impl Assert<&AccountInfo<'_>> for UpgradeableLoaderStateAssertion {
-    fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if !keys_equal(account.owner, &bpf_loader_upgradeable::ID) {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
-        }
-
-        let account_data = account.try_borrow_data().map_err(|e| {
-            err_msg!("Failed to borrow data for target account", e);
-            err!(LighthouseError::AccountBorrowFailed)
-        })?;
-
-        let get_state = || {
-            let state: UpgradeableLoaderState =
-                bincode::deserialize(&account_data).map_err(|e| {
-                    err_msg!("Failed to deserialize upgradeable loader state", e);
-                    err!(LighthouseError::AccountBorrowFailed)
-                })?;
-
-            Ok::<UpgradeableLoaderState, ProgramError>(state)
-        };
-
+impl Assert<&UpgradeableLoaderState> for UpgradeableLoaderStateAssertion {
+    fn evaluate(&self, state: &UpgradeableLoaderState, log_level: LogLevel) -> Result<()> {
         match &self {
             UpgradeableLoaderStateAssertion::State {
                 value: assertion_value,
                 operator,
             } => {
-                let casted_assertion_value: u8 = assertion_value.clone() as u8;
-                let actual_state: u8 = account_data[0];
-
-                if actual_state > 4 {
-                    msg!("Failed to deserialize upgradeable loader state: enum out of bounds");
-                    return Err(LighthouseError::FailedToDeserialize.into());
-                }
+                let actual_state = match state {
+                    UpgradeableLoaderState::Uninitialized => {
+                        UpgradeableLoaderStateType::Uninitialized
+                    }
+                    UpgradeableLoaderState::Buffer { .. } => UpgradeableLoaderStateType::Buffer,
+                    UpgradeableLoaderState::Program { .. } => UpgradeableLoaderStateType::Program,
+                    UpgradeableLoaderState::ProgramData { .. } => {
+                        UpgradeableLoaderStateType::ProgramData
+                    }
+                } as u8;
+                let casted_assertion_value = (*assertion_value) as u8;
 
                 operator.evaluate(&actual_state, &casted_assertion_value, log_level)
             }
             UpgradeableLoaderStateAssertion::Buffer(assertion) => {
-                let state = get_state()?;
-                assertion.evaluate(&state, log_level)
+                assertion.evaluate(state, log_level)
             }
             UpgradeableLoaderStateAssertion::Program(assertion) => {
-                assertion.evaluate(&get_state()?, log_level)
+                assertion.evaluate(state, log_level)
             }
             UpgradeableLoaderStateAssertion::ProgramData(assertion) => {
-                assertion.evaluate(&get_state()?, log_level)
+                assertion.evaluate(state, log_level)
             }
         }
     }
@@ -158,7 +137,7 @@ pub enum UpgradeableProgramDataAssertion {
     },
     Slot {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
 }
 

@@ -1,4 +1,4 @@
-use std::{any::type_name, ops::Range};
+use std::any::type_name;
 
 use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
@@ -131,12 +131,7 @@ pub fn create_account<'a, 'info>(
     }
 }
 
-pub fn out_of_bounds_err(r: Range<usize>) -> ProgramError {
-    msg!("Failed to access account data range {:?}: out of bounds", r);
-    LighthouseError::RangeOutOfBounds.into()
-}
-
-pub fn close<'info>(info: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
+pub fn close<'info>(info: &AccountInfo<'info>, sol_destination: &AccountInfo<'info>) -> Result<()> {
     // Transfer tokens from the account to the sol_destination.
     let dest_starting_lamports = sol_destination.lamports();
     **sol_destination.lamports.borrow_mut() =
@@ -157,4 +152,19 @@ pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
 
 pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
     keys.iter().any(|k| keys_equal(k, key))
+}
+
+pub trait Key {
+    fn key(&self) -> Pubkey;
+}
+impl Key for Pubkey {
+    fn key(&self) -> Pubkey {
+        *self
+    }
+}
+
+impl<'info> Key for AccountInfo<'info> {
+    fn key(&self) -> Pubkey {
+        *self.key
+    }
 }

@@ -11,7 +11,7 @@ export * from './accountInfoAssertion';
 export * from './accountInfoDeltaAssertion';
 export * from './accountInfoField';
 export * from './byteSliceOperator';
-export * from './comparableOperator';
+export * from './clockField';
 export * from './dataValue';
 export * from './dataValueAssertion';
 export * from './dataValueDeltaAssertion';

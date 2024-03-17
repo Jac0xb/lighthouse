@@ -1,2 +1,2 @@
-// pub mod close;
+pub mod error;
 pub mod simple;

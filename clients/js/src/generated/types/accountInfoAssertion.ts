@@ -36,27 +36,26 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
+  IntegerOperator,
+  IntegerOperatorArgs,
   KnownProgram,
   KnownProgramArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
   getKnownProgramDecoder,
   getKnownProgramEncoder,
 } from '.';
 
 export type AccountInfoAssertion =
-  | { __kind: 'Key'; value: Address; operator: EquatableOperator }
-  | { __kind: 'Lamports'; value: bigint; operator: ComparableOperator }
-  | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'DataLength'; value: bigint; operator: IntegerOperator }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
   | { __kind: 'KnownOwner'; value: KnownProgram; operator: EquatableOperator }
-  | { __kind: 'RentEpoch'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'RentEpoch'; value: bigint; operator: IntegerOperator }
   | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperator }
   | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperator }
   | { __kind: 'Executable'; value: boolean; operator: EquatableOperator }
@@ -68,16 +67,15 @@ export type AccountInfoAssertion =
     };
 
 export type AccountInfoAssertionArgs =
-  | { __kind: 'Key'; value: Address; operator: EquatableOperatorArgs }
   | {
       __kind: 'Lamports';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'DataLength';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
   | {
@@ -88,7 +86,7 @@ export type AccountInfoAssertionArgs =
   | {
       __kind: 'RentEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperatorArgs }
   | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperatorArgs }
@@ -103,24 +101,17 @@ export type AccountInfoAssertionArgs =
 export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
   return getDataEnumEncoder([
     [
-      'Key',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
       'Lamports',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'DataLength',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -141,7 +132,7 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
       'RentEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -179,24 +170,17 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
 export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> {
   return getDataEnumDecoder([
     [
-      'Key',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
       'Lamports',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'DataLength',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -217,7 +201,7 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
       'RentEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -263,10 +247,6 @@ export function getAccountInfoAssertionCodec(): Codec<
 }
 
 // Data Enum Helpers.
-export function accountInfoAssertion(
-  kind: 'Key',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Key'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'Key'>;
 export function accountInfoAssertion(
   kind: 'Lamports',
   data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Lamports'>

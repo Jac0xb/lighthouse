@@ -1,7 +1,8 @@
 use super::{Assert, LogLevel};
-use crate::{processor::AssertMerkleTreeAccountContext, utils::Result, validation::CheckedAccount};
+use crate::{error::LighthouseError, processor::AssertMerkleTreeAccountContext, utils::Result};
 use anchor_lang::context::CpiContext;
 use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::msg;
 use std::fmt::Debug;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -28,7 +29,7 @@ impl<'a, 'info> Assert<&AssertMerkleTreeAccountContext<'a, 'info>> for MerkleTre
                 leaf_hash,
             } => {
                 let cpi_context =
-                    CpiContext::new(context.spl_account_compression.info_as_owned(), accounts)
+                    CpiContext::new(context.spl_account_compression.info.clone(), accounts)
                         .with_remaining_accounts(context.proof_path.to_vec());
 
                 spl_account_compression::cpi::verify_leaf(
@@ -36,7 +37,11 @@ impl<'a, 'info> Assert<&AssertMerkleTreeAccountContext<'a, 'info>> for MerkleTre
                     context.root.key.to_bytes(),
                     leaf_hash,
                     leaf_index,
-                )?;
+                )
+                .map_err(|e| {
+                    msg!("Failed to verify leaf: {:?}", e);
+                    LighthouseError::AssertionFailed
+                })?;
 
                 Ok(())
             }

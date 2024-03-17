@@ -1,5 +1,5 @@
 use crate::error::LighthouseError;
-use crate::types::write::{AccountInfoField, DataValue, WriteType};
+use crate::types::write::{AccountInfoField, ClockField, DataValue, WriteType};
 use crate::utils::Result;
 use crate::validation::{
     AccountValidation, CheckedAccount, DerivedAddress, InitializeType, LighthouseProgram, Memory,
@@ -9,10 +9,13 @@ use crate::{err, err_msg};
 use borsh::BorshSerialize;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
+    clock::Clock,
     instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT},
     msg,
     program_error::ProgramError,
+    sysvar::Sysvar,
 };
+
 use std::slice::Iter;
 
 #[allow(dead_code)]
@@ -93,7 +96,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
 }
 
 pub(crate) fn memory_write(
-    context: &MemoryWriteContext,
+    ctx: &MemoryWriteContext,
     offset: u16,
     write_type: &WriteType,
 ) -> Result<()> {
@@ -102,11 +105,11 @@ pub(crate) fn memory_write(
         return Err(LighthouseError::CrossProgramInvokeViolation.into());
     }
 
-    let memory = context.memory.clone();
-    let source_account = context.source_account;
+    let memory = ctx.memory.clone();
+    let source_account = ctx.source_account;
 
     let write_offset = offset as usize;
-    let memory_ref = &mut memory.info().try_borrow_mut_data()?;
+    let memory_ref = &mut memory.info.try_borrow_mut_data()?;
 
     match write_type {
         WriteType::DataValue(data_value) => {
@@ -140,7 +143,7 @@ pub(crate) fn memory_write(
                         msg!(
                             "DataValue write - range out of bounds {:?} write length {:?}",
                             memory_write_range,
-                            memory.info().data_len()
+                            memory.info.data_len()
                         );
                         LighthouseError::RangeOutOfBounds
                     })?;
@@ -185,12 +188,17 @@ pub(crate) fn memory_write(
                     err_msg!("Failed to serialize AccountInfo.key", err);
                     LighthouseError::FailedToSerialize
                 })?,
-                AccountInfoField::Lamports => {
-                    source_account.lamports().try_to_vec().map_err(|err| {
+                AccountInfoField::Lamports => source_account
+                    .try_borrow_lamports()
+                    .map_err(|err| {
+                        err_msg!("Failed to borrow AccountInfo.lamports", err);
+                        LighthouseError::AccountBorrowFailed
+                    })?
+                    .try_to_vec()
+                    .map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.lamports", err);
                         LighthouseError::FailedToSerialize
-                    })?
-                }
+                    })?,
                 AccountInfoField::Owner => source_account.owner.try_to_vec().map_err(|err| {
                     err_msg!("Failed to serialize AccountInfo.owner", err);
                     LighthouseError::FailedToSerialize
@@ -201,12 +209,12 @@ pub(crate) fn memory_write(
                         LighthouseError::FailedToSerialize
                     })?
                 }
-                AccountInfoField::DataLength => {
-                    source_account.data_len().try_to_vec().map_err(|err| {
+                AccountInfoField::DataLength => (source_account.data_len() as u64)
+                    .try_to_vec()
+                    .map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.data_len", err);
                         LighthouseError::FailedToSerialize
-                    })?
-                }
+                    })?,
                 AccountInfoField::Executable => {
                     source_account.executable.try_to_vec().map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.executable", err);
@@ -225,6 +233,49 @@ pub(crate) fn memory_write(
                             "AccountInfo write - range out of bounds {:?}",
                             memory_write_range
                         );
+                        LighthouseError::RangeOutOfBounds
+                    })?;
+
+            memory_write_slice.copy_from_slice(&bytes);
+        }
+        WriteType::Clock(clock_field) => {
+            let clock = Clock::get()?;
+
+            let bytes = match clock_field {
+                ClockField::Slot => clock.slot.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.slot", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+                ClockField::EpochStartTimestamp => {
+                    clock.epoch_start_timestamp.try_to_vec().map_err(|err| {
+                        err_msg!("Failed to serialize Clock.epoch_start_timestamp", err);
+                        LighthouseError::FailedToSerialize
+                    })?
+                }
+                ClockField::Epoch => clock.epoch.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.epoch", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+                ClockField::LeaderScheduleEpoch => {
+                    clock.leader_schedule_epoch.try_to_vec().map_err(|err| {
+                        err_msg!("Failed to serialize Clock.leader_schedule_epoch", err);
+                        LighthouseError::FailedToSerialize
+                    })?
+                }
+                ClockField::UnixTimestamp => clock.unix_timestamp.try_to_vec().map_err(|err| {
+                    err_msg!("Failed to serialize Clock.unix_timestamp", err);
+                    LighthouseError::FailedToSerialize
+                })?,
+            };
+
+            let data_length = write_type.data_length();
+
+            let memory_write_range = write_offset..(write_offset + data_length);
+            let memory_write_slice =
+                memory_ref
+                    .get_mut(memory_write_range.clone())
+                    .ok_or_else(|| {
+                        msg!("Clock write - range out of bounds {:?}", memory_write_range);
                         LighthouseError::RangeOutOfBounds
                     })?;
 

@@ -6,7 +6,7 @@ use crate::utils::{
 use crate::utils::{context::TestContext, create_mint, create_user};
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse::types::{
-    AccountInfoAssertion, ComparableOperator, EquatableOperator, TokenAccountAssertion,
+    AccountInfoAssertion, EquatableOperator, IntegerOperator, TokenAccountAssertion,
 };
 use lighthouse::{error::LighthouseError, types::Assertion};
 use lighthouse_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};

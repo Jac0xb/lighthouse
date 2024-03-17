@@ -2,8 +2,8 @@ use super::{AccountValidation, CheckedAccount, Id};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 use std::{marker::PhantomData, ops::Deref};
 
-pub struct Program<'a, 'info, T: Id> {
-    info: &'a AccountInfo<'info>,
+pub(crate) struct Program<'a, 'info, T: Id> {
+    pub(crate) info: &'a AccountInfo<'info>,
     _phantom: PhantomData<T>,
 }
 

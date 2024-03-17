@@ -37,6 +37,42 @@
           "type": "bool"
         }
       ]
+    },
+    {
+      "name": "write",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "memory",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lighthouse",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "memoryBump",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [

@@ -7,9 +7,9 @@ use lighthouse_client::instructions::{
     MemoryCloseBuilder, MemoryWriteBuilder,
 };
 use lighthouse_client::types::{
-    AccountDeltaAssertion, AccountInfoAssertion, ByteSliceOperator, ComparableOperator,
-    DataValueDeltaAssertion, EquatableOperator, IntegerOperator, KnownProgram, LogLevel,
-    MetaAssertion, StakeAccountAssertion, StakeStateType, WriteType,
+    AccountDeltaAssertion, AccountInfoAssertion, ByteSliceOperator, DataValueDeltaAssertion,
+    EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MetaAssertion,
+    StakeAccountAssertion, StakeStateType, WriteType,
 };
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
@@ -212,7 +212,7 @@ pub fn build_safe_send_transaction(
                 .target_account(from_keypair.pubkey())
                 .assertion(AccountInfoAssertion::Lamports {
                     value: balance - amount - 5000,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
         ],
@@ -345,7 +345,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupEpoch {
                             value: meta.lockup.epoch,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),
@@ -354,7 +354,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupUnixTimestamp {
                             value: meta.lockup.unix_timestamp,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),
@@ -372,7 +372,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::RentExemptReserve {
                             value: meta.rent_exempt_reserve,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),
@@ -414,7 +414,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupEpoch {
                             value: meta.lockup.epoch,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),
@@ -423,7 +423,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::LockupUnixTimestamp {
                             value: meta.lockup.unix_timestamp,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),
@@ -441,7 +441,7 @@ fn build_assert_stake_transaction(
                     .assertion(StakeAccountAssertion::MetaAssertion(
                         MetaAssertion::RentExemptReserve {
                             value: meta.rent_exempt_reserve,
-                            operator: ComparableOperator::Equal,
+                            operator: IntegerOperator::Equal,
                         },
                     ))
                     .instruction(),

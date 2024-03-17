@@ -1005,9 +1005,13 @@
             "name": "DataLength",
             "fields": [
               {
+                "name": "value",
+                "type": "i128"
+              },
+              {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1033,7 +1037,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1047,21 +1051,6 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "Key",
-            "fields": [
-              {
-                "name": "value",
-                "type": "publicKey"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          },
-          {
             "name": "Lamports",
             "fields": [
               {
@@ -1071,7 +1060,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1086,7 +1075,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1133,7 +1122,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1227,7 +1216,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1242,7 +1231,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1257,7 +1246,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1272,7 +1261,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1287,7 +1276,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1458,32 +1447,6 @@
       }
     },
     {
-      "name": "ComparableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          }
-        ]
-      }
-    },
-    {
       "name": "IntegerOperator",
       "type": {
         "kind": "enum",
@@ -1634,7 +1597,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1679,7 +1642,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1694,7 +1657,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1747,7 +1710,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1762,7 +1725,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1777,7 +1740,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1792,7 +1755,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1845,7 +1808,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1877,7 +1840,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1909,7 +1872,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -2086,7 +2049,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -2116,6 +2079,29 @@
           },
           {
             "name": "Executable"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClockField",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Slot"
+          },
+          {
+            "name": "EpochStartTimestamp"
+          },
+          {
+            "name": "Epoch"
+          },
+          {
+            "name": "LeaderScheduleEpoch"
+          },
+          {
+            "name": "UnixTimestamp"
           }
         ]
       }
@@ -2237,6 +2223,14 @@
             "fields": [
               {
                 "defined": "DataValue"
+              }
+            ]
+          },
+          {
+            "name": "Clock",
+            "fields": [
+              {
+                "defined": "ClockField"
               }
             ]
           }

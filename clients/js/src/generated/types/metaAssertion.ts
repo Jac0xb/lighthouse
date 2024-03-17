@@ -28,37 +28,33 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type MetaAssertion =
-  | { __kind: 'RentExemptReserve'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'RentExemptReserve'; value: bigint; operator: IntegerOperator }
   | { __kind: 'AuthorizedStaker'; value: Address; operator: EquatableOperator }
   | {
       __kind: 'AuthorizedWithdrawer';
       value: Address;
       operator: EquatableOperator;
     }
-  | {
-      __kind: 'LockupUnixTimestamp';
-      value: bigint;
-      operator: ComparableOperator;
-    }
-  | { __kind: 'LockupEpoch'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'LockupUnixTimestamp'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'LockupEpoch'; value: bigint; operator: IntegerOperator }
   | { __kind: 'LockupCustodian'; value: Address; operator: EquatableOperator };
 
 export type MetaAssertionArgs =
   | {
       __kind: 'RentExemptReserve';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'AuthorizedStaker';
@@ -73,12 +69,12 @@ export type MetaAssertionArgs =
   | {
       __kind: 'LockupUnixTimestamp';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'LockupEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'LockupCustodian';
@@ -92,7 +88,7 @@ export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
       'RentExemptReserve',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -113,14 +109,14 @@ export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
       'LockupUnixTimestamp',
       getStructEncoder([
         ['value', getI64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'LockupEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -139,7 +135,7 @@ export function getMetaAssertionDecoder(): Decoder<MetaAssertion> {
       'RentExemptReserve',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -160,14 +156,14 @@ export function getMetaAssertionDecoder(): Decoder<MetaAssertion> {
       'LockupUnixTimestamp',
       getStructDecoder([
         ['value', getI64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'LockupEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [

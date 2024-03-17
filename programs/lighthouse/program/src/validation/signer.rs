@@ -3,8 +3,8 @@ use solana_program::account_info::AccountInfo;
 use std::ops::Deref;
 
 #[derive(Clone)]
-pub struct Signer<'a, 'info> {
-    info: &'a AccountInfo<'info>,
+pub(crate) struct Signer<'a, 'info> {
+    pub(crate) info: &'a AccountInfo<'info>,
 }
 
 impl<'a, 'info> CheckedAccount<'a, 'info> for Signer<'a, 'info>

@@ -1,6 +1,6 @@
 use anchor_spl::associated_token::get_associated_token_address;
 use lighthouse_client::instructions::AssertTokenAccountMultiBuilder;
-use lighthouse_client::types::{ComparableOperator, EquatableOperator, TokenAccountAssertion};
+use lighthouse_client::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
 use solana_program_test::tokio;
 use solana_sdk::instruction::InstructionError;
 use solana_sdk::signature::Keypair;
@@ -50,7 +50,7 @@ async fn test_basic() {
                 },
                 TokenAccountAssertion::Amount {
                     value: 100,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
                 TokenAccountAssertion::Delegate {
                     value: None,
@@ -58,7 +58,7 @@ async fn test_basic() {
                 },
                 TokenAccountAssertion::State {
                     value: TokenAccountState::Frozen as u8,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
                 TokenAccountAssertion::IsNative {
                     value: None,
@@ -66,7 +66,7 @@ async fn test_basic() {
                 },
                 TokenAccountAssertion::DelegatedAmount {
                     value: 0,
-                    operator: ComparableOperator::LessThanOrEqual,
+                    operator: IntegerOperator::LessThanOrEqual,
                 },
                 TokenAccountAssertion::CloseAuthority {
                     value: None,
@@ -123,7 +123,7 @@ async fn prod_test() {
                 },
                 TokenAccountAssertion::Amount {
                     value: 90,
-                    operator: ComparableOperator::GreaterThanOrEqual,
+                    operator: IntegerOperator::GreaterThanOrEqual,
                 },
                 TokenAccountAssertion::Delegate {
                     value: None,
@@ -180,7 +180,7 @@ async fn multi_errors() {
                 },
                 TokenAccountAssertion::Amount {
                     value: 90,
-                    operator: ComparableOperator::GreaterThanOrEqual,
+                    operator: IntegerOperator::GreaterThanOrEqual,
                 },
                 TokenAccountAssertion::Delegate {
                     value: None,
@@ -218,7 +218,7 @@ async fn multi_errors() {
                 },
                 TokenAccountAssertion::Amount {
                     value: 90,
-                    operator: ComparableOperator::GreaterThanOrEqual,
+                    operator: IntegerOperator::GreaterThanOrEqual,
                 },
                 TokenAccountAssertion::Delegate {
                     value: None,
@@ -256,7 +256,7 @@ async fn multi_errors() {
                 // Fail
                 TokenAccountAssertion::Amount {
                     value: 100,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 },
                 TokenAccountAssertion::Delegate {
                     value: None,
@@ -293,7 +293,7 @@ async fn multi_errors() {
                 },
                 TokenAccountAssertion::Amount {
                     value: 90,
-                    operator: ComparableOperator::GreaterThanOrEqual,
+                    operator: IntegerOperator::GreaterThanOrEqual,
                 },
                 // Fail
                 TokenAccountAssertion::Delegate {

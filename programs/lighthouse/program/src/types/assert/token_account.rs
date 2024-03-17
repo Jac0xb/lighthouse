@@ -2,8 +2,8 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
-    utils::{keys_equal, out_of_bounds_err, unpack_coption_key, unpack_coption_u64, Result},
+    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -22,7 +22,7 @@ pub enum TokenAccountAssertion {
     },
     Amount {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Delegate {
         value: Option<Pubkey>,
@@ -30,7 +30,7 @@ pub enum TokenAccountAssertion {
     },
     State {
         value: u8,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     IsNative {
         value: Option<u64>,
@@ -38,7 +38,7 @@ pub enum TokenAccountAssertion {
     },
     DelegatedAmount {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     CloseAuthority {
         value: Option<Pubkey>,
@@ -66,23 +66,18 @@ pub fn u8_from_account_state(state: AccountState) -> u8 {
 
 impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if !keys_equal(account.owner, &spl_token::ID)
-            && !keys_equal(account.owner, &spl_token_2022::ID)
-        {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
-        }
-
-        let data = account.try_borrow_data().map_err(|e| {
-            err_msg!("Failed to borrow data for target account", e);
-            err!(LighthouseError::AccountBorrowFailed)
-        })?;
+        let data = account
+            .try_borrow_data()
+            .map_err(LighthouseError::failed_borrow_err)?;
 
         match self {
             TokenAccountAssertion::Mint {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data.get(0..32).ok_or_else(|| out_of_bounds_err(0..32))?;
+                let data_slice = data
+                    .get(0..32)
+                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
                 let mint = Pubkey::try_from(data_slice).map_err(|e| {
                     err_msg!("Failed to deserialize mint from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -94,7 +89,9 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data.get(32..64).ok_or_else(|| out_of_bounds_err(32..64))?;
+                let data_slice = data
+                    .get(32..64)
+                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
                 let owner = Pubkey::try_from(data_slice).map_err(|e| {
                     err_msg!("Failed to deserialize owner from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -106,7 +103,9 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data.get(64..72).ok_or_else(|| out_of_bounds_err(64..72))?;
+                let data_slice = data
+                    .get(64..72)
+                    .ok_or_else(|| LighthouseError::oob_err(64..72))?;
                 let actual_amount = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize amount from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -120,7 +119,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(72..108)
-                    .ok_or_else(|| out_of_bounds_err(72..108))?;
+                    .ok_or_else(|| LighthouseError::oob_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
                 operator.evaluate(&delegate, assertion_value, log_level)
@@ -129,14 +128,16 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_state = data.get(108).ok_or_else(|| out_of_bounds_err(108..109))?;
+                let actual_state = data
+                    .get(108)
+                    .ok_or_else(|| LighthouseError::oob_err(108..109))?;
 
                 operator.evaluate(actual_state, assertion_value, log_level)
             }
             TokenAccountAssertion::IsNative { value, operator } => {
                 let data_slice = data
                     .get(109..121)
-                    .ok_or_else(|| out_of_bounds_err(109..121))?;
+                    .ok_or_else(|| LighthouseError::oob_err(109..121))?;
 
                 let actual_is_native = unpack_coption_u64(data_slice)?;
 
@@ -148,7 +149,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(121..129)
-                    .ok_or_else(|| out_of_bounds_err(121..129))?;
+                    .ok_or_else(|| LighthouseError::oob_err(121..129))?;
 
                 let actual_delegated_amount =
                     u64::from_le_bytes(data_slice.try_into().map_err(|e| {
@@ -161,19 +162,23 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             TokenAccountAssertion::CloseAuthority { value, operator } => {
                 let data_slice = data
                     .get(129..165)
-                    .ok_or_else(|| out_of_bounds_err(129..165))?;
+                    .ok_or_else(|| LighthouseError::oob_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
                 operator.evaluate(&close_authority, value, log_level)
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
-                let mint_data = data.get(0..32).ok_or_else(|| out_of_bounds_err(0..32))?;
+                let mint_data = data
+                    .get(0..32)
+                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
                 let mint = Pubkey::try_from(mint_data).map_err(|e| {
                     err_msg!("Failed to deserialize mint from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
-                let owner_data = data.get(32..64).ok_or_else(|| out_of_bounds_err(32..64))?;
+                let owner_data = data
+                    .get(32..64)
+                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
                 let owner = Pubkey::try_from(owner_data).map_err(|e| {
                     err_msg!("Failed to deserialize owner from account data", e);
                     err!(LighthouseError::FailedToDeserialize)
@@ -202,7 +207,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                operator::{ComparableOperator, EquatableOperator},
+                operator::{EquatableOperator, IntegerOperator},
                 Assert, LogLevel, TokenAccountAssertion,
             },
         };
@@ -251,7 +256,7 @@ mod tests {
             //
             let result = TokenAccountAssertion::Amount {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
@@ -259,7 +264,7 @@ mod tests {
 
             let result = TokenAccountAssertion::Amount {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
@@ -313,7 +318,7 @@ mod tests {
 
             let result = TokenAccountAssertion::State {
                 value: AccountState::Initialized as u8,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
@@ -321,7 +326,7 @@ mod tests {
 
             let result = TokenAccountAssertion::State {
                 value: AccountState::Frozen as u8,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
@@ -329,7 +334,7 @@ mod tests {
 
             let result = TokenAccountAssertion::State {
                 value: AccountState::Uninitialized as u8,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
@@ -352,7 +357,7 @@ mod tests {
             //
             let result = TokenAccountAssertion::DelegatedAmount {
                 value: 42,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 

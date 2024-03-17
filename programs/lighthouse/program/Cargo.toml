@@ -38,3 +38,4 @@ spl-account-compression = { version = "=0.3.0", features = ["cpi" , "no-entrypoi
 [dev-dependencies]
 test-program = { path = "../../test-program/program", features = ["no-entrypoint"] }
 solana-sdk = "=1.17.23"
+solana-program-test = "=1.17.23"

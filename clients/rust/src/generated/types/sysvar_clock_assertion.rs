@@ -5,7 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
+use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -14,22 +14,22 @@ use borsh::BorshSerialize;
 pub enum SysvarClockAssertion {
     Slot {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     EpochStartTimestamp {
         value: i64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Epoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     LeaderScheduleEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     UnixTimestamp {
         value: i64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
 }

@@ -30,14 +30,14 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type UpgradeableProgramDataAssertion =
@@ -46,7 +46,7 @@ export type UpgradeableProgramDataAssertion =
       value: Option<Address>;
       operator: EquatableOperator;
     }
-  | { __kind: 'Slot'; value: bigint; operator: ComparableOperator };
+  | { __kind: 'Slot'; value: bigint; operator: IntegerOperator };
 
 export type UpgradeableProgramDataAssertionArgs =
   | {
@@ -54,11 +54,7 @@ export type UpgradeableProgramDataAssertionArgs =
       value: OptionOrNullable<Address>;
       operator: EquatableOperatorArgs;
     }
-  | {
-      __kind: 'Slot';
-      value: number | bigint;
-      operator: ComparableOperatorArgs;
-    };
+  | { __kind: 'Slot'; value: number | bigint; operator: IntegerOperatorArgs };
 
 export function getUpgradeableProgramDataAssertionEncoder(): Encoder<UpgradeableProgramDataAssertionArgs> {
   return getDataEnumEncoder([
@@ -73,7 +69,7 @@ export function getUpgradeableProgramDataAssertionEncoder(): Encoder<Upgradeable
       'Slot',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
   ]);
@@ -92,7 +88,7 @@ export function getUpgradeableProgramDataAssertionDecoder(): Decoder<Upgradeable
       'Slot',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
   ]);

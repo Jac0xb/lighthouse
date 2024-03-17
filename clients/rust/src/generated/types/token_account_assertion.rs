@@ -5,8 +5,8 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
+use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -32,7 +32,7 @@ pub enum TokenAccountAssertion {
     },
     Amount {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Delegate {
         value: Option<Pubkey>,
@@ -40,7 +40,7 @@ pub enum TokenAccountAssertion {
     },
     State {
         value: u8,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     IsNative {
         value: Option<u64>,
@@ -48,7 +48,7 @@ pub enum TokenAccountAssertion {
     },
     DelegatedAmount {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     CloseAuthority {
         value: Option<Pubkey>,

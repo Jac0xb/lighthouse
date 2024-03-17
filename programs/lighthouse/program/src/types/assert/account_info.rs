@@ -1,25 +1,21 @@
 use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
+    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum AccountInfoAssertion {
-    Key {
-        value: Pubkey,
-        operator: EquatableOperator,
-    },
     Lamports {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     DataLength {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Owner {
         value: Pubkey,
@@ -31,7 +27,7 @@ pub enum AccountInfoAssertion {
     },
     RentEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     IsSigner {
         value: bool,
@@ -55,9 +51,6 @@ pub enum AccountInfoAssertion {
 impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         match self {
-            AccountInfoAssertion::Key { value, operator } => {
-                operator.evaluate(account.key, value, log_level)
-            }
             AccountInfoAssertion::Owner { value, operator } => {
                 operator.evaluate(account.owner, value, log_level)
             }
@@ -97,7 +90,15 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                         .ok_or(LighthouseError::RangeOutOfBounds)? as u16,
                 );
 
-                let account_data = &account_data[start as usize..(start + length) as usize];
+                let hash_range = start as usize..(start + length) as usize;
+                let account_data = &account_data.get(hash_range.clone()).ok_or_else(|| {
+                    msg!(
+                        "Failed to verify hash data, range {:?} was out of bounds",
+                        hash_range
+                    );
+
+                    LighthouseError::RangeOutOfBounds
+                })?;
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
                 ByteSliceOperator::Equal.evaluate(&actual_hash, expected_hash, log_level)
