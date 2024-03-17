@@ -24,12 +24,9 @@ pub(crate) fn assert_account_delta<
     'info,
     T: Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)>,
 >(
-    assert_context: &AssertAccountDeltaContext<'a, 'info>,
+    ctx: &AssertAccountDeltaContext<'a, 'info>,
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    assertion.evaluate(
-        (assert_context.left_account, assert_context.right_account),
-        log_level,
-    )
+    assertion.evaluate((ctx.left_account, ctx.right_account), log_level)
 }

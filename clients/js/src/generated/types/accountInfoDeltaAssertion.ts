@@ -21,14 +21,10 @@ import {
   getStructEncoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
   getIntegerOperatorDecoder,
@@ -37,9 +33,9 @@ import {
 
 export type AccountInfoDeltaAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'DataLength'; value: bigint; operator: IntegerOperator }
   | { __kind: 'Owner'; operator: EquatableOperator }
-  | { __kind: 'RentEpoch'; value: bigint; operator: ComparableOperator };
+  | { __kind: 'RentEpoch'; value: bigint; operator: IntegerOperator };
 
 export type AccountInfoDeltaAssertionArgs =
   | {
@@ -50,13 +46,13 @@ export type AccountInfoDeltaAssertionArgs =
   | {
       __kind: 'DataLength';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | { __kind: 'Owner'; operator: EquatableOperatorArgs }
   | {
       __kind: 'RentEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     };
 
 export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaAssertionArgs> {
@@ -72,7 +68,7 @@ export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaA
       'DataLength',
       getStructEncoder([
         ['value', getI128Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     ['Owner', getStructEncoder([['operator', getEquatableOperatorEncoder()]])],
@@ -80,7 +76,7 @@ export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaA
       'RentEpoch',
       getStructEncoder([
         ['value', getI128Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
   ]);
@@ -99,7 +95,7 @@ export function getAccountInfoDeltaAssertionDecoder(): Decoder<AccountInfoDeltaA
       'DataLength',
       getStructDecoder([
         ['value', getI128Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     ['Owner', getStructDecoder([['operator', getEquatableOperatorDecoder()]])],
@@ -107,7 +103,7 @@ export function getAccountInfoDeltaAssertionDecoder(): Decoder<AccountInfoDeltaA
       'RentEpoch',
       getStructDecoder([
         ['value', getI128Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
   ]);

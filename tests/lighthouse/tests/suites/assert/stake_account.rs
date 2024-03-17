@@ -7,8 +7,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertStakeAccountBuilder;
 use lighthouse_client::types::{
-    ComparableOperator, EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion,
-    StakeAssertion, StakeStateType,
+    EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion, StakeAssertion,
+    StakeStateType,
 };
 use solana_program_test::tokio;
 use solana_sdk::clock::Clock;
@@ -145,28 +145,28 @@ async fn test() {
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupEpoch {
                     value: meta.lockup.epoch,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupEpoch {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupUnixTimestamp {
                     value: meta.lockup.unix_timestamp,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupUnixTimestamp {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
@@ -201,70 +201,70 @@ async fn test() {
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::RentExemptReserve {
                     value: meta.rent_exempt_reserve,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::RentExemptReserve {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::CreditsObserved {
                     value: stake.credits_observed,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::CreditsObserved {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationStake {
                     value: stake.delegation.stake,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationStake {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationDeactivationEpoch {
                     value: stake.delegation.deactivation_epoch,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationDeactivationEpoch {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationActivationEpoch {
                     value: stake.delegation.activation_epoch,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             // Negation
             builder_fn(StakeAccountAssertion::StakeAssertion(
                 StakeAssertion::DelegationActivationEpoch {
                     value: 69,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 },
             )),
             // ()
@@ -317,13 +317,13 @@ async fn test() {
         builder_fn(StakeAccountAssertion::MetaAssertion(
             MetaAssertion::LockupEpoch {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::MetaAssertion(
             MetaAssertion::LockupUnixTimestamp {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::MetaAssertion(
@@ -341,31 +341,31 @@ async fn test() {
         builder_fn(StakeAccountAssertion::MetaAssertion(
             MetaAssertion::RentExemptReserve {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::CreditsObserved {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::DelegationStake {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::DelegationDeactivationEpoch {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::DelegationActivationEpoch {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::StakeAssertion(
@@ -431,7 +431,7 @@ async fn test() {
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::CreditsObserved {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::MetaAssertion(
@@ -492,7 +492,7 @@ async fn test() {
         builder_fn(StakeAccountAssertion::StakeAssertion(
             StakeAssertion::CreditsObserved {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::MetaAssertion(
@@ -570,13 +570,13 @@ async fn test() {
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupEpoch {
                     value: 69,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
             builder_fn(StakeAccountAssertion::MetaAssertion(
                 MetaAssertion::LockupUnixTimestamp {
                     value: 69,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             )),
         ],
@@ -611,13 +611,13 @@ async fn test() {
         builder_fn(StakeAccountAssertion::MetaAssertion(
             MetaAssertion::LockupEpoch {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
         builder_fn(StakeAccountAssertion::MetaAssertion(
             MetaAssertion::LockupUnixTimestamp {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )),
     ];

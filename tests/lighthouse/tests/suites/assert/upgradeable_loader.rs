@@ -4,9 +4,8 @@ use crate::utils::{process_transaction_assert_failure, process_transaction_asser
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertUpgradeableLoaderAccountBuilder;
 use lighthouse_client::types::{
-    ComparableOperator, EquatableOperator, UpgradableBufferAssertion,
-    UpgradeableLoaderStateAssertion, UpgradeableLoaderStateType, UpgradeableProgramAssertion,
-    UpgradeableProgramDataAssertion,
+    EquatableOperator, IntegerOperator, UpgradableBufferAssertion, UpgradeableLoaderStateAssertion,
+    UpgradeableLoaderStateType, UpgradeableProgramAssertion, UpgradeableProgramDataAssertion,
 };
 use solana_program_test::tokio;
 use solana_sdk::bpf_loader_upgradeable::{self, UpgradeableLoaderState};
@@ -108,7 +107,7 @@ async fn test_upgradeable_loader() {
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: u64::MAX,
-                        operator: ComparableOperator::Equal,
+                        operator: IntegerOperator::Equal,
                     },
                 ))
                 .instruction(),
@@ -168,7 +167,7 @@ async fn simple() {
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             ))
             .instruction(),
@@ -264,7 +263,7 @@ async fn simple() {
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             ))
             .instruction(),
@@ -350,7 +349,7 @@ async fn simple() {
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 },
             ))
             .instruction(),
@@ -427,7 +426,7 @@ async fn simple() {
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: u64::MAX,
-                        operator: ComparableOperator::Equal,
+                        operator: IntegerOperator::Equal,
                     },
                 ))
                 .instruction(),

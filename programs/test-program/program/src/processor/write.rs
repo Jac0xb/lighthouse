@@ -5,9 +5,12 @@ use lighthouse_client::types::{ClockField, WriteType};
 pub(crate) struct Write<'info> {
     #[account(mut)]
     pub(crate) signer: Signer<'info>,
+    /// CHECK: Ligma
     #[account(mut)]
     pub(crate) memory: AccountInfo<'info>,
+    /// CHECK: Ligma
     pub(crate) source_account: AccountInfo<'info>,
+    /// CHECK: Ligma
     pub(crate) lighthouse: AccountInfo<'info>,
     pub(crate) system_program: Program<'info, System>,
 }

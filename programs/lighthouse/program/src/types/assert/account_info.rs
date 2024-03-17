@@ -1,7 +1,7 @@
 use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{ComparableOperator, EquatableOperator, Operator},
+    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -11,11 +11,11 @@ use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
 pub enum AccountInfoAssertion {
     Lamports {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     DataLength {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Owner {
         value: Pubkey,
@@ -27,7 +27,7 @@ pub enum AccountInfoAssertion {
     },
     RentEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     IsSigner {
         value: bool,

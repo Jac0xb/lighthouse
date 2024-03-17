@@ -46,6 +46,8 @@ pub fn program_test() -> ProgramTest {
 
     test.set_compute_max_units(1_400_000);
 
+    test.prefer_bpf(true);
+
     test
 }
 

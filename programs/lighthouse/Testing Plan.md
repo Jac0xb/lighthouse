@@ -123,9 +123,9 @@ Testing Plan
         - [x] Test account not in program data state
     -
 
-- [] Look into memcpy syscall for memory write and using it.
+- [] Look into memcpy syscall for memory write.
 - [] Add multi-write to roadmap
-- [] .info() isnt a good name
+- [x] .info() isnt a good name
 - [] Look for more programs to add to KnownPrograms
 - [] Use log level helpers
 - [] Add additional merkle tree assertions to roadmap
@@ -135,5 +135,4 @@ Testing Plan
 - [] Add multi write to roadmap
 - [] Should I add 128 bit support for account data delta
 - [] Probably readd data is empty check
-- [] Might want to just delete comparable operator
 - [] Remove anchor for spl compression

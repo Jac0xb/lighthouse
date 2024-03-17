@@ -10,12 +10,11 @@ use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::ByteSliceOperator;
-use lighthouse_client::types::ComparableOperator;
 use lighthouse_client::types::DataValueDeltaAssertion;
 use lighthouse_client::types::EquatableOperator;
+use lighthouse_client::types::IntegerOperator;
 use lighthouse_client::types::{
-    AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, IntegerOperator, LogLevel,
-    WriteType,
+    AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, LogLevel, WriteType,
 };
 use solana_program_test::tokio;
 use solana_sdk::pubkey::Pubkey;
@@ -439,7 +438,7 @@ async fn test_account_info_delta() {
             0,
             AccountInfoDeltaAssertion::DataLength {
                 value: -100,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -456,7 +455,7 @@ async fn test_account_info_delta() {
             0,
             AccountInfoDeltaAssertion::DataLength {
                 value: 100,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -570,7 +569,7 @@ async fn test_account_info_delta() {
             0,
             AccountInfoDeltaAssertion::RentEpoch {
                 value: 10,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -587,7 +586,7 @@ async fn test_account_info_delta() {
             0,
             AccountInfoDeltaAssertion::RentEpoch {
                 value: 10,
-                operator: ComparableOperator::LessThan,
+                operator: IntegerOperator::LessThan,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -613,7 +612,7 @@ async fn test_account_info_delta() {
             0,
             AccountInfoDeltaAssertion::RentEpoch {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -676,7 +675,7 @@ async fn out_of_bounds_account_info_delta() {
             2,
             AccountInfoDeltaAssertion::DataLength {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),
@@ -725,7 +724,7 @@ async fn out_of_bounds_account_info_delta() {
             128 - 4,
             AccountInfoDeltaAssertion::RentEpoch {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             },
         )],
         Some(&user.encodable_pubkey()),

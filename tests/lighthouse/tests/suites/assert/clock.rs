@@ -8,7 +8,7 @@ use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::find_memory_pda;
 use lighthouse_client::instructions::{AssertSysvarClockBuilder, MemoryWriteBuilder};
 use lighthouse_client::types::{
-    ClockField, ComparableOperator, LogLevel, SysvarClockAssertion, WriteType,
+    ClockField, IntegerOperator, LogLevel, SysvarClockAssertion, WriteType,
 };
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
@@ -60,28 +60,28 @@ async fn simple() {
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Epoch {
                     value: epoch,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Epoch {
                     value: epoch / 2,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Epoch {
                     value: epoch * 2,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Epoch {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -131,28 +131,28 @@ async fn simple() {
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Slot {
                     value: slot,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Slot {
                     value: slot / 2,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Slot {
                     value: slot * 2,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::Slot {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -202,28 +202,28 @@ async fn simple() {
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::UnixTimestamp {
                     value: unix_timestamp,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::UnixTimestamp {
                     value: unix_timestamp / 2,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::UnixTimestamp {
                     value: unix_timestamp * 2,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::UnixTimestamp {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -273,28 +273,28 @@ async fn simple() {
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::LeaderScheduleEpoch {
                     value: leader_schedule_epoch,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::LeaderScheduleEpoch {
                     value: leader_schedule_epoch / 2,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::LeaderScheduleEpoch {
                     value: leader_schedule_epoch * 2,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::LeaderScheduleEpoch {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -344,28 +344,28 @@ async fn simple() {
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::EpochStartTimestamp {
                     value: epoch_start_timestamp,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::EpochStartTimestamp {
                     value: epoch_start_timestamp / 2,
-                    operator: ComparableOperator::GreaterThan,
+                    operator: IntegerOperator::GreaterThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::EpochStartTimestamp {
                     value: epoch_start_timestamp * 2,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
             AssertSysvarClockBuilder::new()
                 .log_level(LogLevel::Silent)
                 .assertion(SysvarClockAssertion::EpochStartTimestamp {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -383,7 +383,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::Epoch {
                 value: epoch * 2,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -405,7 +405,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::Slot {
                 value: slot * 2,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -427,7 +427,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::UnixTimestamp {
                 value: unix_timestamp * 2,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -449,7 +449,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::LeaderScheduleEpoch {
                 value: leader_schedule_epoch * 2,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -471,7 +471,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::EpochStartTimestamp {
                 value: epoch_start_timestamp * 2,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -493,7 +493,7 @@ async fn simple() {
             .log_level(LogLevel::Silent)
             .assertion(SysvarClockAssertion::Epoch {
                 value: epoch,
-                operator: ComparableOperator::GreaterThan,
+                operator: IntegerOperator::GreaterThan,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),

@@ -29,9 +29,9 @@ pub(crate) fn assert_merkle_tree_account<
     'info,
     T: Assert<&'a AssertMerkleTreeAccountContext<'a, 'info>>,
 >(
-    context: &'a AssertMerkleTreeAccountContext<'a, 'info>,
+    ctx: &'a AssertMerkleTreeAccountContext<'a, 'info>,
     assertion: &T,
     log_level: LogLevel,
 ) -> Result<()> {
-    assertion.evaluate(context, log_level)
+    assertion.evaluate(ctx, log_level)
 }

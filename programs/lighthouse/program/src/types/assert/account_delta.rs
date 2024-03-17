@@ -1,8 +1,8 @@
-use super::{Assert, ComparableOperator, EquatableOperator, LogLevel};
+use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
-    err, err_msg,
+    err,
     error::LighthouseError,
-    types::assert::operator::{ByteSliceOperator, IntegerOperator, Operator},
+    types::assert::operator::{ByteSliceOperator, Operator},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -78,14 +78,12 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                 let (a_account, b_account) = accounts;
 
-                let a_account_data = a_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for account_a", e);
-                    err!(LighthouseError::AccountBorrowFailed)
-                })?;
-                let b_account_data = b_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for account_b", e);
-                    err!(LighthouseError::AccountBorrowFailed)
-                })?;
+                let a_account_data = a_account
+                    .try_borrow_data()
+                    .map_err(LighthouseError::failed_borrow_err)?;
+                let b_account_data = b_account
+                    .try_borrow_data()
+                    .map_err(LighthouseError::failed_borrow_err)?;
 
                 if a_account_data.is_empty() || b_account_data.is_empty() {
                     return Err(LighthouseError::AccountNotInitialized.into());
@@ -208,10 +206,9 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                     return Err(LighthouseError::AccountNotInitialized.into());
                 }
 
-                let a_account_data = a_account.try_borrow_data().map_err(|e| {
-                    err_msg!("Cannot borrow data for account_a", e);
-                    err!(LighthouseError::AccountBorrowFailed)
-                })?;
+                let a_account_data = a_account
+                    .try_borrow_data()
+                    .map_err(LighthouseError::failed_borrow_err)?;
 
                 let a_offset = *a_offset as usize;
 
@@ -259,14 +256,14 @@ pub enum AccountInfoDeltaAssertion {
     },
     DataLength {
         value: i128,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Owner {
         operator: EquatableOperator,
     },
     RentEpoch {
         value: i128,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
 }
 

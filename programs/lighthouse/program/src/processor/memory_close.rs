@@ -52,9 +52,6 @@ impl<'a, 'info> MemoryCloseContext<'a, 'info> {
     }
 }
 
-pub(crate) fn memory_close(context: &MemoryCloseContext) -> Result<()> {
-    close(
-        context.memory.info_as_owned(),
-        context.payer.info_as_owned(),
-    )
+pub(crate) fn memory_close(ctx: &MemoryCloseContext) -> Result<()> {
+    close(ctx.memory.info, ctx.payer.info)
 }

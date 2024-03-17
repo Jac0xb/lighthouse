@@ -26,14 +26,14 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type StakeAssertion =
@@ -42,18 +42,18 @@ export type StakeAssertion =
       value: Address;
       operator: EquatableOperator;
     }
-  | { __kind: 'DelegationStake'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'DelegationStake'; value: bigint; operator: IntegerOperator }
   | {
       __kind: 'DelegationActivationEpoch';
       value: bigint;
-      operator: ComparableOperator;
+      operator: IntegerOperator;
     }
   | {
       __kind: 'DelegationDeactivationEpoch';
       value: bigint;
-      operator: ComparableOperator;
+      operator: IntegerOperator;
     }
-  | { __kind: 'CreditsObserved'; value: bigint; operator: ComparableOperator };
+  | { __kind: 'CreditsObserved'; value: bigint; operator: IntegerOperator };
 
 export type StakeAssertionArgs =
   | {
@@ -64,22 +64,22 @@ export type StakeAssertionArgs =
   | {
       __kind: 'DelegationStake';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'DelegationActivationEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'DelegationDeactivationEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'CreditsObserved';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     };
 
 export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
@@ -95,28 +95,28 @@ export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
       'DelegationStake',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'DelegationActivationEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'DelegationDeactivationEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'CreditsObserved',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
   ]);
@@ -135,28 +135,28 @@ export function getStakeAssertionDecoder(): Decoder<StakeAssertion> {
       'DelegationStake',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'DelegationActivationEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'DelegationDeactivationEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'CreditsObserved',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
   ]);

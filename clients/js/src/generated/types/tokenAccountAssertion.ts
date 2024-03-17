@@ -34,24 +34,24 @@ import {
   getUnitEncoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type TokenAccountAssertion =
   | { __kind: 'Mint'; value: Address; operator: EquatableOperator }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
-  | { __kind: 'Amount'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'Amount'; value: bigint; operator: IntegerOperator }
   | { __kind: 'Delegate'; value: Option<Address>; operator: EquatableOperator }
-  | { __kind: 'State'; value: number; operator: ComparableOperator }
+  | { __kind: 'State'; value: number; operator: IntegerOperator }
   | { __kind: 'IsNative'; value: Option<bigint>; operator: EquatableOperator }
-  | { __kind: 'DelegatedAmount'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'DelegatedAmount'; value: bigint; operator: IntegerOperator }
   | {
       __kind: 'CloseAuthority';
       value: Option<Address>;
@@ -62,17 +62,13 @@ export type TokenAccountAssertion =
 export type TokenAccountAssertionArgs =
   | { __kind: 'Mint'; value: Address; operator: EquatableOperatorArgs }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
-  | {
-      __kind: 'Amount';
-      value: number | bigint;
-      operator: ComparableOperatorArgs;
-    }
+  | { __kind: 'Amount'; value: number | bigint; operator: IntegerOperatorArgs }
   | {
       __kind: 'Delegate';
       value: OptionOrNullable<Address>;
       operator: EquatableOperatorArgs;
     }
-  | { __kind: 'State'; value: number; operator: ComparableOperatorArgs }
+  | { __kind: 'State'; value: number; operator: IntegerOperatorArgs }
   | {
       __kind: 'IsNative';
       value: OptionOrNullable<number | bigint>;
@@ -81,7 +77,7 @@ export type TokenAccountAssertionArgs =
   | {
       __kind: 'DelegatedAmount';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'CloseAuthority';
@@ -110,7 +106,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
       'Amount',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -124,7 +120,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
       'State',
       getStructEncoder([
         ['value', getU8Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -138,7 +134,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
       'DelegatedAmount',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -172,7 +168,7 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
       'Amount',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -186,7 +182,7 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
       'State',
       getStructDecoder([
         ['value', getU8Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -200,7 +196,7 @@ export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion
       'DelegatedAmount',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [

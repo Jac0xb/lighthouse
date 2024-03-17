@@ -1011,7 +1011,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1037,7 +1037,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1060,7 +1060,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1075,7 +1075,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1122,7 +1122,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1216,7 +1216,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1231,7 +1231,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1246,7 +1246,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1261,7 +1261,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1276,7 +1276,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1447,32 +1447,6 @@
       }
     },
     {
-      "name": "ComparableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          }
-        ]
-      }
-    },
-    {
       "name": "IntegerOperator",
       "type": {
         "kind": "enum",
@@ -1623,7 +1597,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1668,7 +1642,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1683,7 +1657,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1736,7 +1710,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1751,7 +1725,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1766,7 +1740,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1781,7 +1755,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1834,7 +1808,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1866,7 +1840,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -1898,7 +1872,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]
@@ -2075,7 +2049,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ComparableOperator"
+                  "defined": "IntegerOperator"
                 }
               }
             ]

@@ -17,7 +17,7 @@ const DOES_NOT_CONTAIN_SYMBOL: &str = "!&";
 pub trait Operator<T: ?Sized + Debug> {
     fn evaluate(&self, actual_value: &T, assertion_value: &T, log_level: LogLevel) -> Result<()>;
     fn log(&self, actual_value: &T, assertion_value: &T, log_level: LogLevel) {
-        if log_level == LogLevel::PlaintextMessage {
+        if log_level.is_plaintext_message() {
             msg!(
                 "{:?} {} {:?}",
                 actual_value,
@@ -27,48 +27,6 @@ pub trait Operator<T: ?Sized + Debug> {
         }
     }
     fn format_operator(&self) -> &str;
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum ComparableOperator {
-    Equal,
-    NotEqual,
-    GreaterThan,
-    LessThan,
-    GreaterThanOrEqual,
-    LessThanOrEqual,
-}
-
-impl<T: PartialEq + Eq + PartialOrd + Ord + Debug + Sized> Operator<T> for ComparableOperator {
-    fn format_operator(&self) -> &str {
-        match self {
-            ComparableOperator::Equal => EQUAL_SYMBOL,
-            ComparableOperator::NotEqual => NOT_EQUAL_SYMBOL,
-            ComparableOperator::GreaterThan => GREATER_THAN_SYMBOL,
-            ComparableOperator::LessThan => LESS_THAN_SYMBOL,
-            ComparableOperator::GreaterThanOrEqual => GREATER_THAN_OR_EQUAL_SYMBOL,
-            ComparableOperator::LessThanOrEqual => LESS_THAN_OR_EQUAL_SYMBOL,
-        }
-    }
-
-    fn evaluate(&self, actual_value: &T, assertion_value: &T, log_level: LogLevel) -> Result<()> {
-        let passed = match self {
-            ComparableOperator::Equal => T::eq(actual_value, assertion_value),
-            ComparableOperator::NotEqual => T::ne(actual_value, assertion_value),
-            ComparableOperator::GreaterThan => T::gt(actual_value, assertion_value),
-            ComparableOperator::LessThan => T::lt(actual_value, assertion_value),
-            ComparableOperator::GreaterThanOrEqual => T::ge(actual_value, assertion_value),
-            ComparableOperator::LessThanOrEqual => T::le(actual_value, assertion_value),
-        };
-
-        self.log(actual_value, assertion_value, log_level);
-
-        if passed {
-            Ok(())
-        } else {
-            Err(LighthouseError::AssertionFailed.into())
-        }
-    }
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]

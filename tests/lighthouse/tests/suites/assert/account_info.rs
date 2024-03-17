@@ -8,7 +8,7 @@ use crate::utils::{
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertAccountInfoBuilder;
 use lighthouse_client::types::{
-    AccountInfoAssertion, ComparableOperator, EquatableOperator, KnownProgram,
+    AccountInfoAssertion, EquatableOperator, IntegerOperator, KnownProgram,
 };
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
@@ -98,7 +98,7 @@ async fn test_account_balance() {
             .log_level(lighthouse_client::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::Lamports {
                 value: user_balance - 5000,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.pubkey()),
@@ -392,7 +392,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::Lamports {
                     value: test_balance / 2,
-                    operator: ComparableOperator::GreaterThanOrEqual,
+                    operator: IntegerOperator::GreaterThanOrEqual,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -400,7 +400,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::Lamports {
                     value: test_balance * 2,
-                    operator: ComparableOperator::LessThanOrEqual,
+                    operator: IntegerOperator::LessThanOrEqual,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -408,7 +408,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::Lamports {
                     value: test_balance,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -416,7 +416,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::Lamports {
                     value: 0,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
         ],
@@ -435,7 +435,7 @@ async fn simple() {
             .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
             .assertion(AccountInfoAssertion::Lamports {
                 value: test_balance + 1,
-                operator: ComparableOperator::GreaterThanOrEqual,
+                operator: IntegerOperator::GreaterThanOrEqual,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -460,7 +460,7 @@ async fn simple() {
             .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
             .assertion(AccountInfoAssertion::DataLength {
                 value: 0,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -488,7 +488,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: 0,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -496,7 +496,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: 128,
-                    operator: ComparableOperator::NotEqual,
+                    operator: IntegerOperator::NotEqual,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -504,7 +504,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: test_account_len,
-                    operator: ComparableOperator::Equal,
+                    operator: IntegerOperator::Equal,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
@@ -512,7 +512,7 @@ async fn simple() {
                 .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: test_account_len + 1,
-                    operator: ComparableOperator::LessThan,
+                    operator: IntegerOperator::LessThan,
                 })
                 .instruction(),
         ],
@@ -730,7 +730,7 @@ async fn simple() {
             .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
             .assertion(AccountInfoAssertion::RentEpoch {
                 value: rent_epoch,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -748,7 +748,7 @@ async fn simple() {
             .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
             .assertion(AccountInfoAssertion::RentEpoch {
                 value: rent_epoch - 1,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             })
             .instruction()],
         Some(&user.encodable_pubkey()),

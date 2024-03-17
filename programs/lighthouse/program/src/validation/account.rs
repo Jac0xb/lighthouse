@@ -81,7 +81,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
             create_account(
                 payer.as_ref(),
                 account_info,
-                system_program.info(),
+                system_program.info,
                 program_owner,
                 &Rent::get()?,
                 space,
@@ -177,7 +177,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                 create_account(
                     payer.as_ref(),
                     account_info,
-                    system_program.info(),
+                    system_program.info,
                     program_owner,
                     &Rent::get()?,
                     space as u64,

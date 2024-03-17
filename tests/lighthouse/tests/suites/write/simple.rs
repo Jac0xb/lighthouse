@@ -10,16 +10,17 @@ use lighthouse_client::instructions::{
     AssertAccountDataBuilder, AssertAccountDeltaBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
 };
 use lighthouse_client::types::{
-    AccountDeltaAssertion, ByteSliceOperator, DataValue, DataValueAssertion,
+    AccountDeltaAssertion, AccountInfoField, ByteSliceOperator, DataValue, DataValueAssertion,
     DataValueDeltaAssertion, EquatableOperator, IntegerOperator, LogLevel, WriteType,
 };
 use lighthouse_client::{find_memory_pda, find_memory_pda_bump_iterate};
 use solana_program_test::tokio;
 use solana_sdk::instruction::Instruction;
+use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::system_program;
 use solana_sdk::transaction::Transaction;
+use solana_sdk::{bpf_loader, system_program};
 use spl_associated_token_account::get_associated_token_address;
 use std::u8::MAX;
 
@@ -707,4 +708,144 @@ async fn cpi_check() {
     )
     .await
     .unwrap();
+}
+
+#[tokio::test]
+async fn account_info() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let test_account = create_test_account(context, &user, false).await.unwrap();
+    let test_acount_info = &mut context
+        .get_account(test_account.encodable_pubkey())
+        .await
+        .unwrap();
+
+    let test_account_data = &test_acount_info.data;
+    let test_account_lamports = test_acount_info.lamports;
+    let test_account_rent_epoch = test_acount_info.rent_epoch;
+
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
+
+    let builder_fn = |write_type: WriteType, offset: u16| {
+        MemoryWriteBuilder::new()
+            .payer(user.encodable_pubkey())
+            .source_account(test_account.encodable_pubkey())
+            .memory(memory)
+            .program_id(lighthouse_client::ID)
+            .memory_id(0)
+            .memory_bump(memory_bump)
+            .write_offset(offset)
+            .system_program(system_program::id())
+            .write_type(write_type)
+            .instruction()
+    };
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::DataLength), 0),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Executable), 8),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Owner), 16),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Lamports), 48),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::RentEpoch), 56),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Key), 64),
+        ],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let account_data = context.get_account(memory).await.unwrap().data;
+
+    assert_eq!(account_data.len(), 96);
+
+    let actual_value = u64::try_from_slice(&account_data[0..8]).unwrap();
+    assert_eq!(actual_value, test_account_data.len() as u64);
+
+    let actual_value = bool::try_from_slice(&account_data[8..9]).unwrap();
+    assert!(!actual_value);
+
+    let actual_value = Pubkey::try_from_slice(&account_data[16..48]).unwrap();
+    assert_eq!(actual_value, test_program::ID);
+
+    let actual_value = u64::try_from_slice(&account_data[48..56]).unwrap();
+    assert_eq!(actual_value, test_account_lamports);
+
+    let actual_value = u64::try_from_slice(&account_data[56..64]).unwrap();
+    assert_eq!(actual_value, test_account_rent_epoch);
+
+    let actual_value = Pubkey::try_from_slice(&account_data[64..96]).unwrap();
+    assert_eq!(actual_value, test_account.encodable_pubkey());
+}
+
+#[tokio::test]
+async fn account_info_program() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let program_acount_info = &mut context.get_account(lighthouse_client::ID).await.unwrap();
+
+    let program_account_data = &program_acount_info.data;
+    let program_account_lamports = program_acount_info.lamports;
+    let program_account_rent_epoch = program_acount_info.rent_epoch;
+
+    let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
+
+    let builder_fn = |write_type: WriteType, offset: u16| {
+        MemoryWriteBuilder::new()
+            .payer(user.encodable_pubkey())
+            .source_account(lighthouse_client::ID)
+            .memory(memory)
+            .program_id(lighthouse_client::ID)
+            .memory_id(0)
+            .memory_bump(memory_bump)
+            .write_offset(offset)
+            .system_program(system_program::id())
+            .write_type(write_type)
+            .instruction()
+    };
+
+    let tx = Transaction::new_signed_with_payer(
+        &[
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::DataLength), 0),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Executable), 8),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Owner), 16),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Lamports), 48),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::RentEpoch), 56),
+            builder_fn(WriteType::AccountInfoField(AccountInfoField::Key), 64),
+        ],
+        Some(&user.encodable_pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    let account_data = context.get_account(memory).await.unwrap().data;
+
+    assert_eq!(account_data.len(), 96);
+
+    let actual_value = u64::try_from_slice(&account_data[0..8]).unwrap();
+    assert_eq!(actual_value, program_account_data.len() as u64);
+
+    let actual_value = bool::try_from_slice(&account_data[8..9]).unwrap();
+    assert!(actual_value);
+
+    let actual_value = Pubkey::try_from_slice(&account_data[16..48]).unwrap();
+    assert_eq!(actual_value, bpf_loader::ID);
+
+    let actual_value = u64::try_from_slice(&account_data[48..56]).unwrap();
+    assert_eq!(actual_value, program_account_lamports);
+
+    let actual_value = u64::try_from_slice(&account_data[56..64]).unwrap();
+    assert_eq!(actual_value, program_account_rent_epoch);
+
+    let actual_value = Pubkey::try_from_slice(&account_data[64..96]).unwrap();
+    assert_eq!(actual_value, lighthouse_client::ID);
 }

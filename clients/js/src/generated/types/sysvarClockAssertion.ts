@@ -23,48 +23,36 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
+  IntegerOperator,
+  IntegerOperatorArgs,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '.';
 
 export type SysvarClockAssertion =
-  | { __kind: 'Slot'; value: bigint; operator: ComparableOperator }
-  | {
-      __kind: 'EpochStartTimestamp';
-      value: bigint;
-      operator: ComparableOperator;
-    }
-  | { __kind: 'Epoch'; value: bigint; operator: ComparableOperator }
-  | {
-      __kind: 'LeaderScheduleEpoch';
-      value: bigint;
-      operator: ComparableOperator;
-    }
-  | { __kind: 'UnixTimestamp'; value: bigint; operator: ComparableOperator };
+  | { __kind: 'Slot'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'EpochStartTimestamp'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'Epoch'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'LeaderScheduleEpoch'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'UnixTimestamp'; value: bigint; operator: IntegerOperator };
 
 export type SysvarClockAssertionArgs =
-  | { __kind: 'Slot'; value: number | bigint; operator: ComparableOperatorArgs }
+  | { __kind: 'Slot'; value: number | bigint; operator: IntegerOperatorArgs }
   | {
       __kind: 'EpochStartTimestamp';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
-  | {
-      __kind: 'Epoch';
-      value: number | bigint;
-      operator: ComparableOperatorArgs;
-    }
+  | { __kind: 'Epoch'; value: number | bigint; operator: IntegerOperatorArgs }
   | {
       __kind: 'LeaderScheduleEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'UnixTimestamp';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     };
 
 export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionArgs> {
@@ -73,35 +61,35 @@ export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionAr
       'Slot',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'EpochStartTimestamp',
       getStructEncoder([
         ['value', getI64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'Epoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'LeaderScheduleEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'UnixTimestamp',
       getStructEncoder([
         ['value', getI64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
   ]);
@@ -113,35 +101,35 @@ export function getSysvarClockAssertionDecoder(): Decoder<SysvarClockAssertion> 
       'Slot',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'EpochStartTimestamp',
       getStructDecoder([
         ['value', getI64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'Epoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'LeaderScheduleEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'UnixTimestamp',
       getStructDecoder([
         ['value', getI64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
   ]);

@@ -96,7 +96,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
 }
 
 pub(crate) fn memory_write(
-    context: &MemoryWriteContext,
+    ctx: &MemoryWriteContext,
     offset: u16,
     write_type: &WriteType,
 ) -> Result<()> {
@@ -105,11 +105,11 @@ pub(crate) fn memory_write(
         return Err(LighthouseError::CrossProgramInvokeViolation.into());
     }
 
-    let memory = context.memory.clone();
-    let source_account = context.source_account;
+    let memory = ctx.memory.clone();
+    let source_account = ctx.source_account;
 
     let write_offset = offset as usize;
-    let memory_ref = &mut memory.info().try_borrow_mut_data()?;
+    let memory_ref = &mut memory.info.try_borrow_mut_data()?;
 
     match write_type {
         WriteType::DataValue(data_value) => {
@@ -143,7 +143,7 @@ pub(crate) fn memory_write(
                         msg!(
                             "DataValue write - range out of bounds {:?} write length {:?}",
                             memory_write_range,
-                            memory.info().data_len()
+                            memory.info.data_len()
                         );
                         LighthouseError::RangeOutOfBounds
                     })?;
@@ -188,12 +188,17 @@ pub(crate) fn memory_write(
                     err_msg!("Failed to serialize AccountInfo.key", err);
                     LighthouseError::FailedToSerialize
                 })?,
-                AccountInfoField::Lamports => {
-                    source_account.lamports().try_to_vec().map_err(|err| {
+                AccountInfoField::Lamports => source_account
+                    .try_borrow_lamports()
+                    .map_err(|err| {
+                        err_msg!("Failed to borrow AccountInfo.lamports", err);
+                        LighthouseError::AccountBorrowFailed
+                    })?
+                    .try_to_vec()
+                    .map_err(|err| {
                         err_msg!("Failed to serialize AccountInfo.lamports", err);
                         LighthouseError::FailedToSerialize
-                    })?
-                }
+                    })?,
                 AccountInfoField::Owner => source_account.owner.try_to_vec().map_err(|err| {
                     err_msg!("Failed to serialize AccountInfo.owner", err);
                     LighthouseError::FailedToSerialize

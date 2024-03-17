@@ -2,8 +2,8 @@ use super::{AccountValidation, CheckedAccount, DerivedAddress};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(Clone)]
-pub struct Memory<'a, 'info> {
-    info: &'a AccountInfo<'info>,
+pub(crate) struct Memory<'a, 'info> {
+    pub(crate) info: &'a AccountInfo<'info>,
 }
 
 pub struct MemorySeeds<'a> {

@@ -5,7 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
@@ -20,13 +19,13 @@ pub enum AccountInfoDeltaAssertion {
     },
     DataLength {
         value: i128,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Owner {
         operator: EquatableOperator,
     },
     RentEpoch {
         value: i128,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
 }

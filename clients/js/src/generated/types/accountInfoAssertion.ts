@@ -36,26 +36,26 @@ import {
   getU64Encoder,
 } from '@solana/codecs';
 import {
-  ComparableOperator,
-  ComparableOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
+  IntegerOperator,
+  IntegerOperatorArgs,
   KnownProgram,
   KnownProgramArgs,
-  getComparableOperatorDecoder,
-  getComparableOperatorEncoder,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
   getKnownProgramDecoder,
   getKnownProgramEncoder,
 } from '.';
 
 export type AccountInfoAssertion =
-  | { __kind: 'Lamports'; value: bigint; operator: ComparableOperator }
-  | { __kind: 'DataLength'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
+  | { __kind: 'DataLength'; value: bigint; operator: IntegerOperator }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
   | { __kind: 'KnownOwner'; value: KnownProgram; operator: EquatableOperator }
-  | { __kind: 'RentEpoch'; value: bigint; operator: ComparableOperator }
+  | { __kind: 'RentEpoch'; value: bigint; operator: IntegerOperator }
   | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperator }
   | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperator }
   | { __kind: 'Executable'; value: boolean; operator: EquatableOperator }
@@ -70,12 +70,12 @@ export type AccountInfoAssertionArgs =
   | {
       __kind: 'Lamports';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | {
       __kind: 'DataLength';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
   | {
@@ -86,7 +86,7 @@ export type AccountInfoAssertionArgs =
   | {
       __kind: 'RentEpoch';
       value: number | bigint;
-      operator: ComparableOperatorArgs;
+      operator: IntegerOperatorArgs;
     }
   | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperatorArgs }
   | { __kind: 'IsWritable'; value: boolean; operator: EquatableOperatorArgs }
@@ -104,14 +104,14 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
       'Lamports',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
       'DataLength',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -132,7 +132,7 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
       'RentEpoch',
       getStructEncoder([
         ['value', getU64Encoder()],
-        ['operator', getComparableOperatorEncoder()],
+        ['operator', getIntegerOperatorEncoder()],
       ]),
     ],
     [
@@ -173,14 +173,14 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
       'Lamports',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
       'DataLength',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [
@@ -201,7 +201,7 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
       'RentEpoch',
       getStructDecoder([
         ['value', getU64Decoder()],
-        ['operator', getComparableOperatorDecoder()],
+        ['operator', getIntegerOperatorDecoder()],
       ]),
     ],
     [

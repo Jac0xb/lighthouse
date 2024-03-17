@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::{
-    types::assert::operator::{ComparableOperator, Operator},
+    types::assert::operator::{IntegerOperator, Operator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -10,23 +10,23 @@ use solana_program::{clock::Clock, sysvar::Sysvar};
 pub enum SysvarClockAssertion {
     Slot {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     EpochStartTimestamp {
         value: i64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Epoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     LeaderScheduleEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     UnixTimestamp {
         value: i64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
 }
 
@@ -84,7 +84,7 @@ mod tests {
     mod evaluate {
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{operator::ComparableOperator, Assert, LogLevel, SysvarClockAssertion},
+            types::assert::{operator::IntegerOperator, Assert, LogLevel, SysvarClockAssertion},
         };
         use solana_sdk::{
             clock::Clock,
@@ -115,7 +115,7 @@ mod tests {
             // Evaluate slot
             let result = SysvarClockAssertion::Slot {
                 value: 69,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -123,7 +123,7 @@ mod tests {
 
             let result = SysvarClockAssertion::Slot {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -133,7 +133,7 @@ mod tests {
 
             let result = SysvarClockAssertion::EpochStartTimestamp {
                 value: 420,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -141,7 +141,7 @@ mod tests {
 
             let result = SysvarClockAssertion::EpochStartTimestamp {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -151,7 +151,7 @@ mod tests {
 
             let result = SysvarClockAssertion::Epoch {
                 value: 1337,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -159,7 +159,7 @@ mod tests {
 
             let result = SysvarClockAssertion::Epoch {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -168,7 +168,7 @@ mod tests {
 
             let result = SysvarClockAssertion::LeaderScheduleEpoch {
                 value: 9001,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -176,7 +176,7 @@ mod tests {
 
             let result = SysvarClockAssertion::LeaderScheduleEpoch {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -185,7 +185,7 @@ mod tests {
 
             let result = SysvarClockAssertion::UnixTimestamp {
                 value: 123456789,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 
@@ -193,7 +193,7 @@ mod tests {
 
             let result = SysvarClockAssertion::UnixTimestamp {
                 value: 1600,
-                operator: ComparableOperator::Equal,
+                operator: IntegerOperator::Equal,
             }
             .evaluate((), LogLevel::PlaintextMessage);
 

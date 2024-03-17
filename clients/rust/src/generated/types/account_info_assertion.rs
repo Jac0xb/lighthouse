@@ -5,8 +5,8 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ComparableOperator;
 use crate::generated::types::EquatableOperator;
+use crate::generated::types::IntegerOperator;
 use crate::generated::types::KnownProgram;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -17,11 +17,11 @@ use solana_program::pubkey::Pubkey;
 pub enum AccountInfoAssertion {
     Lamports {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     DataLength {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     Owner {
         #[cfg_attr(
@@ -37,7 +37,7 @@ pub enum AccountInfoAssertion {
     },
     RentEpoch {
         value: u64,
-        operator: ComparableOperator,
+        operator: IntegerOperator,
     },
     IsSigner {
         value: bool,
