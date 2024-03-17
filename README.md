@@ -229,3 +229,16 @@ Lighthouse is provided "as is", with no warranties regarding its efficacy in com
 - Assertion type: hash of account, for post-simulation account integrity
 - POD / Bytemuck / zerocopy rewrite of instruction data
   - Maybe need to move to native implementation
+- [] Look into memcpy syscall for memory write.
+- [] Add multi-write to roadmap
+- [x] .info() isnt a good name
+- [] Look for more programs to add to KnownPrograms
+- [] Use log level helpers
+- [] Add additional merkle tree assertions to roadmap
+- [] Probably move get_state to its own function not as a variable
+- [] Write test plan for validations, multi instructions, utils
+- [] Source account for memory write needs to be optional
+- [] Add multi write to roadmap
+- [] Should I add 128 bit support for account data delta
+- [] Probably readd data is empty check
+- [] Remove anchor for spl compression
