@@ -26,6 +26,7 @@ export * from './stakeAccountAssertion';
 export * from './stakeAssertion';
 export * from './stakeStateType';
 export * from './sysvarClockAssertion';
+export * from './testAccountV1';
 export * from './tokenAccountAssertion';
 export * from './upgradableBufferAssertion';
 export * from './upgradeableLoaderStateAssertion';

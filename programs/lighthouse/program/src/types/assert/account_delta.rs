@@ -275,10 +275,6 @@ pub enum AccountInfoDeltaAssertion {
 
 #[cfg(test)]
 mod tests {
-    use solana_sdk::{
-        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
-    };
-
     use crate::{
         test_utils::{assert_passed, create_test_account},
         types::assert::{
@@ -286,13 +282,17 @@ mod tests {
             DataValueDeltaAssertion, EquatableOperator, LogLevel,
         },
     };
+    use borsh::BorshSerialize;
+    use solana_sdk::{
+        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
+    };
 
     #[test]
     fn evaluate_diff_u8() {
         let key = system_program::id();
         let (lamports_b, lamports_a) = (&mut 0, &mut 0);
         let a_data: &mut [u8] = &mut [0u8; 171];
-        a_data.copy_from_slice(create_test_account().try_to_vec_override().as_ref());
+        a_data.copy_from_slice(create_test_account().try_to_vec().unwrap().as_ref());
         let a_account_info =
             AccountInfo::new(&key, false, false, lamports_b, a_data, &key, false, 0);
 
@@ -341,7 +341,7 @@ mod tests {
         let (lamports_b, lamports_a) = (&mut 0, &mut 0);
         let a_data: &mut [u8] = &mut [0u8; 171];
         let test_account = create_test_account();
-        a_data.copy_from_slice(create_test_account().try_to_vec_override().as_ref());
+        a_data.copy_from_slice(create_test_account().try_to_vec().unwrap().as_ref());
         let a_account_info =
             AccountInfo::new(&key, false, false, lamports_b, a_data, &key, false, 0);
 
@@ -390,7 +390,7 @@ mod tests {
         let (lamports_b, lamports_a) = (&mut 0, &mut 0);
         let a_data: &mut [u8] = &mut [0u8; 171];
         let test_account = create_test_account();
-        a_data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+        a_data.copy_from_slice(test_account.try_to_vec().unwrap().as_ref());
         let a_account_info =
             AccountInfo::new(&key, false, false, lamports_b, a_data, &key, false, 0);
 
@@ -439,7 +439,7 @@ mod tests {
         let (lamports_b, lamports_a) = (&mut 0, &mut 0);
         let a_data: &mut [u8] = &mut [0u8; 171];
         let test_account = create_test_account();
-        a_data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+        a_data.copy_from_slice(test_account.try_to_vec().unwrap().as_ref());
         let a_account_info =
             AccountInfo::new(&key, false, false, lamports_b, a_data, &key, false, 0);
 

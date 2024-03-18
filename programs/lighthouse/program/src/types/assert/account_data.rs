@@ -198,6 +198,7 @@ mod tests {
             AccountDataAssertion, Assert, ByteSliceOperator, LogLevel,
         },
     };
+    use borsh::BorshSerialize;
     use solana_sdk::{
         account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
     };
@@ -208,7 +209,7 @@ mod tests {
         let lamports = &mut 0;
         let test_account = create_test_account();
         let data: &mut [u8] = &mut [0u8; 171];
-        data.copy_from_slice(test_account.try_to_vec_override().as_ref());
+        data.copy_from_slice(test_account.try_to_vec().unwrap().as_ref());
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         // Test all operators

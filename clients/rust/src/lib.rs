@@ -7,7 +7,15 @@ pub use generated::programs::LIGHTHOUSE_ID as ID;
 use solana_program::pubkey::{Pubkey, PubkeyError};
 
 pub mod types {
-    pub use crate::generated::types::*;
+    pub use crate::generated::types::{
+        AccountDeltaAssertion, AccountInfoAssertion, AccountInfoDeltaAssertion, AccountInfoField,
+        ByteSliceOperator, ClockField, DataValue, DataValueAssertion, DataValueDeltaAssertion,
+        EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MerkleTreeAssertion,
+        MetaAssertion, MintAccountAssertion, StakeAccountAssertion, StakeAssertion, StakeStateType,
+        SysvarClockAssertion, TokenAccountAssertion, UpgradableBufferAssertion,
+        UpgradeableLoaderStateAssertion, UpgradeableLoaderStateType, UpgradeableProgramAssertion,
+        UpgradeableProgramDataAssertion, WriteType,
+    };
 }
 
 pub mod instructions {
