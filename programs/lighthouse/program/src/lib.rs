@@ -11,6 +11,18 @@ pub mod test_utils;
 use solana_program::declare_id;
 pub use utils::Result;
 
+#[cfg(not(feature = "no-entrypoint"))]
+pub mod security {
+    use solana_security_txt::security_txt;
+    security_txt! {
+        name: "Lighthouse Protocol",
+        project_url: "https://github.com/Jac0xb/lighthouse",
+        contacts: "email:jacob@rektdefi.net",
+        preferred_languages: "en",
+        source_code: "https://github.com/Jac0xb/lighthouse"
+    }
+}
+
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
 pub mod lighthouse {
     use crate::processor;

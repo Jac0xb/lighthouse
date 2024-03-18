@@ -91,6 +91,11 @@ impl LighthouseError {
         msg!("Failed to access account data range {:?}: out of bounds", r);
         LighthouseError::RangeOutOfBounds.into()
     }
+
+    pub fn serialize_err(e: io::Error) -> ProgramError {
+        err_msg!("Failed to serialize data", e);
+        err!(LighthouseError::FailedToSerialize)
+    }
 }
 
 impl From<LighthouseError> for ProgramError {

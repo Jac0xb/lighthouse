@@ -1,5 +1,30 @@
-use solana_sdk::{program_error::ProgramError, signature::Keypair, signer::EncodableKeypair};
-use test_program::processor::TestAccountV1;
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_sdk::{
+    program_error::ProgramError, pubkey::Pubkey, signature::Keypair, signer::EncodableKeypair,
+};
+
+#[derive(Debug, BorshDeserialize, BorshSerialize)]
+pub struct TestAccountV1 {
+    pub u8: u8,
+    pub i8: i8,
+    pub u16: u16,
+    pub i16: i16,
+    pub u32: u32,
+    pub i32: i32,
+    pub u64: u64,
+    pub i64: i64,
+    pub u128: u128,
+    pub i128: i128,
+    pub bytes: [u8; 32],
+    pub true_field: bool,
+    pub false_field: bool,
+    pub option_u8: Option<u8>,
+    pub option_u8_none: Option<u8>,
+    pub option_u16: Option<u16>,
+    pub option_u16_none: Option<u16>,
+    pub pubkey: Pubkey,
+    pub vec: Vec<u8>,
+}
 
 pub fn create_test_account() -> TestAccountV1 {
     TestAccountV1 {

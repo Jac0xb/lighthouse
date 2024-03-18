@@ -32,6 +32,7 @@ pub enum TokenAccountAssertion {
         value: u8,
         operator: IntegerOperator,
     },
+    // This is an EquatableOperator because current iteration of IntegerOperator doesn't make sense for a Option<u64>
     IsNative {
         value: Option<u64>,
         operator: EquatableOperator,
