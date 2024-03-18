@@ -2,6 +2,7 @@ use std::any::type_name;
 
 use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
+use sha2_const_stable::Sha256;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
@@ -152,6 +153,13 @@ pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
 
 pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
     keys.iter().any(|k| keys_equal(k, key))
+}
+
+pub const fn anchor_discriminator(preimage: &'static str) -> u64 {
+    let hash: [u8; 32] = Sha256::new().update(preimage.as_bytes()).finalize();
+    u64::from_le_bytes([
+        hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7],
+    ])
 }
 
 pub trait Key {

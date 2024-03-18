@@ -2136,7 +2136,6 @@ dependencies = [
 name = "lighthouse"
 version = "0.1.0"
 dependencies = [
- "anchor-lang",
  "bincode",
  "borsh 0.10.3",
  "bytemuck",
@@ -2144,6 +2143,7 @@ dependencies = [
  "lib-sokoban",
  "mpl-bubblegum",
  "num-traits",
+ "sha2-const-stable",
  "shank",
  "solana-program",
  "solana-program-test",
@@ -3437,6 +3437,12 @@ dependencies = [
  "cpufeatures",
  "digest 0.10.7",
 ]
+
+[[package]]
+name = "sha2-const-stable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f179d4e11094a893b82fff208f74d448a7512f99f5a0acbd5c679b705f83ed9"
 
 [[package]]
 name = "sha3"
