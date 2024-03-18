@@ -48,10 +48,16 @@ impl Id for LighthouseProgram {
     }
 }
 
+pub const SPL_ACCOUNT_COMPRESSION_ID: Pubkey = Pubkey::new_from_array([
+    9u8, 42u8, 19u8, 238u8, 149u8, 196u8, 28u8, 186u8, 8u8, 166u8, 127u8, 90u8, 198u8, 126u8,
+    141u8, 247u8, 225u8, 218u8, 17u8, 98u8, 94u8, 29u8, 100u8, 19u8, 127u8, 143u8, 79u8, 35u8,
+    131u8, 3u8, 127u8, 20u8,
+]);
+
 pub struct SplAccountCompressionProgram;
 impl Id for SplAccountCompressionProgram {
     fn id() -> Pubkey {
-        spl_account_compression::ID
+        SPL_ACCOUNT_COMPRESSION_ID
     }
 }
 
