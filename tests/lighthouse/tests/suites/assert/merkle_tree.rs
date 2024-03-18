@@ -2,8 +2,8 @@ use crate::utils::bubblegum::context::BubblegumTestContext;
 use crate::utils::bubblegum::{DirtyClone, LeafArgs, Tree};
 use crate::utils::context::TestContext;
 use crate::utils::{
-    process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
-    to_transaction_error_u8, Result,
+    create_user, process_transaction_assert_failure, process_transaction_assert_success,
+    to_transaction_error, to_transaction_error_u8, Result,
 };
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertMerkleTreeAccountBuilder;
@@ -43,7 +43,7 @@ pub async fn context_tree_and_leaves(
 async fn simple() {
     let context = &mut TestContext::new().await.unwrap();
 
-    let new_owner = Keypair::new();
+    let new_owner = create_user(context).await.unwrap();
 
     let (_, mut tree, mut leaves) = context_tree_and_leaves(&mut context.program_context)
         .await
@@ -72,6 +72,80 @@ async fn simple() {
     tree.transfer(
         leaf,
         &new_owner,
+        &[AssertMerkleTreeAccountBuilder::new()
+            .target_merkle_tree(tree_pubkey)
+            .root(Pubkey::new_from_array(tree_root))
+            .spl_account_compression(spl_account_compression::id())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(MerkleTreeAssertion::VerifyLeaf {
+                leaf_index: leaf.index,
+                leaf_hash: new_leaf_hash,
+            })
+            .add_remaining_accounts(&proof_path_metas)
+            .instruction()],
+        &[],
+    )
+    .await
+    .unwrap();
+
+    let tree_root = tree.decode_root().await.unwrap();
+
+    // transfer two
+
+    let new_new_owner = create_user(context).await.unwrap();
+
+    let proof_path_metas = tree
+        .proof_of_leaf(leaf.index)
+        .iter()
+        .map(|proof| AccountMeta::new_readonly(Pubkey::new_from_array(*proof), false))
+        .collect::<Vec<AccountMeta>>();
+
+    let mut modified_leaf_node = leaf.clone();
+    modified_leaf_node.owner = new_new_owner.dirty_clone();
+    modified_leaf_node.delegate = new_new_owner.dirty_clone();
+    let new_leaf_hash = tree.leaf_node(&modified_leaf_node).unwrap();
+
+    tree.transfer(
+        leaf,
+        &new_new_owner,
+        &[AssertMerkleTreeAccountBuilder::new()
+            .target_merkle_tree(tree_pubkey)
+            .root(Pubkey::new_from_array(tree_root))
+            .spl_account_compression(spl_account_compression::id())
+            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .assertion(MerkleTreeAssertion::VerifyLeaf {
+                leaf_index: leaf.index,
+                leaf_hash: new_leaf_hash,
+            })
+            .add_remaining_accounts(&proof_path_metas)
+            .instruction()],
+        &[],
+    )
+    .await
+    .unwrap();
+
+    // transfer leaf 0x6
+
+    let tree_root = tree.decode_root().await.unwrap();
+
+    let leaf = leaves.get_mut(6).unwrap();
+
+    let proof_path_metas = tree
+        .proof_of_leaf(leaf.index)
+        .iter()
+        .map(|proof| AccountMeta::new_readonly(Pubkey::new_from_array(*proof), false))
+        .collect::<Vec<AccountMeta>>();
+
+    let new_new_owner = Keypair::new();
+
+    let mut modified_leaf_node = leaf.clone();
+    modified_leaf_node.owner = new_new_owner.dirty_clone();
+    modified_leaf_node.delegate = new_new_owner.dirty_clone();
+    let new_leaf_hash = tree.leaf_node(&modified_leaf_node).unwrap();
+
+    tree.transfer(
+        leaf,
+        &new_new_owner,
         &[AssertMerkleTreeAccountBuilder::new()
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
