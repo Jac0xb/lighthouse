@@ -1,10 +1,14 @@
 pub mod account_data;
 pub mod account_delta;
 pub mod account_info;
+pub mod account_info_multi;
 pub mod clock;
 pub mod merkle_tree;
 pub mod mint_account;
+pub mod mint_account_multi;
 pub mod stake_account;
+pub mod stake_account_multi;
 pub mod token_account;
 pub mod token_account_multi;
 pub mod upgradeable_loader;
+pub mod upgradeable_loader_multi;

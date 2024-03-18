@@ -42,124 +42,19 @@ The transaction is then sent to the Solana blockchain. The assertion fails becau
 
 **Assertion Instructions (Primary)** - instructions which allow transaction builders to assert on data accessed at runtime during the assertion instruction.
 
-_Current Assertion Data Model_
-
-```rust
-// Used in assertions during evaluation.
-pub enum Operator {
-    Equal,
-    NotEqual,
-    GreaterThan,
-    LessThan,
-    GreaterThanOrEqual,
-    LessThanOrEqual,
-}
-
-// Used in assertion as "expected value"
-pub enum DataValue {
-    Bool(bool),
-    U8(u8),
-    I8(i8),
-    U16(u16),
-    I16(i16),
-    U32(u32),
-    I32(i32),
-    U64(u64),
-    I64(i64),
-    U128(u128),
-    I128(i128),
-    Bytes(Vec<u8>),
-    Pubkey(Pubkey),
-}
-
-// Used in AccountInfoField assertion to assert about account info.
-pub enum AccountInfoField {
-    Key(Pubkey),
-    Lamports(u64),
-    DataLength(u64),
-    Owner(Pubkey),
-    RentEpoch(u64),
-    IsSigner(bool),
-    IsWritable(bool),
-    Executable(bool),
-}
-
-// Used in LegacyTokenAccountField assertion to assert on token account data.
-pub enum LegacyTokenAccountField {
-    Mint(Pubkey),
-    Owner(Pubkey),
-    Amount(u64),
-    Delegate(Option<Pubkey>),
-    State(u8),
-    IsNative(Option<u64>),
-    DelegatedAmount(u64),
-    CloseAuthority(Option<Pubkey>),
-}
-
-pub enum Assertion {
-    AccountInfoField(AccountInfoField, Operator),
-    AccountData(u16, Operator, DataValue),
-    LegacyTokenAccountField(LegacyTokenAccountField, Operator),
-}
-```
-
-_Current Assertion Instructions_
-
-```rust
-pub fn assert_v1<'info>(...) -> Result<()> {
-   // Allows for logging (CU intensive but useful for debugging) and has more instruction data overhead (config struct)
-}
-
-pub fn assert_compact_v1<'info>(...) -> Result<()> {
-   // Has less data instruction overhead, and suppresses CU intensive logging.
-}
-
-pub fn assert_multi_v1<'info>(...) -> Result<()> {
-   // Allows for logging on assertion (CU intensive) and has more instruction data overhead (uses vector for assertions and has a config struct)
-}
-
-pub fn assert_multi_compact_v1<'info>(...) -> Result<()> {
-   // Uses fixed-array defined in enum for assertions and suppresses CU intensive logging.
-}
-```
+TODO
 
 **Write Instructions (Secondary)** - write account data, account info, and other data available at runtime into memory accounts to allow for assertion of inter-transaction state changes rather than just instruction data and data accessed at runtime during assertion instruction.
 
+TODO
+
 **Memory Account** - PDA with seeds `[b"memory".as_ref(), signer.key.as_ref(), &[memory_idx]]`. The memory account is used to store runtime data into memory accounts derived by the signer. Useful for asserting on the difference of changes between instructions.
 
-_Current Write Data Model_
-
-```rust
-pub enum WriteTypeParameter {
-    // Memory offset, write type
-    WriteU8(u8, WriteType),
-    WriteU16(u16, WriteType),
-    WriteU32(u32, WriteType),
-}
-
-
-pub enum WriteType {
-    // Account data start index, end index, validations (owner, exists, etc)
-    AccountData(u16, Option<u16>, Option<AccountValidation>),
-    AccountInfo,
-    DataValue(DataValue),
-}
-```
-
-_Current Write Instructions_
-
-```rust
-pub fn create_memory_account_v1<'info>(..., memory_idx) -> Result<()> {
-   // Create a memory account which can then be used to write data to.
-}
-
-
-pub fn write_v1<'info>(..., memory_idx, write_type) -> Result<()> {
-   // Write data to a memory account using predefined write types.
-}
-```
+TODO
 
 ## Getting Started
+
+TODO
 
 ### Prerequisites
 
@@ -192,53 +87,3 @@ This project is under the [MIT License](LICENSE).
 ## Disclaimer
 
 Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
-
-## Todo
-
-- Instruction protections (Allow for assertions on CPI, etc)
-  - Assert address is signer
-- Program data address check (Program data swap attack)
-  - Program unchanged
-- Turn config into bit flag to save instruction space
-- Add security info
-- Add verification of source
-- Resize cache account
-- Write account info support
-- Token Account Assertions
-  - State assertions
-  - Has Delegate (https://twitter.com/kb24x7/status/1731261594141671824)
-  - Has No Delegate
-- Instruction Data Hotloader
-  - Allow instruction data to be hot loaded from cache to allow for instruction data to react to state change
-- Piece-wise instruction CPI constructor
-  - Piece-wise write segments of instruction data in a cache and then cpi execute the instruction data
-- Perform arithmetic on cached values
-  - Look into creating expressions which can load values, evaluate expression, save back to cache
-- Protected cache write spaces
-  - Think about if it is necessary to assign/protect cache space to transactions/assertion ids
-- Assert on blocktime, slot, etc.
-
-- Write Multi V1
-  - Save on tranasction space by only needing to call write once.
-- Auto-increment validation
-  - Check to make sure transactions are ran in sequence or they fail
-- Decide on using CPI events vs program logs events
-  - Extra account overhead for cpi events pda
-  - program logs concat
-  - Do we even need logs :P
-- Assertion type: hash of account, for post-simulation account integrity
-- POD / Bytemuck / zerocopy rewrite of instruction data
-  - Maybe need to move to native implementation
-- [] Look into memcpy syscall for memory write.
-- [] Add multi-write to roadmap
-- [x] .info() isnt a good name
-- [] Look for more programs to add to KnownPrograms
-- [] Use log level helpers
-- [] Add additional merkle tree assertions to roadmap
-- [] Probably move get_state to its own function not as a variable
-- [] Write test plan for validations, multi instructions, utils
-- [] Source account for memory write needs to be optional
-- [] Add multi write to roadmap
-- [] Should I add 128 bit support for account data delta
-- [] Probably readd data is empty check
-- [] Remove anchor for spl compression

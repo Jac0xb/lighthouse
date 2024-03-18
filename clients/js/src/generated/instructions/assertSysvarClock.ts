@@ -56,7 +56,7 @@ export type AssertSysvarClockInstructionData = {
 };
 
 export type AssertSysvarClockInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertion: SysvarClockAssertionArgs;
 };
 
@@ -67,7 +67,11 @@ export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysv
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getSysvarClockAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 14 })
+    (value) => ({
+      ...value,
+      discriminator: 14,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -90,12 +94,12 @@ export function getAssertSysvarClockInstructionDataCodec(): Codec<
 }
 
 export type AssertSysvarClockInput = {
-  logLevel: AssertSysvarClockInstructionDataArgs['logLevel'];
+  logLevel?: AssertSysvarClockInstructionDataArgs['logLevel'];
   assertion: AssertSysvarClockInstructionDataArgs['assertion'];
 };
 
 export type AssertSysvarClockInputWithSigners = {
-  logLevel: AssertSysvarClockInstructionDataArgs['logLevel'];
+  logLevel?: AssertSysvarClockInstructionDataArgs['logLevel'];
   assertion: AssertSysvarClockInstructionDataArgs['assertion'];
 };
 

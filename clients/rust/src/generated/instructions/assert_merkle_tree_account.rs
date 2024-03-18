@@ -123,6 +123,7 @@ impl AssertMerkleTreeAccountBuilder {
         self.spl_account_compression = Some(spl_account_compression);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.log_level = Some(log_level);
@@ -163,7 +164,7 @@ impl AssertMerkleTreeAccountBuilder {
                 .expect("spl_account_compression is not set"),
         };
         let args = AssertMerkleTreeAccountInstructionArgs {
-            log_level: self.log_level.clone().expect("log_level is not set"),
+            log_level: self.log_level.clone().unwrap_or(LogLevel::Silent),
             assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
@@ -338,6 +339,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
         self.instruction.spl_account_compression = Some(spl_account_compression);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.instruction.log_level = Some(log_level);
@@ -394,7 +396,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
                 .instruction
                 .log_level
                 .clone()
-                .expect("log_level is not set"),
+                .unwrap_or(LogLevel::Silent),
             assertion: self
                 .instruction
                 .assertion

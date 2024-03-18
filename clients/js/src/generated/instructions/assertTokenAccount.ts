@@ -79,7 +79,7 @@ export type AssertTokenAccountInstructionData = {
 };
 
 export type AssertTokenAccountInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertion: TokenAccountAssertionArgs;
 };
 
@@ -90,7 +90,11 @@ export function getAssertTokenAccountInstructionDataEncoder(): Encoder<AssertTok
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getTokenAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 8 })
+    (value) => ({
+      ...value,
+      discriminator: 8,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -115,7 +119,7 @@ export function getAssertTokenAccountInstructionDataCodec(): Codec<
 export type AssertTokenAccountInput<TAccountTargetAccount extends string> = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertTokenAccountInstructionDataArgs['logLevel'];
   assertion: AssertTokenAccountInstructionDataArgs['assertion'];
 };
 
@@ -124,7 +128,7 @@ export type AssertTokenAccountInputWithSigners<
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertTokenAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertTokenAccountInstructionDataArgs['logLevel'];
   assertion: AssertTokenAccountInstructionDataArgs['assertion'];
 };
 

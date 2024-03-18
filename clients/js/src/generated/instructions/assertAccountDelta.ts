@@ -87,7 +87,7 @@ export type AssertAccountDeltaInstructionData = {
 };
 
 export type AssertAccountDeltaInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertion: AccountDeltaAssertionArgs;
 };
 
@@ -98,7 +98,11 @@ export function getAssertAccountDeltaInstructionDataEncoder(): Encoder<AssertAcc
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getAccountDeltaAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 3 })
+    (value) => ({
+      ...value,
+      discriminator: 3,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -128,7 +132,7 @@ export type AssertAccountDeltaInput<
   accountA: Address<TAccountAccountA>;
   /** Account B where the delta is calculated to */
   accountB: Address<TAccountAccountB>;
-  logLevel: AssertAccountDeltaInstructionDataArgs['logLevel'];
+  logLevel?: AssertAccountDeltaInstructionDataArgs['logLevel'];
   assertion: AssertAccountDeltaInstructionDataArgs['assertion'];
 };
 
@@ -140,7 +144,7 @@ export type AssertAccountDeltaInputWithSigners<
   accountA: Address<TAccountAccountA>;
   /** Account B where the delta is calculated to */
   accountB: Address<TAccountAccountB>;
-  logLevel: AssertAccountDeltaInstructionDataArgs['logLevel'];
+  logLevel?: AssertAccountDeltaInstructionDataArgs['logLevel'];
   assertion: AssertAccountDeltaInstructionDataArgs['assertion'];
 };
 

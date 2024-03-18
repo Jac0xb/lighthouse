@@ -30,20 +30,41 @@ kinobi.update(
 //
 // How to set a default value for an account in an instruction.
 //
-// kinobi.update(
-//   k.updateInstructionsVisitor({
-//     memoryWrite: {
-//       accounts: {
-//         systemProgram: {
-//           defaultValue: k.publicKeyValueNode('<pubkey>'),
-//         },
-//         memoryAccount: {
-//           defaultValue: k.pdaValueNode('memory'),
-//         },
-//       },
-//     },
-//   })
-// );
+kinobi.update(
+  k.updateInstructionsVisitor({
+    memoryWrite: {
+      // accounts: {
+      //   systemProgram: {
+      //     defaultValue: k.publicKeyValueNode('<pubkey>'),
+      //   },
+      //   memoryAccount: {
+      //     defaultValue: k.pdaValueNode('memory'),
+      //   },
+      // },
+      arguments: {
+        memoryId: {
+          defaultValue: k.numberValueNode(0),
+        },
+      },
+    },
+  })
+);
+
+kinobi.update(
+  k.bottomUpTransformerVisitor([
+    {
+      select: '[instructionArgumentNode]logLevel',
+      transform: (node) => {
+        return k.instructionArgumentNode({
+          ...node,
+          defaultValue: k.enumValueNode('logLevel', 'Silent'),
+        });
+      },
+    },
+  ])
+);
+
+kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 
 //
 // How to long the kinobi tree

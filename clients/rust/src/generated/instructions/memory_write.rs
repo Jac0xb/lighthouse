@@ -147,6 +147,7 @@ impl MemoryWriteBuilder {
         self.source_account = Some(source_account);
         self
     }
+    /// `[optional argument, defaults to '0']`
     #[inline(always)]
     pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
         self.memory_id = Some(memory_id);
@@ -197,7 +198,7 @@ impl MemoryWriteBuilder {
             source_account: self.source_account.expect("source_account is not set"),
         };
         let args = MemoryWriteInstructionArgs {
-            memory_id: self.memory_id.clone().expect("memory_id is not set"),
+            memory_id: self.memory_id.clone().unwrap_or(0),
             memory_bump: self.memory_bump.clone().expect("memory_bump is not set"),
             write_offset: self.write_offset.clone().expect("write_offset is not set"),
             write_type: self.write_type.clone().expect("write_type is not set"),
@@ -416,6 +417,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         self.instruction.source_account = Some(source_account);
         self
     }
+    /// `[optional argument, defaults to '0']`
     #[inline(always)]
     pub fn memory_id(&mut self, memory_id: u8) -> &mut Self {
         self.instruction.memory_id = Some(memory_id);
@@ -478,11 +480,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = MemoryWriteInstructionArgs {
-            memory_id: self
-                .instruction
-                .memory_id
-                .clone()
-                .expect("memory_id is not set"),
+            memory_id: self.instruction.memory_id.clone().unwrap_or(0),
             memory_bump: self
                 .instruction
                 .memory_bump

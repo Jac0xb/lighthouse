@@ -81,7 +81,7 @@ export type AssertUpgradeableLoaderAccountMultiInstructionData = {
 };
 
 export type AssertUpgradeableLoaderAccountMultiInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertions: Array<UpgradeableLoaderStateAssertionArgs>;
 };
 
@@ -95,7 +95,11 @@ export function getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(): 
         getArrayEncoder(getUpgradeableLoaderStateAssertionEncoder()),
       ],
     ]),
-    (value) => ({ ...value, discriminator: 13 })
+    (value) => ({
+      ...value,
+      discriminator: 13,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -125,7 +129,7 @@ export type AssertUpgradeableLoaderAccountMultiInput<
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
+  logLevel?: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
   assertions: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['assertions'];
 };
 
@@ -134,7 +138,7 @@ export type AssertUpgradeableLoaderAccountMultiInputWithSigners<
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
+  logLevel?: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['logLevel'];
   assertions: AssertUpgradeableLoaderAccountMultiInstructionDataArgs['assertions'];
 };
 
