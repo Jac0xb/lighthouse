@@ -81,7 +81,7 @@ export type AssertStakeAccountMultiInstructionData = {
 };
 
 export type AssertStakeAccountMultiInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertions: Array<StakeAccountAssertionArgs>;
 };
 
@@ -92,7 +92,11 @@ export function getAssertStakeAccountMultiInstructionDataEncoder(): Encoder<Asse
       ['logLevel', getLogLevelEncoder()],
       ['assertions', getArrayEncoder(getStakeAccountAssertionEncoder())],
     ]),
-    (value) => ({ ...value, discriminator: 11 })
+    (value) => ({
+      ...value,
+      discriminator: 11,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -118,7 +122,7 @@ export type AssertStakeAccountMultiInput<TAccountTargetAccount extends string> =
   {
     /** Target account to be asserted */
     targetAccount: Address<TAccountTargetAccount>;
-    logLevel: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
+    logLevel?: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
     assertions: AssertStakeAccountMultiInstructionDataArgs['assertions'];
   };
 
@@ -127,7 +131,7 @@ export type AssertStakeAccountMultiInputWithSigners<
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
+  logLevel?: AssertStakeAccountMultiInstructionDataArgs['logLevel'];
   assertions: AssertStakeAccountMultiInstructionDataArgs['assertions'];
 };
 

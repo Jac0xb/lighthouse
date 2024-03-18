@@ -104,6 +104,7 @@ impl AssertAccountDeltaBuilder {
         self.account_b = Some(account_b);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.log_level = Some(log_level);
@@ -139,7 +140,7 @@ impl AssertAccountDeltaBuilder {
             account_b: self.account_b.expect("account_b is not set"),
         };
         let args = AssertAccountDeltaInstructionArgs {
-            log_level: self.log_level.clone().expect("log_level is not set"),
+            log_level: self.log_level.clone().unwrap_or(LogLevel::Silent),
             assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
@@ -296,6 +297,7 @@ impl<'a, 'b> AssertAccountDeltaCpiBuilder<'a, 'b> {
         self.instruction.account_b = Some(account_b);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.instruction.log_level = Some(log_level);
@@ -352,7 +354,7 @@ impl<'a, 'b> AssertAccountDeltaCpiBuilder<'a, 'b> {
                 .instruction
                 .log_level
                 .clone()
-                .expect("log_level is not set"),
+                .unwrap_or(LogLevel::Silent),
             assertion: self
                 .instruction
                 .assertion

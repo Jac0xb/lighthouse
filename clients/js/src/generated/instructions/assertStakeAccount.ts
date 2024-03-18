@@ -79,7 +79,7 @@ export type AssertStakeAccountInstructionData = {
 };
 
 export type AssertStakeAccountInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertion: StakeAccountAssertionArgs;
 };
 
@@ -90,7 +90,11 @@ export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertSta
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getStakeAccountAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 10 })
+    (value) => ({
+      ...value,
+      discriminator: 10,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -115,7 +119,7 @@ export function getAssertStakeAccountInstructionDataCodec(): Codec<
 export type AssertStakeAccountInput<TAccountTargetAccount extends string> = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertStakeAccountInstructionDataArgs['logLevel'];
   assertion: AssertStakeAccountInstructionDataArgs['assertion'];
 };
 
@@ -124,7 +128,7 @@ export type AssertStakeAccountInputWithSigners<
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel: AssertStakeAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertStakeAccountInstructionDataArgs['logLevel'];
   assertion: AssertStakeAccountInstructionDataArgs['assertion'];
 };
 

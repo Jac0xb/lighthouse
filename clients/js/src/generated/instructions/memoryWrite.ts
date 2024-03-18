@@ -123,7 +123,7 @@ export type MemoryWriteInstructionData = {
 };
 
 export type MemoryWriteInstructionDataArgs = {
-  memoryId: number;
+  memoryId?: number;
   memoryBump: number;
   writeOffset: number;
   writeType: WriteTypeArgs;
@@ -138,7 +138,7 @@ export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstr
       ['writeOffset', getU16Encoder()],
       ['writeType', getWriteTypeEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 0 })
+    (value) => ({ ...value, discriminator: 0, memoryId: value.memoryId ?? 0 })
   );
 }
 
@@ -179,7 +179,7 @@ export type MemoryWriteInput<
   memory: Address<TAccountMemory>;
   /** Account to be written to memory */
   sourceAccount: Address<TAccountSourceAccount>;
-  memoryId: MemoryWriteInstructionDataArgs['memoryId'];
+  memoryId?: MemoryWriteInstructionDataArgs['memoryId'];
   memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
   writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
   writeType: MemoryWriteInstructionDataArgs['writeType'];
@@ -202,7 +202,7 @@ export type MemoryWriteInputWithSigners<
   memory: Address<TAccountMemory>;
   /** Account to be written to memory */
   sourceAccount: Address<TAccountSourceAccount>;
-  memoryId: MemoryWriteInstructionDataArgs['memoryId'];
+  memoryId?: MemoryWriteInstructionDataArgs['memoryId'];
   memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
   writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
   writeType: MemoryWriteInstructionDataArgs['writeType'];

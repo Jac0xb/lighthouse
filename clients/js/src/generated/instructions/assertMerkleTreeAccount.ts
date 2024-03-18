@@ -95,7 +95,7 @@ export type AssertMerkleTreeAccountInstructionData = {
 };
 
 export type AssertMerkleTreeAccountInstructionDataArgs = {
-  logLevel: LogLevelArgs;
+  logLevel?: LogLevelArgs;
   assertion: MerkleTreeAssertionArgs;
 };
 
@@ -106,7 +106,11 @@ export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<Asse
       ['logLevel', getLogLevelEncoder()],
       ['assertion', getMerkleTreeAssertionEncoder()],
     ]),
-    (value) => ({ ...value, discriminator: 15 })
+    (value) => ({
+      ...value,
+      discriminator: 15,
+      logLevel: value.logLevel ?? LogLevel.Silent,
+    })
   );
 }
 
@@ -139,7 +143,7 @@ export type AssertMerkleTreeAccountInput<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  logLevel: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
   assertion: AssertMerkleTreeAccountInstructionDataArgs['assertion'];
 };
 
@@ -154,7 +158,7 @@ export type AssertMerkleTreeAccountInputWithSigners<
   root: Address<TAccountRoot>;
   /** SPL account compression program */
   splAccountCompression: Address<TAccountSplAccountCompression>;
-  logLevel: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
+  logLevel?: AssertMerkleTreeAccountInstructionDataArgs['logLevel'];
   assertion: AssertMerkleTreeAccountInstructionDataArgs['assertion'];
 };
 

@@ -6,17 +6,7 @@ pub use generated::programs::LIGHTHOUSE_ID;
 pub use generated::programs::LIGHTHOUSE_ID as ID;
 use solana_program::pubkey::{Pubkey, PubkeyError};
 
-pub mod types {
-    pub use crate::generated::types::{
-        AccountDeltaAssertion, AccountInfoAssertion, AccountInfoDeltaAssertion, AccountInfoField,
-        ByteSliceOperator, ClockField, DataValue, DataValueAssertion, DataValueDeltaAssertion,
-        EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MerkleTreeAssertion,
-        MetaAssertion, MintAccountAssertion, StakeAccountAssertion, StakeAssertion, StakeStateType,
-        SysvarClockAssertion, TokenAccountAssertion, UpgradableBufferAssertion,
-        UpgradeableLoaderStateAssertion, UpgradeableLoaderStateType, UpgradeableProgramAssertion,
-        UpgradeableProgramDataAssertion, WriteType,
-    };
-}
+pub use generated::types;
 
 pub mod instructions {
     pub use crate::generated::instructions::{
@@ -33,9 +23,9 @@ pub mod instructions {
 pub mod cpi {
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
-        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
-        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
+        AssertAccountInfoMultiBuilder, AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder,
+        AssertMintAccountMultiBuilder, AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder,
+        AssertSysvarClockBuilder, AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
         AssertUpgradeableLoaderAccountBuilder, MemoryCloseCpiBuilder, MemoryWriteCpiBuilder,
     };
 }

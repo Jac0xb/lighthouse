@@ -90,6 +90,7 @@ impl AssertUpgradeableLoaderAccountBuilder {
         self.target_account = Some(target_account);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.log_level = Some(log_level);
@@ -124,7 +125,7 @@ impl AssertUpgradeableLoaderAccountBuilder {
             target_account: self.target_account.expect("target_account is not set"),
         };
         let args = AssertUpgradeableLoaderAccountInstructionArgs {
-            log_level: self.log_level.clone().expect("log_level is not set"),
+            log_level: self.log_level.clone().unwrap_or(LogLevel::Silent),
             assertion: self.assertion.clone().expect("assertion is not set"),
         };
 
@@ -260,6 +261,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
         self.instruction.target_account = Some(target_account);
         self
     }
+    /// `[optional argument, defaults to 'LogLevel::Silent']`
     #[inline(always)]
     pub fn log_level(&mut self, log_level: LogLevel) -> &mut Self {
         self.instruction.log_level = Some(log_level);
@@ -316,7 +318,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
                 .instruction
                 .log_level
                 .clone()
-                .expect("log_level is not set"),
+                .unwrap_or(LogLevel::Silent),
             assertion: self
                 .instruction
                 .assertion
