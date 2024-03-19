@@ -74,3 +74,163 @@ pub fn find_memory_pda_bump_iterate(
 
     None
 }
+
+#[cfg(feature = "sdk")]
+pub mod utils {
+    use solana_sdk::{
+        instruction::{AccountMeta, Instruction},
+        message::{legacy, v0, CompileError, Message, VersionedMessage},
+        signer::{Signer, SignerError},
+        transaction::{Transaction, VersionedTransaction},
+    };
+
+    #[derive(Debug, thiserror::Error, PartialEq, Eq)]
+    #[repr(u32)]
+    pub enum ClientError {
+        #[error("Transaction already signed")]
+        TransactionAlreadySigned,
+        #[error("Address table lookups not supported")]
+        AddressTableLookupsNotSupported,
+        #[error("Empty transaction")]
+        EmptyTransaction,
+        #[error("...")]
+        CompileError(CompileError),
+        #[error("...")]
+        SignerError(SignerError),
+    }
+
+    pub fn append_instructions_to_transaction(
+        transaction: &Transaction,
+        ixs: Vec<Instruction>,
+    ) -> Result<Transaction, ClientError> {
+        if !transaction.signatures.is_empty() {
+            return Err(ClientError::TransactionAlreadySigned);
+        }
+
+        let mut merged_ixs = decompile_instruction_from_transaction(transaction)?;
+        merged_ixs.extend(ixs);
+
+        let transaction = Transaction::new_unsigned(Message::new(
+            &merged_ixs,
+            Some(
+                transaction
+                    .message
+                    .account_keys
+                    .first()
+                    .ok_or(ClientError::EmptyTransaction)?,
+            ),
+        ));
+
+        Ok(transaction)
+    }
+
+    pub fn append_instructions_to_versioned_transaction(
+        transaction: &VersionedTransaction,
+        ixs: Vec<Instruction>,
+        signers: &[&dyn Signer],
+    ) -> Result<VersionedTransaction, ClientError> {
+        if !transaction.signatures.is_empty() {
+            return Err(ClientError::TransactionAlreadySigned);
+        }
+
+        if transaction.message.address_table_lookups().is_some() {
+            return Err(ClientError::AddressTableLookupsNotSupported);
+        }
+
+        let mut merged_ixs = decompile_instruction_from_versioned_transaction(transaction)?;
+        merged_ixs.extend(ixs);
+
+        let payer = transaction
+            .message
+            .static_account_keys()
+            .first()
+            .ok_or(ClientError::EmptyTransaction)?;
+
+        let versioned_messsage = match transaction.message {
+            VersionedMessage::Legacy(_) => {
+                VersionedMessage::Legacy(legacy::Message::new(&merged_ixs, Some(payer)))
+            }
+            VersionedMessage::V0(_) => VersionedMessage::V0(
+                v0::Message::try_compile(
+                    payer,
+                    &merged_ixs,
+                    &[],
+                    *transaction.message.recent_blockhash(),
+                )
+                .map_err(ClientError::CompileError)?,
+            ),
+        };
+
+        let mut transaction = VersionedTransaction::try_new(versioned_messsage, signers)
+            .map_err(ClientError::SignerError)?;
+
+        transaction
+            .message
+            .set_recent_blockhash(*transaction.message.recent_blockhash());
+
+        Ok(transaction)
+    }
+
+    pub fn decompile_instruction_from_versioned_transaction(
+        transaction: &VersionedTransaction,
+    ) -> Result<Vec<Instruction>, ClientError> {
+        if !transaction.signatures.is_empty() {
+            return Err(ClientError::TransactionAlreadySigned);
+        }
+
+        if transaction.message.address_table_lookups().is_some() {
+            return Err(ClientError::AddressTableLookupsNotSupported);
+        }
+
+        let mut modified_ixs = vec![];
+        let compiled_ixs = transaction.message.instructions();
+
+        for instruction in compiled_ixs {
+            let account_keys = transaction.message.static_account_keys();
+
+            modified_ixs.push(Instruction {
+                program_id: account_keys[instruction.program_id_index as usize],
+                accounts: instruction
+                    .accounts
+                    .iter()
+                    .map(|index| AccountMeta {
+                        pubkey: account_keys[*index as usize],
+                        is_signer: index < &transaction.message.header().num_required_signatures,
+                        is_writable: transaction.message.is_maybe_writable(*index as usize),
+                    })
+                    .collect(),
+                data: instruction.data.clone(),
+            });
+        }
+
+        Ok(modified_ixs)
+    }
+
+    pub fn decompile_instruction_from_transaction(
+        transaction: &Transaction,
+    ) -> Result<Vec<Instruction>, ClientError> {
+        if !transaction.signatures.is_empty() {
+            return Err(ClientError::TransactionAlreadySigned);
+        }
+
+        let mut modified_ixs = vec![];
+
+        for instruction in &transaction.message.instructions {
+            modified_ixs.push(Instruction {
+                program_id: transaction.message.account_keys[instruction.program_id_index as usize],
+                accounts: instruction
+                    .accounts
+                    .iter()
+                    .map(|index| AccountMeta {
+                        pubkey: transaction.message.account_keys[*index as usize],
+                        is_signer: index < &transaction.message.header.num_required_signatures,
+                        is_writable: transaction.message.is_writable(*index as usize),
+                    })
+                    .collect(),
+                data: instruction.data.clone(),
+            });
+        }
+
+        Ok(modified_ixs)
+    }
+}

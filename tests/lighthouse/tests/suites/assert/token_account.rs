@@ -11,6 +11,7 @@ use anchor_spl::token_2022;
 use lighthouse_client::errors::LighthouseError;
 use lighthouse_client::instructions::AssertTokenAccountBuilder;
 use lighthouse_client::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
+use lighthouse_client::utils::append_instructions_to_transaction;
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
@@ -360,7 +361,6 @@ async fn test_drain_token_account() {
                 .ix(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Amount {
                     value: 69_000,
                     operator: IntegerOperator::Equal,
@@ -368,7 +368,6 @@ async fn test_drain_token_account() {
                 .instruction(),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
-                .log_level(lighthouse_client::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Delegate {
                     value: None,
                     operator: EquatableOperator::Equal,
@@ -683,4 +682,79 @@ async fn account_not_owned_by_token_program() {
     )
     .await
     .unwrap();
+}
+
+#[tokio::test]
+async fn append_ix_test() {
+    let context = &mut TestContext::new().await.unwrap();
+    let user = create_user(context).await.unwrap();
+
+    let (mut tx, mint) = create_mint(
+        context,
+        &user,
+        CreateMintParameters {
+            token_program: spl_token::id(),
+            mint_authority: Some(Some(user.pubkey())),
+            freeze_authority: None,
+            mint_to: Some((user.pubkey(), 69_000)),
+            decimals: 9,
+        },
+    )
+    .await
+    .unwrap();
+
+    tx.signatures = vec![];
+
+    let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
+    let builder_fn = |assertion: TokenAccountAssertion| {
+        AssertTokenAccountBuilder::new()
+            .target_account(user_ata)
+            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .assertion(assertion)
+            .instruction()
+    };
+
+    let assertion_ixs = vec![
+        builder_fn(TokenAccountAssertion::Mint {
+            value: mint.pubkey(),
+            operator: EquatableOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::Owner {
+            value: user.pubkey(),
+            operator: EquatableOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::Amount {
+            value: 69_000,
+            operator: IntegerOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::Delegate {
+            value: None,
+            operator: EquatableOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::State {
+            value: AccountState::Initialized as u8,
+            operator: IntegerOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::IsNative {
+            value: None,
+            operator: EquatableOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::DelegatedAmount {
+            value: 0,
+            operator: IntegerOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::CloseAuthority {
+            value: None,
+            operator: EquatableOperator::Equal,
+        }),
+        builder_fn(TokenAccountAssertion::TokenAccountOwnerIsDerived),
+    ];
+
+    let mut tx = append_instructions_to_transaction(&tx, assertion_ixs).unwrap();
+
+    tx.sign(&[&user, &mint], context.get_blockhash().await);
+
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 }
