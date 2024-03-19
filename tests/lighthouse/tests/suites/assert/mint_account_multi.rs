@@ -1,11 +1,9 @@
 use crate::utils::context::TestContext;
 use crate::utils::{create_mint, create_user, to_transaction_error_u8, CreateMintParameters};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
-use lighthouse_client::cpi::AssertMintAccountMultiBuilder;
-use lighthouse_client::instructions::AssertMintAccountBuilder;
-use lighthouse_client::types::{
-    EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion,
-};
+use lighthouse_sdk::cpi::AssertMintAccountMultiBuilder;
+use lighthouse_sdk::instructions::AssertMintAccountBuilder;
+use lighthouse_sdk::types::{EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion};
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::{EncodableKeypair, Signer};

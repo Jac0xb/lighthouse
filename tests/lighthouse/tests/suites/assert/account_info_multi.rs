@@ -3,9 +3,9 @@ use crate::utils::{create_test_account, create_user};
 use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error_u8,
 };
-use lighthouse_client::cpi::AssertAccountInfoMultiBuilder;
-use lighthouse_client::instructions::AssertAccountInfoBuilder;
-use lighthouse_client::types::{
+use lighthouse_sdk::cpi::AssertAccountInfoMultiBuilder;
+use lighthouse_sdk::instructions::AssertAccountInfoBuilder;
+use lighthouse_sdk::types::{
     AccountInfoAssertion, EquatableOperator, IntegerOperator, KnownProgram,
 };
 use solana_program_test::tokio;
@@ -43,7 +43,7 @@ async fn simple() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertions(vec![
                 AccountInfoAssertion::Owner {
                     value: system_program::ID,
@@ -134,7 +134,7 @@ async fn simple() {
         let tx = Transaction::new_signed_with_payer(
             &[AssertAccountInfoMultiBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertions(assertions)
                 .instruction()],
             Some(&user.encodable_pubkey()),
@@ -155,7 +155,7 @@ async fn simple() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(test_account.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 AccountInfoAssertion::Lamports {
                     value: test_balance / 2,
@@ -195,7 +195,7 @@ async fn simple() {
         &[
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -203,7 +203,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: 128,
                     operator: IntegerOperator::NotEqual,
@@ -211,7 +211,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: test_account_len,
                     operator: IntegerOperator::Equal,
@@ -219,7 +219,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::DataLength {
                     value: test_account_len + 1,
                     operator: IntegerOperator::LessThan,
@@ -239,7 +239,7 @@ async fn simple() {
         &[
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsSigner {
                     value: true,
                     operator: EquatableOperator::Equal,
@@ -247,15 +247,15 @@ async fn simple() {
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsSigner {
                     value: false,
                     operator: EquatableOperator::NotEqual,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
-                .target_account(lighthouse_client::ID)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .target_account(lighthouse_sdk::ID)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsSigner {
                     value: true,
                     operator: EquatableOperator::NotEqual,
@@ -274,7 +274,7 @@ async fn simple() {
         &[
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsWritable {
                     value: true,
                     operator: EquatableOperator::Equal,
@@ -282,15 +282,15 @@ async fn simple() {
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(user.encodable_pubkey())
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsWritable {
                     value: false,
                     operator: EquatableOperator::NotEqual,
                 })
                 .instruction(),
             AssertAccountInfoBuilder::new()
-                .target_account(lighthouse_client::ID)
-                .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+                .target_account(lighthouse_sdk::ID)
+                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
                 .assertion(AccountInfoAssertion::IsWritable {
                     value: false,
                     operator: EquatableOperator::Equal,
@@ -320,7 +320,7 @@ async fn verify_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(test_account.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 AccountInfoAssertion::VerifyDatahash {
                     expected_hash: keccak::hashv(&[&test_account_data.data]).0,
@@ -358,7 +358,7 @@ async fn verify_hash() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 AccountInfoAssertion::VerifyDatahash {
                     expected_hash: keccak::hashv(&[&[]]).0,

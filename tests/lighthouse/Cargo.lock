@@ -2138,7 +2138,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-client"
+name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
@@ -2161,7 +2161,7 @@ dependencies = [
  "borsh 0.10.3",
  "bubblegum",
  "bytemuck",
- "lighthouse-client",
+ "lighthouse-sdk",
  "mpl-token-metadata",
  "rand 0.8.5",
  "regex",
@@ -5226,7 +5226,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "arrayref",
- "lighthouse-client",
+ "lighthouse-sdk",
  "solana-program",
 ]
 

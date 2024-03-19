@@ -4,9 +4,9 @@ use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_client::errors::LighthouseError;
-use lighthouse_client::instructions::AssertStakeAccountBuilder;
-use lighthouse_client::types::{
+use lighthouse_sdk::errors::LighthouseError;
+use lighthouse_sdk::instructions::AssertStakeAccountBuilder;
+use lighthouse_sdk::types::{
     EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion, StakeAssertion,
     StakeStateType,
 };
@@ -110,7 +110,7 @@ async fn test() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(derived_account)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -408,7 +408,7 @@ async fn test() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(stake_pubkey)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -697,7 +697,7 @@ async fn not_owned_by_stake_program() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };

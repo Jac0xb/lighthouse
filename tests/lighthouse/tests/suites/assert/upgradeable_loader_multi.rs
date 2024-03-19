@@ -3,8 +3,8 @@ use crate::utils::{create_user_with_balance, set_account_from_refs};
 use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error_u8,
 };
-use lighthouse_client::instructions::AssertUpgradeableLoaderAccountMultiBuilder;
-use lighthouse_client::types::{
+use lighthouse_sdk::instructions::AssertUpgradeableLoaderAccountMultiBuilder;
+use lighthouse_sdk::types::{
     EquatableOperator, UpgradableBufferAssertion, UpgradeableLoaderStateAssertion,
     UpgradeableLoaderStateType,
 };
@@ -40,7 +40,7 @@ async fn simple() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertUpgradeableLoaderAccountMultiBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Buffer,
@@ -91,7 +91,7 @@ async fn simple() {
         let tx = Transaction::new_signed_with_payer(
             &[AssertUpgradeableLoaderAccountMultiBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertions(assertions)
                 .instruction()],
             Some(&user.encodable_pubkey()),

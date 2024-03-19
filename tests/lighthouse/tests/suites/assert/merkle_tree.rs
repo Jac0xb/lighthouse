@@ -5,9 +5,9 @@ use crate::utils::{
     create_user, process_transaction_assert_failure, process_transaction_assert_success,
     to_transaction_error, to_transaction_error_u8, Result,
 };
-use lighthouse_client::errors::LighthouseError;
-use lighthouse_client::instructions::AssertMerkleTreeAccountBuilder;
-use lighthouse_client::types::MerkleTreeAssertion;
+use lighthouse_sdk::errors::LighthouseError;
+use lighthouse_sdk::instructions::AssertMerkleTreeAccountBuilder;
+use lighthouse_sdk::types::MerkleTreeAssertion;
 use solana_program_test::{tokio, ProgramTestContext};
 use solana_sdk::instruction::AccountMeta;
 use solana_sdk::pubkey::Pubkey;
@@ -76,7 +76,7 @@ async fn simple() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: new_leaf_hash,
@@ -112,7 +112,7 @@ async fn simple() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: new_leaf_hash,
@@ -150,7 +150,7 @@ async fn simple() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: new_leaf_hash,
@@ -196,7 +196,7 @@ async fn simple_no_modify() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash,
@@ -219,7 +219,7 @@ async fn simple_no_modify() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: [69; 32],
@@ -253,7 +253,7 @@ async fn simple_no_modify() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash,
@@ -279,9 +279,9 @@ async fn simple_no_modify() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertMerkleTreeAccountBuilder::new()
             .target_merkle_tree(tree_pubkey)
-            .root(lighthouse_client::ID)
+            .root(lighthouse_sdk::ID)
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash,
@@ -304,7 +304,7 @@ async fn simple_no_modify() {
             .target_merkle_tree(Pubkey::new_from_array([69; 32]))
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash,
@@ -358,7 +358,7 @@ async fn fail() {
                 .target_merkle_tree(tree_pubkey)
                 .root(Pubkey::new_from_array(tree_root))
                 .spl_account_compression(spl_account_compression::id())
-                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(MerkleTreeAssertion::VerifyLeaf {
                     leaf_index: leaf.index,
                     leaf_hash,
@@ -392,7 +392,7 @@ async fn fail() {
                 .target_merkle_tree(tree_pubkey)
                 .root(Pubkey::new_from_array(tree_root))
                 .spl_account_compression(spl_account_compression::id())
-                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(MerkleTreeAssertion::VerifyLeaf {
                     leaf_index: leaf.index,
                     leaf_hash: new_leaf_hash,
@@ -415,7 +415,7 @@ async fn fail() {
                 .target_merkle_tree(Pubkey::new_from_array([0; 32]))
                 .root(Pubkey::new_from_array(tree_root))
                 .spl_account_compression(spl_account_compression::id())
-                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(MerkleTreeAssertion::VerifyLeaf {
                     leaf_index: leaf.index,
                     leaf_hash: new_leaf_hash,
@@ -435,7 +435,7 @@ async fn fail() {
             .target_merkle_tree(tree_pubkey)
             .root(Pubkey::new_from_array(tree_root))
             .spl_account_compression(spl_account_compression::id())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(MerkleTreeAssertion::VerifyLeaf {
                 leaf_index: leaf.index,
                 leaf_hash: new_leaf_hash,
