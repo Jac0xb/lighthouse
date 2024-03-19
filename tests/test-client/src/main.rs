@@ -1,12 +1,12 @@
 use anchor_spl::associated_token;
 use borsh::BorshDeserialize;
 use clap::{Parser, Subcommand};
-use lighthouse_client::find_memory_pda;
-use lighthouse_client::instructions::{
+use lighthouse_sdk::find_memory_pda;
+use lighthouse_sdk::instructions::{
     AssertAccountDeltaBuilder, AssertAccountInfoBuilder, AssertStakeAccountBuilder,
     MemoryCloseBuilder, MemoryWriteBuilder,
 };
-use lighthouse_client::types::{
+use lighthouse_sdk::types::{
     AccountDeltaAssertion, AccountInfoAssertion, ByteSliceOperator, DataValueDeltaAssertion,
     EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MetaAssertion,
     StakeAccountAssertion, StakeStateType, WriteType,

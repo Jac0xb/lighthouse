@@ -8,10 +8,10 @@ use crate::utils::{
 };
 use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token_2022;
-use lighthouse_client::errors::LighthouseError;
-use lighthouse_client::instructions::AssertTokenAccountBuilder;
-use lighthouse_client::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
-use lighthouse_client::utils::append_instructions_to_transaction;
+use lighthouse_sdk::errors::LighthouseError;
+use lighthouse_sdk::instructions::AssertTokenAccountBuilder;
+use lighthouse_sdk::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
+use lighthouse_sdk::utils::append_instructions_to_transaction;
 use solana_program::program_pack::Pack;
 use solana_program::system_instruction::transfer;
 use solana_program_test::tokio;
@@ -182,7 +182,7 @@ async fn set_token_close_authority_native() {
             .unwrap(),
             AssertTokenAccountBuilder::new()
                 .target_account(bad_actor_token_account)
-                .log_level(lighthouse_client::types::LogLevel::Silent)
+                .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Amount {
                     value: 100_000,
                     operator: IntegerOperator::Equal,
@@ -248,7 +248,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_client::types::LogLevel::Silent)
+                    .log_level(lighthouse_sdk::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::Owner {
                         value: user.pubkey(),
                         operator: EquatableOperator::Equal,
@@ -307,7 +307,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_client::types::LogLevel::Silent)
+                    .log_level(lighthouse_sdk::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::TokenAccountOwnerIsDerived)
                     .instruction(),
             ],
@@ -417,7 +417,7 @@ async fn simple() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -663,7 +663,7 @@ async fn account_not_owned_by_token_program() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountBuilder::new()
             .target_account(user.pubkey())
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(TokenAccountAssertion::Owner {
                 value: user.encodable_pubkey(),
                 operator: EquatableOperator::Equal,
@@ -709,7 +709,7 @@ async fn append_ix_test() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_client::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };

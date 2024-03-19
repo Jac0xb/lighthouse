@@ -2,8 +2,8 @@ use crate::utils::context::TestContext;
 use crate::utils::{create_mint, create_user, CreateMintParameters};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse_client::instructions::AssertTokenAccountMultiBuilder;
-use lighthouse_client::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
+use lighthouse_sdk::instructions::AssertTokenAccountMultiBuilder;
+use lighthouse_sdk::types::{EquatableOperator, IntegerOperator, TokenAccountAssertion};
 use solana_program_test::tokio;
 use solana_sdk::instruction::InstructionError;
 use solana_sdk::signature::Keypair;
@@ -37,7 +37,7 @@ async fn test_basic() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),
@@ -110,7 +110,7 @@ async fn prod_test() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),
@@ -166,7 +166,7 @@ async fn multi_errors() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 // Fail
                 TokenAccountAssertion::Mint {
@@ -204,7 +204,7 @@ async fn multi_errors() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),
@@ -242,7 +242,7 @@ async fn multi_errors() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),
@@ -280,7 +280,7 @@ async fn multi_errors() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
-            .log_level(lighthouse_client::types::LogLevel::Silent)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertions(vec![
                 TokenAccountAssertion::Mint {
                     value: mint.pubkey(),

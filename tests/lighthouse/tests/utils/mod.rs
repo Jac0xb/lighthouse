@@ -6,7 +6,7 @@ pub mod test_program;
 pub mod tx_builder;
 
 use anchor_spl::{associated_token, token::Mint};
-use lighthouse_client::errors::LighthouseError;
+use lighthouse_sdk::errors::LighthouseError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program_test::{BanksClient, BanksClientError, ProgramTest};
@@ -32,7 +32,7 @@ pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 
 pub fn program_test() -> ProgramTest {
-    let mut test = ProgramTest::new("lighthouse", lighthouse_client::ID, None);
+    let mut test = ProgramTest::new("lighthouse", lighthouse_sdk::ID, None);
     test.add_program("blackhat", blackhat::id(), None);
     test.add_program("test_program", test_program::id(), None);
     test.add_program(

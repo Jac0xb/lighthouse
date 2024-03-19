@@ -2118,7 +2118,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-client"
+name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
@@ -5128,7 +5128,7 @@ dependencies = [
  "anchor-spl",
  "arrayref",
  "async-trait",
- "lighthouse-client",
+ "lighthouse-sdk",
  "regex",
  "solana-banks-interface",
  "solana-program",

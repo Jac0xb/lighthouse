@@ -1,5 +1,5 @@
 [package]
-name = "lighthouse-client"
+name = "lighthouse-sdk"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"

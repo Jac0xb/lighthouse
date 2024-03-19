@@ -6,14 +6,14 @@ use crate::utils::process_transaction_assert_success;
 use crate::utils::set_account_from_refs;
 use crate::utils::to_transaction_error;
 use borsh::BorshSerialize;
-use lighthouse_client::errors::LighthouseError;
-use lighthouse_client::find_memory_pda;
-use lighthouse_client::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
-use lighthouse_client::types::ByteSliceOperator;
-use lighthouse_client::types::DataValueDeltaAssertion;
-use lighthouse_client::types::EquatableOperator;
-use lighthouse_client::types::IntegerOperator;
-use lighthouse_client::types::{
+use lighthouse_sdk::errors::LighthouseError;
+use lighthouse_sdk::find_memory_pda;
+use lighthouse_sdk::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
+use lighthouse_sdk::types::ByteSliceOperator;
+use lighthouse_sdk::types::DataValueDeltaAssertion;
+use lighthouse_sdk::types::EquatableOperator;
+use lighthouse_sdk::types::IntegerOperator;
+use lighthouse_sdk::types::{
     AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, LogLevel, WriteType,
 };
 use solana_program_test::tokio;
@@ -43,7 +43,7 @@ async fn slippage_check() {
                 .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
                 .write_offset(0)
@@ -77,7 +77,7 @@ async fn slippage_check() {
                 .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
                 .write_offset(0)

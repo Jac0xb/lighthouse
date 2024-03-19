@@ -4,10 +4,10 @@ pub mod memory_close {
         process_transaction_assert_failure, process_transaction_assert_success,
         to_transaction_error,
     };
-    use lighthouse_client::errors::LighthouseError;
-    use lighthouse_client::instructions::{MemoryCloseBuilder, MemoryWriteBuilder};
-    use lighthouse_client::types::{AccountInfoField, WriteType};
-    use lighthouse_client::{find_memory_pda, find_memory_pda_bump_iterate};
+    use lighthouse_sdk::errors::LighthouseError;
+    use lighthouse_sdk::instructions::{MemoryCloseBuilder, MemoryWriteBuilder};
+    use lighthouse_sdk::types::{AccountInfoField, WriteType};
+    use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
     use solana_program_test::tokio;
     use solana_sdk::signature::Keypair;
     use solana_sdk::signer::EncodableKeypair;
@@ -26,7 +26,7 @@ pub mod memory_close {
         let tx = Transaction::new_signed_with_payer(
             &[MemoryCloseBuilder::new()
                 .payer(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
                 .memory_id(0)
@@ -50,7 +50,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -59,14 +59,14 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
@@ -101,7 +101,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -110,7 +110,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(8)
@@ -139,7 +139,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -148,7 +148,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_bump(next_memory_bump)
                     .memory_id(0)
@@ -183,7 +183,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -228,7 +228,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -237,7 +237,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(bad_user.encodable_pubkey())
-                    .program_id(lighthouse_client::ID)
+                    .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
@@ -272,7 +272,7 @@ pub mod memory_close {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -290,7 +290,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -321,7 +321,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -352,7 +352,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -383,7 +383,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -420,10 +420,10 @@ pub mod memory_write {
     use crate::utils::{
         create_test_account, process_transaction_assert_failure, to_transaction_error,
     };
-    use lighthouse_client::errors::LighthouseError;
-    use lighthouse_client::instructions::MemoryWriteBuilder;
-    use lighthouse_client::types::{AccountInfoField, WriteType};
-    use lighthouse_client::{find_memory_pda, find_memory_pda_bump_iterate};
+    use lighthouse_sdk::errors::LighthouseError;
+    use lighthouse_sdk::instructions::MemoryWriteBuilder;
+    use lighthouse_sdk::types::{AccountInfoField, WriteType};
+    use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
     use solana_program_test::tokio;
     use solana_sdk::instruction::InstructionError;
     use solana_sdk::signature::Keypair;
@@ -451,7 +451,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(8)
                 .write_offset(0)
@@ -477,7 +477,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -544,7 +544,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(bad_user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -577,7 +577,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(u16::MAX)
@@ -609,7 +609,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -652,7 +652,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -696,7 +696,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -741,7 +741,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(test_account.encodable_pubkey())
-                .program_id(lighthouse_client::ID)
+                .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)

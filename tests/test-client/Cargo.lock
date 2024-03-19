@@ -2105,7 +2105,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-client"
+name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
@@ -2123,7 +2123,7 @@ dependencies = [
  "bincode",
  "borsh 0.10.3",
  "clap 4.5.1",
- "lighthouse-client",
+ "lighthouse-sdk",
  "rayon",
  "serde_json",
  "solana-client",

@@ -4,10 +4,10 @@ use crate::utils::process_transaction_assert_failure;
 use crate::utils::process_transaction_assert_success;
 use crate::utils::to_transaction_error;
 use borsh::BorshDeserialize;
-use lighthouse_client::errors::LighthouseError;
-use lighthouse_client::find_memory_pda;
-use lighthouse_client::instructions::{AssertSysvarClockBuilder, MemoryWriteBuilder};
-use lighthouse_client::types::{
+use lighthouse_sdk::errors::LighthouseError;
+use lighthouse_sdk::find_memory_pda;
+use lighthouse_sdk::instructions::{AssertSysvarClockBuilder, MemoryWriteBuilder};
+use lighthouse_sdk::types::{
     ClockField, IntegerOperator, LogLevel, SysvarClockAssertion, WriteType,
 };
 use solana_program_test::tokio;
@@ -30,9 +30,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_client::ID)
+            .source_account(lighthouse_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::Epoch))
             .instruction()],
@@ -101,9 +101,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(1)
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_client::ID)
+            .source_account(lighthouse_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::Slot))
             .instruction()],
@@ -172,9 +172,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(2)
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_client::ID)
+            .source_account(lighthouse_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::UnixTimestamp))
             .instruction()],
@@ -243,9 +243,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(3)
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_client::ID)
+            .source_account(lighthouse_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::LeaderScheduleEpoch))
             .instruction()],
@@ -314,9 +314,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(4)
-            .program_id(lighthouse_client::ID)
+            .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_client::ID)
+            .source_account(lighthouse_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::EpochStartTimestamp))
             .instruction()],

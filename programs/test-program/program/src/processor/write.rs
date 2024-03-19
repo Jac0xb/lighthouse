@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use lighthouse_client::types::{ClockField, WriteType};
+use lighthouse_sdk::types::{ClockField, WriteType};
 
 #[derive(Accounts)]
 pub(crate) struct Write<'info> {
@@ -19,7 +19,7 @@ pub(crate) fn write<'info>(
     ctx: Context<'_, '_, '_, 'info, Write<'info>>,
     memory_bump: u8,
 ) -> Result<()> {
-    lighthouse_client::cpi::MemoryWriteCpiBuilder::new(&ctx.accounts.lighthouse)
+    lighthouse_sdk::cpi::MemoryWriteCpiBuilder::new(&ctx.accounts.lighthouse)
         .payer(&ctx.accounts.signer.to_account_info())
         .system_program(&ctx.accounts.system_program.to_account_info())
         .source_account(&ctx.accounts.source_account.to_account_info())
