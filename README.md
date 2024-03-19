@@ -14,19 +14,36 @@ Solana at its core is a decentralized database (accounts) and assertion/mutation
 
 **Guardrail Example**: A wallet simulates that a token account changes balance from `100` to `90` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
 
-```rust
-let tx = blackhat_program
-   .drain_token_account(&user, &drainer.encodable_pubkey(), &mint.pubkey())
-   .append(lighthouse_program.create_assert(
-      &user,
-      user_ata,
-      Assertion::LegacyTokenAccountField(
-         LegacyTokenAccountField::Amount(90),
-         Operator::Equal,
-      ),
-   )
-)
-```
+````
+let tx = Transaction::new_signed_with_payer(
+   &[
+      blackhat_program
+         .drain_token_account(
+            user.encodable_pubkey(),
+            drainer.encodable_pubkey(),
+            mint.pubkey(),
+         )
+         .ix(),
+      AssertTokenAccountBuilder::new()
+         .target_account(user_ata)
+         .assertion(TokenAccountAssertion::Amount {
+            value: 90,
+            operator: IntegerOperator::Equal,
+         })
+         .instruction(),
+      AssertTokenAccountBuilder::new()
+         .target_account(user_ata)
+         .assertion(TokenAccountAssertion::Delegate {
+            value: None,
+            operator: EquatableOperator::Equal,
+         })
+         .instruction(),
+   ],
+   Some(&user.pubkey()),
+   &[&user],
+   context.get_blockhash().await,
+);
+    ```
 
 (From the testing library, blackhat program is a test program designed to emulate existing drainer programs)
 
@@ -42,15 +59,9 @@ The transaction is then sent to the Solana blockchain. The assertion fails becau
 
 **Assertion Instructions (Primary)** - instructions which allow transaction builders to assert on data accessed at runtime during the assertion instruction.
 
-TODO
-
 **Write Instructions (Secondary)** - write account data, account info, and other data available at runtime into memory accounts to allow for assertion of inter-transaction state changes rather than just instruction data and data accessed at runtime during assertion instruction.
 
-TODO
-
 **Memory Account** - PDA with seeds `[b"memory".as_ref(), signer.key.as_ref(), &[memory_idx]]`. The memory account is used to store runtime data into memory accounts derived by the signer. Useful for asserting on the difference of changes between instructions.
-
-TODO
 
 ## Getting Started
 
@@ -67,6 +78,17 @@ TODO
 1. Compile the program:
    ```bash
    pnpm run programs:build
+````
+
+2. Run the tests:
+
+   ```bash
+   pnpm run programs:test
+   ```
+
+3. Generate shank and kinobi clients:
+   ```bash
+   pnpm run generate
    ```
 
 ## Usage
