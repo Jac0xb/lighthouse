@@ -338,6 +338,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
 
         match log_level {
             LogLevel::PlaintextMessage => {
+                msg!("Result: ");
                 actual_value.log();
                 msg!(operator.format());
                 assertion_value.log();
@@ -392,24 +393,27 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
         match log_level {
             LogLevel::PlaintextMessage => match (actual_value, assertion_value) {
                 (Some(actual_value), Some(assertion_value)) => {
+                    msg!("Result: ");
                     actual_value.log();
                     msg!(operator.format());
                     assertion_value.log();
                 }
                 (None, Some(assertion_value)) => {
-                    msg!("None {}", operator.format());
+                    msg!("Result: ");
+                    msg!("None");
+                    msg!(operator.format());
                     assertion_value.log();
                 }
                 (Some(actual_value), None) => {
+                    msg!("Result: ");
                     actual_value.log();
-                    msg!("{} None", operator.format());
+                    msg!(operator.format());
+                    msg!("None");
                 }
                 (None, None) => {
-                    msg!("None {} None", operator.format());
+                    msg!("Result: None {} None", operator.format());
                 }
             },
-            LogLevel::Silent => {}
-            LogLevel::EncodedNoop => {}
             LogLevel::EncodedMessage => {
                 let payload = AssertionResult::Pubkey(
                     *actual_value,
@@ -422,6 +426,19 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
 
                 sol_log_data(&[payload.as_slice()]);
             }
+            LogLevel::EncodedNoop => {
+                let payload = AssertionResult::Pubkey(
+                    *actual_value,
+                    *assertion_value,
+                    *operator as u8,
+                    passed,
+                )
+                .try_to_vec()
+                .map_err(LighthouseError::serialize_err)?;
+
+                sol_log_data(&[payload.as_slice()]);
+            }
+            LogLevel::Silent => {}
         }
 
         if passed {
@@ -490,7 +507,6 @@ where
                     assertion_value.as_ref()
                 );
             }
-            LogLevel::Silent => {}
             LogLevel::EncodedMessage => {
                 AssertionResult::Bytes(
                     actual_value.as_ref().to_vec(),
@@ -509,6 +525,7 @@ where
                 )
                 .log_noop()?;
             }
+            LogLevel::Silent => {}
         }
 
         if passed {
