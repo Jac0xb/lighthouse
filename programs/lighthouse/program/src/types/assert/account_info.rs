@@ -1,7 +1,7 @@
 use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};

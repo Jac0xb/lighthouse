@@ -2,7 +2,7 @@ use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err,
     error::LighthouseError,
-    types::assert::operator::{ByteSliceOperator, Evaluate},
+    types::assert::evaluate::{ByteSliceOperator, Evaluate},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -278,8 +278,8 @@ mod tests {
     use crate::{
         test_utils::{assert_passed, create_test_account},
         types::assert::{
-            operator::IntegerOperator, AccountDeltaAssertion, AccountInfoDeltaAssertion, Assert,
-            DataValueDeltaAssertion, EquatableOperator, LogLevel,
+            AccountDeltaAssertion, AccountInfoDeltaAssertion, Assert, DataValueDeltaAssertion,
+            EquatableOperator, IntegerOperator, LogLevel,
         },
     };
     use borsh::BorshSerialize;
@@ -502,7 +502,7 @@ mod tests {
             a_offset: 0,
             b_offset: 4,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::operator::ByteSliceOperator::Equal,
+                operator: crate::types::assert::evaluate::ByteSliceOperator::Equal,
                 length: 32,
             },
         };
@@ -518,7 +518,7 @@ mod tests {
             a_offset: 4,
             b_offset: 0,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::operator::ByteSliceOperator::Equal,
+                operator: crate::types::assert::evaluate::ByteSliceOperator::Equal,
                 length: 32,
             },
         };

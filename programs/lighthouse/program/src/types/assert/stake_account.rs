@@ -1,5 +1,5 @@
 use super::{Assert, LogLevel};
-use crate::types::assert::operator::{EquatableOperator, Evaluate, IntegerOperator};
+use crate::types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator};
 use crate::utils::Result;
 use crate::{err, err_msg, error::LighthouseError};
 use borsh::{BorshDeserialize, BorshSerialize};

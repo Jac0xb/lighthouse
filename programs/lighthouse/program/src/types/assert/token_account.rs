@@ -2,7 +2,7 @@ use super::{Assert, Evaluate, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{EquatableOperator, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, IntegerOperator},
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -218,7 +218,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                operator::{EquatableOperator, IntegerOperator},
+                evaluate::{EquatableOperator, IntegerOperator},
                 Assert, LogLevel, TokenAccountAssertion,
             },
         };

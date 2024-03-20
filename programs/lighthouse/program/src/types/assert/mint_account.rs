@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    types::assert::operator::{EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::{keys_equal, Result},
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
@@ -123,7 +123,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                operator::{EquatableOperator, IntegerOperator},
+                evaluate::{EquatableOperator, IntegerOperator},
                 Assert, LogLevel, MintAccountAssertion,
             },
         };

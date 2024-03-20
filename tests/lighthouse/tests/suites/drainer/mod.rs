@@ -51,7 +51,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 //         .append(lighthouse_program.create_assert(
 //             &user,
 //             user_ata,
-//             Assertion::TokenAccount(TokenAccount::Amount(69_000), Operator::Equal),
+//             Assertion::TokenAccount(TokenAccount::Amount(69_000), evaluationEqual),
 //             None,
 //         ))
 //         .to_transaction_and_sign(vec![&user], context.get_blockhash())

@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::{
-    types::assert::operator::{Evaluate, IntegerOperator},
+    types::assert::evaluate::{Evaluate, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -94,7 +94,7 @@ mod tests {
     mod evaluate {
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{operator::IntegerOperator, Assert, LogLevel, SysvarClockAssertion},
+            types::assert::{Assert, IntegerOperator, LogLevel, SysvarClockAssertion},
         };
         use solana_sdk::{
             clock::Clock,

@@ -1382,174 +1382,6 @@
       }
     },
     {
-      "name": "KnownProgram",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "System"
-          },
-          {
-            "name": "Token"
-          },
-          {
-            "name": "Token2022"
-          },
-          {
-            "name": "Rent"
-          },
-          {
-            "name": "Stake"
-          },
-          {
-            "name": "Vote"
-          },
-          {
-            "name": "BpfLoader"
-          },
-          {
-            "name": "UpgradeableLoader"
-          },
-          {
-            "name": "SysvarConfig"
-          }
-        ]
-      }
-    },
-    {
-      "name": "LogLevel",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Silent"
-          },
-          {
-            "name": "PlaintextMessage"
-          },
-          {
-            "name": "EncodedMessage"
-          },
-          {
-            "name": "EncodedNoop"
-          }
-        ]
-      }
-    },
-    {
-      "name": "MerkleTreeAssertion",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "VerifyLeaf",
-            "fields": [
-              {
-                "name": "leaf_index",
-                "type": "u32"
-              },
-              {
-                "name": "leaf_hash",
-                "type": {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "MintAccountAssertion",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "MintAuthority",
-            "fields": [
-              {
-                "name": "value",
-                "type": {
-                  "option": "publicKey"
-                }
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Supply",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Decimals",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u8"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "IsInitialized",
-            "fields": [
-              {
-                "name": "value",
-                "type": "bool"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "FreezeAuthority",
-            "fields": [
-              {
-                "name": "value",
-                "type": {
-                  "option": "publicKey"
-                }
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "AssertionResult",
       "type": {
         "kind": "enum",
@@ -1778,6 +1610,174 @@
           },
           {
             "name": "NotEqual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KnownProgram",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "System"
+          },
+          {
+            "name": "Token"
+          },
+          {
+            "name": "Token2022"
+          },
+          {
+            "name": "Rent"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Vote"
+          },
+          {
+            "name": "BpfLoader"
+          },
+          {
+            "name": "UpgradeableLoader"
+          },
+          {
+            "name": "SysvarConfig"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LogLevel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Silent"
+          },
+          {
+            "name": "PlaintextMessage"
+          },
+          {
+            "name": "EncodedMessage"
+          },
+          {
+            "name": "EncodedNoop"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MerkleTreeAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "VerifyLeaf",
+            "fields": [
+              {
+                "name": "leaf_index",
+                "type": "u32"
+              },
+              {
+                "name": "leaf_hash",
+                "type": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintAccountAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "MintAuthority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Supply",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Decimals",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "IsInitialized",
+            "fields": [
+              {
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "FreezeAuthority",
+            "fields": [
+              {
+                "name": "value",
+                "type": {
+                  "option": "publicKey"
+                }
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
           }
         ]
       }
