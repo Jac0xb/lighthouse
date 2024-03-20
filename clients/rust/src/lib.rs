@@ -77,6 +77,8 @@ pub fn find_memory_pda_bump_iterate(
 
 #[cfg(feature = "sdk")]
 pub mod utils {
+    use crate::generated::types::AssertionResult;
+    use borsh::BorshDeserialize;
     use solana_sdk::{
         instruction::{AccountMeta, Instruction},
         message::{legacy, v0, CompileError, Message, VersionedMessage},
@@ -84,7 +86,7 @@ pub mod utils {
         transaction::{Transaction, VersionedTransaction},
     };
 
-    #[derive(Debug, thiserror::Error, PartialEq, Eq)]
+    #[derive(Debug, thiserror::Error)]
     #[repr(u32)]
     pub enum ClientError {
         #[error("Transaction already signed")]
@@ -97,6 +99,24 @@ pub mod utils {
         CompileError(CompileError),
         #[error("...")]
         SignerError(SignerError),
+        #[error("...")]
+        Base64DecodeError(base64::DecodeError),
+        #[error("...")]
+        IOError(std::io::Error),
+    }
+
+    #[allow(deprecated)]
+    pub fn parse_evaluation_payloads_from_logs(
+        logs: Vec<&String>,
+    ) -> Result<Vec<AssertionResult>, ClientError> {
+        logs.iter()
+            .filter(|log| log.contains("Program data: "))
+            .map(|log| {
+                let encoded = log.split("Program data: ").collect::<Vec<&str>>()[1];
+                let decoded = base64::decode(encoded).map_err(ClientError::Base64DecodeError)?;
+                AssertionResult::try_from_slice(&decoded).map_err(ClientError::IOError)
+            })
+            .collect()
     }
 
     pub fn append_instructions_to_transaction(

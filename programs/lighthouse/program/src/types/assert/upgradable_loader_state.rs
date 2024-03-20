@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -48,7 +48,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableLoaderStateAssertion {
                 } as u8;
                 let casted_assertion_value = (*assertion_value) as u8;
 
-                operator.evaluate(&actual_state, &casted_assertion_value, log_level)
+                u8::evaluate(&actual_state, &casted_assertion_value, operator, log_level)
             }
             UpgradeableLoaderStateAssertion::Buffer(assertion) => {
                 assertion.evaluate(state, log_level)
@@ -82,7 +82,12 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
                 UpgradableBufferAssertion::Authority {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(authority_address, assertion_value, log_level),
+                } => <Option<Pubkey>>::evaluate(
+                    authority_address,
+                    assertion_value,
+                    operator,
+                    log_level,
+                ),
             },
             _ => {
                 msg!(
@@ -116,7 +121,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
                 UpgradeableProgramAssertion::ProgramDataAddress {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(programdata_address, assertion_value, log_level),
+                } => Pubkey::evaluate(programdata_address, assertion_value, operator, log_level),
             },
             _ => {
                 msg!(
@@ -155,11 +160,16 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                 UpgradeableProgramDataAssertion::UpgradeAuthority {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(upgrade_authority_address, assertion_value, log_level),
+                } => <Option<Pubkey>>::evaluate(
+                    upgrade_authority_address,
+                    assertion_value,
+                    operator,
+                    log_level,
+                ),
                 UpgradeableProgramDataAssertion::Slot {
                     value: assertion_value,
                     operator,
-                } => operator.evaluate(slot, assertion_value, log_level),
+                } => u64::evaluate(slot, assertion_value, operator, log_level),
             },
             _ => {
                 msg!(

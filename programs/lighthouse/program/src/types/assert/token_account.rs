@@ -1,8 +1,8 @@
-use super::{Assert, LogLevel};
+use super::{Assert, Evaluate, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    types::assert::evaluate::{EquatableOperator, IntegerOperator},
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -84,7 +84,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
-                operator.evaluate(&mint, assertion_value, log_level)
+                Pubkey::evaluate(&mint, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::Owner {
                 value: assertion_value,
@@ -98,7 +98,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?;
 
-                operator.evaluate(&owner, assertion_value, log_level)
+                Pubkey::evaluate(&owner, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::Amount {
                 value: assertion_value,
@@ -112,7 +112,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?);
 
-                operator.evaluate(&actual_amount, assertion_value, log_level)
+                u64::evaluate(&actual_amount, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::Delegate {
                 value: assertion_value,
@@ -123,7 +123,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
-                operator.evaluate(&delegate, assertion_value, log_level)
+                <Option<Pubkey>>::evaluate(&delegate, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::State {
                 value: assertion_value,
@@ -133,7 +133,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .get(108)
                     .ok_or_else(|| LighthouseError::oob_err(108..109))?;
 
-                operator.evaluate(actual_state, assertion_value, log_level)
+                u8::evaluate(actual_state, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::IsNative { value, operator } => {
                 let data_slice = data
@@ -142,7 +142,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
                 let actual_is_native = unpack_coption_u64(data_slice)?;
 
-                operator.evaluate(&actual_is_native, value, log_level)
+                <Option<u64>>::evaluate(&actual_is_native, value, operator, log_level)
             }
             TokenAccountAssertion::DelegatedAmount {
                 value: assertion_value,
@@ -158,7 +158,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                         err!(LighthouseError::FailedToDeserialize)
                     })?);
 
-                operator.evaluate(&actual_delegated_amount, assertion_value, log_level)
+                u64::evaluate(
+                    &actual_delegated_amount,
+                    assertion_value,
+                    operator,
+                    log_level,
+                )
             }
             TokenAccountAssertion::CloseAuthority { value, operator } => {
                 let data_slice = data
@@ -166,7 +171,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
-                operator.evaluate(&close_authority, value, log_level)
+                <Option<Pubkey>>::evaluate(&close_authority, value, operator, log_level)
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
                 let mint_data = data
@@ -188,7 +193,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 let expected_ata =
                     get_associated_token_address_with_program_id(&owner, &mint, account.owner);
 
-                EquatableOperator::Equal.evaluate(account.key, &expected_ata, log_level)
+                Pubkey::evaluate(
+                    account.key,
+                    &expected_ata,
+                    &EquatableOperator::Equal,
+                    log_level,
+                )
             }
         }
     }
@@ -208,7 +218,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                operator::{EquatableOperator, IntegerOperator},
+                evaluate::{EquatableOperator, IntegerOperator},
                 Assert, LogLevel, TokenAccountAssertion,
             },
         };

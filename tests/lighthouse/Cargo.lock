@@ -584,6 +584,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
+name = "base64"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9475866fec1451be56a3c2400fd081ff546538961565ccb5b7142cbd22bc7a51"
+
+[[package]]
 name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -688,7 +694,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4114279215a005bc675e386011e594e1d9b800918cea18fcadadcce864a2046b"
 dependencies = [
  "borsh-derive 0.10.3",
- "hashbrown 0.12.3",
+ "hashbrown 0.13.2",
 ]
 
 [[package]]
@@ -2141,6 +2147,7 @@ dependencies = [
 name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.0",
  "borsh 0.10.3",
  "num-derive 0.3.3",
  "num-traits",
@@ -2156,6 +2163,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "async-trait",
+ "base64 0.22.0",
  "bincode",
  "blackhat",
  "borsh 0.10.3",

@@ -13,4 +13,6 @@ use borsh::BorshSerialize;
 pub enum LogLevel {
     Silent,
     PlaintextMessage,
+    EncodedMessage,
+    EncodedNoop,
 }

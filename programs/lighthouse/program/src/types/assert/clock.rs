@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::{
-    types::assert::operator::{IntegerOperator, Operator},
+    types::assert::evaluate::{Evaluate, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -41,7 +41,7 @@ impl Assert<()> for SysvarClockAssertion {
             } => {
                 let actual_slot = clock.slot;
 
-                operator.evaluate(&actual_slot, assertion_value, log_level)
+                u64::evaluate(&actual_slot, assertion_value, operator, log_level)
             }
             SysvarClockAssertion::EpochStartTimestamp {
                 value: assertion_value,
@@ -49,7 +49,12 @@ impl Assert<()> for SysvarClockAssertion {
             } => {
                 let actual_epoch_start_timestamp = clock.epoch_start_timestamp;
 
-                operator.evaluate(&actual_epoch_start_timestamp, assertion_value, log_level)
+                i64::evaluate(
+                    &actual_epoch_start_timestamp,
+                    assertion_value,
+                    operator,
+                    log_level,
+                )
             }
             SysvarClockAssertion::Epoch {
                 value: assertion_value,
@@ -57,7 +62,7 @@ impl Assert<()> for SysvarClockAssertion {
             } => {
                 let actual_epoch = clock.epoch;
 
-                operator.evaluate(&actual_epoch, assertion_value, log_level)
+                u64::evaluate(&actual_epoch, assertion_value, operator, log_level)
             }
             SysvarClockAssertion::LeaderScheduleEpoch {
                 value: assertion_value,
@@ -65,7 +70,12 @@ impl Assert<()> for SysvarClockAssertion {
             } => {
                 let actual_leader_schedule_epoch = clock.leader_schedule_epoch;
 
-                operator.evaluate(&actual_leader_schedule_epoch, assertion_value, log_level)
+                u64::evaluate(
+                    &actual_leader_schedule_epoch,
+                    assertion_value,
+                    operator,
+                    log_level,
+                )
             }
             SysvarClockAssertion::UnixTimestamp {
                 value: assertion_value,
@@ -73,7 +83,7 @@ impl Assert<()> for SysvarClockAssertion {
             } => {
                 let actual_unix_timestamp = clock.unix_timestamp;
 
-                operator.evaluate(&actual_unix_timestamp, assertion_value, log_level)
+                i64::evaluate(&actual_unix_timestamp, assertion_value, operator, log_level)
             }
         }
     }
@@ -84,7 +94,7 @@ mod tests {
     mod evaluate {
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{operator::IntegerOperator, Assert, LogLevel, SysvarClockAssertion},
+            types::assert::{Assert, IntegerOperator, LogLevel, SysvarClockAssertion},
         };
         use solana_sdk::{
             clock::Clock,

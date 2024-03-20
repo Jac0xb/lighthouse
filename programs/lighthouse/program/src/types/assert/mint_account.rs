@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::{keys_equal, Result},
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
@@ -54,7 +54,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(0..36))?;
                 let mint_authority = unpack_coption_key(data_slice)?;
 
-                operator.evaluate(&mint_authority, assertion_value, log_level)
+                <Option<Pubkey>>::evaluate(&mint_authority, assertion_value, operator, log_level)
             }
             MintAccountAssertion::Supply {
                 value: assertion_value,
@@ -68,7 +68,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?);
 
-                operator.evaluate(&actual_supply, assertion_value, log_level)
+                u64::evaluate(&actual_supply, assertion_value, operator, log_level)
             }
             MintAccountAssertion::Decimals {
                 value: assertion_value,
@@ -82,7 +82,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     err!(LighthouseError::FailedToDeserialize)
                 })?);
 
-                operator.evaluate(&actual_decimals, assertion_value, log_level)
+                u8::evaluate(&actual_decimals, assertion_value, operator, log_level)
             }
             MintAccountAssertion::IsInitialized {
                 value: assertion_value,
@@ -93,7 +93,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(45..46))?;
                 let actual_value = *actual_value != 0;
 
-                operator.evaluate(&actual_value, assertion_value, log_level)
+                bool::evaluate(&actual_value, assertion_value, operator, log_level)
             }
             MintAccountAssertion::FreezeAuthority {
                 value: assertion_value,
@@ -104,7 +104,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(46..82))?;
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
-                operator.evaluate(&freeze_authority, assertion_value, log_level)
+                <Option<Pubkey>>::evaluate(&freeze_authority, assertion_value, operator, log_level)
             }
         }
     }
@@ -123,7 +123,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                operator::{EquatableOperator, IntegerOperator},
+                evaluate::{EquatableOperator, IntegerOperator},
                 Assert, LogLevel, MintAccountAssertion,
             },
         };

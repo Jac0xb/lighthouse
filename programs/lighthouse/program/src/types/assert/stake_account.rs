@@ -1,5 +1,5 @@
 use super::{Assert, LogLevel};
-use crate::types::assert::operator::{EquatableOperator, IntegerOperator, Operator};
+use crate::types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator};
 use crate::utils::Result;
 use crate::{err, err_msg, error::LighthouseError};
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -47,7 +47,7 @@ impl<'a> Assert<&'a StakeStateV2> for StakeAccountAssertion {
                 } as u8;
 
                 let casted_assertion_value = *assertion_value as u8;
-                operator.evaluate(&actual_state, &casted_assertion_value, log_level)
+                u8::evaluate(&actual_state, &casted_assertion_value, operator, log_level)
             }
             StakeAccountAssertion::MetaAssertion(meta_assertion) => match stake_account {
                 StakeStateV2::Initialized(meta) | StakeStateV2::Stake(meta, _, _) => {
@@ -77,7 +77,7 @@ impl<'a> Assert<&'a StakeStateV2> for StakeAccountAssertion {
 
                         let actual_stake_flag = serialized_stake_flag[0];
 
-                        operator.evaluate(&actual_stake_flag, value, log_level)
+                        u8::evaluate(&actual_stake_flag, value, operator, log_level)
                     }
                     _ => {
                         msg!("Stake account is not in a state that has stake field");
@@ -123,27 +123,47 @@ impl Assert<&StakeMeta> for MetaAssertion {
             MetaAssertion::RentExemptReserve {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.rent_exempt_reserve, assertion_value, log_level),
+            } => u64::evaluate(
+                &meta.rent_exempt_reserve,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             MetaAssertion::AuthorizedStaker {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.authorized.staker, assertion_value, log_level),
+            } => Pubkey::evaluate(
+                &meta.authorized.staker,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             MetaAssertion::AuthorizedWithdrawer {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.authorized.withdrawer, assertion_value, log_level),
+            } => Pubkey::evaluate(
+                &meta.authorized.withdrawer,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             MetaAssertion::LockupUnixTimestamp {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.unix_timestamp, assertion_value, log_level),
+            } => i64::evaluate(
+                &meta.lockup.unix_timestamp,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             MetaAssertion::LockupEpoch {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.epoch, assertion_value, log_level),
+            } => u64::evaluate(&meta.lockup.epoch, assertion_value, operator, log_level),
             MetaAssertion::LockupCustodian {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&meta.lockup.custodian, assertion_value, log_level),
+            } => Pubkey::evaluate(&meta.lockup.custodian, assertion_value, operator, log_level),
         }
     }
 }
@@ -178,31 +198,48 @@ impl Assert<&StakeInfo> for StakeAssertion {
             StakeAssertion::DelegationVoterPubkey {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&stake.delegation.voter_pubkey, assertion_value, log_level),
+            } => Pubkey::evaluate(
+                &stake.delegation.voter_pubkey,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             StakeAssertion::DelegationStake {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&stake.delegation.stake, assertion_value, log_level),
+            } => u64::evaluate(
+                &stake.delegation.stake,
+                assertion_value,
+                operator,
+                log_level,
+            ),
             StakeAssertion::DelegationActivationEpoch {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(
+            } => u64::evaluate(
                 &stake.delegation.activation_epoch,
                 assertion_value,
+                operator,
                 log_level,
             ),
             StakeAssertion::DelegationDeactivationEpoch {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(
+            } => u64::evaluate(
                 &stake.delegation.deactivation_epoch,
                 assertion_value,
+                operator,
                 log_level,
             ),
             StakeAssertion::CreditsObserved {
                 value: assertion_value,
                 operator,
-            } => operator.evaluate(&stake.credits_observed, assertion_value, log_level),
+            } => u64::evaluate(
+                &stake.credits_observed,
+                assertion_value,
+                operator,
+                log_level,
+            ),
         }
     }
 }
