@@ -12,7 +12,7 @@ use lighthouse_sdk::cpi::AssertTokenAccountMultiBuilder;
 use lighthouse_sdk::errors::LighthouseError;
 use lighthouse_sdk::instructions::AssertTokenAccountBuilder;
 use lighthouse_sdk::types::{
-    EquatableOperator, EvaluationPayload, IntegerOperator, TokenAccountAssertion,
+    AssertionResult, EquatableOperator, IntegerOperator, TokenAccountAssertion,
 };
 use lighthouse_sdk::utils::{
     append_instructions_to_transaction, parse_evaluation_payloads_from_logs,
@@ -862,48 +862,48 @@ async fn encoded_message() {
         .filter(|log| log.contains("Program data: "))
         .collect::<Vec<&String>>();
 
-    let expected_payloads: [EvaluationPayload; 11] = [
-        EvaluationPayload::Pubkey(
+    let expected_payloads: [AssertionResult; 11] = [
+        AssertionResult::Pubkey(
             Some(mint.pubkey()),
             Some(mint.pubkey()),
             EquatableOperator::Equal as u8,
             true,
         ),
-        EvaluationPayload::Pubkey(
+        AssertionResult::Pubkey(
             Some(user.pubkey()),
             Some(user.pubkey()),
             EquatableOperator::Equal as u8,
             true,
         ),
-        EvaluationPayload::U64(
+        AssertionResult::U64(
             Some(69_000),
             Some(69_000),
             IntegerOperator::Equal as u8,
             true,
         ),
-        EvaluationPayload::U64(
+        AssertionResult::U64(
             Some(69_000),
             Some(69_001),
             IntegerOperator::NotEqual as u8,
             true,
         ),
-        EvaluationPayload::Pubkey(None, None, EquatableOperator::Equal as u8, true),
-        EvaluationPayload::U8(
+        AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
+        AssertionResult::U8(
             Some(AccountState::Initialized as u8),
             Some(AccountState::Initialized as u8),
             IntegerOperator::Equal as u8,
             true,
         ),
-        EvaluationPayload::U8(
+        AssertionResult::U8(
             Some(AccountState::Initialized as u8),
             Some(AccountState::Frozen as u8),
             IntegerOperator::NotEqual as u8,
             true,
         ),
-        EvaluationPayload::U64(None, None, EquatableOperator::Equal as u8, true),
-        EvaluationPayload::U64(Some(0), Some(0), IntegerOperator::Equal as u8, true),
-        EvaluationPayload::Pubkey(None, None, EquatableOperator::Equal as u8, true),
-        EvaluationPayload::Pubkey(
+        AssertionResult::U64(None, None, EquatableOperator::Equal as u8, true),
+        AssertionResult::U64(Some(0), Some(0), IntegerOperator::Equal as u8, true),
+        AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
+        AssertionResult::Pubkey(
             Some(user_ata),
             Some(user_ata),
             EquatableOperator::Equal as u8,
@@ -946,7 +946,7 @@ async fn encoded_message() {
         .filter(|log| log.contains("Program data: "))
         .collect::<Vec<&String>>();
 
-    let expected_payloads: [EvaluationPayload; 1] = [EvaluationPayload::U64(
+    let expected_payloads: [AssertionResult; 1] = [AssertionResult::U64(
         Some(69_000),
         Some(69_001),
         IntegerOperator::Equal as u8,
@@ -992,33 +992,33 @@ async fn encoded_message() {
     ];
 
     let expected_payload = [
-        EvaluationPayload::U64(
+        AssertionResult::U64(
             Some(69_000),
             Some(69_001),
             IntegerOperator::Equal as u8,
             false,
         ),
-        EvaluationPayload::U64(
+        AssertionResult::U64(
             Some(69_000),
             Some(69_000),
             IntegerOperator::NotEqual as u8,
             false,
         ),
-        EvaluationPayload::U8(
+        AssertionResult::U8(
             Some(AccountState::Initialized as u8),
             Some(AccountState::Frozen as u8),
             IntegerOperator::Equal as u8,
             false,
         ),
-        EvaluationPayload::U8(
+        AssertionResult::U8(
             Some(AccountState::Initialized as u8),
             Some(AccountState::Initialized as u8),
             IntegerOperator::NotEqual as u8,
             false,
         ),
-        EvaluationPayload::U64(Some(0), Some(0), IntegerOperator::NotEqual as u8, false),
-        EvaluationPayload::U64(Some(0), Some(69), IntegerOperator::Equal as u8, false),
-        EvaluationPayload::Pubkey(None, None, EquatableOperator::NotEqual as u8, false),
+        AssertionResult::U64(Some(0), Some(0), IntegerOperator::NotEqual as u8, false),
+        AssertionResult::U64(Some(0), Some(69), IntegerOperator::Equal as u8, false),
+        AssertionResult::Pubkey(None, None, EquatableOperator::NotEqual as u8, false),
     ];
 
     for (i, ix) in failed_assertions.iter().enumerate() {

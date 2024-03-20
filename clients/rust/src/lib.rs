@@ -77,7 +77,7 @@ pub fn find_memory_pda_bump_iterate(
 
 #[cfg(feature = "sdk")]
 pub mod utils {
-    use crate::generated::types::EvaluationPayload;
+    use crate::generated::types::AssertionResult;
     use borsh::BorshDeserialize;
     use solana_sdk::{
         instruction::{AccountMeta, Instruction},
@@ -108,13 +108,13 @@ pub mod utils {
     #[allow(deprecated)]
     pub fn parse_evaluation_payloads_from_logs(
         logs: Vec<&String>,
-    ) -> Result<Vec<EvaluationPayload>, ClientError> {
+    ) -> Result<Vec<AssertionResult>, ClientError> {
         logs.iter()
             .filter(|log| log.contains("Program data: "))
             .map(|log| {
                 let encoded = log.split("Program data: ").collect::<Vec<&str>>()[1];
                 let decoded = base64::decode(encoded).map_err(ClientError::Base64DecodeError)?;
-                EvaluationPayload::try_from_slice(&decoded).map_err(ClientError::IOError)
+                AssertionResult::try_from_slice(&decoded).map_err(ClientError::IOError)
             })
             .collect()
     }

@@ -54,7 +54,7 @@ import {
   getU8Encoder,
 } from '@solana/codecs';
 
-export type EvaluationPayload =
+export type AssertionResult =
   | { __kind: 'U8'; fields: [Option<number>, Option<number>, number, boolean] }
   | { __kind: 'U16'; fields: [Option<number>, Option<number>, number, boolean] }
   | { __kind: 'U32'; fields: [Option<number>, Option<number>, number, boolean] }
@@ -81,7 +81,7 @@ export type EvaluationPayload =
       fields: [Option<boolean>, Option<boolean>, number, boolean];
     };
 
-export type EvaluationPayloadArgs =
+export type AssertionResultArgs =
   | {
       __kind: 'U8';
       fields: [
@@ -192,7 +192,7 @@ export type EvaluationPayloadArgs =
       ];
     };
 
-export function getEvaluationPayloadEncoder(): Encoder<EvaluationPayloadArgs> {
+export function getAssertionResultEncoder(): Encoder<AssertionResultArgs> {
   return getDataEnumEncoder([
     [
       'U8',
@@ -379,7 +379,7 @@ export function getEvaluationPayloadEncoder(): Encoder<EvaluationPayloadArgs> {
   ]);
 }
 
-export function getEvaluationPayloadDecoder(): Decoder<EvaluationPayload> {
+export function getAssertionResultDecoder(): Decoder<AssertionResult> {
   return getDataEnumDecoder([
     [
       'U8',
@@ -566,81 +566,78 @@ export function getEvaluationPayloadDecoder(): Decoder<EvaluationPayload> {
   ]);
 }
 
-export function getEvaluationPayloadCodec(): Codec<
-  EvaluationPayloadArgs,
-  EvaluationPayload
+export function getAssertionResultCodec(): Codec<
+  AssertionResultArgs,
+  AssertionResult
 > {
-  return combineCodec(
-    getEvaluationPayloadEncoder(),
-    getEvaluationPayloadDecoder()
-  );
+  return combineCodec(getAssertionResultEncoder(), getAssertionResultDecoder());
 }
 
 // Data Enum Helpers.
-export function evaluationPayload(
+export function assertionResult(
   kind: 'U8',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'U8'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'U8'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'U8'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'U8'>;
+export function assertionResult(
   kind: 'U16',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'U16'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'U16'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'U16'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'U16'>;
+export function assertionResult(
   kind: 'U32',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'U32'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'U32'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'U32'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'U32'>;
+export function assertionResult(
   kind: 'U64',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'U64'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'U64'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'U64'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'U64'>;
+export function assertionResult(
   kind: 'U128',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'U128'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'U128'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'U128'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'U128'>;
+export function assertionResult(
   kind: 'I8',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'I8'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'I8'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'I8'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'I8'>;
+export function assertionResult(
   kind: 'I16',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'I16'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'I16'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'I16'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'I16'>;
+export function assertionResult(
   kind: 'I32',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'I32'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'I32'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'I32'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'I32'>;
+export function assertionResult(
   kind: 'I64',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'I64'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'I64'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'I64'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'I64'>;
+export function assertionResult(
   kind: 'I128',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'I128'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'I128'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'I128'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'I128'>;
+export function assertionResult(
   kind: 'Pubkey',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'Pubkey'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'Pubkey'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'Pubkey'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'Pubkey'>;
+export function assertionResult(
   kind: 'Bytes',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'Bytes'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'Bytes'>;
-export function evaluationPayload(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'Bytes'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'Bytes'>;
+export function assertionResult(
   kind: 'Bool',
-  data: GetDataEnumKindContent<EvaluationPayloadArgs, 'Bool'>['fields']
-): GetDataEnumKind<EvaluationPayloadArgs, 'Bool'>;
-export function evaluationPayload<K extends EvaluationPayloadArgs['__kind']>(
+  data: GetDataEnumKindContent<AssertionResultArgs, 'Bool'>['fields']
+): GetDataEnumKind<AssertionResultArgs, 'Bool'>;
+export function assertionResult<K extends AssertionResultArgs['__kind']>(
   kind: K,
   data?: any
-): Extract<EvaluationPayloadArgs, { __kind: K }> {
+): Extract<AssertionResultArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
-export function isEvaluationPayload<K extends EvaluationPayload['__kind']>(
+export function isAssertionResult<K extends AssertionResult['__kind']>(
   kind: K,
-  value: EvaluationPayload
-): value is EvaluationPayload & { __kind: K } {
+  value: AssertionResult
+): value is AssertionResult & { __kind: K } {
   return value.__kind === kind;
 }

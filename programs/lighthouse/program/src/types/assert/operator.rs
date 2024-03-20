@@ -17,7 +17,7 @@ const CONTAINS_SYMBOL: &str = "&";
 const DOES_NOT_CONTAIN_SYMBOL: &str = "!&";
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
-pub enum EvaluationPayload {
+pub enum AssertionResult {
     U8(Option<u8>, Option<u8>, u8, bool),
     U16(Option<u16>, Option<u16>, u8, bool),
     U32(Option<u32>, Option<u32>, u8, bool),
@@ -33,7 +33,7 @@ pub enum EvaluationPayload {
     Bool(Option<bool>, Option<bool>, u8, bool),
 }
 
-impl EvaluationPayload {
+impl AssertionResult {
     pub fn log_data(&self) -> Result<()> {
         let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
 
@@ -130,7 +130,7 @@ macro_rules! impl_integer_evaluate {
                         }
                         LogLevel::Silent => {}
                         LogLevel::EncodedMessage => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 Some(*actual_value),
                                 Some(*assertion_value),
                                 *operator as u8,
@@ -138,7 +138,7 @@ macro_rules! impl_integer_evaluate {
                             ).log_data()?;
                         }
                         LogLevel::EncodedNoop => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 Some(*actual_value),
                                 Some(*assertion_value),
                                 *operator as u8,
@@ -213,7 +213,7 @@ macro_rules! impl_evaluate {
                             );
                         }
                         LogLevel::EncodedMessage => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 Some(*actual_value),
                                 Some(*assertion_value),
                                 *operator as u8,
@@ -221,7 +221,7 @@ macro_rules! impl_evaluate {
                             ).log_data()?;
                         }
                         LogLevel::EncodedNoop => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 Some(*actual_value),
                                 Some(*assertion_value),
                                 *operator as u8,
@@ -281,7 +281,7 @@ macro_rules! impl_evaluate_for_option_type {
                             );
                         }
                         LogLevel::EncodedMessage => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 *actual_value,
                                 *assertion_value,
                                 *operator as u8,
@@ -289,7 +289,7 @@ macro_rules! impl_evaluate_for_option_type {
                             ).log_data()?;
                         }
                         LogLevel::EncodedNoop => {
-                            EvaluationPayload::$payload_variant(
+                            AssertionResult::$payload_variant(
                                 *actual_value,
                                 *assertion_value,
                                 *operator as u8,
@@ -343,7 +343,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
                 assertion_value.log();
             }
             LogLevel::EncodedMessage => {
-                let payload = EvaluationPayload::Pubkey(
+                let payload = AssertionResult::Pubkey(
                     Some(*actual_value),
                     Some(*assertion_value),
                     *operator as u8,
@@ -355,7 +355,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
                 sol_log_data(&[payload.as_slice()]);
             }
             LogLevel::EncodedNoop => {
-                let payload = EvaluationPayload::Pubkey(
+                let payload = AssertionResult::Pubkey(
                     Some(*actual_value),
                     Some(*assertion_value),
                     *operator as u8,
@@ -411,7 +411,7 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
             LogLevel::Silent => {}
             LogLevel::EncodedNoop => {}
             LogLevel::EncodedMessage => {
-                let payload = EvaluationPayload::Pubkey(
+                let payload = AssertionResult::Pubkey(
                     *actual_value,
                     *assertion_value,
                     *operator as u8,
@@ -492,7 +492,7 @@ where
             }
             LogLevel::Silent => {}
             LogLevel::EncodedMessage => {
-                EvaluationPayload::Bytes(
+                AssertionResult::Bytes(
                     actual_value.as_ref().to_vec(),
                     assertion_value.as_ref().to_vec(),
                     *operator as u8,
@@ -501,7 +501,7 @@ where
                 .log_data()?;
             }
             LogLevel::EncodedNoop => {
-                EvaluationPayload::Bytes(
+                AssertionResult::Bytes(
                     actual_value.as_ref().to_vec(),
                     assertion_value.as_ref().to_vec(),
                     *operator as u8,

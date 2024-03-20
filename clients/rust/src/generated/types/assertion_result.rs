@@ -11,7 +11,7 @@ use solana_program::pubkey::Pubkey;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum EvaluationPayload {
+pub enum AssertionResult {
     U8(Option<u8>, Option<u8>, u8, bool),
     U16(Option<u16>, Option<u16>, u8, bool),
     U32(Option<u32>, Option<u32>, u8, bool),
