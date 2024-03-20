@@ -15,27 +15,28 @@ path = "src/lib.rs"
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
-solana-program = "1.17.23"
-spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }
-spl-token = { version = ">= 3.5.0, < 5.0", features = ["no-entrypoint"] }
 async-trait = "0.1.71"
+base64 = "0.22.0"
+bincode = "1"
+borsh = "^0.10.0"
+bytemuck = "1.13.0"
+lighthouse-sdk = { path = "../../clients/rust", features = ["sdk"], default-features = false }
+mpl-bubblegum = { git = "https://github.com/Jac0xb/mpl-bubblegum.git", rev = "bf9a36d95d4b636c0f9346665cc744c9cf283b54", package = "bubblegum", features = ["test-sbf"] }
+mpl-token-metadata = "3.2.3"
+rand = "0.8.4"
+regex = "1.5.4"
+solana-banks-interface = "1.14.10"
+solana-client = "1.17.23"
+solana-loader-v4-program = "1.17.23"
+solana-program = "1.17.23"
 solana-program-test = "1.17.23"
 solana-sdk = "1.17.23"
-solana-banks-interface = "1.14.10"
-regex = "1.5.4"
-test-program = { path = "../../programs/test-program/program", features = ["no-entrypoint"] }
-blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }
-lighthouse-sdk = { path = "../../clients/rust", features = ["sdk"], default-features = false }
 solana-vote-program = "1.17.23"
-rand = "0.8.4"
-borsh = "^0.10.0"
-solana-client = "1.17.23"
-bincode = "1"
-solana-loader-v4-program = "1.17.23"
-mpl-bubblegum = { git = "https://github.com/Jac0xb/mpl-bubblegum.git", rev = "bf9a36d95d4b636c0f9346665cc744c9cf283b54", package = "bubblegum", features = ["test-sbf"] }
+spl-account-compression = { version = "0.3.0", features = ["cpi"] }
+spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }
 spl-concurrent-merkle-tree = "0.2.0"
 spl-merkle-tree-reference = "0.1.0"
 spl-noop = { version = "0.1.3", features = ["no-entrypoint"] }
-mpl-token-metadata = "3.2.3"
-spl-account-compression = { version = "0.3.0", features = ["cpi"] }
-bytemuck = "1.13.0"
+spl-token = { version = ">= 3.5.0, < 5.0", features = ["no-entrypoint"] }
+test-program = { path = "../../programs/test-program/program", features = ["no-entrypoint"] }
+blackhat = { path = "../../programs/blackhat/program", features = ["no-entrypoint"] }

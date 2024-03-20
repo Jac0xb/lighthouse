@@ -2,7 +2,7 @@ use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err,
     error::LighthouseError,
-    types::assert::operator::{ByteSliceOperator, Operator},
+    types::assert::operator::{ByteSliceOperator, Evaluate},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -99,7 +99,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i16 - a_value as i16;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i16::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::I8 {
                         value: assertion_value,
@@ -110,7 +110,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i16 - a_value as i16;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i16::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::U16 {
                         value: assertion_value,
@@ -121,7 +121,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i32 - a_value as i32;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i32::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::I16 {
                         value: assertion_value,
@@ -132,7 +132,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i32 - a_value as i32;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i32::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::U32 {
                         value: assertion_value,
@@ -143,7 +143,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i64 - a_value as i64;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i64::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::I32 {
                         value: assertion_value,
@@ -154,7 +154,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i64 - a_value as i64;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i64::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::U64 {
                         value: assertion_value,
@@ -165,7 +165,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i128 - a_value as i128;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i128::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::I64 {
                         value: assertion_value,
@@ -176,7 +176,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_value as i128 - a_value as i128;
 
-                        operator.evaluate(&diff_value, assertion_value, log_level)
+                        i128::evaluate(&diff_value, assertion_value, operator, log_level)
                     }
                     DataValueDeltaAssertion::Bytes { operator, length } => {
                         let a_value = a_account_data
@@ -192,7 +192,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                                 err!(LighthouseError::RangeOutOfBounds)
                             })?;
 
-                        operator.evaluate(a_value, b_value, log_level)
+                        <[u8]>::evaluate(a_value, b_value, operator, log_level)
                     }
                 }
             }
@@ -219,7 +219,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_lamports as i128 - a_lamports as i128;
 
-                        operator.evaluate(&diff_value, value, log_level)
+                        i128::evaluate(&diff_value, value, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::DataLength { value, operator } => {
                         let a_data_len = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
@@ -227,12 +227,12 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_data_len - a_data_len as i128;
 
-                        operator.evaluate(&diff_value, value, log_level)
+                        i128::evaluate(&diff_value, value, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::Owner { operator } => {
                         let a_owner = try_from_slice::<Pubkey>(&a_account_data, a_offset, None)?;
 
-                        operator.evaluate(&a_owner, b_account.owner, log_level)
+                        Pubkey::evaluate(&a_owner, b_account.owner, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::RentEpoch { value, operator } => {
                         let a_rent_epoch = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
@@ -240,7 +240,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                         let diff_value = b_rent_epoch as i128 - a_rent_epoch as i128;
 
-                        operator.evaluate(&diff_value, value, log_level)
+                        i128::evaluate(&diff_value, value, operator, log_level)
                     }
                 }
             }

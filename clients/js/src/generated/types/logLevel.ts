@@ -18,6 +18,8 @@ import {
 export enum LogLevel {
   Silent,
   PlaintextMessage,
+  EncodedMessage,
+  EncodedNoop,
 }
 
 export type LogLevelArgs = LogLevel;

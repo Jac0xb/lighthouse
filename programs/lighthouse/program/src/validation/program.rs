@@ -49,9 +49,13 @@ impl Id for LighthouseProgram {
 }
 
 pub const SPL_ACCOUNT_COMPRESSION_ID: Pubkey = Pubkey::new_from_array([
-    9u8, 42u8, 19u8, 238u8, 149u8, 196u8, 28u8, 186u8, 8u8, 166u8, 127u8, 90u8, 198u8, 126u8,
-    141u8, 247u8, 225u8, 218u8, 17u8, 98u8, 94u8, 29u8, 100u8, 19u8, 127u8, 143u8, 79u8, 35u8,
-    131u8, 3u8, 127u8, 20u8,
+    9, 42, 19, 238, 149, 196, 28, 186, 8, 166, 127, 90, 198, 126, 141, 247, 225, 218, 17, 98, 94,
+    29, 100, 19, 127, 143, 79, 35, 131, 3, 127, 20,
+]);
+
+pub const SPL_NOOP_ID: Pubkey = Pubkey::new_from_array([
+    11, 188, 15, 192, 187, 71, 202, 47, 116, 196, 17, 46, 148, 171, 19, 207, 163, 198, 52, 229,
+    220, 23, 234, 203, 3, 205, 26, 35, 205, 126, 120, 124,
 ]);
 
 pub struct SplAccountCompressionProgram;

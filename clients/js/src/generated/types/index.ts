@@ -16,6 +16,7 @@ export * from './dataValue';
 export * from './dataValueAssertion';
 export * from './dataValueDeltaAssertion';
 export * from './equatableOperator';
+export * from './evaluationPayload';
 export * from './integerOperator';
 export * from './knownProgram';
 export * from './logLevel';

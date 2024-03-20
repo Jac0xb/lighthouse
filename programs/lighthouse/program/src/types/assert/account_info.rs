@@ -1,7 +1,7 @@
 use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::operator::{EquatableOperator, IntegerOperator, Operator},
+    types::assert::operator::{EquatableOperator, Evaluate, IntegerOperator},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -52,28 +52,28 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         match self {
             AccountInfoAssertion::Owner { value, operator } => {
-                operator.evaluate(account.owner, value, log_level)
+                Pubkey::evaluate(account.owner, value, operator, log_level)
             }
             AccountInfoAssertion::KnownOwner { value, operator } => {
-                operator.evaluate(account.owner, &value.to_pubkey(), log_level)
+                Pubkey::evaluate(account.owner, &value.to_pubkey(), operator, log_level)
             }
             AccountInfoAssertion::Lamports { value, operator } => {
-                operator.evaluate(&account.try_lamports()?, value, log_level)
+                u64::evaluate(&account.try_lamports()?, value, operator, log_level)
             }
             AccountInfoAssertion::DataLength { value, operator } => {
-                operator.evaluate(&(account.data_len() as u64), value, log_level)
+                u64::evaluate(&(account.data_len() as u64), value, operator, log_level)
             }
             AccountInfoAssertion::Executable { value, operator } => {
-                operator.evaluate(&account.executable, value, log_level)
+                bool::evaluate(&account.executable, value, operator, log_level)
             }
             AccountInfoAssertion::IsSigner { value, operator } => {
-                operator.evaluate(&account.is_signer, value, log_level)
+                bool::evaluate(&account.is_signer, value, operator, log_level)
             }
             AccountInfoAssertion::IsWritable { value, operator } => {
-                operator.evaluate(&account.is_writable, value, log_level)
+                bool::evaluate(&account.is_writable, value, operator, log_level)
             }
             AccountInfoAssertion::RentEpoch { value, operator } => {
-                operator.evaluate(&account.rent_epoch as &u64, value, log_level)
+                u64::evaluate(&account.rent_epoch as &u64, value, operator, log_level)
             }
             AccountInfoAssertion::VerifyDatahash {
                 expected_hash,
@@ -101,7 +101,12 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                 })?;
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
-                ByteSliceOperator::Equal.evaluate(&actual_hash, expected_hash, log_level)
+                <[u8]>::evaluate(
+                    &actual_hash,
+                    expected_hash,
+                    &ByteSliceOperator::Equal,
+                    log_level,
+                )
             }
         }
     }

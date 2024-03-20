@@ -396,8 +396,8 @@ pub async fn process_transaction_assert_failure(
     tx: Transaction,
     expected_tx_error: TransactionError,
     log_match_regex: Option<&[String]>,
-) -> Result<()> {
-    let tx_metadata = process_transaction(&mut context.client(), &tx)
+) -> Result<BanksTransactionResultWithMetadata> {
+    let tx_metadata = &mut process_transaction(&mut context.client(), &tx)
         .await
         .unwrap();
 
@@ -422,7 +422,7 @@ pub async fn process_transaction_assert_failure(
         )));
     }
 
-    let actual_tx_error = tx_metadata.result.unwrap_err();
+    let actual_tx_error = tx_metadata.result.clone().unwrap_err();
 
     if actual_tx_error != expected_tx_error {
         match &actual_tx_error {
@@ -468,7 +468,7 @@ pub async fn process_transaction_assert_failure(
             .map(|s| regex::Regex::new(s).unwrap())
             .collect::<Vec<regex::Regex>>();
 
-        let logs = tx_metadata.metadata.unwrap().log_messages;
+        let logs = tx_metadata.metadata.clone().unwrap().log_messages;
         for log in &logs {
             println!("{:?}", log);
         }
@@ -492,7 +492,7 @@ pub async fn process_transaction_assert_failure(
         }
     }
 
-    Ok(())
+    Ok(tx_metadata.clone())
 }
 
 pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {

@@ -5,6 +5,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub enum LogLevel {
     Silent = 0,
     PlaintextMessage = 1,
+    EncodedMessage = 2,
+    EncodedNoop = 3,
 }
 
 impl LogLevel {
