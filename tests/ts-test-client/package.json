@@ -1,25 +1,15 @@
 {
   "name": "lighthouse-sdk",
-  "version": "0.1.2",
-  "description": "JavaScript client for the Lighthouse program",
+  "version": "0.0.0",
+  "description": "JavaScript client for the Counter program",
   "sideEffects": false,
   "module": "dist/src/index.mjs",
   "main": "dist/src/index.js",
   "types": "dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.mjs",
-      "require": "./dist/src/index.js"
-    }
-  },
-  "files": [
-    "dist/src",
-    "dist/types"
-  ],
   "scripts": {
     "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
     "build:docs": "typedoc",
+    "test": "ava",
     "lint": "eslint --ext js,ts,tsx src",
     "lint:fix": "eslint --fix --ext js,ts,tsx src",
     "format": "prettier --check src test",
@@ -32,16 +22,19 @@
   "license": "MIT",
   "dependencies": {
     "@solana/accounts": "^2.0.0-preview.2",
-    "@solana/addresses": "^2.0.0-preview.2",
+    "@solana/addresses": "2.0.0-preview.2",
     "@solana/codecs": "^2.0.0-preview.2",
     "@solana/instructions": "^2.0.0-preview.2",
+    "@solana/transactions": "^2.0.0-preview.2",
     "@solana/programs": "^2.0.0-preview.2",
-    "@solana/signers": "^2.0.0-preview.2"
+    "@solana/signers": "^2.0.0-preview.2",
+    "lighthouse-sdk": "0.1.2"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
-    "@solana/web3.js": "^2.0.0-preview.2",
+    "@solana/web3.js": "2.0.0-preview.2",
     "@solana/webcrypto-ed25519-polyfill": "^2.0.0-preview.2",
+    "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "ava": "^6.1.1",

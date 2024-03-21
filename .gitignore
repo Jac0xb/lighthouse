@@ -4,12 +4,10 @@
 **/*.rs.bk
 node_modules
 test-ledger
-dist
 .amman
 .crates
 test-programs
 programs/.bin
 configs/.programs
-
 /.env-local
 /.local
