@@ -14,7 +14,7 @@ Solana at its core is a decentralized database (accounts) and assertion/mutation
 
 **Guardrail Example**: A wallet simulates that a token account changes balance from `100` to `90` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
 
-````
+```
 let tx = Transaction::new_signed_with_payer(
    &[
       blackhat_program
@@ -43,7 +43,7 @@ let tx = Transaction::new_signed_with_payer(
    &[&user],
    context.get_blockhash().await,
 );
-    ```
+```
 
 (From the testing library, blackhat program is a test program designed to emulate existing drainer programs)
 
@@ -78,6 +78,8 @@ TODO
 1. Compile the program:
    ```bash
    pnpm run programs:build
+   ```
+
 ````
 
 2. Run the tests:
@@ -109,3 +111,4 @@ This project is under the [MIT License](LICENSE).
 ## Disclaimer
 
 Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
+````
