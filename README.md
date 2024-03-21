@@ -14,7 +14,7 @@ Solana at its core is a decentralized database (accounts) and assertion/mutation
 
 **Guardrail Example**: A wallet simulates that a token account changes balance from `100` to `90` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
 
-```
+```rust
 let tx = Transaction::new_signed_with_payer(
    &[
       blackhat_program
