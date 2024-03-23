@@ -48,10 +48,10 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             bump: Some(memory_bump),
         });
 
-        let required_space = (write_offset as usize) + write_type.data_length();
+        let required_space = (write_offset as u64) + write_type.data_length();
 
         let memory_info = next_account_info(account_iter)?;
-        let memory = if memory_info.try_data_len()? < required_space {
+        let memory = if memory_info.try_data_len()? < required_space as usize {
             Memory::new_init_checked(
                 memory_info,
                 InitializeType::InitOrReallocIfNeeded {
@@ -133,8 +133,8 @@ pub(crate) fn memory_write(
                 DataValue::Bytes(value) => value.clone(),
                 DataValue::Pubkey(value) => value.to_bytes().to_vec(),
             };
-            let data_length = write_type.data_length();
 
+            let data_length = write_type.data_length() as usize;
             let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref
@@ -155,7 +155,7 @@ pub(crate) fn memory_write(
             data_length: _,
         } => {
             let data_offset = *data_offset as usize;
-            let data_length = write_type.data_length();
+            let data_length = write_type.data_length() as usize;
 
             let data = source_account.try_borrow_data().map_err(|err| {
                 msg!("Failed to borrow target account: {:?}", err);
@@ -222,8 +222,8 @@ pub(crate) fn memory_write(
                     })?
                 }
             };
-            let data_length = write_type.data_length();
 
+            let data_length = write_type.data_length() as usize;
             let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref
@@ -268,8 +268,7 @@ pub(crate) fn memory_write(
                 })?,
             };
 
-            let data_length = write_type.data_length();
-
+            let data_length = write_type.data_length() as usize;
             let memory_write_range = write_offset..(write_offset + data_length);
             let memory_write_slice =
                 memory_ref

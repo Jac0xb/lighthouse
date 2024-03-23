@@ -10,12 +10,12 @@ pub enum WriteType {
 }
 
 impl WriteType {
-    pub fn data_length(&self) -> usize {
+    pub fn data_length(&self) -> u64 {
         match self {
             WriteType::AccountData {
                 offset: _,
                 data_length,
-            } => *data_length as usize,
+            } => *data_length as u64,
             WriteType::AccountInfoField(field) => match field {
                 AccountInfoField::Key => 32,
                 AccountInfoField::Lamports => 8,
@@ -30,7 +30,7 @@ impl WriteType {
                 DataValue::U32(_) | DataValue::I32(_) => 4,
                 DataValue::U64(_) | DataValue::I64(_) => 8,
                 DataValue::U128(_) | DataValue::I128(_) => 16,
-                DataValue::Bytes(bytes) => bytes.len(),
+                DataValue::Bytes(bytes) => bytes.len() as u64,
                 DataValue::Pubkey(_) => 32,
             },
             WriteType::Clock(field) => match field {

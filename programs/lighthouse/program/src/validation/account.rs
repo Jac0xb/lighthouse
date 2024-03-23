@@ -28,21 +28,21 @@ pub(crate) enum AccountValidation<'a> {
 #[allow(dead_code)]
 pub(crate) enum InitializeType<'b, 'a, 'info> {
     InitOrReallocIfNeeded {
-        space: usize,
+        space: u64,
         payer: &'b Signer<'a, 'info>,
         program_owner: &'b Pubkey,
         system_program: &'b Program<'a, 'info, SystemProgram>,
         seeds: &'b Vec<Vec<u8>>,
     },
     Init {
-        space: usize,
+        space: u64,
         payer: &'b Signer<'a, 'info>,
         program_owner: &'b Pubkey,
         system_program: &'b Program<'a, 'info, SystemProgram>,
         seeds: &'b Vec<Vec<u8>>,
     },
     InitIfNeeded {
-        space: usize,
+        space: u64,
         payer: &'b Signer<'a, 'info>,
         program_owner: &'b Pubkey,
         system_program: &'b Program<'a, 'info, SystemProgram>,
@@ -58,7 +58,6 @@ pub(crate) enum InitializeType<'b, 'a, 'info> {
 pub(crate) trait CheckedAccount<'a, 'info: 'a> {
     fn new(account: &'a AccountInfo<'info>) -> Self;
     fn info(&self) -> &'a AccountInfo<'info>;
-
     fn get_validations() -> Option<Vec<AccountValidation<'a>>>;
 
     fn info_as_owned(&self) -> AccountInfo<'info> {
@@ -89,8 +88,11 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
             )?;
 
             Ok(true)
-        } else {
+        } else if keys_equal(account_info.owner, program_owner) {
             Ok(false)
+        } else {
+            msg!("Unexpected program owner");
+            Err(LighthouseError::AccountValidationFailed.into())
         }
     }
 
@@ -125,7 +127,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
         validations: Option<&Vec<AccountValidation>>,
     ) -> Result<Self>
     where
-        Self: std::marker::Sized,
+        Self: Sized,
     {
         Self::check_conditions(account_info, validations)?;
         Self::check_conditions(account_info, Self::get_validations().as_ref())?;
@@ -141,7 +143,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                 Self::init_if_needed(
                     account_info,
                     payer,
-                    space as u64,
+                    space,
                     program_owner,
                     system_program,
                     seeds,
@@ -157,14 +159,14 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                 let was_inited = Self::init_if_needed(
                     account_info,
                     payer,
-                    space as u64,
+                    space,
                     program_owner,
                     system_program,
                     seeds,
                 )?;
 
                 if !was_inited {
-                    Self::realloc(account_info, payer, system_program, space as u64)?;
+                    Self::realloc(account_info, payer, system_program, space)?;
                 }
             }
             InitializeType::Init {
@@ -180,7 +182,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                     system_program.info,
                     program_owner,
                     &Rent::get()?,
-                    space as u64,
+                    space,
                     seeds.to_vec(),
                 )?;
             }
@@ -201,7 +203,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
         validations: Option<&Vec<AccountValidation>>,
     ) -> Result<Self>
     where
-        Self: std::marker::Sized,
+        Self: Sized,
     {
         Self::check_conditions(account_info, validations)?;
         Self::check_conditions(account_info, Self::get_validations().as_ref())?;
@@ -311,772 +313,182 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
     }
 }
 
-// #[allow(non_snake_case)]
-// #[allow(clippy::useless_vec)]
-// #[cfg(test)]
-// mod tests {
-//     use super::{AccountValidation, CheckedAccount, InitializeType};
-//     use crate::{
-//         error::LighthouseError,
-//         utils::keys_equal,
-//         validation::{DerivedAddress, Memory, MemorySeeds, Program, Signer},
-//         Result,
-//     };
-//     use solana_sdk::{
-//         account_info::AccountInfo,
-//         msg,
-//         program_memory::sol_memset,
-//         program_stubs::{set_syscall_stubs, SyscallStubs},
-//         pubkey::Pubkey,
-//         rent::{
-//             Rent, DEFAULT_BURN_PERCENT, DEFAULT_EXEMPTION_THRESHOLD, DEFAULT_LAMPORTS_PER_BYTE_YEAR,
-//         },
-//         signature::Keypair,
-//         signer::EncodableKeypair,
-//         system_instruction::{SystemInstruction, MAX_PERMITTED_DATA_LENGTH},
-//         system_program,
-//         sysvar::Sysvar,
-//     };
-//     use std::slice::from_raw_parts_mut;
-
-//     struct TestAccount<'a, 'info> {
-//         account: &'a AccountInfo<'info>,
-//     }
-
-//     impl<'a, 'info> CheckedAccount<'a, 'info> for TestAccount<'a, 'info> {
-//         fn new(account: &'a AccountInfo<'info>) -> Self {
-//             Self { account }
-//         }
-
-//         fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
-//             None
-//         }
-
-//         fn info(&self) -> &'a AccountInfo<'info> {
-//             self.account
-//         }
-//     }
-
-//     #[test]
-//     fn new_checked() {
-//         let min_rent = 80_000;
-//         let key = system_program::id();
-//         let owner = Keypair::new().encodable_pubkey();
-//         let lamports = &mut min_rent.clone();
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-
-//         let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 0);
-
-//         TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![
-//                 AccountValidation::KeyEquals(key),
-//                 AccountValidation::IsProgramOwned(owner),
-//             ]),
-//         )
-//         .unwrap();
-
-//         let lamports = &mut 0;
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             true,
-//             0,
-//         );
-
-//         TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![
-//                 AccountValidation::IsSigner,
-//                 AccountValidation::IsWritable,
-//                 AccountValidation::IsNotOwned,
-//                 AccountValidation::CustomValidation(Box::new(|account| -> Result<()> {
-//                     if account.rent_epoch == 0 {
-//                         Ok(())
-//                     } else {
-//                         Err(LighthouseError::AccountValidationFailed.into())
-//                     }
-//                 })),
-//             ]),
-//         )
-//         .unwrap();
-//     }
-
-//     #[allow(clippy::useless_vec)]
-//     #[allow(clippy::type_complexity)]
-//     fn find_memory_pda(
-//         payer: &Pubkey,
-//         memory_id: u8,
-//     ) -> Result<(Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>)> {
-//         let seeds = Memory::get_seeds(MemorySeeds {
-//             payer,
-//             memory_id,
-//             bump: None,
-//         });
-
-//         let (key, bump) = Pubkey::find_program_address(
-//             seeds
-//                 .iter()
-//                 .map(|seed| seed.as_slice())
-//                 .collect::<Vec<_>>()
-//                 .as_slice(),
-//             &crate::id(),
-//         );
-
-//         let seeds_without_bump = seeds.clone();
-
-//         let seeds = seeds
-//             .iter()
-//             .chain(vec![vec![bump]].iter())
-//             .map(|seed| seed.to_vec())
-//             .collect::<Vec<_>>();
-
-//         Ok((key, bump, seeds_without_bump, seeds))
-//     }
-
-//     #[test]
-//     fn new_checked_pda() {
-//         let payer = Keypair::new().encodable_pubkey();
-//         let owner = Keypair::new().encodable_pubkey();
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-
-//         let (key, _bump, seeds_without_bump, seeds) = find_memory_pda(&payer, 0).unwrap();
-
-//         let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 0);
-
-//         TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![AccountValidation::IsProgramDerivedAddress {
-//                 seeds: &seeds_without_bump,
-//                 program_id: &crate::id(),
-//                 find_bump: true,
-//             }]),
-//         )
-//         .unwrap();
-
-//         TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![AccountValidation::IsProgramDerivedAddress {
-//                 seeds: &seeds,
-//                 program_id: &crate::id(),
-//                 find_bump: false,
-//             }]),
-//         )
-//         .unwrap();
-
-//         let fake_payer = Keypair::new().encodable_pubkey();
-//         let (_key, _bump, seeds_without_bump, seeds) = find_memory_pda(&fake_payer, 0).unwrap();
-//         let result = TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![AccountValidation::IsProgramDerivedAddress {
-//                 seeds: &seeds_without_bump,
-//                 program_id: &crate::id(),
-//                 find_bump: true,
-//             }]),
-//         );
-
-//         if let Err(err) = result {
-//             assert_eq!(err, LighthouseError::AccountValidationFailed.into());
-//         } else {
-//             panic!("expected error");
-//         }
-
-//         let result = TestAccount::new_checked(
-//             &account_info,
-//             Some(&vec![AccountValidation::IsProgramDerivedAddress {
-//                 seeds: &seeds,
-//                 program_id: &crate::id(),
-//                 find_bump: false,
-//             }]),
-//         );
-
-//         if let Err(err) = result {
-//             assert_eq!(err, LighthouseError::AccountValidationFailed.into());
-//         } else {
-//             panic!("expected error");
-//         }
-//     }
-
-//     struct MockSyscallStubs {}
-//     impl SyscallStubs for MockSyscallStubs {
-//         fn sol_invoke_signed(
-//             &self,
-//             _instruction: &solana_sdk::instruction::Instruction,
-//             _account_infos: &[AccountInfo],
-//             _signers_seeds: &[&[&[u8]]],
-//         ) -> solana_sdk::entrypoint::ProgramResult {
-//             let create_ix: SystemInstruction =
-//                 bincode::deserialize(_instruction.data.as_ref()).unwrap();
-
-//             match create_ix {
-//                 SystemInstruction::CreateAccount {
-//                     lamports,
-//                     space,
-//                     owner,
-//                 } => {
-//                     let payer = _account_infos[0].clone();
-//                     let new_account = _account_infos[1].clone();
-
-//                     if !payer.is_signer {
-//                         msg!("payer is not signer");
-//                         return Err(0.into());
-//                     }
-
-//                     if !payer.is_writable {
-//                         msg!("payer is not writable");
-//                         return Err(1.into());
-//                     }
-
-//                     if !new_account.is_signer {
-//                         msg!("new account is not signer");
-//                         return Err(3.into());
-//                     }
-
-//                     if !new_account.is_writable {
-//                         msg!("new account is not writable");
-//                         return Err(4.into());
-//                     }
-
-//                     if new_account.executable {
-//                         msg!("new account is executable");
-//                         return Err(5.into());
-//                     }
-
-//                     if !new_account.data_is_empty() {
-//                         msg!("new account is not empty");
-//                         return Err(6.into());
-//                     }
-
-//                     if !system_program::check_id(new_account.owner) {
-//                         msg!("new account is not owned by system program");
-//                         return Err(7.into());
-//                     }
-
-//                     if space > MAX_PERMITTED_DATA_LENGTH {
-//                         msg!("requested space is too large");
-//                         return Err(8.into());
-//                     }
-
-//                     msg!("lamports {}", lamports);
-
-//                     // transfer lamports from payer to new account
-//                     **payer.try_borrow_mut_lamports().unwrap() -= lamports;
-//                     **new_account.try_borrow_mut_lamports().unwrap() += lamports;
-
-//                     let mut data = new_account.try_borrow_mut_data().unwrap();
-//                     unsafe {
-//                         new_account.assign(&owner);
-
-//                         let data_ptr = data.as_mut_ptr();
-//                         *(data_ptr.offset(-8) as *mut u64) = space;
-//                         *data = from_raw_parts_mut(data_ptr, space as usize)
-//                     }
-
-//                     sol_memset(&mut data, 0, space as usize);
-//                 }
-//                 SystemInstruction::Assign { owner } => {
-//                     let account = _account_infos[0].clone();
-
-//                     if !account.is_writable {
-//                         msg!("account is not writable");
-//                         return Err(9.into());
-//                     }
-//                     if account.executable {
-//                         msg!("account is executable");
-//                         return Err(10.into());
-//                     }
-
-//                     let data = account.try_borrow_data().unwrap();
-
-//                     if !data.iter().all(|&x| x == 0) {
-//                         msg!("account is not empty");
-//                         return Err(11.into());
-//                     }
-
-//                     // don't touch the account if the owner does not change
-//                     if keys_equal(account.owner, &owner) {
-//                         return Ok(());
-//                     }
-
-//                     account.assign(&owner);
-//                 }
-//                 SystemInstruction::Allocate { space } => {
-//                     let account = _account_infos[0].clone();
-
-//                     if !account.is_writable {
-//                         msg!("account is not writable");
-//                         return Err(11.into());
-//                     }
-//                     if account.executable {
-//                         msg!("account is executable");
-//                         return Err(12.into());
-//                     }
-
-//                     if !account.is_signer {
-//                         msg!("account is not signer");
-//                         return Err(13.into());
-//                     }
-
-//                     let mut data = account.try_borrow_mut_data().unwrap();
-
-//                     if !data.iter().all(|&x| x == 0) {
-//                         msg!("account is not empty");
-//                         return Err(11.into());
-//                     }
-
-//                     unsafe {
-//                         let data_ptr = data.as_mut_ptr();
-//                         *(data_ptr.offset(-8) as *mut u64) = space;
-//                         *data = from_raw_parts_mut(data_ptr, space as usize)
-//                     }
-
-//                     sol_memset(&mut data, 0, space as usize);
-
-//                     drop(data)
-//                 }
-//                 SystemInstruction::Transfer { lamports } => {
-//                     let payer = _account_infos[0].clone();
-//                     let dest = _account_infos[1].clone();
-
-//                     if !payer.is_signer {
-//                         msg!("payer is not signer");
-//                         return Err(14.into());
-//                     }
-
-//                     if !payer.is_writable {
-//                         msg!("payer is not writable");
-//                         return Err(15.into());
-//                     }
-
-//                     if !dest.is_writable {
-//                         msg!("dest is not writable");
-//                         return Err(16.into());
-//                     }
-
-//                     if dest.executable {
-//                         msg!("dest is executable");
-//                         return Err(17.into());
-//                     }
-
-//                     let mut src_ref = payer.try_borrow_mut_lamports().unwrap();
-//                     let mut dest_ref = dest.try_borrow_mut_lamports().unwrap();
-
-//                     **src_ref -= lamports;
-//                     **dest_ref += lamports;
-
-//                     drop(src_ref);
-//                     drop(dest_ref);
-//                 }
-//                 _ => panic!("unexpected instruction"),
-//             }
-
-//             msg!("create_ix: {:?}", create_ix);
-
-//             Ok(())
-//         }
-
-//         fn sol_get_rent_sysvar(&self, var_addr: *mut u8) -> u64 {
-//             unsafe {
-//                 *(var_addr as *mut _ as *mut Rent) = Rent {
-//                     lamports_per_byte_year: DEFAULT_LAMPORTS_PER_BYTE_YEAR,
-//                     burn_percent: DEFAULT_BURN_PERCENT,
-//                     exemption_threshold: DEFAULT_EXEMPTION_THRESHOLD,
-//                 };
-//             }
-//             solana_program::entrypoint::SUCCESS
-//         }
-//     }
-
-//     // Where crashing starts
-
-//     #[test]
-//     fn new_init_checked__init() {
-//         set_syscall_stubs(Box::new(MockSyscallStubs {}));
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 16];
-//         let sysprog_account = AccountInfo::new(
-//             &system_program::ID,
-//             false,
-//             false,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             true,
-//             0,
-//         );
-//         let sys_program = Program::new(&sysprog_account);
-
-//         let lamports = &mut 100_000_000;
-//         let data: &mut [u8] = &mut vec![0u8; 16];
-//         let key = Keypair::new().encodable_pubkey();
-//         let signer_account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             false,
-//             0,
-//         );
-//         let signer = Signer::new(&signer_account_info);
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 2048];
-//         let key = Keypair::new().encodable_pubkey();
-
-//         let owner = system_program::id();
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             &mut data[0..0],
-//             &owner,
-//             false,
-//             0,
-//         );
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::Init {
-//                 payer: &signer,
-//                 space: 120,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         // Test branching logic where account is already partially funded but not initialized
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(120)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 120);
-
-//         let lamports = &mut 10_000;
-//         let data: &mut [u8] = &mut vec![0u8; 2048];
-//         let key = Keypair::new().encodable_pubkey();
-
-//         let owner = system_program::id();
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             &mut data[0..0],
-//             &owner,
-//             false,
-//             0,
-//         );
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::Init {
-//                 payer: &signer,
-//                 space: 512,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(512)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 512);
-//     }
-
-//     #[test]
-//     fn new_init_checked__init_if_needed() {
-//         set_syscall_stubs(Box::new(MockSyscallStubs {}));
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let sysprog_account = AccountInfo::new(
-//             &system_program::ID,
-//             false,
-//             false,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             true,
-//             0,
-//         );
-//         let sys_program = Program::new(&sysprog_account);
-
-//         let lamports = &mut 100_000_000;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let key = Keypair::new().encodable_pubkey();
-//         let signer_account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             false,
-//             0,
-//         );
-//         let signer = Signer::new(&signer_account_info);
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 2048];
-//         let key = Keypair::new().encodable_pubkey();
-
-//         let owner = system_program::id();
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             &mut data[0..0],
-//             &owner,
-//             false,
-//             0,
-//         );
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::InitIfNeeded {
-//                 payer: &signer,
-//                 space: 120,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::InitIfNeeded {
-//                 payer: &signer,
-//                 space: 120,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-//     }
-
-//     #[test]
-//     fn new_init_checked__init_or_realloc_if_needed() {
-//         set_syscall_stubs(Box::new(MockSyscallStubs {}));
-
-//         if std::mem::size_of::<usize>() == 8 {
-//             println!("Running in a 64-bit environment");
-//         } else if std::mem::size_of::<usize>() == 4 {
-//             println!("Running in a 32-bit environment");
-//         } else {
-//             println!("Unexpected usize size");
-//         }
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let sysprog_account = AccountInfo::new(
-//             &system_program::ID,
-//             false,
-//             false,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             true,
-//             0,
-//         );
-//         let sys_program = Program::new(&sysprog_account);
-
-//         let lamports = &mut 100_000_000;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let key = Keypair::new().encodable_pubkey();
-//         let signer_account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             false,
-//             0,
-//         );
-//         let signer = Signer::new(&signer_account_info);
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 2048];
-//         let key = Keypair::new().encodable_pubkey();
-
-//         let owner = system_program::id();
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             &mut data[0..0],
-//             &owner,
-//             false,
-//             0,
-//         );
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::InitOrReallocIfNeeded {
-//                 payer: &signer,
-//                 space: 120,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(120)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 120);
-
-//         let mut data = account_info.try_borrow_mut_data().unwrap();
-//         sol_memset(&mut data, 255, 120);
-
-//         drop(data);
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::InitOrReallocIfNeeded {
-//                 payer: &signer,
-//                 space: 256,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(256)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 256);
-
-//         let data = account_info.try_borrow_data().unwrap();
-
-//         for i in 0..120 {
-//             assert_eq!(data[i], 255);
-//         }
-
-//         for i in 120..256 {
-//             assert_eq!(data[i], 0);
-//         }
-//     }
-
-//     #[test]
-//     fn new_init_checked__realloc() {
-//         set_syscall_stubs(Box::new(MockSyscallStubs {}));
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let sysprog_account = AccountInfo::new(
-//             &system_program::ID,
-//             false,
-//             false,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             true,
-//             0,
-//         );
-//         let sys_program = Program::new(&sysprog_account);
-
-//         let lamports = &mut 100_000_000;
-//         let data: &mut [u8] = &mut vec![0u8; 8];
-//         let key = Keypair::new().encodable_pubkey();
-//         let signer_account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             data,
-//             &system_program::ID,
-//             false,
-//             0,
-//         );
-//         let signer = Signer::new(&signer_account_info);
-
-//         let lamports = &mut 0;
-//         let data: &mut [u8] = &mut vec![0u8; 2048];
-//         let key = Keypair::new().encodable_pubkey();
-
-//         let owner = system_program::id();
-//         let account_info = AccountInfo::new(
-//             &key,
-//             true,
-//             true,
-//             lamports,
-//             &mut data[0..0],
-//             &owner,
-//             false,
-//             0,
-//         );
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::Init {
-//                 payer: &signer,
-//                 space: 256,
-//                 program_owner: &crate::ID,
-//                 system_program: &sys_program,
-//                 seeds: &vec![],
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(256)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 256);
-
-//         TestAccount::new_init_checked(
-//             &account_info,
-//             InitializeType::Realloc {
-//                 payer: &signer,
-//                 space: 120,
-//                 system_program: &sys_program,
-//             },
-//             None,
-//         )
-//         .unwrap();
-
-//         assert_eq!(
-//             account_info.lamports(),
-//             Rent::get().unwrap().minimum_balance(256)
-//         );
-//         assert_eq!(account_info.owner, &crate::ID);
-//         assert_eq!(account_info.data_len(), 120);
-//     }
-// }
+#[allow(non_snake_case)]
+#[allow(clippy::useless_vec)]
+#[cfg(test)]
+mod tests {
+    use super::{AccountValidation, CheckedAccount};
+    use crate::{
+        error::LighthouseError,
+        validation::{DerivedAddress, Memory, MemorySeeds},
+        Result,
+    };
+    use solana_sdk::{
+        account_info::AccountInfo, pubkey::Pubkey, signature::Keypair, signer::EncodableKeypair,
+        system_program,
+    };
+
+    struct TestAccount<'a, 'info> {
+        account: &'a AccountInfo<'info>,
+    }
+
+    impl<'a, 'info> CheckedAccount<'a, 'info> for TestAccount<'a, 'info> {
+        fn new(account: &'a AccountInfo<'info>) -> Self {
+            Self { account }
+        }
+
+        fn get_validations() -> Option<Vec<AccountValidation<'a>>> {
+            None
+        }
+
+        fn info(&self) -> &'a AccountInfo<'info> {
+            self.account
+        }
+    }
+
+    #[test]
+    fn new_checked() {
+        let min_rent = 80_000;
+        let key = system_program::id();
+        let owner = Keypair::new().encodable_pubkey();
+        let lamports = &mut min_rent.clone();
+        let data: &mut [u8] = &mut vec![0u8; 8];
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 100);
+
+        TestAccount::new_checked(
+            &account_info,
+            Some(&vec![
+                AccountValidation::KeyEquals(key),
+                AccountValidation::IsProgramOwned(owner),
+            ]),
+        )
+        .unwrap();
+
+        let lamports = &mut 0;
+        let account_info = AccountInfo::new(
+            &key,
+            true,
+            true,
+            lamports,
+            data,
+            &system_program::ID,
+            true,
+            0,
+        );
+
+        TestAccount::new_checked(
+            &account_info,
+            Some(&vec![
+                AccountValidation::IsSigner,
+                AccountValidation::IsWritable,
+                AccountValidation::IsNotOwned,
+                AccountValidation::CustomValidation(Box::new(|account| -> Result<()> {
+                    if account.rent_epoch == 100 {
+                        Ok(())
+                    } else {
+                        Err(LighthouseError::AccountValidationFailed.into())
+                    }
+                })),
+            ]),
+        )
+        .unwrap();
+    }
+
+    #[allow(clippy::useless_vec)]
+    #[allow(clippy::type_complexity)]
+    fn find_memory_pda(
+        payer: &Pubkey,
+        memory_id: u8,
+    ) -> Result<(Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>)> {
+        let seeds = Memory::get_seeds(MemorySeeds {
+            payer,
+            memory_id,
+            bump: None,
+        });
+
+        let (key, bump) = Pubkey::find_program_address(
+            seeds
+                .iter()
+                .map(|seed| seed.as_slice())
+                .collect::<Vec<_>>()
+                .as_slice(),
+            &crate::id(),
+        );
+
+        let seeds_without_bump = seeds.clone();
+
+        let seeds = seeds
+            .iter()
+            .chain(vec![vec![bump]].iter())
+            .map(|seed| seed.to_vec())
+            .collect::<Vec<_>>();
+
+        Ok((key, bump, seeds_without_bump, seeds))
+    }
+
+    #[test]
+    fn new_checked_pda() {
+        let payer = Keypair::new().encodable_pubkey();
+        let owner = Keypair::new().encodable_pubkey();
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut vec![0u8; 0];
+
+        let (key, _bump, seeds_without_bump, seeds) = find_memory_pda(&payer, 0).unwrap();
+
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 0);
+
+        TestAccount::new_checked(
+            &account_info,
+            Some(&vec![AccountValidation::IsProgramDerivedAddress {
+                seeds: &seeds_without_bump,
+                program_id: &crate::id(),
+                find_bump: true,
+            }]),
+        )
+        .unwrap();
+
+        TestAccount::new_checked(
+            &account_info,
+            Some(&vec![AccountValidation::IsProgramDerivedAddress {
+                seeds: &seeds,
+                program_id: &crate::id(),
+                find_bump: false,
+            }]),
+        )
+        .unwrap();
+
+        let fake_payer = Keypair::new().encodable_pubkey();
+        let (_key, _bump, seeds_without_bump, seeds) = find_memory_pda(&fake_payer, 0).unwrap();
+        let result = TestAccount::new_checked(
+            &account_info,
+            Some(&vec![AccountValidation::IsProgramDerivedAddress {
+                seeds: &seeds_without_bump,
+                program_id: &crate::id(),
+                find_bump: true,
+            }]),
+        );
+
+        if let Err(err) = result {
+            assert_eq!(err, LighthouseError::AccountValidationFailed.into());
+        } else {
+            panic!("expected error");
+        }
+
+        let result = TestAccount::new_checked(
+            &account_info,
+            Some(&vec![AccountValidation::IsProgramDerivedAddress {
+                seeds: &seeds,
+                program_id: &crate::id(),
+                find_bump: false,
+            }]),
+        );
+
+        if let Err(err) = result {
+            assert_eq!(err, LighthouseError::AccountValidationFailed.into());
+        } else {
+            panic!("expected error");
+        }
+    }
+}
