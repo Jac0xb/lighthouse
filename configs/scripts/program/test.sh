@@ -24,7 +24,7 @@ export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
 
 cd ${WORKING_DIR}/programs/lighthouse/program
 echo "Running solana test-sbf for ${p}..."
-RUST_LOG=error BPF_OUT_DIR=${WORKING_DIR}/configs/.programs cargo test 2>&1
+RUST_LOG=error RUST_BACKTRACE=1 BPF_OUT_DIR=${WORKING_DIR}/configs/.programs cargo test 2>&1
 
-cd ${WORKING_DIR}/tests/lighthouse
-RUST_LOG=error cargo test 2>&1
+cd ${WORKING_DIR}/tests/lighthouse/
+RUST_LOG=error RUST_BACKTRACE=1 cargo test 2>&1
