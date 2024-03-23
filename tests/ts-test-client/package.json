@@ -1,7 +1,7 @@
 {
-  "name": "lighthouse-sdk",
+  "name": "ts-test-client",
   "version": "0.0.0",
-  "description": "JavaScript client for the Counter program",
+  "description": "Client to test lighthouse-sdk",
   "sideEffects": false,
   "module": "dist/src/index.mjs",
   "main": "dist/src/index.js",
