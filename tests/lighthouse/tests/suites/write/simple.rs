@@ -10,7 +10,7 @@ use lighthouse_sdk::instructions::{
     AssertAccountDataBuilder, AssertAccountDeltaBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
 };
 use lighthouse_sdk::types::{
-    AccountDeltaAssertion, AccountInfoField, ByteSliceOperator, DataValue, DataValueAssertion,
+    AccountDeltaAssertion, AccountInfoField, DataValue, DataValueAssertion,
     DataValueDeltaAssertion, EquatableOperator, IntegerOperator, LogLevel, WriteType,
 };
 use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
@@ -174,7 +174,7 @@ async fn write_account_data() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(62)
                 .instruction(),
@@ -230,7 +230,7 @@ async fn write_account_data() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(99)
                 .instruction(),
@@ -239,7 +239,7 @@ async fn write_account_data() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(102)
                 .instruction(),
@@ -261,7 +261,7 @@ async fn write_account_data() {
                         .cloned()
                         .chain(vec![255; 32])
                         .collect::<Vec<u8>>(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(135)
                 .instruction(),
@@ -325,7 +325,7 @@ async fn write_account_type() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: expected_blob.clone(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(0)
                 .instruction(),
@@ -516,7 +516,7 @@ async fn token_transfer() {
                 a_offset: 0,
                 b_offset: 0,
                 assertion: DataValueDeltaAssertion::Bytes {
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                     length: 64,
                 },
             })
@@ -600,7 +600,7 @@ async fn write_to_another_memory_index() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![MAX; 94],
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(0)
                 .instruction(),
@@ -660,7 +660,7 @@ async fn write_to_another_bump() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![MAX; 94],
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(0)
                 .instruction(),

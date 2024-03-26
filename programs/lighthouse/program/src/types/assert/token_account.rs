@@ -79,12 +79,9 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 let data_slice = data
                     .get(0..32)
                     .ok_or_else(|| LighthouseError::oob_err(0..32))?;
-                let mint = Pubkey::try_from(data_slice).map_err(|e| {
-                    err_msg!("Failed to deserialize mint from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
+                let actual_mint = bytemuck::from_bytes::<Pubkey>(data_slice);
 
-                Pubkey::evaluate(&mint, assertion_value, operator, log_level)
+                Pubkey::evaluate(actual_mint, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::Owner {
                 value: assertion_value,
@@ -93,12 +90,9 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                 let data_slice = data
                     .get(32..64)
                     .ok_or_else(|| LighthouseError::oob_err(32..64))?;
-                let owner = Pubkey::try_from(data_slice).map_err(|e| {
-                    err_msg!("Failed to deserialize owner from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
+                let actual_owner = bytemuck::from_bytes::<Pubkey>(data_slice);
 
-                Pubkey::evaluate(&owner, assertion_value, operator, log_level)
+                Pubkey::evaluate(actual_owner, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::Amount {
                 value: assertion_value,
@@ -123,7 +117,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
-                <Option<Pubkey>>::evaluate(&delegate, assertion_value, operator, log_level)
+                <Option<&Pubkey>>::evaluate(
+                    &delegate,
+                    &assertion_value.as_ref(),
+                    operator,
+                    log_level,
+                )
             }
             TokenAccountAssertion::State {
                 value: assertion_value,
@@ -171,27 +170,21 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
-                <Option<Pubkey>>::evaluate(&close_authority, value, operator, log_level)
+                <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
                 let mint_data = data
                     .get(0..32)
                     .ok_or_else(|| LighthouseError::oob_err(0..32))?;
-                let mint = Pubkey::try_from(mint_data).map_err(|e| {
-                    err_msg!("Failed to deserialize mint from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
+                let mint = bytemuck::from_bytes::<Pubkey>(mint_data);
 
                 let owner_data = data
                     .get(32..64)
                     .ok_or_else(|| LighthouseError::oob_err(32..64))?;
-                let owner = Pubkey::try_from(owner_data).map_err(|e| {
-                    err_msg!("Failed to deserialize owner from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
+                let owner = bytemuck::from_bytes::<Pubkey>(owner_data);
 
                 let expected_ata =
-                    get_associated_token_address_with_program_id(&owner, &mint, account.owner);
+                    get_associated_token_address_with_program_id(owner, mint, account.owner);
 
                 Pubkey::evaluate(
                     account.key,

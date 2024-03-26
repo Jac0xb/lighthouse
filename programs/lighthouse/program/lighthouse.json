@@ -901,7 +901,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ByteSliceOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]
@@ -1101,7 +1101,7 @@
               {
                 "name": "operator",
                 "type": {
-                  "defined": "ByteSliceOperator"
+                  "defined": "EquatableOperator"
                 }
               }
             ]
@@ -1717,20 +1717,6 @@
     },
     {
       "name": "EquatableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ByteSliceOperator",
       "type": {
         "kind": "enum",
         "variants": [

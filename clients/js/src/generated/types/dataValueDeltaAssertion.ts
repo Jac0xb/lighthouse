@@ -29,12 +29,12 @@ import {
   getU16Encoder,
 } from '@solana/codecs';
 import {
-  ByteSliceOperator,
-  ByteSliceOperatorArgs,
+  EquatableOperator,
+  EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getByteSliceOperatorDecoder,
-  getByteSliceOperatorEncoder,
+  getEquatableOperatorDecoder,
+  getEquatableOperatorEncoder,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
 } from '.';
@@ -48,7 +48,7 @@ export type DataValueDeltaAssertion =
   | { __kind: 'I32'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; length: number; operator: ByteSliceOperator };
+  | { __kind: 'Bytes'; length: number; operator: EquatableOperator };
 
 export type DataValueDeltaAssertionArgs =
   | { __kind: 'U8'; value: number; operator: IntegerOperatorArgs }
@@ -59,7 +59,7 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'I32'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; length: number; operator: ByteSliceOperatorArgs };
+  | { __kind: 'Bytes'; length: number; operator: EquatableOperatorArgs };
 
 export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
   return getDataEnumEncoder([
@@ -123,7 +123,7 @@ export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAsser
       'Bytes',
       getStructEncoder([
         ['length', getU16Encoder()],
-        ['operator', getByteSliceOperatorEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
   ]);
@@ -191,7 +191,7 @@ export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAsser
       'Bytes',
       getStructDecoder([
         ['length', getU16Decoder()],
-        ['operator', getByteSliceOperatorDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
   ]);

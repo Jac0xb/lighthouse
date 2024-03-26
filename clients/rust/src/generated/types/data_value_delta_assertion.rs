@@ -5,7 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ByteSliceOperator;
+use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -47,6 +47,6 @@ pub enum DataValueDeltaAssertion {
     },
     Bytes {
         length: u16,
-        operator: ByteSliceOperator,
+        operator: EquatableOperator,
     },
 }

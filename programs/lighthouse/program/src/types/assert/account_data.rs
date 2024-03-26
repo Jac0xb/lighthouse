@@ -2,7 +2,7 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{ByteSliceOperator, EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -62,7 +62,7 @@ pub enum DataValueAssertion {
     },
     Bytes {
         value: Vec<u8>,
-        operator: ByteSliceOperator,
+        operator: EquatableOperator,
     },
     Pubkey {
         value: Pubkey,
@@ -179,9 +179,17 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = try_from_slice::<Pubkey>(&data, offset, None)?;
+                let data_slice = data.get(offset..offset + 32).ok_or_else(|| {
+                    msg!(
+                        "Failed to deserialized Pubkey range {:?} was out of bounds",
+                        offset..offset + 32
+                    );
 
-                Pubkey::evaluate(&actual_value, assertion_value, operator, log_level)
+                    LighthouseError::RangeOutOfBounds
+                })?;
+                let actual_value = bytemuck::from_bytes::<Pubkey>(data_slice);
+
+                <Pubkey>::evaluate(actual_value, assertion_value, operator, log_level)
             }
         }
     }
@@ -195,7 +203,7 @@ mod tests {
         test_utils::{assert_failed, assert_passed, create_test_account},
         types::assert::{
             evaluate::{EquatableOperator, IntegerOperator},
-            AccountDataAssertion, Assert, ByteSliceOperator, LogLevel,
+            AccountDataAssertion, Assert, LogLevel,
         },
     };
     use borsh::BorshSerialize;
@@ -650,7 +658,7 @@ mod tests {
             offset: 0,
             assertion: DataValueAssertion::Bytes {
                 value: vec![u8::MAX; 33],
-                operator: ByteSliceOperator::Equal,
+                operator: EquatableOperator::Equal,
             },
         };
 
@@ -711,7 +719,7 @@ mod tests {
             offset: 17,
             assertion: DataValueAssertion::Bytes {
                 value: vec![u8::MAX; 16],
-                operator: ByteSliceOperator::Equal,
+                operator: EquatableOperator::Equal,
             },
         };
 

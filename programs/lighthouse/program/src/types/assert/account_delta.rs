@@ -2,7 +2,7 @@ use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err,
     error::LighthouseError,
-    types::assert::evaluate::{ByteSliceOperator, Evaluate},
+    types::assert::evaluate::Evaluate,
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -57,7 +57,7 @@ pub enum DataValueDeltaAssertion {
     },
     Bytes {
         length: u16,
-        operator: ByteSliceOperator,
+        operator: EquatableOperator,
     },
 }
 
@@ -502,7 +502,7 @@ mod tests {
             a_offset: 0,
             b_offset: 4,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::evaluate::ByteSliceOperator::Equal,
+                operator: crate::types::assert::evaluate::EquatableOperator::Equal,
                 length: 32,
             },
         };
@@ -518,7 +518,7 @@ mod tests {
             a_offset: 4,
             b_offset: 0,
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::evaluate::ByteSliceOperator::Equal,
+                operator: crate::types::assert::evaluate::EquatableOperator::Equal,
                 length: 32,
             },
         };

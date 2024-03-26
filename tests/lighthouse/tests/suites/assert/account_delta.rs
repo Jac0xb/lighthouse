@@ -9,7 +9,6 @@ use borsh::BorshSerialize;
 use lighthouse_sdk::errors::LighthouseError;
 use lighthouse_sdk::find_memory_pda;
 use lighthouse_sdk::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
-use lighthouse_sdk::types::ByteSliceOperator;
 use lighthouse_sdk::types::DataValueDeltaAssertion;
 use lighthouse_sdk::types::EquatableOperator;
 use lighthouse_sdk::types::IntegerOperator;
@@ -231,7 +230,7 @@ async fn test_data_delta() {
                 62,
                 DataValueDeltaAssertion::Bytes {
                     length: 32,
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 },
             ),
         ],
@@ -350,7 +349,7 @@ async fn test_data_delta() {
                 62,
                 DataValueDeltaAssertion::Bytes {
                     length: 32,
-                    operator: ByteSliceOperator::NotEqual,
+                    operator: EquatableOperator::NotEqual,
                 },
             ),
         ],

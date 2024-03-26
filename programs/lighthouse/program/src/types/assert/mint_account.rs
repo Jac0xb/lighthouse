@@ -54,7 +54,12 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(0..36))?;
                 let mint_authority = unpack_coption_key(data_slice)?;
 
-                <Option<Pubkey>>::evaluate(&mint_authority, assertion_value, operator, log_level)
+                <Option<&Pubkey>>::evaluate(
+                    &mint_authority,
+                    &assertion_value.as_ref(),
+                    operator,
+                    log_level,
+                )
             }
             MintAccountAssertion::Supply {
                 value: assertion_value,
@@ -104,7 +109,12 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(46..82))?;
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
-                <Option<Pubkey>>::evaluate(&freeze_authority, assertion_value, operator, log_level)
+                <Option<&Pubkey>>::evaluate(
+                    &freeze_authority,
+                    &assertion_value.as_ref(),
+                    operator,
+                    log_level,
+                )
             }
         }
     }

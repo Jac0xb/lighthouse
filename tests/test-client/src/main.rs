@@ -7,7 +7,7 @@ use lighthouse_sdk::instructions::{
     MemoryCloseBuilder, MemoryWriteBuilder,
 };
 use lighthouse_sdk::types::{
-    AccountDeltaAssertion, AccountInfoAssertion, ByteSliceOperator, DataValueDeltaAssertion,
+    AccountDeltaAssertion, AccountInfoAssertion, DataValueDeltaAssertion, EquatableOperator,
     EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MetaAssertion,
     StakeAccountAssertion, StakeStateType, WriteType,
 };
@@ -262,7 +262,7 @@ fn build_safe_send_token_transaction(
                     a_offset: 0,
                     b_offset: 0,
                     assertion: DataValueDeltaAssertion::Bytes {
-                        operator: ByteSliceOperator::Equal,
+                        operator: EquatableOperator::Equal,
                         length: 64,
                     },
                 })
