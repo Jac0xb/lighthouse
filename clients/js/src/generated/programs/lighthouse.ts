@@ -19,6 +19,7 @@ import {
   ParsedAssertAccountDeltaInstruction,
   ParsedAssertAccountInfoInstruction,
   ParsedAssertAccountInfoMultiInstruction,
+  ParsedAssertBubblegumTreeConfigAccountInstruction,
   ParsedAssertMerkleTreeAccountInstruction,
   ParsedAssertMintAccountInstruction,
   ParsedAssertMintAccountMultiInstruction,
@@ -68,6 +69,7 @@ export enum LighthouseInstruction {
   AssertUpgradeableLoaderAccountMulti,
   AssertSysvarClock,
   AssertMerkleTreeAccount,
+  AssertBubblegumTreeConfigAccount,
 }
 
 export function identifyLighthouseInstruction(
@@ -122,6 +124,9 @@ export function identifyLighthouseInstruction(
   }
   if (memcmp(data, getU8Encoder().encode(15), 0)) {
     return LighthouseInstruction.AssertMerkleTreeAccount;
+  }
+  if (memcmp(data, getU8Encoder().encode(16), 0)) {
+    return LighthouseInstruction.AssertBubblegumTreeConfigAccount;
   }
   throw new Error(
     'The provided instruction could not be identified as a lighthouse instruction.'
@@ -178,4 +183,7 @@ export type ParsedLighthouseInstruction<
     } & ParsedAssertSysvarClockInstruction<TProgram>)
   | ({
       instructionType: LighthouseInstruction.AssertMerkleTreeAccount;
-    } & ParsedAssertMerkleTreeAccountInstruction<TProgram>);
+    } & ParsedAssertMerkleTreeAccountInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertBubblegumTreeConfigAccount;
+    } & ParsedAssertBubblegumTreeConfigAccountInstruction<TProgram>);

@@ -10,6 +10,7 @@ export * from './assertAccountData';
 export * from './assertAccountDelta';
 export * from './assertAccountInfo';
 export * from './assertAccountInfoMulti';
+export * from './assertBubblegumTreeConfigAccount';
 export * from './assertMerkleTreeAccount';
 export * from './assertMintAccount';
 export * from './assertMintAccountMulti';

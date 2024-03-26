@@ -1,8 +1,9 @@
 use crate::types::{
     assert::{
-        AccountDataAssertion, AccountDeltaAssertion, AccountInfoAssertion, LogLevel,
-        MerkleTreeAssertion, MintAccountAssertion, StakeAccountAssertion, SysvarClockAssertion,
-        TokenAccountAssertion, UpgradeableLoaderStateAssertion,
+        AccountDataAssertion, AccountDeltaAssertion, AccountInfoAssertion,
+        BubblegumTreeConfigAssertion, LogLevel, MerkleTreeAssertion, MintAccountAssertion,
+        StakeAccountAssertion, SysvarClockAssertion, TokenAccountAssertion,
+        UpgradeableLoaderStateAssertion,
     },
     write::WriteType,
 };
@@ -73,6 +74,10 @@ pub(crate) enum LighthouseInstruction {
     #[account(1, name = "root", desc = "The current root of the merkle tree")]
     #[account(2, name = "spl_account_compression", desc = "SPL account compression program")]
     AssertMerkleTreeAccount { log_level: LogLevel, assertion: MerkleTreeAssertion },
+
+
+    #[account(0, name = "target_account", desc = "Target mpl-bubblegum tree config account to be asserted")]
+    AssertBubblegumTreeConfigAccount { log_level: LogLevel, assertion: BubblegumTreeConfigAssertion },
 }
 
 impl LighthouseInstruction {
@@ -97,6 +102,9 @@ impl LighthouseInstruction {
                 "AssertUpgradeableLoaderAccountMulti"
             }
             LighthouseInstruction::AssertSysvarClock { .. } => "AssertSysvarClock",
+            LighthouseInstruction::AssertBubblegumTreeConfigAccount { .. } => {
+                "AssertBubblegumTreeConfigAccount"
+            }
             LighthouseInstruction::AssertMerkleTreeAccount { .. } => "AssertMerkleTreeAccount",
         }
     }
@@ -119,6 +127,7 @@ impl LighthouseInstruction {
             LighthouseInstruction::AssertUpgradeableLoaderAccountMulti { log_level, .. } => {
                 *log_level
             }
+            LighthouseInstruction::AssertBubblegumTreeConfigAccount { log_level, .. } => *log_level,
             LighthouseInstruction::AssertSysvarClock { log_level, .. } => *log_level,
             LighthouseInstruction::AssertMerkleTreeAccount { log_level, .. } => *log_level,
         }
