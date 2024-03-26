@@ -17,11 +17,11 @@ export default defineConfig(() => [
   { ...SHARED_OPTIONS, format: 'esm' },
 
   // Tests.
-  {
-    ...SHARED_OPTIONS,
-    bundle: false,
-    entry: ['./test/*.ts'],
-    format: 'cjs',
-    outDir: './dist/test',
-  },
+  // {
+  //   ...SHARED_OPTIONS,
+  //   bundle: false,
+  //   entry: ['./test/*.ts'],
+  //   format: 'cjs',
+  //   outDir: './dist/test',
+  // },
 ]);
