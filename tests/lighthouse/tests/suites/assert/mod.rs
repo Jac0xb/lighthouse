@@ -12,3 +12,4 @@ pub mod token_account;
 pub mod token_account_multi;
 pub mod upgradeable_loader;
 pub mod upgradeable_loader_multi;
+pub mod bubblegum_tree_config;

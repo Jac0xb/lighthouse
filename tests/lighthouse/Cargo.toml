@@ -22,6 +22,7 @@ borsh = "^0.10.0"
 bytemuck = "1.13.0"
 lighthouse-sdk = { path = "../../clients/rust", features = ["sdk"], default-features = false }
 mpl-bubblegum = { git = "https://github.com/Jac0xb/mpl-bubblegum.git", rev = "bf9a36d95d4b636c0f9346665cc744c9cf283b54", package = "bubblegum", features = ["test-sbf"] }
+mpl-bubblegum-sdk = { git = "https://github.com/Jac0xb/mpl-bubblegum.git", rev = "bf9a36d95d4b636c0f9346665cc744c9cf283b54", package = "mpl-bubblegum" }
 mpl-token-metadata = "3.2.3"
 rand = "0.8.4"
 regex = "1.5.4"

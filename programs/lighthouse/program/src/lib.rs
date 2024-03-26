@@ -170,6 +170,13 @@ pub mod lighthouse {
                 let ctx = AssertMerkleTreeAccountContext::load(&mut accounts.iter())?;
                 processor::assert_merkle_tree_account(&ctx, &assertion, log_level)?;
             }
+            LighthouseInstruction::AssertBubblegumTreeConfigAccount {
+                log_level,
+                assertion,
+            } => {
+                let ctx = AssertBubblegumTreeConfigAccountContext::load(&mut accounts.iter())?;
+                processor::assert_bubblegum_tree_config_account(&ctx, &assertion, log_level)?;
+            }
         }
 
         Ok(())

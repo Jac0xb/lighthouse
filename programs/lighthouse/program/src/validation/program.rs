@@ -48,6 +48,11 @@ impl Id for LighthouseProgram {
     }
 }
 
+pub const MPL_BUBBLEGUM_ID: Pubkey = Pubkey::new_from_array([
+    152, 139, 128, 235, 121, 53, 40, 105, 178, 36, 116, 95, 89, 221, 191, 138, 38, 88, 202, 19,
+    220, 104, 129, 33, 38, 53, 28, 174, 7, 193, 165, 165,
+]);
+
 pub const SPL_ACCOUNT_COMPRESSION_ID: Pubkey = Pubkey::new_from_array([
     9, 42, 19, 238, 149, 196, 28, 186, 8, 166, 127, 90, 198, 126, 141, 247, 225, 218, 17, 98, 94,
     29, 100, 19, 127, 143, 79, 35, 131, 3, 127, 20,

@@ -11,11 +11,11 @@ pub use generated::types;
 pub mod instructions {
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
-        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
-        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
-        AssertUpgradeableLoaderAccountBuilder, AssertUpgradeableLoaderAccountMultiBuilder,
-        MemoryCloseBuilder, MemoryWriteBuilder,
+        AssertBubblegumTreeConfigAccountBuilder, AssertMerkleTreeAccountBuilder,
+        AssertMintAccountBuilder, AssertMintAccountMultiBuilder, AssertStakeAccountBuilder,
+        AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder, AssertTokenAccountBuilder,
+        AssertTokenAccountMultiBuilder, AssertUpgradeableLoaderAccountBuilder,
+        AssertUpgradeableLoaderAccountMultiBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
     };
 }
 
@@ -23,9 +23,10 @@ pub mod instructions {
 pub mod cpi {
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertAccountInfoMultiBuilder, AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder,
-        AssertMintAccountMultiBuilder, AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder,
-        AssertSysvarClockBuilder, AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
+        AssertAccountInfoMultiBuilder, AssertBubblegumTreeConfigAccountCpiBuilder,
+        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
+        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
+        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
         AssertUpgradeableLoaderAccountBuilder, MemoryCloseCpiBuilder, MemoryWriteCpiBuilder,
     };
 }

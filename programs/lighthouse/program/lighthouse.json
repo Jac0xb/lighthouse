@@ -572,6 +572,37 @@
         "type": "u8",
         "value": 15
       }
+    },
+    {
+      "name": "AssertBubblegumTreeConfigAccount",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target mpl-bubblegum tree config account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertion",
+          "type": {
+            "defined": "BubblegumTreeConfigAssertion"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 16
+      }
     }
   ],
   "types": [
@@ -1291,6 +1322,104 @@
                 "name": "length",
                 "type": {
                   "option": "u16"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "BubblegumTreeConfigAssertion",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "TreeCreator",
+            "fields": [
+              {
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "TreeDelegate",
+            "fields": [
+              {
+                "name": "value",
+                "type": "publicKey"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "TotalMintCapacity",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "NumMinted",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "IntegerOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "IsPublic",
+            "fields": [
+              {
+                "name": "value",
+                "type": "bool"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
+                }
+              }
+            ]
+          },
+          {
+            "name": "IsDecompressible",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u8"
+              },
+              {
+                "name": "operator",
+                "type": {
+                  "defined": "EquatableOperator"
                 }
               }
             ]

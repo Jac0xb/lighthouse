@@ -11,6 +11,7 @@ export * from './accountInfoAssertion';
 export * from './accountInfoDeltaAssertion';
 export * from './accountInfoField';
 export * from './assertionResult';
+export * from './bubblegumTreeConfigAssertion';
 export * from './byteSliceOperator';
 export * from './clockField';
 export * from './dataValue';
