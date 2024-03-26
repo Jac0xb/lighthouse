@@ -48,14 +48,10 @@ import {
   getU8Encoder,
 } from '@solana/codecs';
 import {
-  ByteSliceOperator,
-  ByteSliceOperatorArgs,
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getByteSliceOperatorDecoder,
-  getByteSliceOperatorEncoder,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
   getIntegerOperatorDecoder,
@@ -74,7 +70,7 @@ export type DataValueAssertion =
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: ByteSliceOperator }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperator }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
@@ -89,7 +85,7 @@ export type DataValueAssertionArgs =
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: ByteSliceOperatorArgs }
+  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperatorArgs }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
 
 export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> {
@@ -175,7 +171,7 @@ export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> 
       'Bytes',
       getStructEncoder([
         ['value', getBytesEncoder({ size: getU32Encoder() })],
-        ['operator', getByteSliceOperatorEncoder()],
+        ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
     [
@@ -271,7 +267,7 @@ export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
       'Bytes',
       getStructDecoder([
         ['value', getBytesDecoder({ size: getU32Decoder() })],
-        ['operator', getByteSliceOperatorDecoder()],
+        ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
     [

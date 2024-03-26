@@ -422,7 +422,7 @@ async fn simple() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(assertion)
             .instruction()
     };

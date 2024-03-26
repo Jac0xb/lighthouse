@@ -378,7 +378,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
     }
 }
 
-impl Evaluate<EquatableOperator> for Option<Pubkey> {
+impl Evaluate<EquatableOperator> for Option<&Pubkey> {
     fn evaluate(
         actual_value: &Self,
         assertion_value: &Self,
@@ -416,8 +416,8 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
             },
             LogLevel::EncodedMessage => {
                 let payload = AssertionResult::Pubkey(
-                    *actual_value,
-                    *assertion_value,
+                    actual_value.copied(),
+                    assertion_value.copied(),
                     *operator as u8,
                     passed,
                 )
@@ -428,8 +428,8 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
             }
             LogLevel::EncodedNoop => {
                 let payload = AssertionResult::Pubkey(
-                    *actual_value,
-                    *assertion_value,
+                    actual_value.copied(),
+                    assertion_value.copied(),
                     *operator as u8,
                     passed,
                 )
@@ -449,47 +449,22 @@ impl Evaluate<EquatableOperator> for Option<Pubkey> {
     }
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum ByteSliceOperator {
-    Equal,
-    NotEqual,
-}
-
-impl Operator for ByteSliceOperator {
-    fn format(&self) -> &str {
-        match self {
-            ByteSliceOperator::Equal => EQUAL_SYMBOL,
-            ByteSliceOperator::NotEqual => NOT_EQUAL_SYMBOL,
-        }
-    }
-}
-
-impl<T> Evaluate<ByteSliceOperator> for T
-where
-    T: AsRef<[u8]> + ?Sized,
-{
+impl Evaluate<EquatableOperator> for [u8] {
     fn evaluate(
-        actual_value: &T,
-        assertion_value: &T,
-        operator: &ByteSliceOperator,
+        actual_value: &Self,
+        assertion_value: &Self,
+        operator: &EquatableOperator,
         log_level: LogLevel,
     ) -> Result<()> {
         let passed = match operator {
-            ByteSliceOperator::Equal => {
-                let actual_value = actual_value.as_ref();
-                let assertion_value = assertion_value.as_ref();
-
+            EquatableOperator::Equal => {
                 if actual_value.len() == assertion_value.len() {
                     sol_memcmp(actual_value, assertion_value, assertion_value.len()) == 0
                 } else {
                     false
                 }
             }
-            ByteSliceOperator::NotEqual => {
-                let actual_value = actual_value.as_ref();
-                let assertion_value = assertion_value.as_ref();
-
+            EquatableOperator::NotEqual => {
                 if actual_value.len() == assertion_value.len() {
                     sol_memcmp(actual_value, assertion_value, assertion_value.len()) != 0
                 } else {
@@ -502,15 +477,15 @@ where
             LogLevel::PlaintextMessage => {
                 msg!(
                     "Result: {:?} {} {:?}",
-                    actual_value.as_ref(),
+                    actual_value,
                     operator.format(),
-                    assertion_value.as_ref()
+                    assertion_value
                 );
             }
             LogLevel::EncodedMessage => {
                 AssertionResult::Bytes(
-                    actual_value.as_ref().to_vec(),
-                    assertion_value.as_ref().to_vec(),
+                    actual_value.to_vec(),
+                    assertion_value.to_vec(),
                     *operator as u8,
                     passed,
                 )
@@ -518,8 +493,8 @@ where
             }
             LogLevel::EncodedNoop => {
                 AssertionResult::Bytes(
-                    actual_value.as_ref().to_vec(),
-                    assertion_value.as_ref().to_vec(),
+                    actual_value.to_vec(),
+                    assertion_value.to_vec(),
                     *operator as u8,
                     passed,
                 )

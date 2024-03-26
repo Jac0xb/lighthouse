@@ -18,15 +18,13 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
-pub fn unpack_coption_key(src: &[u8]) -> Result<Option<Pubkey>> {
+pub fn unpack_coption_key(src: &[u8]) -> Result<Option<&Pubkey>> {
     let tag = &src[0..4];
     let body = &src[4..36];
 
     match *tag {
         [0, 0, 0, 0] => Ok(Option::None),
-        [1, 0, 0, 0] => Ok(Option::Some(Pubkey::new_from_array(
-            body.try_into().unwrap(),
-        ))),
+        [1, 0, 0, 0] => Ok(Option::Some(bytemuck::from_bytes(body))),
         _ => {
             msg!("Failed to deserialize COption<Pubkey> src: {:?}", src);
             Err(LighthouseError::FailedToDeserialize.into())

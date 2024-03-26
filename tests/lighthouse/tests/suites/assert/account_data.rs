@@ -6,9 +6,7 @@ use crate::utils::{
 };
 use lighthouse_sdk::errors::LighthouseError;
 use lighthouse_sdk::instructions::AssertAccountDataBuilder;
-use lighthouse_sdk::types::{
-    ByteSliceOperator, DataValueAssertion, EquatableOperator, IntegerOperator,
-};
+use lighthouse_sdk::types::{DataValueAssertion, EquatableOperator, IntegerOperator};
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
@@ -122,7 +120,7 @@ async fn simple() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(70)
                 .instruction(),
@@ -178,7 +176,7 @@ async fn simple() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(107)
                 .instruction(),
@@ -187,7 +185,7 @@ async fn simple() {
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(110)
                 .instruction(),
@@ -209,7 +207,7 @@ async fn simple() {
                         .cloned()
                         .chain(vec![255; 32])
                         .collect::<Vec<u8>>(),
-                    operator: ByteSliceOperator::Equal,
+                    operator: EquatableOperator::Equal,
                 })
                 .offset(143)
                 .instruction(),

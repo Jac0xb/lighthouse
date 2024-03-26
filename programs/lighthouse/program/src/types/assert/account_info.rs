@@ -1,4 +1,4 @@
-use super::{Assert, ByteSliceOperator, KnownProgram, LogLevel};
+use super::{Assert, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
     types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
@@ -104,7 +104,7 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                 <[u8]>::evaluate(
                     &actual_hash,
                     expected_hash,
-                    &ByteSliceOperator::Equal,
+                    &EquatableOperator::Equal,
                     log_level,
                 )
             }

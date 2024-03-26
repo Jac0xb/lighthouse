@@ -82,9 +82,9 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
                 UpgradableBufferAssertion::Authority {
                     value: assertion_value,
                     operator,
-                } => <Option<Pubkey>>::evaluate(
-                    authority_address,
-                    assertion_value,
+                } => <Option<&Pubkey>>::evaluate(
+                    &authority_address.as_ref(),
+                    &assertion_value.as_ref(),
                     operator,
                     log_level,
                 ),
@@ -160,9 +160,9 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                 UpgradeableProgramDataAssertion::UpgradeAuthority {
                     value: assertion_value,
                     operator,
-                } => <Option<Pubkey>>::evaluate(
-                    upgrade_authority_address,
-                    assertion_value,
+                } => <Option<&Pubkey>>::evaluate(
+                    &upgrade_authority_address.as_ref(),
+                    &assertion_value.as_ref(),
                     operator,
                     log_level,
                 ),
