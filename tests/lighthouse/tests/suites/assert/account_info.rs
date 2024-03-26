@@ -13,7 +13,7 @@ use lighthouse_sdk::types::{
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
-use solana_sdk::{keccak, system_program};
+use solana_sdk::{bpf_loader_upgradeable, keccak, system_program};
 use spl_associated_token_account::get_associated_token_address;
 
 #[tokio::test]
@@ -91,6 +91,14 @@ async fn test_account_balance() {
         .get_balance(user.encodable_pubkey())
         .await
         .unwrap();
+
+    let test = AssertAccountInfoBuilder::new()
+        .target_account(account_key)
+        .assertion(AccountInfoAssertion::RentEp {
+            value: system_program::ID,
+            operator: EquatableOperator::Equal,
+        })
+        .instruction();
 
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()

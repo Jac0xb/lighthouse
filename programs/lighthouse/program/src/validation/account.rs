@@ -354,7 +354,7 @@ mod tests {
         let lamports = &mut min_rent.clone();
         let data: &mut [u8] = &mut vec![0u8; 8];
 
-        let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 100);
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &owner, false, 0);
 
         TestAccount::new_checked(
             &account_info,
@@ -374,7 +374,7 @@ mod tests {
             data,
             &system_program::ID,
             true,
-            0,
+            100,
         );
 
         TestAccount::new_checked(
