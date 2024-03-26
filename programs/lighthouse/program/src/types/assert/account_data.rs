@@ -189,7 +189,7 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                 })?;
                 let actual_value = bytemuck::from_bytes::<Pubkey>(data_slice);
 
-                <Pubkey>::evaluate(actual_value, assertion_value, operator, log_level)
+                Pubkey::evaluate(actual_value, assertion_value, operator, log_level)
             }
         }
     }
