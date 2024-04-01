@@ -92,14 +92,6 @@ async fn test_account_balance() {
         .await
         .unwrap();
 
-    let test = AssertAccountInfoBuilder::new()
-        .target_account(account_key)
-        .assertion(AccountInfoAssertion::RentEp {
-            value: system_program::ID,
-            operator: EquatableOperator::Equal,
-        })
-        .instruction();
-
     let tx = Transaction::new_signed_with_payer(
         &[AssertAccountInfoBuilder::new()
             .target_account(user.encodable_pubkey())

@@ -1,16 +1,16 @@
 ---
-title: Assert Account Data
-metaTitle: Assert - Account Data
+title: Assert Account Delta
+metaTitle: Assert - Account Delta
 description:
 ---
 
-## AssertAccountData Instruction
+## AssertAccountDelta Instruction
 
-The **AssertAccountData** instruction gives you tools to make assertions about arbitrary account data by deserializing account data slices into a specified type and comparing it to an expected value. One of the arguments for the instruction is the **DataValueAssertion** enum which allows you describe the type you would like to deserialize and the value and operator used to compare.
+The **AssertAccountDelta** instruction is similar to [AssertAccountData](/assert/account-data) and [AssertAccountInfo](/assert/account-info) instructions but with the key difference of allowing you to compare one account's data with another account's data or **AccountInfo**.
 
-**Supported types**: `bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `u128`, `i128`, `bytes`, `Pubkey`.
+### Example:
 
-### Example: Asserting on integer values in account data.
+<!--
 
 Imagine a struct with the following layout:
 
@@ -74,4 +74,4 @@ AssertAccountDataBuilder::new()
 
 {% /totem %}
 {% /dialect %}
-{% /dialect-switcher %}
+{% /dialect-switcher %} -->

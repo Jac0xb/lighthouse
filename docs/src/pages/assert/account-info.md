@@ -36,15 +36,6 @@ Lighthouse exposes asserting on these values through the AssertAccountInfo , Ass
 It's possible to make assertions on the value of lamports of an account at runtime.
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-TODO
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -67,15 +58,6 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to make assertions on which programs owns the account.
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-TODO
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -114,15 +96,6 @@ pub enum KnownProgram {
 Here is an example of asserting that the account is owned by the system program.
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-TODO
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -145,15 +118,6 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to assert the
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-TODO
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -362,15 +326,6 @@ Note: The error code is different than for a normal assertion. `0x1900 + (index 
 This is for indexers who want to know easily determine which assertion failed.
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-TODO
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
