@@ -1,0 +1,35 @@
+@layer components {
+  /* Only apply styles to the highest ancestor. */
+  .totem:not(.totem .totem) {
+    /* Fence-like contours. */
+    @apply rounded-xl shadow-lg dark:shadow-none dark:ring-1 dark:ring-slate-300/10;
+    /* Fence-like background. */
+    @apply bg-slate-900 dark:bg-slate-800/60;
+
+    /* -------------------- */
+    /* Update nested prose. */
+    /* -------------------- */
+
+    @apply prose-invert text-slate-400;
+    /* lead */
+    @apply prose-lead:text-slate-400;
+    /* links */
+    @apply prose-a:text-accent-400;
+    /* link underline */
+    @apply [--tw-prose-background:theme(colors.slate.900)] prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.accent.800))] hover:prose-a:[--tw-prose-underline-size:6px];
+    /* pre */
+    @apply prose-pre:m-0 prose-pre:rounded-none prose-pre:shadow-none prose-pre:dark:bg-transparent prose-pre:dark:ring-0;
+    /* hr */
+    @apply prose-hr:border-slate-800;
+    /* p */
+    @apply prose-p:m-0 prose-p:px-4 prose-p:py-3;
+    /* table */
+    @apply prose-table:mx-4 prose-table:my-3 prose-table:w-[calc(100%-2rem)];
+  }
+
+  /* Dividers can be applied to all nested totems too. */
+  .totem {
+    /* Totem dividers. */
+    @apply divide-y divide-slate-700/60 dark:divide-slate-300/10;
+  }
+}

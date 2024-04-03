@@ -1,0 +1,108 @@
+:root {
+  --color-accent-50: theme('colors.sky.50');
+  --color-accent-100: theme('colors.sky.100');
+  --color-accent-200: theme('colors.sky.200');
+  --color-accent-300: theme('colors.sky.300');
+  --color-accent-400: theme('colors.sky.400');
+  --color-accent-500: theme('colors.sky.500');
+  --color-accent-600: theme('colors.sky.600');
+  --color-accent-700: theme('colors.sky.700');
+  --color-accent-800: theme('colors.sky.800');
+  --color-accent-900: theme('colors.sky.900');
+  --quick-links-hover-bg: var(--color-accent-50);
+  --quick-links-hover-border: theme('colors.sky.500'), theme('colors.cyan.400'),
+    theme('colors.indigo.400');
+}
+
+@layer components {
+  .accent-sky {
+    --color-accent-50: theme('colors.sky.50');
+    --color-accent-100: theme('colors.sky.100');
+    --color-accent-200: theme('colors.sky.200');
+    --color-accent-300: theme('colors.sky.300');
+    --color-accent-400: theme('colors.sky.400');
+    --color-accent-500: theme('colors.sky.500');
+    --color-accent-600: theme('colors.sky.600');
+    --color-accent-700: theme('colors.sky.700');
+    --color-accent-800: theme('colors.sky.800');
+    --color-accent-900: theme('colors.sky.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.sky.500'),
+      theme('colors.cyan.400'), theme('colors.indigo.400');
+  }
+  .accent-teal {
+    --color-accent-50: theme('colors.teal.50');
+    --color-accent-100: theme('colors.teal.100');
+    --color-accent-200: theme('colors.teal.200');
+    --color-accent-300: theme('colors.teal.300');
+    --color-accent-400: theme('colors.teal.400');
+    --color-accent-500: theme('colors.teal.500');
+    --color-accent-600: theme('colors.teal.600');
+    --color-accent-700: theme('colors.teal.700');
+    --color-accent-800: theme('colors.teal.800');
+    --color-accent-900: theme('colors.teal.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.teal.400'),
+      theme('colors.cyan.400'), theme('colors.indigo.400');
+  }
+  .accent-green {
+    --color-accent-50: theme('colors.green.50');
+    --color-accent-100: theme('colors.green.100');
+    --color-accent-200: theme('colors.green.200');
+    --color-accent-300: theme('colors.green.300');
+    --color-accent-400: theme('colors.green.400');
+    --color-accent-500: theme('colors.green.500');
+    --color-accent-600: theme('colors.green.600');
+    --color-accent-700: theme('colors.green.700');
+    --color-accent-800: theme('colors.green.800');
+    --color-accent-900: theme('colors.green.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.green.400'),
+      theme('colors.lime.400'), theme('colors.green.500');
+  }
+  .accent-emerald {
+    --color-accent-50: theme('colors.emerald.50');
+    --color-accent-100: theme('colors.emerald.100');
+    --color-accent-200: theme('colors.emerald.200');
+    --color-accent-300: theme('colors.emerald.300');
+    --color-accent-400: theme('colors.emerald.400');
+    --color-accent-500: theme('colors.emerald.500');
+    --color-accent-600: theme('colors.emerald.600');
+    --color-accent-700: theme('colors.emerald.700');
+    --color-accent-800: theme('colors.emerald.800');
+    --color-accent-900: theme('colors.emerald.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.green.400'),
+      theme('colors.lime.400'), theme('colors.green.500');
+  }
+  .accent-pink {
+    --color-accent-50: theme('colors.pink.50');
+    --color-accent-100: theme('colors.pink.100');
+    --color-accent-200: theme('colors.pink.200');
+    --color-accent-300: theme('colors.pink.300');
+    --color-accent-400: theme('colors.pink.400');
+    --color-accent-500: theme('colors.pink.500');
+    --color-accent-600: theme('colors.pink.600');
+    --color-accent-700: theme('colors.pink.700');
+    --color-accent-800: theme('colors.pink.800');
+    --color-accent-900: theme('colors.pink.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.pink.400'),
+      theme('colors.rose.300'), theme('colors.fuchsia.500');
+  }
+  .accent-amber {
+    --color-accent-50: theme('colors.amber.50');
+    --color-accent-100: theme('colors.amber.100');
+    --color-accent-200: theme('colors.amber.200');
+    --color-accent-300: theme('colors.amber.300');
+    --color-accent-400: theme('colors.amber.400');
+    --color-accent-500: theme('colors.amber.500');
+    --color-accent-600: theme('colors.amber.600');
+    --color-accent-700: theme('colors.amber.700');
+    --color-accent-800: theme('colors.amber.800');
+    --color-accent-900: theme('colors.amber.900');
+    --quick-links-hover-bg: var(--color-accent-50);
+    --quick-links-hover-border: theme('colors.amber.400'),
+      theme('colors.yellow.300'), theme('colors.orange.400');
+  }
+}

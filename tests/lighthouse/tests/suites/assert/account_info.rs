@@ -13,7 +13,7 @@ use lighthouse_sdk::types::{
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
-use solana_sdk::{keccak, system_program};
+use solana_sdk::{bpf_loader_upgradeable, keccak, system_program};
 use spl_associated_token_account::get_associated_token_address;
 
 #[tokio::test]

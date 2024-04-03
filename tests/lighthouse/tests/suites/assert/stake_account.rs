@@ -114,7 +114,6 @@ async fn test() {
             .assertion(assertion)
             .instruction()
     };
-
     let tx: Transaction = Transaction::new_signed_with_payer(
         &[
             // ()

@@ -13,3 +13,5 @@ configs/.programs
 
 /.env-local
 /.local
+pkg
+.next

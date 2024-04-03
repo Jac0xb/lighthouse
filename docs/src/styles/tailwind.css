@@ -1,0 +1,21 @@
+@import 'tailwindcss/base';
+@import './fonts.css';
+@import './docsearch.css';
+@import './prism.css';
+@import './react-flow.css';
+@import './totem.css';
+@import './accent.css';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './overrides.css';
+
+.prose code::before,
+.prose code::after {
+  content: none !important;
+}
+
+p code {
+  background-color: rgb(30 41 59 / 0.6);
+  padding: 0.3em 0.2em;
+  border-radius: 0.3em;
+}

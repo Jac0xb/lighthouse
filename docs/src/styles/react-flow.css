@@ -1,0 +1,13 @@
+.react-flow__attribution {
+  @apply bg-transparent !important;
+}
+
+.react-flow__attribution a {
+  @apply text-slate-400 dark:text-slate-500 shadow-none !important;
+}
+
+.diagram-prose p,
+.diagram-prose ul,
+.diagram-prose li {
+  @apply m-0;
+}
