@@ -1,7 +1,5 @@
 import { Popover } from '@headlessui/react'
 import { useState } from 'react'
-import { Logo, LogoWithName } from './products/Logo'
-import { SwitcherDialog } from './products/SwitcherDialog'
 import { SwitcherPopover } from './products/SwitcherPopover'
 
 const menuItems = []
@@ -21,11 +19,11 @@ const NavList = () => {
                   onClick={() => setActive(index)}
                 >
                   {item}
-                  {/* <Logo product={page.product} className="h-8 w-8 sm:hidden" />
-                <LogoWithName
-                  product={page.product}
-                  className="hidden sm:flex"
-                /> */}
+                  <Logo product={page.product} className="h-8 w-8 sm:hidden" />
+                  <LogoWithName
+                    product={page.product}
+                    className="hidden sm:flex"
+                  />
                 </Popover.Button>
               </SwitcherPopover>
             </div>

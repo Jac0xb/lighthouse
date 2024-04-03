@@ -33,7 +33,7 @@ export const lighthouse = {
           title: 'Features',
           links: [
             { title: 'Assert', href: '/assert' },
-            { title: 'Write', href: '/write' },
+            { title: 'Memory', href: '/memory' },
           ],
         },
         {
@@ -62,6 +62,13 @@ export const lighthouse = {
               title: 'Merkle Tree Account',
               href: '/assert/merkle-tree-account',
             },
+          ],
+        },
+        {
+          title: 'Memory',
+          links: [
+            { title: 'Memory Write', href: '/memory/write' },
+            { title: 'Memory Close', href: '/memory/close' },
           ],
         },
       ],

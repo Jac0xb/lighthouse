@@ -25,14 +25,14 @@ export default function App({ Component, pageProps }) {
         <meta property="og:title" content={page.metaTitle} />
         <meta name="twitter:title" content={page.metaTitle} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="developers.metaplex.com" />
+        <meta property="twitter:domain" content="http://lighthouse.voyage/" />
         <meta
           property="og:image"
-          content="https://developers.metaplex.com/assets/social/dev-hub-preview.jpg"
+          content="https://lighthouse.voyage/assets/lighthouse_widescreen.png"
         />
         <meta
           name="twitter:image"
-          content="https://developers.metaplex.com/assets/social/dev-hub-preview.jpg"
+          content="https://lighthouse.voyage/assets/lighthouse_widescreen.png"
         />
 
         {page.description && (
@@ -49,17 +49,6 @@ export default function App({ Component, pageProps }) {
           <Component {...pageProps} />
         </Layout>
       </DialectProvider>
-
-      {/* Google Analytics. */}
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-YLQCC8102N" />
-      <Script id="google-analytics">
-        {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-YLQCC8102N');
-          `}
-      </Script>
     </>
   )
 }

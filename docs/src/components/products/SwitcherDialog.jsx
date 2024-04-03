@@ -1,6 +1,5 @@
 import { Dialog } from '@headlessui/react'
 import { useState } from 'react'
-import { MobileAppGrid } from './MobileAppGrid'
 
 export function SwitcherDialog({ children, props }) {
   let [isOpen, setIsOpen] = useState(false)
@@ -19,7 +18,6 @@ export function SwitcherDialog({ children, props }) {
           className="fixed inset-0 bg-neutral-900/50 backdrop-blur"
           aria-hidden="true"
         />
-
         {/* Full-screen scrollable container */}
         <div
           className=" l-0 fixed inset-x-0 top-0 h-full
@@ -35,11 +33,6 @@ export function SwitcherDialog({ children, props }) {
                   e.stopPropagation, setIsOpen(false)
                 }}
               ></div>
-
-              <MobileAppGrid
-                className="relative grid-rows-1"
-                onClick={() => setIsOpen(false)}
-              />
             </Dialog.Panel>
           </div>
         </div>

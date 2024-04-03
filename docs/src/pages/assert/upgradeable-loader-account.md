@@ -1,77 +1,224 @@
 ---
-title: Assert Account Delta
-metaTitle: Assert - Account Delta
+title: Assert Upgradeable Loader Account
+metaTitle: Assert - Upgradeable Loader Account
 description:
 ---
 
-## AssertAccountDelta Instruction
+## AssertUpgradeableLoaderAccount Instruction
 
-The **AssertAccountDelta** instruction is similar to [AssertAccountData](/assert/account-data) and [AssertAccountInfo](/assert/account-info) instructions but with the key difference of allowing you to compare one account's data with another account's data or **AccountInfo**.
+The **AssertUpgradeableLoaderAccount** instruction is for making assertions on the data of an upgradeable loader account.
 
-### Example:
+This could also be accomplished by using the [AssertAccountData](/assert/account-data) instruction, but this instruction is a convenience instruction for stake accounts which checks that the account is owned by the stake program and maps enums to offset / type deserialization.
 
-<!--
-
-Imagine a struct with the following layout:
+The upgradeable loader account is an enum that looks like
 
 ```rust
-pub struct TestAccount {
-    pub account_discriminator: [u8; 8], // bytes 0 to 7
-    pub balance: u64,                   // bytes 8 to 16
+pub enum UpgradeableLoaderStateAssertion {
+    State {
+        value: UpgradeableLoaderStateType,
+        operator: EquatableOperator,
+    },
+    Buffer(UpgradableBufferAssertion),
+    Program(UpgradeableProgramAssertion),
+    ProgramData(UpgradeableProgramDataAssertion),
 }
 ```
 
-Say we wanted to assert on the _balance_ field in our TestAccount struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
+You can make assertions about the `State`, `Buffer`, `Program`, and `ProgramData` structs of the upgradeable loader account. `UpgradeableLoaderStateType` is an enum that represents the state of the upgradeable loader account.
+
+The `UpgradableBufferAssertion` struct is as follows:
+
+```rust
+pub enum UpgradableBufferAssertion {
+    Authority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
+}
+```
+
+The `UpgradeableProgramAssertion` struct is as follows:
+
+```rust
+pub enum UpgradeableProgramAssertion {
+    ProgramDataAddress {
+        #[cfg_attr(
+            feature = "serde",
+            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+        )]
+        value: Pubkey,
+        operator: EquatableOperator,
+    },
+}
+```
+
+The `UpgradeableProgramDataAssertion` struct is as follows:
+
+```rust
+pub enum UpgradeableProgramDataAssertion {
+    UpgradeAuthority {
+        value: Option<Pubkey>,
+        operator: EquatableOperator,
+    },
+    Slot {
+        value: u64,
+        operator: IntegerOperator,
+    },
+}
+
+```
+
+### Example: Asserting on the state of an upgradeable loader account
+
+In this example, we assert that the upgradeable loader account is in the `Buffer` state.
 
 {% dialect-switcher title="" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
-AssertAccountDataBuilder::new()
-    .target_account(test_account_key)
-    .assertion(DataValueAssertion::U64 {
-        value: 420, // The expected value.
-        operator: IntegerOperator::GreaterThanOrEqual,
-    })
-    .offset(8) // The account data byte offset where 'balance' is stored.
-    .instruction();
+let tx: Transaction = Transaction::new_signed_with_payer(
+    &[
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(upgradeable_loader_account)
+            .assertion(UpgradeableLoaderStateAssertion::State {
+                value: UpgradeableLoaderStateType::Buffer,
+                operator: EquatableOperator::Equal,
+            })
+            .instruction(),
+    ],
+    Some(&user_key),
+    &[&user_keypair],
+    blockhash,
+);
 ```
 
 {% /totem %}
 {% /dialect %}
 {% /dialect-switcher %}
 
-### Example: Equality assertion on pubkey in account data.
+### Example: Asserting on the buffer of an upgradeable loader account
 
-Imagine we expand the struct from before and add a pubkey field.
-
-```rust
-pub struct TestAccount {
-    pub account_discriminator: [u8; 8], // bytes 0 to 7
-    pub balance: u64,                   // bytes 8 to 16
-    pub owner: Pubkey,                  // bytes 16 to 48
-}
-```
-
-Say we wanted to assert on the "balance" field in our TestAccount struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
+In this example, we assert that the authority of the buffer of the upgradeable loader account is equal to a specific pubkey.
 
 {% dialect-switcher title="" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
-AssertAccountDataBuilder::new()
-    .target_account(test_account_key)
-    .assertion(DataValueAssertion::Pubkey {
-        value: owner_key,
-        operator: EquatableOperator::Equal,
-    })
-    .offset(16) // The account data byte offset where 'owner' is stored.
-    .instruction(),
-
+let tx = Transaction::new_signed_with_payer(
+    &[
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(program_key)
+            .assertion(UpgradeableLoaderStateAssertion::State {
+                value: UpgradeableLoaderStateType::Buffer,
+                operator: EquatableOperator::Equal,
+            })
+            .instruction(),
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(program_key)
+            .assertion(UpgradeableLoaderStateAssertion::Buffer(
+                UpgradableBufferAssertion::Authority {
+                    value: Some(authority_key),
+                    operator: EquatableOperator::Equal,
+                },
+            ))
+            .instruction(),
+    ],
+    Some(&user_key),
+    &[&user_keypair],
+    blockhash,
+);
 ```
 
 {% /totem %}
 {% /dialect %}
-{% /dialect-switcher %} -->
+{% /dialect-switcher %}
+
+### Example: Asserting on the program of an upgradeable loader account
+
+In this example, we assert that the program data address of the upgradeable loader account is equal to a specific pubkey.
+
+{% dialect-switcher title="" %}
+{% dialect title="Rust" id="rust" %}
+{% totem %}
+
+```rust
+let tx = Transaction::new_signed_with_payer(
+    &[
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(program_key)
+            .assertion(UpgradeableLoaderStateAssertion::State {
+                value: UpgradeableLoaderStateType::Program,
+                operator: EquatableOperator::Equal,
+            })
+            .instruction(),
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(program_key)
+            .assertion(UpgradeableLoaderStateAssertion::Program(
+                UpgradeableProgramAssertion::ProgramDataAddress {
+                    value: programdata_key,
+                    operator: EquatableOperator::Equal,
+                },
+            ))
+            .instruction(),
+    ],
+    Some(&user_key),
+    &[&user_keypair],
+    blockhash,
+);
+```
+
+{% /totem %}
+{% /dialect %}
+{% /dialect-switcher %}
+
+### Example: Asserting on the program data of an upgradeable loader account
+
+In this example, we assert that the upgrade authority of the program data of the upgradeable loader account is equal to a specific pubkey.
+
+{% dialect-switcher title="" %}
+{% dialect title="Rust" id="rust" %}
+{% totem %}
+
+```rust
+let tx = Transaction::new_signed_with_payer(
+    &[
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(programdata_key)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .assertion(UpgradeableLoaderStateAssertion::State {
+                value: UpgradeableLoaderStateType::ProgramData,
+                operator: EquatableOperator::Equal,
+            })
+            .instruction(),
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(programdata_key)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .assertion(UpgradeableLoaderStateAssertion::ProgramData(
+                UpgradeableProgramDataAssertion::UpgradeAuthority {
+                    value: Some(upgrade_authority),
+                    operator: EquatableOperator::Equal,
+                },
+            ))
+            .instruction(),
+        AssertUpgradeableLoaderAccountBuilder::new()
+            .target_account(programdata_key)
+            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .assertion(UpgradeableLoaderStateAssertion::ProgramData(
+                UpgradeableProgramDataAssertion::Slot {
+                    value: u64::MAX,
+                    operator: IntegerOperator::Equal,
+                },
+            ))
+            .instruction(),
+    ],
+
+    &[&user_keypair],
+    blockhash,
+);
+```
+
+{% /totem %}
+{% /dialect %}
+{% /dialect-switcher %}

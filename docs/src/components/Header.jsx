@@ -40,37 +40,14 @@ export function Header({ page }) {
           <MobileNavigation page={page} />
         </div>
         <div className="relative flex flex-grow basis-0 items-center">
-          {/* <div className="hidden flex-col lg:flex">
+          <div className="hidden flex-col lg:flex">
             <Link href={`/${page.product.path}`}>
               <Logo product={page.product} className="h-8 w-8 sm:hidden" />
               <LogoWithName product={page.product} className="hidden sm:flex" />
-              {console.log(page.product)}http://localhost:3000/_next/static/media/blur-cyan.d28a5585.png
             </Link>
           </div>
-          <div className="flex flex-col lg:hidden">
-            <SwitcherDialog>
-              {({ setIsOpen }) => (
-                <button
-                  onClick={() => setIsOpen(true)}
-                  className="-mx-4 -my-2 rounded-lg px-4 py-2"
-                >
-                  <Logo product={page.product} className="h-8 w-8 sm:hidden" />
-                  <LogoWithName
-                    product={page.product}
-                    className="hidden sm:flex"
-                  />
-                </button>
-              )}
-            </SwitcherDialog>
-          </div> */}
         </div>
-
-        <NavList />
-
         <div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-8 lg:flex-grow">
-          <div className="-my-5 mr-6 sm:mr-8 lg:mr-0">
-            <Search />
-          </div>
           <ThemeSelector className="relative z-10" />
           <Link
             href={page.product.github}
@@ -81,13 +58,6 @@ export function Header({ page }) {
           </Link>
         </div>
       </div>
-      {/* {page.product.sections && page.product.sections.length > 1 && (
-        <Sections
-          className="hidden gap-6 px-2 py-2 text-sm sm:px-4 lg:flex lg:px-6"
-          sections={page.product.sections}
-          activeSectionId={page.activeSection?.id}
-        />
-      )} */}
     </header>
   )
 }

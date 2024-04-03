@@ -20,31 +20,6 @@ In the event that a malicious transaction is too large or is cosigned (and thus 
 
 {% figure src="/assets/slide_3.png" alt="TODO" caption="Jito bundle of malicious transaction and lighthouse transaction combined. Jito bundles fail atomically meaning if the lighthouse transaction fails, the entire bundle fails." /%}
 
-<!-- {% quick-links %}
-{% quick-link title="Creator Studio" icon="Star" href="https://studio.metaplex.com" description="Don't want to code? Launch your next drop by pressing buttons!" /%}
-
-{% quick-link title="Getting Started" icon="InboxArrowDown" href="/candy-machine/getting-started" description="Find the language or library of your choice and get started with Candy Machines." /%}
-{% quick-link title="Recipes" icon="RectangleStack" href="/candy-machine/recipes" description="Learn various scenarios by reading concrete code examples." /%}
-{% quick-link title="API reference" icon="CodeBracketSquare" href="/candy-machine/references" description="Looking for something specific? We've got you." /%}
-{% /quick-links %} -->
-
-<!-- {% callout %}
-This documentation refers to the latest iteration of Candy Machine known as Candy Machine V3. If you’re looking for Candy Machine V2, [please refer to this documentation instead](https://docs.metaplex.com/deprecated/candy-machine-v2/).
-{% /callout %} -->
-
 ## Next steps
 
-Whilst this provides a good overview of Lighthouse, there is a lot more to discover and learn about them. Here’s what you can expect in the other pages of this Lighthouse documentation.
-
-- [Getting Started](/candy-machine/getting-started). Lists the various ways lighthouse can be used.
-<!-- - [Candy Machine Settings](/candy-machine/settings). Explains Candy Machine settings in great detail.
-- [Managing Candy Machines](/candy-machine/manage). Explains how to manage Candy Machines.
-- [Inserting Items](/candy-machine/insert-items). Explains how to load items into Candy Machines.
-- [Candy Guards](/candy-machine/guards). Explains how guards work and how to enable them.
-- [Guard Groups](/candy-machine/guard-groups). Explains how to configure multiple groups of guards.
-- [Special Guard Instructions](/candy-machine/guard-route). Explains how to execute guard-specific instructions.
-- [Minting](/candy-machine/mint). Explains how to mint from Candy Machines and how to handle pre-mint requirements.
-- [How-To Guides](/candy-machine/how-to-guides). Lists practical articles relevant to Candy Machines.
-- [Conceptual Guides](/candy-machine/conceptual-guides). Lists theoretical articles relevant to Candy Machines.
-- [References](/candy-machine/references). Lists API References relevant to Candy Machines.
-- [Updates](/candy-machine/updates). Documents the latest changes. -->
+Whilst this provides a good overview of Lighthouse, there is a lot more to discover and learn about them. Head over to [Getting Started](/getting-started).
