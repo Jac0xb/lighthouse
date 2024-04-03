@@ -8,8 +8,8 @@ use lighthouse_sdk::instructions::{
 };
 use lighthouse_sdk::types::{
     AccountDeltaAssertion, AccountInfoAssertion, DataValueDeltaAssertion, EquatableOperator,
-    EquatableOperator, IntegerOperator, KnownProgram, LogLevel, MetaAssertion,
-    StakeAccountAssertion, StakeStateType, WriteType,
+    IntegerOperator, KnownProgram, LogLevel, MetaAssertion, StakeAccountAssertion, StakeStateType,
+    WriteType,
 };
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
