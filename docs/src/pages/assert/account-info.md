@@ -6,7 +6,7 @@ description:
 
 ## AssertAccountInfo Instruction
 
-The AccountInfoAssertion exposes the fields accessible by the AccountInfo struct passed into the rust entrypoint during runtime. The struct itself looks like
+The `AccountInfoAssertion` exposes the fields accessible by the AccountInfo struct passed into the rust entrypoint during runtime. The struct itself looks like
 
 ```rust
 pub struct AccountInfo<'a> {
@@ -29,13 +29,13 @@ pub struct AccountInfo<'a> {
 }
 ```
 
-Lighthouse exposes asserting on these values through the AssertAccountInfo , AssertAccountInfoMulti , and AssertAccountDelta (which is discussed in ???).
+Lighthouse exposes asserting on these `AccountInfo` through the assertion types `AssertAccountInfo` and `AssertAccountDelta` (which is discussed in [here](/assert/account-delta)).
 
 ### Lamports
 
 It's possible to make assertions on the value of lamports of an account at runtime.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Lamport assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -57,7 +57,7 @@ let ix = AssertAccountInfoBuilder::new()
 
 It's possible to make assertions on which programs owns the account.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Account owner assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -95,7 +95,7 @@ pub enum KnownProgram {
 
 Here is an example of asserting that the account is owned by the system program.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="KnownOwner account owner assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -117,18 +117,18 @@ let ix = AssertAccountInfoBuilder::new()
 
 It's possible to assert the
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Rent Epoch assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
-AssertAccountInfoBuilder::new()
-.target_account(account_key)
-.assertion(AccountInfoAssertion::RentEpoch {
-value: 0,
-operator: IntegerOperator::Equal,
-})
-.instruction();
+let ix = AssertAccountInfoBuilder::new()
+    .target_account(account_key)
+    .assertion(AccountInfoAssertion::RentEpoch {
+        value: 0,
+        operator: IntegerOperator::Equal,
+    })
+    .instruction();
 ```
 
 {% /totem %}
@@ -139,23 +139,14 @@ operator: IntegerOperator::Equal,
 
 It's possible to get whether an account is a signer in the runtime.
 
-{% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-
-```
-
-{% /totem %}
-{% /dialect %}
+{% dialect-switcher title="IsSigner assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
 
 let ix = AssertAccountInfoBuilder::new()
-    .target_account(user_pubkey)
+    .target_account(user_key)
     .log_level(LogLevel::PlaintextMessage) // Logs assertion results.
     .assertion(AccountInfoAssertion::IsSigner {
         value: true,
@@ -173,16 +164,7 @@ let ix = AssertAccountInfoBuilder::new()
 
 It's possible to get whether an account is writable in the runtime.
 
-{% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-
-```
-
-{% /totem %}
-{% /dialect %}
+{% dialect-switcher title="IsWritable assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -205,21 +187,12 @@ let ix = AssertAccountInfoBuilder::new()
 
 It's possible to get whether an account is an executable account.
 
-{% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-
-```
-
-{% /totem %}
-{% /dialect %}
+{% dialect-switcher title="Executable assertion instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
-AssertAccountInfoBuilder::new()
+let ix = AssertAccountInfoBuilder::new()
     .target_account(program_id)
     .assertion(AccountInfoAssertion::IsWritable {
         value: true,
@@ -235,23 +208,19 @@ AssertAccountInfoBuilder::new()
 
 ### VerifyDatahash
 
-To save transaction space it is possible to assert on account data by hashing a slice of the account data and passing it into the VerifyDatahash assertion. This costs more compute but is very useful if you need to verify that a writable account matches exactly what you expected. The type used to represent the slice to be hashed is u16 so you are limited accounts of size `len < 65_535`.
-expected_hash - is the expected hash which must be exactly equal to what the lighthouse program hashes at runtime or lighthouse will through an AssertionFailed error.
-start - the start index of the account data slice to be hashed. If None, start is 0.
-length - the length of the slice to be hashed where the end index of the slice will be `start + length`. If `None`, length is `(length of account data) - start`.
+To save transaction space it is possible to assert on account data by hashing a slice of the account data and passing it into the `VerifyDatahash` assertion. This costs more compute but is very useful if you need to verify that a writable account matches exactly what you expected.
+
+Fields of the `VerifyDatahash` assertion are:
+
+`expected_hash` - the expected keccak hash which will be compared to what the lighthouse program hashes at runtime. If they do not match the program will throw a AssertionFailed error.
+
+`start` - the start index of the account data slice to be hashed. If `None`, start is 0.
+
+`length` - the length of the slice to be hashed where the end index of the slice will be `start + length`. If `None`, length is `(length of account data) - start`.
 
 The following is an example using the entire account data.
 
 {% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-
-```
-
-{% /totem %}
-{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -260,17 +229,19 @@ The following is an example using the entire account data.
 let hash = keccak::hashv(&[&account.data]).0;
 
 let tx = Transaction::new_signed_with_payer(
-&[AssertAccountInfoBuilder::new()
-.target_account(account_key)
-.assertion(AccountInfoAssertion::VerifyDatahash {
-expected_hash: hash,
-start: None,
-length: None,
-})
-.instruction()],
-Some(&user_pubkey),
-&[&user_keypair],
-blockhash,
+    &[
+        AssertAccountInfoBuilder::new()
+            .target_account(account_key)
+            .assertion(AccountInfoAssertion::VerifyDatahash {
+              expected_hash: hash,
+                start: None,
+                length: None,
+            })
+            .instruction(),
+    ],
+    Some(&user_key),
+    &[&user_keypair],
+    blockhash,
 );
 ```
 
@@ -280,16 +251,7 @@ blockhash,
 
 The following is an example using start and length.
 
-{% dialect-switcher title="" %}
-{% dialect title="TypeScript" id="typescript" %}
-{% totem %}
-
-```ts
-
-```
-
-{% /totem %}
-{% /dialect %}
+{% dialect-switcher title="VerifyDatahash" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -307,7 +269,7 @@ let tx = Transaction::new_signed_with_payer(
             })
             .instruction()
     ],
-    Some(&user_pubkey),
+    Some(&user_key),
     &[&user_keypair],
     blockhash,
 );
@@ -319,20 +281,16 @@ let tx = Transaction::new_signed_with_payer(
 
 ### AssertAccountInfoMulti Instruction
 
-To save transaction space there is an instruction AssertAccountInfoMulti which allows you join all your assertions into one vector. This elimiates duplicating instruction data: program id (u8), target account (u8), instruction disciminator (u8), and the compute unit overhead of program entry per assertion (3 bytes per instruction - 4 bytes for vector, ~500 CU per instruction).
+To save transaction space there is an instruction AssertAccountInfoMulti which allows you join all your assertions into one vector. This elimiates duplicating instruction data.
 
-Note: The error code is different than for a normal assertion. `0x1900 + (index of failed assertion)`.
-
-This is for indexers who want to know easily determine which assertion failed.
-
-{% dialect-switcher title="" %}
+{% dialect-switcher title="AssertAccountInfoMulti instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
 let tx = Transaction::new_signed_with_payer(
     &[AssertAccountInfoMultiBuilder::new()
-        .target_account(user_pubkey)
+        .target_account(user_key)
         .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
         .assertions(vec![
             AccountInfoAssertion::Owner {
@@ -369,7 +327,7 @@ let tx = Transaction::new_signed_with_payer(
             },
         ])
     .instruction()],
-    Some(&user_pubkey),
+    Some(&user_key),
     &[&user_keypair],
     blockhash,
 );

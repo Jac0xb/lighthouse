@@ -6,11 +6,41 @@ description:
 
 ## AssertUpgradeableLoaderAccount Instruction
 
-The **AssertUpgradeableLoaderAccount** instruction is for making assertions on the data of an upgradeable loader account.
+The **AssertUpgradeableLoaderAccount** instruction is for making assertions on the states and fields of an upgradeable loader account.
 
 This could also be accomplished by using the [AssertAccountData](/assert/account-data) instruction, but this instruction is a convenience instruction for stake accounts which checks that the account is owned by the stake program and maps enums to offset / type deserialization.
 
 The upgradeable loader account is an enum that looks like
+
+```rust
+pub enum UpgradeableLoaderState {
+    /// Account is not initialized.
+    Uninitialized,
+    /// A Buffer account.
+    Buffer {
+        /// Authority address
+        authority_address: Option<Pubkey>,
+        // The raw program data follows this serialized structure in the
+        // account's data.
+    },
+    /// An Program account.
+    Program {
+        /// Address of the ProgramData account.
+        programdata_address: Pubkey,
+    },
+    // A ProgramData account.
+    ProgramData {
+        /// Slot that the program was last modified.
+        slot: u64,
+        /// Address of the Program's upgrade authority.
+        upgrade_authority_address: Option<Pubkey>,
+        // The raw program data follows this serialized structure in the
+        // account's data.
+    },
+}
+```
+
+The assertion enum consists of the following
 
 ```rust
 pub enum UpgradeableLoaderStateAssertion {
@@ -42,10 +72,6 @@ The `UpgradeableProgramAssertion` struct is as follows:
 ```rust
 pub enum UpgradeableProgramAssertion {
     ProgramDataAddress {
-        #[cfg_attr(
-            feature = "serde",
-            serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
-        )]
         value: Pubkey,
         operator: EquatableOperator,
     },
@@ -72,7 +98,7 @@ pub enum UpgradeableProgramDataAssertion {
 
 In this example, we assert that the upgradeable loader account is in the `Buffer` state.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert state transaction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -101,7 +127,7 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 
 In this example, we assert that the authority of the buffer of the upgradeable loader account is equal to a specific pubkey.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert state + assert buffer transaction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -139,7 +165,7 @@ let tx = Transaction::new_signed_with_payer(
 
 In this example, we assert that the program data address of the upgradeable loader account is equal to a specific pubkey.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert state + assert program transaction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -175,9 +201,9 @@ let tx = Transaction::new_signed_with_payer(
 
 ### Example: Asserting on the program data of an upgradeable loader account
 
-In this example, we assert that the upgrade authority of the program data of the upgradeable loader account is equal to a specific pubkey.
+In this example, we assert that the upgrade authority of the program data of the upgradeable loader account is equal to a specific pubkey and that the slot of the upgrade matches a specific slot.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert state + assert program data transaction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -186,7 +212,6 @@ let tx = Transaction::new_signed_with_payer(
     &[
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(programdata_key)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::State {
                 value: UpgradeableLoaderStateType::ProgramData,
                 operator: EquatableOperator::Equal,
@@ -194,7 +219,6 @@ let tx = Transaction::new_signed_with_payer(
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(programdata_key)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::UpgradeAuthority {
                     value: Some(upgrade_authority),
@@ -204,16 +228,15 @@ let tx = Transaction::new_signed_with_payer(
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(programdata_key)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
-                    value: u64::MAX,
+                    value: expected_slot,
                     operator: IntegerOperator::Equal,
                 },
             ))
             .instruction(),
     ],
-
+    Some(&user_key),
     &[&user_keypair],
     blockhash,
 );

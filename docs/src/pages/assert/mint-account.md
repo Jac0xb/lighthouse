@@ -6,7 +6,7 @@ description:
 
 ## AssertMintAccount Instruction
 
-The **AssertMintAccount** instruction is for making assertions on the data of a spl-token mint account.
+The **AssertMintAccount** instruction is for making assertions on the fields of a spl-token mint account struct.
 
 This could also be accomplished by using the [AssertAccountData](/assert/account-data) instruction, but this instruction is a convenience instruction for mint accounts which checks that the account is owned by the spl-token program and maps enums to offset / type deserialization.
 
@@ -50,8 +50,8 @@ let mint = Mint {
     mint_authority: user_key,
     supply: 69_000,
     decimals: 9,
-    state: true,
-    freeze_authority: None,
+    is_initialized: true,
+    freeze_authority: COption::None,
 };
 ```
 

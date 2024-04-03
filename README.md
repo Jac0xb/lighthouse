@@ -2,6 +2,8 @@
 
 ![0_0](https://github.com/Jac0xb/lighthouse/assets/5273873/d5bb94be-a994-424f-88e0-32a917f07129)
 
+### [Lighthouse Documentation](https://lighthouse.voyage/)
+
 ## Overview
 
 Lighthouse is a Solana program that provides assertion instructions that can be added to transactions. If a bad actor spoofs simulation results, there is overspending during the transaction, or an oracle account is in an undesired state, the assertion will fail, and the transaction will also fail. Lighthouse makes it simple to append assertion instructions to existing transactions without needing to write new Solana programs.
@@ -76,11 +78,10 @@ TODO
 - pnpm install
 
 1. Compile the program:
+
    ```bash
    pnpm run programs:build
    ```
-
-````
 
 2. Run the tests:
 
@@ -95,10 +96,11 @@ TODO
 
 ## Usage
 
-For experimental use only, program has yet to receive an audit and more tests need to be written!
+For experimental use only, program has yet to receive an audit.
 
-devnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
-mainnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
+devnet - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
+
+mainnet-beta - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
 
 ## Contributing
 
@@ -111,4 +113,3 @@ This project is under the [MIT License](LICENSE).
 ## Disclaimer
 
 Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
-````

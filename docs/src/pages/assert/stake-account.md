@@ -6,7 +6,7 @@ description:
 
 ## AssertStakeAccount Instruction
 
-The **AssertStakeAccount** instruction is for making assertions on the data of a stake account.
+The **AssertStakeAccount** instruction is for making assertions on the various states and fields of a stake account.
 
 This could also be accomplished by using the [AssertAccountData](/assert/account-data) instruction, but this instruction is a convenience instruction for stake accounts which checks that the account is owned by the stake program and maps enums to offset / type deserialization.
 
@@ -38,7 +38,7 @@ pub enum StakeAccountAssertion {
 }
 ```
 
-You can make assertions about the `Meta` and `Stake` fields of the stake account, as well as the `StakeFlags`. `StakeAccoutnASsertionState` is an assertion type that lets you assert on the state of the account.
+You can make assertions about the `Meta` and `Stake` fields of the stake account, as well as the `StakeFlags`. `StakeAccountAssertionState` is an assertion type that lets you assert on the state of the account.
 
 If you make an assertion about the `Meta` or `Stake` structs and the stake account is in the `Uninitialized` or `RewardsPool` state, the assertion will fail.
 
@@ -104,7 +104,7 @@ pub enum StakeAssertion {
 
 In this example, we assert that the stake account is in the `Stake` state.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert state instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -133,7 +133,7 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake` or `Initialized`, we can make assertions on the stake account. The following assertions will pass:
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert meta instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -209,7 +209,7 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake`, we can make assertions on the stake account. The following assertions will pass:
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert stake instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -274,11 +274,11 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 
 ### Example: Asserting on the stake flags of a stake account
 
-The IntegerOperator allows you to make bitwise assertions on the `StakeFlags` field of the stake account.
+The `IntegerOperator` allows you to make bitwise assertions on the `StakeFlags` field of the stake account.
 
-Assuming the StakeFlags of a particular stake account is `0b00000000`, the following assertions will pass:
+Assuming the `StakeFlags` of a particular stake account is `0b00000000`, the following assertions will pass:
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Assert stake flags instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

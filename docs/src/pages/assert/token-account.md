@@ -6,11 +6,11 @@ description:
 
 ## AssertTokenAccount Instruction
 
-The **AssertTokenAccount** instruction is for making assertions on the data of a spl-token token account.
+The **AssertTokenAccount** instruction is for making assertions on the fields of a spl-token token account struct.
 
 This could also be accomplished by using the [AssertAccountData](/assert/account-data) instruction, but this instruction is a convenience instruction for token accounts which checks that the account is owned by the spl-token program and maps enums to offset / type deserialization.
 
-Below are the types of assertions you can make about a mint account:
+Below are the types of assertions you can make about a token account:
 
 ```rust
 pub enum TokenAccountAssertion {
@@ -127,5 +127,5 @@ let tx = Transaction::new_signed_with_payer(
 {% /dialect-switcher %}
 
 {% callout %}
-The enum variant **TokenAccountOwnerIsDerived** is a special assertion that checks if account key is a PDA using the current owner and the mint. This is a optimization for saving transaction space since you do not build owner or mint key assertions.
+The enum variant **TokenAccountOwnerIsDerived** is a special assertion that checks if token account's account info key is a PDA using the current owner and the mint as seeds. This is a optimization for saving transaction space since you do not build owner or mint key assertions.
 {% /callout %}
