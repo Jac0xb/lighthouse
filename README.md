@@ -96,8 +96,9 @@ TODO
 
 For experimental use only, program has yet to receive an audit and more tests need to be written!
 
-devnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
-mainnet: L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK
+devnet - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
+
+mainnet-beta - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
 
 ## Contributing
 
