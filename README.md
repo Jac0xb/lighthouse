@@ -2,7 +2,7 @@
 
 ![0_0](https://github.com/Jac0xb/lighthouse/assets/5273873/d5bb94be-a994-424f-88e0-32a917f07129)
 
-- [Lighthouse Documentation](https://lighthouse.voyage/)
+### [Lighthouse Documentation](https://lighthouse.voyage/)
 
 ## Overview
 
