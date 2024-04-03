@@ -76,11 +76,10 @@ TODO
 - pnpm install
 
 1. Compile the program:
+
    ```bash
    pnpm run programs:build
    ```
-
-````
 
 2. Run the tests:
 
@@ -111,4 +110,3 @@ This project is under the [MIT License](LICENSE).
 ## Disclaimer
 
 Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
-````
