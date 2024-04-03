@@ -68,7 +68,7 @@ export const lighthouse = {
           title: 'Memory',
           links: [
             { title: 'Memory Write', href: '/memory/write' },
-            { title: 'Memory Close', href: '/memory/close' },
+            // { title: 'Memory Close', href: '/memory/close' },
           ],
         },
       ],

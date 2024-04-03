@@ -10,4 +10,4 @@ The **MemoryWrite** and **MemoryClose** instructions are used to store arbitrary
 
 [MemoryWrite](/memory/write) (Write data to a memory account)
 
-[MemoryClose](/memory/close) (Close a memory account)
+<!-- [MemoryClose](/memory/close) (Close a memory account) -->
