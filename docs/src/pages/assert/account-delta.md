@@ -6,15 +6,14 @@ description:
 
 ## AssertAccountDelta Instruction
 
-The **AssertAccountDelta** instruction is similar to [AssertAccountData](/assert/account-data) and [AssertAccountInfo](/assert/account-info) instructions but with the key difference of allowing you to compare one account's data with another account's data or **AccountInfo**.
+The **AssertAccountDelta** instruction is similar to [AssertAccountData](/assert/account-data) and [AssertAccountInfo](/assert/account-info) instructions but with the key difference of allowing you to compare one account's data with another account's data or `AccountInfo`.
 
 ### Example: Storing lamports into a memory account and asserting on the delta.
 
-You may want to see assert on the lamport delta of an account during a transaction.
-To do this we can use the [Memory](/memory) account and instructions that lighthouse offers.
-This involves writing the lamports of user's account into a memory account and asserting on the delta.
+You may want to assert on the lamport delta of an account during a transaction.
+To do this we can use the [memory account](/memory) and delta assertion instructions that lighthouse offers. This involves writing the lamports of user's account into a memory account and asserting on the delta change.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Memory write + delta assertion transaction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -61,7 +60,9 @@ let tx = Transaction::new_signed_with_payer(
 {% /dialect-switcher %}
 
 The **first** instruction writes the lamports of the user's account into the memory account.
-The **second** instruction transfers 1e9 lamports (1 SOL) from the user's account to the destination account.
+{% /linebreak %}
+The **second** instruction transfers `1e9` lamports (1 SOL) from the user's account to another account.
+{% /linebreak %}
 The **third** instruction asserts that the lamport delta of the user's account is -1e9 (1 SOL), which is what we expect.
 
 ### Example: Asserting on delta of values stored in two different accounts.

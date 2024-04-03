@@ -6,7 +6,9 @@ description:
 
 ## AssertAccountData Instruction
 
-The **AssertAccountData** instruction gives you tools to make assertions about arbitrary account data by deserializing account data slices into a specified type and comparing it to an expected value. One of the arguments for the instruction is the **DataValueAssertion** enum which allows you describe the type you would like to deserialize and the value and operator used to compare.
+The **AssertAccountData** instruction gives you tools to make assertions about arbitrary account data by deserializing account data slices into a specified type and comparing it to an expected value.
+
+The `assertion` argument for the instruction is the `DataValueAssertion` enum which allows you to describe the type you would like to deserialize the account data into and the expected value and operator used in the comparison.
 
 **Supported types**: `bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `u128`, `i128`, `bytes`, `Pubkey`.
 
@@ -21,9 +23,9 @@ pub struct TestAccount {
 }
 ```
 
-Say we wanted to assert on the _balance_ field in our TestAccount struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
+Say we wanted to assert on the `balance` field in our `TestAccount` struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Data value assertion instruction builder example" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -54,9 +56,9 @@ pub struct TestAccount {
 }
 ```
 
-Say we wanted to assert on the "balance" field in our TestAccount struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
+Say we wanted to assert on the `owner` field in our `TestAccount` struct. We can deserialize the Pubkey and assert using the example code below.
 
-{% dialect-switcher title="" %}
+{% dialect-switcher title="Data value assertion instruction builder example" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
