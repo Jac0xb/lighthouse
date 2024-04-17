@@ -22,7 +22,7 @@ SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
 
 
-cd ${WORKING_DIR}/programs/lighthouse/program
+cd ${WORKING_DIR}/programs/lighthouse
 echo "Running solana test-sbf for ${p}..."
 RUST_LOG=error RUST_BACKTRACE=1 BPF_OUT_DIR=${WORKING_DIR}/configs/.programs cargo test 2>&1
 
