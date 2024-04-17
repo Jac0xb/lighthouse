@@ -24,15 +24,12 @@ function getPrograms() {
 
   return folders.map((folder, index) => {
     const isShank = fs
-      .readFileSync(
-        path.join(programsDir, folder, 'program', 'Cargo.toml'),
-        'utf8'
-      )
+      .readFileSync(path.join(programsDir, folder, 'Cargo.toml'), 'utf8')
       .match(/shank/);
 
     return {
       folder,
-      programDir: path.join(programsDir, folder, 'program'),
+      programDir: path.join(programsDir, folder),
       address: addresses[index],
       binary: binaries[index],
       name: binaries[index].replace(/\.so$/, ''),

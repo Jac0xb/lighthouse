@@ -75,23 +75,36 @@ TODO
 
 ### Installation
 
+- install solana cli 1.18.8
+
 - pnpm install
 
 1. Compile the program:
 
    ```bash
-   pnpm run programs:build
+   $ pnpm run programs:build
    ```
 
 2. Run the tests:
 
    ```bash
-   pnpm run programs:test
+   $ pnpm run programs:test
    ```
 
 3. Generate shank and kinobi clients:
+
    ```bash
-   pnpm run generate
+   $ pnpm run generate
+   ```
+
+4. Building/deploying a verify program:
+
+   ```bash
+   $ cd programs/lighthouse
+   $ solana-verify build
+   $ solana-verify get-executable-hash target/deploy/lighthouse.so
+   $ solana program deploy programs/lighthouse/target/deploy/lighthouse.so --with-compute-unit-price 500000
+   $ solana-verify verify-from-repo -um --program-id L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK https://github.com/jac0xb/lighthouse --library-name lighthouse -- --features mainnet-beta
    ```
 
 ## Usage
