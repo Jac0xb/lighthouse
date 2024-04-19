@@ -4,9 +4,9 @@ use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::instructions::AssertStakeAccountBuilder;
-use lighthouse_sdk::types::{
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::instructions::AssertStakeAccountBuilder;
+use lighthaus_sdk::types::{
     EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion, StakeAssertion,
     StakeStateType,
 };
@@ -110,7 +110,7 @@ async fn test() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(derived_account)
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -386,7 +386,7 @@ async fn test() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -407,7 +407,7 @@ async fn test() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(stake_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -456,7 +456,7 @@ async fn test() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -517,7 +517,7 @@ async fn test() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -632,7 +632,7 @@ async fn test() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -696,7 +696,7 @@ async fn not_owned_by_stake_program() {
     let builder_fn = |assertion: StakeAccountAssertion| {
         AssertStakeAccountBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -714,7 +714,7 @@ async fn not_owned_by_stake_program() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AccountOwnerMismatch),
+        to_transaction_error(0, lighthausError::AccountOwnerMismatch),
         None,
     )
     .await

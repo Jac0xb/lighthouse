@@ -1,15 +1,15 @@
 [package]
-name = "lighthouse-v1"
+name = "lighthaus-v1"
 version = "0.1.0"
 description = "Transaction guard rails"
 authors = ["Jac0xb"]
-repository = "https://github.com/jac0xb/lighthouse"
+repository = "https://github.com/jac0xb/lighthaus"
 license-file = "../../../LICENSE"
 edition = "2021"
 readme = "../../README.md"
 
 [lib]
-name = "lighthouse"
+name = "lighthaus"
 crate-type = ["cdylib", "lib"]
 
 [features]

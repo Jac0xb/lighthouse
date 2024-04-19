@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export const enum LighthouseProgramErrorCode {
+export const enum lighthausProgramErrorCode {
   /** InvalidInstructionData: Invalid instruction */
   INVALID_INSTRUCTION_DATA = 0x1770, // 6000
   /** AssertionFailed: AssertionFailed */
@@ -43,15 +43,15 @@ export const enum LighthouseProgramErrorCode {
   CROSS_PROGRAM_INVOKE_VIOLATION = 0x1780, // 6016
 }
 
-export class LighthouseProgramError extends Error {
-  override readonly name = 'LighthouseProgramError';
+export class lighthausProgramError extends Error {
+  override readonly name = 'lighthausProgramError';
 
-  readonly code: LighthouseProgramErrorCode;
+  readonly code: lighthausProgramErrorCode;
 
   readonly cause: Error | undefined;
 
   constructor(
-    code: LighthouseProgramErrorCode,
+    code: lighthausProgramErrorCode,
     name: string,
     message: string,
     cause?: Error
@@ -62,92 +62,92 @@ export class LighthouseProgramError extends Error {
   }
 }
 
-let lighthouseProgramErrorCodeMap:
-  | Record<LighthouseProgramErrorCode, [string, string]>
+let lighthausProgramErrorCodeMap:
+  | Record<lighthausProgramErrorCode, [string, string]>
   | undefined;
 if (__DEV__) {
-  lighthouseProgramErrorCodeMap = {
-    [LighthouseProgramErrorCode.INVALID_INSTRUCTION_DATA]: [
+  lighthausProgramErrorCodeMap = {
+    [lighthausProgramErrorCode.INVALID_INSTRUCTION_DATA]: [
       'InvalidInstructionData',
       `Invalid instruction`,
     ],
-    [LighthouseProgramErrorCode.ASSERTION_FAILED]: [
+    [lighthausProgramErrorCode.ASSERTION_FAILED]: [
       'AssertionFailed',
       `AssertionFailed`,
     ],
-    [LighthouseProgramErrorCode.NOT_ENOUGH_ACCOUNTS]: [
+    [lighthausProgramErrorCode.NOT_ENOUGH_ACCOUNTS]: [
       'NotEnoughAccounts',
       `NotEnoughAccounts`,
     ],
-    [LighthouseProgramErrorCode.BUMP_NOT_FOUND]: [
+    [lighthausProgramErrorCode.BUMP_NOT_FOUND]: [
       'BumpNotFound',
       `BumpNotFound`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_BORROW_FAILED]: [
+    [lighthausProgramErrorCode.ACCOUNT_BORROW_FAILED]: [
       'AccountBorrowFailed',
       `AccountBorrowFailed`,
     ],
-    [LighthouseProgramErrorCode.RANGE_OUT_OF_BOUNDS]: [
+    [lighthausProgramErrorCode.RANGE_OUT_OF_BOUNDS]: [
       'RangeOutOfBounds',
       `RangeOutOfBounds`,
     ],
-    [LighthouseProgramErrorCode.INDEX_OUT_OF_BOUNDS]: [
+    [lighthausProgramErrorCode.INDEX_OUT_OF_BOUNDS]: [
       'IndexOutOfBounds',
       `IndexOutOfBounds`,
     ],
-    [LighthouseProgramErrorCode.FAILED_TO_DESERIALIZE]: [
+    [lighthausProgramErrorCode.FAILED_TO_DESERIALIZE]: [
       'FailedToDeserialize',
       `FailedToDeserialize`,
     ],
-    [LighthouseProgramErrorCode.FAILED_TO_SERIALIZE]: [
+    [lighthausProgramErrorCode.FAILED_TO_SERIALIZE]: [
       'FailedToSerialize',
       `FailedToSerialize`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_OWNER_MISMATCH]: [
+    [lighthausProgramErrorCode.ACCOUNT_OWNER_MISMATCH]: [
       'AccountOwnerMismatch',
       `AccountOwnerMismatch`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_KEY_MISMATCH]: [
+    [lighthausProgramErrorCode.ACCOUNT_KEY_MISMATCH]: [
       'AccountKeyMismatch',
       `AccountKeyMismatch`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_NOT_INITIALIZED]: [
+    [lighthausProgramErrorCode.ACCOUNT_NOT_INITIALIZED]: [
       'AccountNotInitialized',
       `AccountNotInitialized`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_OWNER_VALIDATION_FAILED]: [
+    [lighthausProgramErrorCode.ACCOUNT_OWNER_VALIDATION_FAILED]: [
       'AccountOwnerValidationFailed',
       `AccountOwnerValidationFailed`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_FUNDED_VALIDATION_FAILED]: [
+    [lighthausProgramErrorCode.ACCOUNT_FUNDED_VALIDATION_FAILED]: [
       'AccountFundedValidationFailed',
       `AccountFundedValidationFailed`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED]: [
+    [lighthausProgramErrorCode.ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED]: [
       'AccountDiscriminatorValidationFailed',
       `AccountDiscriminatorValidationFailed`,
     ],
-    [LighthouseProgramErrorCode.ACCOUNT_VALIDATION_FAILED]: [
+    [lighthausProgramErrorCode.ACCOUNT_VALIDATION_FAILED]: [
       'AccountValidationFailed',
       `AccountValidaitonFailed`,
     ],
-    [LighthouseProgramErrorCode.CROSS_PROGRAM_INVOKE_VIOLATION]: [
+    [lighthausProgramErrorCode.CROSS_PROGRAM_INVOKE_VIOLATION]: [
       'CrossProgramInvokeViolation',
       `CrossProgramInvokeViolation`,
     ],
   };
 }
 
-export function getLighthouseProgramErrorFromCode(
-  code: LighthouseProgramErrorCode,
+export function getlighthausProgramErrorFromCode(
+  code: lighthausProgramErrorCode,
   cause?: Error
-): LighthouseProgramError {
+): lighthausProgramError {
   if (__DEV__) {
-    return new LighthouseProgramError(
+    return new lighthausProgramError(
       code,
       ...(
-        lighthouseProgramErrorCodeMap as Record<
-          LighthouseProgramErrorCode,
+        lighthausProgramErrorCodeMap as Record<
+          lighthausProgramErrorCode,
           [string, string]
         >
       )[code],
@@ -155,7 +155,7 @@ export function getLighthouseProgramErrorFromCode(
     );
   }
 
-  return new LighthouseProgramError(
+  return new lighthausProgramError(
     code,
     'Unknown',
     'Error message not available in production bundles. Compile with __DEV__ set to true to see more information.',

@@ -10,7 +10,7 @@ Testing Plan
       - [x] Already closed memory account
       - [x] Memory account with wrong seeds
       - [x] Memory account with different bump
-      - [x] Wrong lighthouse program
+      - [x] Wrong lighthaus program
       - [x] Try closing someone else's memory account
       - [x] Memory account as not writable
       - [x] Payer is not signer
@@ -28,7 +28,7 @@ Testing Plan
     - Failures
       - [x] Memory account with wrong seeds
       - [x] Memory account with different bump
-      - [x] Wrong lighthouse program
+      - [x] Wrong lighthaus program
       - [x] Try writing to someone else's memory account
       - [x] Writing to offset greater than 10kb
       - [x] Memory account as not writable

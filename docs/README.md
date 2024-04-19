@@ -1,4 +1,4 @@
-# Lighthouse Docs
+# lighthaus Docs
 
 ## Getting started
 

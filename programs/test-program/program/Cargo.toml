@@ -3,7 +3,7 @@ name = "test-program"
 version = "0.0.1"
 description = "test-program"
 authors = ["badmen"]
-repository = "https://github.com/jac0xb/lighthouse"
+repository = "https://github.com/jac0xb/lighthaus"
 license-file = "../../../LICENSE"
 edition = "2021"
 readme = "../../README.md"
@@ -25,7 +25,7 @@ anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
 solana-program = "1.17.23"
 arrayref = "0.3.7"
-lighthouse-sdk = { version = "0.1.0", path = "../../../clients/rust", features = ["cpi"] }
+lighthaus-sdk = { version = "0.1.0", path = "../../../clients/rust", features = ["cpi"] }
 
 [dev-dependencies]
 async-trait = "0.1.71"

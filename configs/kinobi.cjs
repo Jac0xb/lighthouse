@@ -7,17 +7,17 @@ const programDir = path.join(
   __dirname,
   '..',
   'programs',
-  'lighthouse',
+  'lighthaus',
   'program'
 );
 
 // Instanciate Kinobi.
-const kinobi = k.createFromIdls([path.join(programDir, 'lighthouse.json')]);
+const kinobi = k.createFromIdls([path.join(programDir, 'lighthaus.json')]);
 
 // Memory account PDA
 kinobi.update(
   k.addPdasVisitor({
-    lighthouse: [
+    lighthaus: [
       k.pdaNode('memory', [
         k.constantPdaSeedNodeFromString('memory'),
         k.variablePdaSeedNode('payer', k.publicKeyTypeNode()),

@@ -1,5 +1,5 @@
 use super::LogLevel;
-use crate::{error::LighthouseError, validation::SPL_NOOP_ID, Result};
+use crate::{error::lighthausError, validation::SPL_NOOP_ID, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     instruction::Instruction, log::sol_log_data, msg, program::invoke, program_memory::sol_memcmp,
@@ -35,7 +35,7 @@ pub enum AssertionResult {
 
 impl AssertionResult {
     pub fn log_data(&self) -> Result<()> {
-        let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
+        let data = self.try_to_vec().map_err(lighthausError::serialize_err)?;
 
         sol_log_data(&[&data]);
 
@@ -43,7 +43,7 @@ impl AssertionResult {
     }
 
     pub fn log_noop(&self) -> Result<()> {
-        let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
+        let data = self.try_to_vec().map_err(lighthausError::serialize_err)?;
 
         invoke(
             &Instruction {
@@ -150,7 +150,7 @@ macro_rules! impl_integer_evaluate {
                     if passed {
                         Ok(())
                     } else {
-                        Err(LighthouseError::AssertionFailed.into())
+                        Err(lighthausError::AssertionFailed.into())
                     }
                 }
             }
@@ -234,7 +234,7 @@ macro_rules! impl_evaluate {
                     if passed {
                         Ok(())
                     } else {
-                        Err(LighthouseError::AssertionFailed.into())
+                        Err(lighthausError::AssertionFailed.into())
                     }
                 }
             }
@@ -302,7 +302,7 @@ macro_rules! impl_evaluate_for_option_type {
                     if passed {
                         Ok(())
                     } else {
-                        Err(LighthouseError::AssertionFailed.into())
+                        Err(lighthausError::AssertionFailed.into())
                     }
                 }
             }
@@ -351,7 +351,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
                     passed,
                 )
                 .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+                .map_err(lighthausError::serialize_err)?;
 
                 sol_log_data(&[payload.as_slice()]);
             }
@@ -363,7 +363,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
                     passed,
                 )
                 .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+                .map_err(lighthausError::serialize_err)?;
 
                 sol_log_data(&[payload.as_slice()]);
             }
@@ -373,7 +373,7 @@ impl Evaluate<EquatableOperator> for Pubkey {
         if passed {
             Ok(())
         } else {
-            Err(LighthouseError::AssertionFailed.into())
+            Err(lighthausError::AssertionFailed.into())
         }
     }
 }
@@ -422,7 +422,7 @@ impl Evaluate<EquatableOperator> for Option<&Pubkey> {
                     passed,
                 )
                 .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+                .map_err(lighthausError::serialize_err)?;
 
                 sol_log_data(&[payload.as_slice()]);
             }
@@ -434,7 +434,7 @@ impl Evaluate<EquatableOperator> for Option<&Pubkey> {
                     passed,
                 )
                 .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+                .map_err(lighthausError::serialize_err)?;
 
                 sol_log_data(&[payload.as_slice()]);
             }
@@ -444,7 +444,7 @@ impl Evaluate<EquatableOperator> for Option<&Pubkey> {
         if passed {
             Ok(())
         } else {
-            Err(LighthouseError::AssertionFailed.into())
+            Err(lighthausError::AssertionFailed.into())
         }
     }
 }
@@ -506,7 +506,7 @@ impl Evaluate<EquatableOperator> for [u8] {
         if passed {
             Ok(())
         } else {
-            Err(LighthouseError::AssertionFailed.into())
+            Err(lighthausError::AssertionFailed.into())
         }
     }
 }

@@ -35,7 +35,7 @@ impl AssertSysvarClock {
         data.append(&mut args);
 
         solana_program::instruction::Instruction {
-            program_id: crate::LIGHTHOUSE_ID,
+            program_id: crate::lighthaus_ID,
             accounts,
             data,
         }
@@ -182,7 +182,7 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
         data.append(&mut args);
 
         let instruction = solana_program::instruction::Instruction {
-            program_id: crate::LIGHTHOUSE_ID,
+            program_id: crate::lighthaus_ID,
             accounts,
             data,
         };

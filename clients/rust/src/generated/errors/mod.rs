@@ -5,6 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod lighthouse;
+pub(crate) mod lighthaus;
 
-pub use self::lighthouse::LighthouseError;
+pub use self::lighthaus::lighthausError;

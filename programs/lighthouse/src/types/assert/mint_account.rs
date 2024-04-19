@@ -4,7 +4,7 @@ use crate::{
     types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::{keys_equal, Result},
 };
-use crate::{error::LighthouseError, utils::unpack_coption_key};
+use crate::{error::lighthausError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
@@ -37,12 +37,12 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
         if !keys_equal(account.owner, &spl_token::ID)
             && !keys_equal(account.owner, &spl_token_2022::ID)
         {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            return Err(lighthausError::AccountOwnerMismatch.into());
         }
 
         let data = account
             .try_borrow_mut_data()
-            .map_err(LighthouseError::failed_borrow_err)?;
+            .map_err(lighthausError::failed_borrow_err)?;
 
         match self {
             MintAccountAssertion::MintAuthority {
@@ -51,7 +51,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             } => {
                 let data_slice = data
                     .get(0..36)
-                    .ok_or_else(|| LighthouseError::oob_err(0..36))?;
+                    .ok_or_else(|| lighthausError::oob_err(0..36))?;
                 let mint_authority = unpack_coption_key(data_slice)?;
 
                 <Option<&Pubkey>>::evaluate(
@@ -67,10 +67,10 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             } => {
                 let data_slice = data
                     .get(36..44)
-                    .ok_or_else(|| LighthouseError::oob_err(36..44))?;
+                    .ok_or_else(|| lighthausError::oob_err(36..44))?;
                 let actual_supply = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize supply from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
+                    err!(lighthausError::FailedToDeserialize)
                 })?);
 
                 u64::evaluate(&actual_supply, assertion_value, operator, log_level)
@@ -81,10 +81,10 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             } => {
                 let data_slice = data
                     .get(44..45)
-                    .ok_or_else(|| LighthouseError::oob_err(44..45))?;
+                    .ok_or_else(|| lighthausError::oob_err(44..45))?;
                 let actual_decimals = u8::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize decimals from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
+                    err!(lighthausError::FailedToDeserialize)
                 })?);
 
                 u8::evaluate(&actual_decimals, assertion_value, operator, log_level)
@@ -95,7 +95,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             } => {
                 let actual_value = data
                     .get(45)
-                    .ok_or_else(|| LighthouseError::oob_err(45..46))?;
+                    .ok_or_else(|| lighthausError::oob_err(45..46))?;
                 let actual_value = *actual_value != 0;
 
                 bool::evaluate(&actual_value, assertion_value, operator, log_level)
@@ -106,7 +106,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             } => {
                 let data_slice = data
                     .get(46..82)
-                    .ok_or_else(|| LighthouseError::oob_err(46..82))?;
+                    .ok_or_else(|| lighthausError::oob_err(46..82))?;
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
                 <Option<&Pubkey>>::evaluate(

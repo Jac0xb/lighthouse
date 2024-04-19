@@ -1,6 +1,6 @@
 use super::{Assert, LogLevel};
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::Result,
 };
@@ -94,7 +94,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradableBufferAssertion {
                     "Account is not in buffer state was {}",
                     get_state_enum(upgradable_loader_state)
                 );
-                Err(LighthouseError::AssertionFailed.into())
+                Err(lighthausError::AssertionFailed.into())
             }
         }
     }
@@ -128,7 +128,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramAssertion {
                     "Account is not in program state was {}",
                     get_state_enum(upgradable_loader_state)
                 );
-                Err(LighthouseError::AssertionFailed.into())
+                Err(lighthausError::AssertionFailed.into())
             }
         }
     }
@@ -176,7 +176,7 @@ impl Assert<&UpgradeableLoaderState> for UpgradeableProgramDataAssertion {
                     "Account is not in program data state was {}",
                     get_state_enum(upgradable_loader_state)
                 );
-                Err(LighthouseError::AssertionFailed.into())
+                Err(lighthausError::AssertionFailed.into())
             }
         }
     }

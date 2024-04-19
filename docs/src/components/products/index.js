@@ -1,5 +1,5 @@
-import { lighthouse } from './lighthouse'
+import { lighthaus } from './lighthaus'
 
-export const products = [lighthouse].sort((a, b) =>
+export const products = [lighthaus].sort((a, b) =>
   a.name.localeCompare(b.name)
 )

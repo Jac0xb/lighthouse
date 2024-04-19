@@ -4,10 +4,10 @@ use crate::utils::process_transaction_assert_failure;
 use crate::utils::process_transaction_assert_success;
 use crate::utils::to_transaction_error;
 use borsh::BorshDeserialize;
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::find_memory_pda;
-use lighthouse_sdk::instructions::{AssertSysvarClockBuilder, MemoryWriteBuilder};
-use lighthouse_sdk::types::{
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::find_memory_pda;
+use lighthaus_sdk::instructions::{AssertSysvarClockBuilder, MemoryWriteBuilder};
+use lighthaus_sdk::types::{
     ClockField, IntegerOperator, LogLevel, SysvarClockAssertion, WriteType,
 };
 use solana_program_test::tokio;
@@ -23,16 +23,16 @@ async fn simple() {
 
     let (memory, memory_bump) = find_memory_pda(user.encodable_pubkey(), 0);
 
-    // No easy way to get epoch from bankclient so we just use lighthouse to write it to memory lol
+    // No easy way to get epoch from bankclient so we just use lighthaus to write it to memory lol
 
     let tx = Transaction::new_signed_with_payer(
         &[MemoryWriteBuilder::new()
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::Epoch))
             .instruction()],
@@ -101,9 +101,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(1)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::Slot))
             .instruction()],
@@ -172,9 +172,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(2)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::UnixTimestamp))
             .instruction()],
@@ -243,9 +243,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(3)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::LeaderScheduleEpoch))
             .instruction()],
@@ -314,9 +314,9 @@ async fn simple() {
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(4)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .write_offset(0)
             .write_type(WriteType::Clock(ClockField::EpochStartTimestamp))
             .instruction()],
@@ -394,7 +394,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -416,7 +416,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -438,7 +438,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -460,7 +460,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -482,7 +482,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -504,7 +504,7 @@ async fn simple() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await

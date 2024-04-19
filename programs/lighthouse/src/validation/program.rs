@@ -41,8 +41,8 @@ impl<'a, 'info, T: Id> Deref for Program<'a, 'info, T> {
     }
 }
 
-pub struct LighthouseProgram;
-impl Id for LighthouseProgram {
+pub struct lighthausProgram;
+impl Id for lighthausProgram {
     fn id() -> Pubkey {
         crate::ID
     }

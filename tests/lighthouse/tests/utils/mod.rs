@@ -6,7 +6,7 @@ pub mod test_program;
 pub mod tx_builder;
 
 use anchor_spl::{associated_token, token::Mint};
-use lighthouse_sdk::errors::LighthouseError;
+use lighthaus_sdk::errors::lighthausError;
 use solana_banks_interface::BanksTransactionResultWithMetadata;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program_test::{BanksClient, BanksClientError, ProgramTest};
@@ -32,7 +32,7 @@ pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 
 pub fn program_test() -> ProgramTest {
-    let mut test = ProgramTest::new("lighthouse", lighthouse_sdk::ID, None);
+    let mut test = ProgramTest::new("lighthaus", lighthaus_sdk::ID, None);
     test.add_program("blackhat", blackhat::id(), None);
     test.add_program("test_program", test_program::id(), None);
     test.add_program(
@@ -495,7 +495,7 @@ pub async fn process_transaction_assert_failure(
     Ok(tx_metadata.clone())
 }
 
-pub fn to_transaction_error(ix_index: u8, program_error: LighthouseError) -> TransactionError {
+pub fn to_transaction_error(ix_index: u8, program_error: lighthausError) -> TransactionError {
     TransactionError::InstructionError(
         ix_index,
         InstructionError::Custom(6000 + program_error as u32),

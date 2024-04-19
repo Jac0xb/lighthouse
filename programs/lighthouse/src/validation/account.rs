@@ -1,6 +1,6 @@
 use super::{Program, Signer, SystemProgram};
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     utils::{create_account, keys_equal, Result},
 };
 use solana_program::{
@@ -92,7 +92,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
             Ok(false)
         } else {
             msg!("Unexpected program owner");
-            Err(LighthouseError::AccountValidationFailed.into())
+            Err(lighthausError::AccountValidationFailed.into())
         }
     }
 
@@ -221,21 +221,21 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                         if account.is_writable {
                         } else {
                             msg!("account is writable condition failed: {:?}", account.key);
-                            return Err(LighthouseError::AccountValidationFailed.into());
+                            return Err(lighthausError::AccountValidationFailed.into());
                         }
                     }
                     AccountValidation::IsSigner => {
                         if account.is_signer {
                         } else {
                             msg!("account is signer condition failed: {:?}", account.key);
-                            return Err(LighthouseError::AccountValidationFailed.into());
+                            return Err(lighthausError::AccountValidationFailed.into());
                         }
                     }
                     AccountValidation::IsProgramOwned(owner) => {
                         if account.lamports() != 0 && keys_equal(account.owner, owner) {
                         } else {
                             msg!("account inited condition failed: {:?}", account.key);
-                            return Err(LighthouseError::AccountValidationFailed.into());
+                            return Err(lighthausError::AccountValidationFailed.into());
                         }
                     }
                     AccountValidation::IsNotOwned => {
@@ -243,7 +243,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                         {
                         } else {
                             msg!("account not inited condition failed: {:?}", account.key);
-                            return Err(LighthouseError::AccountValidationFailed.into());
+                            return Err(lighthausError::AccountValidationFailed.into());
                         }
                     }
                     AccountValidation::IsProgramDerivedAddress {
@@ -265,7 +265,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                                 generated_pda
                             );
 
-                                return Err(LighthouseError::AccountValidationFailed.into());
+                                return Err(lighthausError::AccountValidationFailed.into());
                             }
                         } else {
                             let derived_address = Pubkey::create_program_address(
@@ -278,7 +278,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                             )
                             .map_err(|err| {
                                 msg!("failed to create program address: {:?} {:?}", seeds, err);
-                                LighthouseError::AccountValidationFailed
+                                lighthausError::AccountValidationFailed
                             })?;
 
                             if !keys_equal(account.key, &derived_address) {
@@ -287,7 +287,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                                 account.key,
                                 derived_address
                             );
-                                return Err(LighthouseError::AccountValidationFailed.into());
+                                return Err(lighthausError::AccountValidationFailed.into());
                             }
                         }
                     }
@@ -299,7 +299,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
                                 account.key,
                                 key
                             );
-                            return Err(LighthouseError::AccountValidationFailed.into());
+                            return Err(lighthausError::AccountValidationFailed.into());
                         }
                     }
                     AccountValidation::CustomValidation(condition) => {
@@ -319,7 +319,7 @@ pub(crate) trait CheckedAccount<'a, 'info: 'a> {
 mod tests {
     use super::{AccountValidation, CheckedAccount};
     use crate::{
-        error::LighthouseError,
+        error::lighthausError,
         validation::{DerivedAddress, Memory, MemorySeeds},
         Result,
     };
@@ -387,7 +387,7 @@ mod tests {
                     if account.rent_epoch == 100 {
                         Ok(())
                     } else {
-                        Err(LighthouseError::AccountValidationFailed.into())
+                        Err(lighthausError::AccountValidationFailed.into())
                     }
                 })),
             ]),
@@ -471,7 +471,7 @@ mod tests {
         );
 
         if let Err(err) = result {
-            assert_eq!(err, LighthouseError::AccountValidationFailed.into());
+            assert_eq!(err, lighthausError::AccountValidationFailed.into());
         } else {
             panic!("expected error");
         }
@@ -486,7 +486,7 @@ mod tests {
         );
 
         if let Err(err) = result {
-            assert_eq!(err, LighthouseError::AccountValidationFailed.into());
+            assert_eq!(err, lighthausError::AccountValidationFailed.into());
         } else {
             panic!("expected error");
         }

@@ -1018,7 +1018,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
+name = "lighthaus-sdk"
 version = "0.1.0"
 dependencies = [
  "assert_matches",

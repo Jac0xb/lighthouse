@@ -2,8 +2,8 @@
 #[allow(clippy::identity_op)]
 mod generated;
 
-pub use generated::programs::LIGHTHOUSE_ID;
-pub use generated::programs::LIGHTHOUSE_ID as ID;
+pub use generated::programs::lighthaus_ID;
+pub use generated::programs::lighthaus_ID as ID;
 use solana_program::pubkey::{Pubkey, PubkeyError};
 
 pub use generated::types;

@@ -1,5 +1,5 @@
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::{Assert, LogLevel},
     utils::{keys_equal, Result},
 };
@@ -18,7 +18,7 @@ impl<'a, 'info> AssertMintAccountContext<'a, 'info> {
         if !keys_equal(mint_account.owner, &spl_token::ID)
             && !keys_equal(mint_account.owner, &spl_token_2022::ID)
         {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            return Err(lighthausError::AccountOwnerMismatch.into());
         }
 
         Ok(Self { mint_account })
@@ -41,7 +41,7 @@ pub(crate) fn assert_mint_account_multi<'a, 'info, T: Assert<&'a AccountInfo<'in
     for (i, assertion) in assertions.iter().enumerate() {
         assertion
             .evaluate(ctx.mint_account, log_level)
-            .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
+            .map_err(|e| lighthausError::map_multi_err(e, i as u32))?;
     }
 
     Ok(())

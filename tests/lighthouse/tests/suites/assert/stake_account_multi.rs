@@ -2,8 +2,8 @@ use crate::utils::context::TestContext;
 use crate::utils::{create_user_with_balance, set_account_from_refs, to_transaction_error_u8};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
 use borsh::BorshDeserialize;
-use lighthouse_sdk::cpi::AssertStakeAccountMultiBuilder;
-use lighthouse_sdk::types::{
+use lighthaus_sdk::cpi::AssertStakeAccountMultiBuilder;
+use lighthaus_sdk::types::{
     EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion, StakeAssertion,
     StakeStateType,
 };
@@ -106,7 +106,7 @@ async fn test() {
     let tx: Transaction = Transaction::new_signed_with_payer(
         &[AssertStakeAccountMultiBuilder::new()
             .target_account(derived_account)
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
             .assertions(vec![
                 // ()
                 (StakeAccountAssertion::State {
@@ -409,7 +409,7 @@ async fn test() {
         let tx: Transaction = Transaction::new_signed_with_payer(
             &[AssertStakeAccountMultiBuilder::new()
                 .target_account(derived_account)
-                .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+                .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
                 .assertions(assertions)
                 .instruction()],
             Some(&user.encodable_pubkey()),

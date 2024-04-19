@@ -5,10 +5,10 @@ use crate::utils::{
     create_user, process_transaction_assert_success, set_account_from_refs, Result,
 };
 use borsh::BorshSerialize;
-use lighthouse_sdk::instructions::{
+use lighthaus_sdk::instructions::{
     AssertBubblegumTreeConfigAccountBuilder, AssertMerkleTreeAccountBuilder,
 };
-use lighthouse_sdk::types::{
+use lighthaus_sdk::types::{
     BubblegumTreeConfigAssertion, EquatableOperator, IntegerOperator, MerkleTreeAssertion,
 };
 use mpl_bubblegum_sdk::accounts::TreeConfig;
@@ -86,7 +86,7 @@ async fn simple() {
                 .target_merkle_tree(tree_pubkey)
                 .root(Pubkey::new_from_array(tree_root))
                 .spl_account_compression(spl_account_compression::id())
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(MerkleTreeAssertion::VerifyLeaf {
                     leaf_index: leaf.index,
                     leaf_hash: new_leaf_hash,

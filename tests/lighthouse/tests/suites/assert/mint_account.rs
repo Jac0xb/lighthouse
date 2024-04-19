@@ -3,9 +3,9 @@ use crate::utils::{create_mint, create_user, CreateMintParameters};
 use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error,
 };
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::instructions::AssertMintAccountBuilder;
-use lighthouse_sdk::types::{EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion};
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::instructions::AssertMintAccountBuilder;
+use lighthaus_sdk::types::{EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion};
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::{EncodableKeypair, Signer};
@@ -286,7 +286,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -311,7 +311,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -336,7 +336,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -361,7 +361,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -390,7 +390,7 @@ async fn account_not_owned_by_token_program() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AccountOwnerMismatch),
+        to_transaction_error(0, lighthausError::AccountOwnerMismatch),
         None,
     )
     .await

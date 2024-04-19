@@ -1,6 +1,6 @@
 use super::{Assert, KnownProgram, LogLevel};
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::Result,
 };
@@ -87,7 +87,7 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                     account_data
                         .len()
                         .checked_sub(start as usize)
-                        .ok_or(LighthouseError::RangeOutOfBounds)? as u16,
+                        .ok_or(lighthausError::RangeOutOfBounds)? as u16,
                 );
 
                 let hash_range = start as usize..(start + length) as usize;
@@ -97,7 +97,7 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                         hash_range
                     );
 
-                    LighthouseError::RangeOutOfBounds
+                    lighthausError::RangeOutOfBounds
                 })?;
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 

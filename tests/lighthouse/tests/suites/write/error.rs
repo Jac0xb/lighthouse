@@ -4,10 +4,10 @@ pub mod memory_close {
         process_transaction_assert_failure, process_transaction_assert_success,
         to_transaction_error,
     };
-    use lighthouse_sdk::errors::LighthouseError;
-    use lighthouse_sdk::instructions::{MemoryCloseBuilder, MemoryWriteBuilder};
-    use lighthouse_sdk::types::{AccountInfoField, WriteType};
-    use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
+    use lighthaus_sdk::errors::lighthausError;
+    use lighthaus_sdk::instructions::{MemoryCloseBuilder, MemoryWriteBuilder};
+    use lighthaus_sdk::types::{AccountInfoField, WriteType};
+    use lighthaus_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
     use solana_program_test::tokio;
     use solana_sdk::signature::Keypair;
     use solana_sdk::signer::EncodableKeypair;
@@ -26,7 +26,7 @@ pub mod memory_close {
         let tx = Transaction::new_signed_with_payer(
             &[MemoryCloseBuilder::new()
                 .payer(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
                 .memory_id(0)
@@ -39,7 +39,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -50,7 +50,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -59,14 +59,14 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
@@ -80,7 +80,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(2, LighthouseError::AccountValidationFailed),
+            to_transaction_error(2, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -101,7 +101,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -110,7 +110,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(8)
@@ -124,7 +124,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(1, LighthouseError::AccountValidationFailed),
+            to_transaction_error(1, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -139,7 +139,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -148,7 +148,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_bump(next_memory_bump)
                     .memory_id(0)
@@ -162,7 +162,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(1, LighthouseError::AccountValidationFailed),
+            to_transaction_error(1, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -183,7 +183,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -206,7 +206,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(1, LighthouseError::AccountValidationFailed),
+            to_transaction_error(1, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -228,7 +228,7 @@ pub mod memory_close {
                 MemoryWriteBuilder::new()
                     .payer(user.encodable_pubkey())
                     .source_account(user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
                     .write_offset(0)
@@ -237,7 +237,7 @@ pub mod memory_close {
                     .instruction(),
                 MemoryCloseBuilder::new()
                     .payer(bad_user.encodable_pubkey())
-                    .program_id(lighthouse_sdk::ID)
+                    .program_id(lighthaus_sdk::ID)
                     .memory(memory)
                     .memory_bump(memory_bump)
                     .memory_id(0)
@@ -251,7 +251,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(1, LighthouseError::AccountValidationFailed),
+            to_transaction_error(1, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -272,7 +272,7 @@ pub mod memory_close {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -290,7 +290,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -313,7 +313,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -321,7 +321,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -344,7 +344,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -352,7 +352,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -375,7 +375,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -383,7 +383,7 @@ pub mod memory_close {
 
         let mut ix = MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -407,7 +407,7 @@ pub mod memory_close {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -420,10 +420,10 @@ pub mod memory_write {
     use crate::utils::{
         create_test_account, process_transaction_assert_failure, to_transaction_error,
     };
-    use lighthouse_sdk::errors::LighthouseError;
-    use lighthouse_sdk::instructions::MemoryWriteBuilder;
-    use lighthouse_sdk::types::{AccountInfoField, WriteType};
-    use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
+    use lighthaus_sdk::errors::lighthausError;
+    use lighthaus_sdk::instructions::MemoryWriteBuilder;
+    use lighthaus_sdk::types::{AccountInfoField, WriteType};
+    use lighthaus_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
     use solana_program_test::tokio;
     use solana_sdk::instruction::InstructionError;
     use solana_sdk::signature::Keypair;
@@ -451,7 +451,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(8)
                 .write_offset(0)
@@ -466,7 +466,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -477,7 +477,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -492,7 +492,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -525,7 +525,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -544,7 +544,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(bad_user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -559,7 +559,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -577,7 +577,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(u16::MAX)
@@ -609,7 +609,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -634,7 +634,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -652,7 +652,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -678,7 +678,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -696,7 +696,7 @@ pub mod memory_write {
         let mut ix = MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .write_offset(0)
@@ -721,7 +721,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AccountValidationFailed),
+            to_transaction_error(0, lighthausError::AccountValidationFailed),
             None,
         )
         .await
@@ -741,7 +741,7 @@ pub mod memory_write {
             &[MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
                 .source_account(test_account.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
                 .write_offset(0)
@@ -759,7 +759,7 @@ pub mod memory_write {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+            to_transaction_error(0, lighthausError::RangeOutOfBounds),
             None,
         )
         .await

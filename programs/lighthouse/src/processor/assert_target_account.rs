@@ -1,5 +1,5 @@
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::{Assert, LogLevel},
     utils::Result,
 };
@@ -35,7 +35,7 @@ pub(crate) fn assert_target_account_multi<'a, 'info, T: Assert<&'a AccountInfo<'
     for (i, assertion) in assertions.iter().enumerate() {
         assertion
             .evaluate(ctx.target_account, log_level)
-            .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
+            .map_err(|e| lighthausError::map_multi_err(e, i as u32))?;
     }
 
     Ok(())

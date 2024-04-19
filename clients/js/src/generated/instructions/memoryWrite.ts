@@ -169,7 +169,7 @@ export type MemoryWriteInput<
   TAccountMemory extends string,
   TAccountSourceAccount extends string
 > = {
-  /** Lighthouse program */
+  /** lighthaus program */
   programId?: Address<TAccountProgramId>;
   /** System program */
   systemProgram?: Address<TAccountSystemProgram>;
@@ -192,7 +192,7 @@ export type MemoryWriteInputWithSigners<
   TAccountMemory extends string,
   TAccountSourceAccount extends string
 > = {
-  /** Lighthouse program */
+  /** lighthaus program */
   programId?: Address<TAccountProgramId>;
   /** System program */
   systemProgram?: Address<TAccountSystemProgram>;
@@ -395,7 +395,7 @@ export type ParsedMemoryWriteInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Lighthouse program */
+    /** lighthaus program */
     programId: TAccountMetas[0];
     /** System program */
     systemProgram: TAccountMetas[1];

@@ -2029,7 +2029,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-v1"
+name = "lighthaus-v1"
 version = "0.1.0"
 dependencies = [
  "bincode",

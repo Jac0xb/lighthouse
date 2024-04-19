@@ -1,5 +1,5 @@
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::{Assert, LogLevel},
     utils::{keys_equal, Result},
     validation::MPL_BUBBLEGUM_ID,
@@ -17,7 +17,7 @@ impl<'a, 'info> AssertBubblegumTreeConfigAccountContext<'a, 'info> {
         let tree_config_account = next_account_info(account_iter)?;
 
         if !keys_equal(tree_config_account.owner, &MPL_BUBBLEGUM_ID) {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            return Err(lighthausError::AccountOwnerMismatch.into());
         }
 
         Ok(Self {

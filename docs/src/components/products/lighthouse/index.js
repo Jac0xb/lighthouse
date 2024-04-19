@@ -1,14 +1,14 @@
 import { Hero } from './Hero'
 import { Logo } from './Logo'
 
-export const lighthouse = {
-  name: 'Lighthouse',
+export const lighthaus = {
+  name: 'lighthaus',
   headline: '',
   description: 'The Assertion Protocol.',
   navigationMenuCatergory: '',
   path: '',
   logo: Logo,
-  github: 'https://github.com/Jac0xb/lighthouse',
+  github: 'https://github.com/Jac0xb/lighthaus',
   className: 'accent-teal',
   heroes: [{ path: '/', component: Hero }],
   sections: [

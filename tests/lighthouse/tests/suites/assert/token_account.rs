@@ -8,13 +8,13 @@ use crate::utils::{
 };
 use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token_2022;
-use lighthouse_sdk::cpi::AssertTokenAccountMultiBuilder;
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::instructions::AssertTokenAccountBuilder;
-use lighthouse_sdk::types::{
+use lighthaus_sdk::cpi::AssertTokenAccountMultiBuilder;
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::instructions::AssertTokenAccountBuilder;
+use lighthaus_sdk::types::{
     AssertionResult, EquatableOperator, IntegerOperator, TokenAccountAssertion,
 };
-use lighthouse_sdk::utils::{
+use lighthaus_sdk::utils::{
     append_instructions_to_transaction, parse_evaluation_payloads_from_logs,
 };
 use solana_program::program_pack::Pack;
@@ -187,7 +187,7 @@ async fn set_token_close_authority_native() {
             .unwrap(),
             AssertTokenAccountBuilder::new()
                 .target_account(bad_actor_token_account)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(TokenAccountAssertion::Amount {
                     value: 100_000,
                     operator: IntegerOperator::Equal,
@@ -204,7 +204,7 @@ async fn set_token_close_authority_native() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(2, LighthouseError::AssertionFailed),
+        to_transaction_error(2, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -253,7 +253,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                    .log_level(lighthaus_sdk::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::Owner {
                         value: user.pubkey(),
                         operator: EquatableOperator::Equal,
@@ -264,7 +264,7 @@ async fn set_token_owner_attack_assert_owner_equal() {
         }
         .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
         .unwrap(),
-        to_transaction_error(1, LighthouseError::AssertionFailed),
+        to_transaction_error(1, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -312,7 +312,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
                     .ix(),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
-                    .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                    .log_level(lighthaus_sdk::types::LogLevel::Silent)
                     .assertion(TokenAccountAssertion::TokenAccountOwnerIsDerived)
                     .instruction(),
             ],
@@ -320,7 +320,7 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
         }
         .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
         .unwrap(),
-        to_transaction_error(1, LighthouseError::AssertionFailed),
+        to_transaction_error(1, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -387,7 +387,7 @@ async fn test_drain_token_account() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(1, LighthouseError::AssertionFailed),
+        to_transaction_error(1, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -422,7 +422,7 @@ async fn simple() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(assertion)
             .instruction()
     };
@@ -518,7 +518,7 @@ async fn simple() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -555,7 +555,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -653,7 +653,7 @@ async fn simple() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -668,7 +668,7 @@ async fn account_not_owned_by_token_program() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertTokenAccountBuilder::new()
             .target_account(user.pubkey())
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(TokenAccountAssertion::Owner {
                 value: user.encodable_pubkey(),
                 operator: EquatableOperator::Equal,
@@ -682,7 +682,7 @@ async fn account_not_owned_by_token_program() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AccountOwnerMismatch),
+        to_transaction_error(0, lighthausError::AccountOwnerMismatch),
         None,
     )
     .await
@@ -714,7 +714,7 @@ async fn append_ix_test() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -791,7 +791,7 @@ async fn encoded_message() {
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
             .target_account(user_ata)
-            .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
+            .log_level(lighthaus_sdk::types::LogLevel::EncodedMessage)
             .assertion(assertion)
             .instruction()
     };
@@ -933,7 +933,7 @@ async fn encoded_message() {
     let result = process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -1043,7 +1043,7 @@ async fn encoded_message() {
         let result = process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(i as u8, LighthouseError::AssertionFailed),
+            to_transaction_error(i as u8, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -1110,7 +1110,7 @@ async fn encoded_message() {
             &[AssertTokenAccountMultiBuilder::new()
                 .assertions(assertions)
                 .target_account(user_ata)
-                .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
+                .log_level(lighthaus_sdk::types::LogLevel::EncodedMessage)
                 .instruction()],
             Some(&user.pubkey()),
             &[&user],

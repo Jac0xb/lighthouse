@@ -14,9 +14,9 @@ Using this over verify_leaf instruction saves 31 bytes (32 bytes reduced to 1 by
 
 ### Example: Assert on a leaf node in a merkle tree account.
 
-To verify leaf using Lighthouse, fetch the proof path and generate the hash of the state you expect the leaf node to have at the end of the transaction.
+To verify leaf using lighthaus, fetch the proof path and generate the hash of the state you expect the leaf node to have at the end of the transaction.
 
-{% dialect-switcher title="Verify leaf through Lighthouse instruction" %}
+{% dialect-switcher title="Verify leaf through lighthaus instruction" %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

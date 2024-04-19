@@ -11,7 +11,7 @@ The **AssertAccountDelta** instruction is similar to [AssertAccountData](/assert
 ### Example: Storing lamports into a memory account and asserting on the delta.
 
 You may want to assert on the lamport delta of an account during a transaction.
-To do this we can use the [memory account](/memory) and delta assertion instructions that lighthouse offers. This involves writing the lamports of user's account into a memory account and asserting on the delta change.
+To do this we can use the [memory account](/memory) and delta assertion instructions that lighthaus offers. This involves writing the lamports of user's account into a memory account and asserting on the delta change.
 
 {% dialect-switcher title="Memory write + delta assertion transaction" %}
 {% dialect title="Rust" id="rust" %}
@@ -26,7 +26,7 @@ let tx = Transaction::new_signed_with_payer(
             .memory(memory_key)
             .payer(user_key)
             .source_account(user_key)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
             .memory_id(0)       // 0 to 255 id for whatever memory account you want to access.
             .write_offset(0)    // byte offset in the memory accountt to write to.

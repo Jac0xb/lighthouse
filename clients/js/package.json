@@ -1,5 +1,5 @@
 {
-  "name": "lighthouse-js",
+  "name": "lighthaus-js",
   "version": "0.0.0",
   "description": "JavaScript client for the Counter program",
   "sideEffects": false,

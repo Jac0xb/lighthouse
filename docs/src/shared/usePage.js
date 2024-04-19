@@ -6,7 +6,7 @@ import { products } from '@/components/products'
 export function usePage(pageProps) {
   const { pathname } = useRouter()
   const title =
-    pageProps.markdoc?.frontmatter.title ?? 'Lighthouse Documentation'
+    pageProps.markdoc?.frontmatter.title ?? 'lighthaus Documentation'
   const product = getActiveProduct(pathname, pageProps)
   const activeSection = getActiveSection(pathname, product, pageProps)
   const activeHero = getActiveHero(pathname, product, pageProps)

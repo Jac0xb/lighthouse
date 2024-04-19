@@ -1,7 +1,7 @@
 use super::{Assert, Evaluate, LogLevel};
 use crate::{
     err, err_msg,
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::evaluate::{EquatableOperator, IntegerOperator},
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
@@ -69,7 +69,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
         let data = account
             .try_borrow_data()
-            .map_err(LighthouseError::failed_borrow_err)?;
+            .map_err(lighthausError::failed_borrow_err)?;
 
         match self {
             TokenAccountAssertion::Mint {
@@ -78,7 +78,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(0..32)
-                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
+                    .ok_or_else(|| lighthausError::oob_err(0..32))?;
                 let actual_mint = bytemuck::from_bytes::<Pubkey>(data_slice);
 
                 Pubkey::evaluate(actual_mint, assertion_value, operator, log_level)
@@ -89,7 +89,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(32..64)
-                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
+                    .ok_or_else(|| lighthausError::oob_err(32..64))?;
                 let actual_owner = bytemuck::from_bytes::<Pubkey>(data_slice);
 
                 Pubkey::evaluate(actual_owner, assertion_value, operator, log_level)
@@ -100,10 +100,10 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(64..72)
-                    .ok_or_else(|| LighthouseError::oob_err(64..72))?;
+                    .ok_or_else(|| lighthausError::oob_err(64..72))?;
                 let actual_amount = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                     err_msg!("Failed to deserialize amount from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
+                    err!(lighthausError::FailedToDeserialize)
                 })?);
 
                 u64::evaluate(&actual_amount, assertion_value, operator, log_level)
@@ -114,7 +114,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(72..108)
-                    .ok_or_else(|| LighthouseError::oob_err(72..108))?;
+                    .ok_or_else(|| lighthausError::oob_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
                 <Option<&Pubkey>>::evaluate(
@@ -130,14 +130,14 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let actual_state = data
                     .get(108)
-                    .ok_or_else(|| LighthouseError::oob_err(108..109))?;
+                    .ok_or_else(|| lighthausError::oob_err(108..109))?;
 
                 u8::evaluate(actual_state, assertion_value, operator, log_level)
             }
             TokenAccountAssertion::IsNative { value, operator } => {
                 let data_slice = data
                     .get(109..121)
-                    .ok_or_else(|| LighthouseError::oob_err(109..121))?;
+                    .ok_or_else(|| lighthausError::oob_err(109..121))?;
 
                 let actual_is_native = unpack_coption_u64(data_slice)?;
 
@@ -149,12 +149,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             } => {
                 let data_slice = data
                     .get(121..129)
-                    .ok_or_else(|| LighthouseError::oob_err(121..129))?;
+                    .ok_or_else(|| lighthausError::oob_err(121..129))?;
 
                 let actual_delegated_amount =
                     u64::from_le_bytes(data_slice.try_into().map_err(|e| {
                         err_msg!("Failed to deserialize delegatedamount from account data", e);
-                        err!(LighthouseError::FailedToDeserialize)
+                        err!(lighthausError::FailedToDeserialize)
                     })?);
 
                 u64::evaluate(
@@ -167,7 +167,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             TokenAccountAssertion::CloseAuthority { value, operator } => {
                 let data_slice = data
                     .get(129..165)
-                    .ok_or_else(|| LighthouseError::oob_err(129..165))?;
+                    .ok_or_else(|| lighthausError::oob_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
                 <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
@@ -175,12 +175,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
                 let mint_data = data
                     .get(0..32)
-                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
+                    .ok_or_else(|| lighthausError::oob_err(0..32))?;
                 let mint = bytemuck::from_bytes::<Pubkey>(mint_data);
 
                 let owner_data = data
                     .get(32..64)
-                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
+                    .ok_or_else(|| lighthausError::oob_err(32..64))?;
                 let owner = bytemuck::from_bytes::<Pubkey>(owner_data);
 
                 let expected_ata =

@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator};
 use crate::utils::Result;
-use crate::{err, err_msg, error::LighthouseError};
+use crate::{err, err_msg, error::lighthausError};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::msg;
 use solana_program::{
@@ -55,14 +55,14 @@ impl<'a> Assert<&'a StakeStateV2> for StakeAccountAssertion {
                 }
                 _ => {
                     msg!("Stake account is not in a state that has meta field");
-                    Err(LighthouseError::AssertionFailed.into())
+                    Err(lighthausError::AssertionFailed.into())
                 }
             },
             StakeAccountAssertion::StakeAssertion(stake_assertion) => match stake_account {
                 StakeStateV2::Stake(_, stake, _) => stake_assertion.evaluate(stake, log_level),
                 _ => {
                     msg!("Stake account is not in a state that has stake field");
-                    Err(LighthouseError::AssertionFailed.into())
+                    Err(lighthausError::AssertionFailed.into())
                 }
             },
             StakeAccountAssertion::StakeFlags { value, operator } => {
@@ -72,7 +72,7 @@ impl<'a> Assert<&'a StakeStateV2> for StakeAccountAssertion {
                         let serialized_stake_flag =
                             actual_stake_flags.try_to_vec().map_err(|e| {
                                 err_msg!("Failed to serialize stake flags", e);
-                                err!(LighthouseError::FailedToSerialize)
+                                err!(lighthausError::FailedToSerialize)
                             })?;
 
                         let actual_stake_flag = serialized_stake_flag[0];
@@ -81,7 +81,7 @@ impl<'a> Assert<&'a StakeStateV2> for StakeAccountAssertion {
                     }
                     _ => {
                         msg!("Stake account is not in a state that has stake field");
-                        Err(LighthouseError::AssertionFailed.into())
+                        Err(lighthausError::AssertionFailed.into())
                     }
                 }
             }

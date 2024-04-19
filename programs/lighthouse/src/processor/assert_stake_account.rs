@@ -1,5 +1,5 @@
 use crate::{
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::{Assert, LogLevel},
     utils::{keys_equal, Result},
 };
@@ -20,7 +20,7 @@ impl<'a, 'info> AssertStakeAccountContext<'a, 'info> {
         let stake_account = next_account_info(account_iter)?;
 
         if !keys_equal(stake_account.owner, &solana_program::stake::program::ID) {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            return Err(lighthausError::AccountOwnerMismatch.into());
         }
 
         Ok(Self { stake_account })
@@ -35,10 +35,10 @@ pub(crate) fn assert_stake_account<'a, 'info, T: for<'b> Assert<&'b StakeStateV2
     let data = ctx
         .stake_account
         .try_borrow_data()
-        .map_err(LighthouseError::failed_borrow_err)?;
+        .map_err(lighthausError::failed_borrow_err)?;
 
     let stake_account =
-        StakeStateV2::deserialize(&mut data.as_ref()).map_err(LighthouseError::stake_deser_err)?;
+        StakeStateV2::deserialize(&mut data.as_ref()).map_err(lighthausError::stake_deser_err)?;
 
     assertion.evaluate(&stake_account, log_level)
 }
@@ -51,15 +51,15 @@ pub(crate) fn assert_stake_account_multi<'a, 'info, T: for<'b> Assert<&'b StakeS
     let data = ctx
         .stake_account
         .try_borrow_data()
-        .map_err(LighthouseError::failed_borrow_err)?;
+        .map_err(lighthausError::failed_borrow_err)?;
 
     let stake_account =
-        StakeStateV2::deserialize(&mut data.as_ref()).map_err(LighthouseError::stake_deser_err)?;
+        StakeStateV2::deserialize(&mut data.as_ref()).map_err(lighthausError::stake_deser_err)?;
 
     for (i, assertion) in assertions.iter().enumerate() {
         assertion
             .evaluate(&stake_account, log_level)
-            .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
+            .map_err(|e| lighthausError::map_multi_err(e, i as u32))?;
     }
 
     Ok(())

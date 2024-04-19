@@ -1,9 +1,9 @@
 use crate::utils::context::TestContext;
 use crate::utils::{create_user_with_balance, set_account_from_refs, to_transaction_error};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::instructions::AssertUpgradeableLoaderAccountBuilder;
-use lighthouse_sdk::types::{
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::instructions::AssertUpgradeableLoaderAccountBuilder;
+use lighthaus_sdk::types::{
     EquatableOperator, IntegerOperator, UpgradableBufferAssertion, UpgradeableLoaderStateAssertion,
     UpgradeableLoaderStateType, UpgradeableProgramAssertion, UpgradeableProgramDataAssertion,
 };
@@ -42,7 +42,7 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Program,
                     operator: EquatableOperator::Equal,
@@ -50,7 +50,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::Program(
                     UpgradeableProgramAssertion::ProgramDataAddress {
                         value: programdata_address,
@@ -85,7 +85,7 @@ async fn test_upgradeable_loader() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::ProgramData,
                     operator: EquatableOperator::Equal,
@@ -93,7 +93,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: Some(upgrade_authority),
@@ -103,7 +103,7 @@ async fn test_upgradeable_loader() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: u64::MAX,
@@ -145,7 +145,7 @@ async fn simple() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::State {
                 value: UpgradeableLoaderStateType::Uninitialized,
                 operator: EquatableOperator::Equal,
@@ -163,7 +163,7 @@ async fn simple() {
     let failed_ixs = [
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
@@ -173,7 +173,7 @@ async fn simple() {
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Buffer(
                 UpgradableBufferAssertion::Authority {
                     value: None,
@@ -183,7 +183,7 @@ async fn simple() {
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Program(
                 UpgradeableProgramAssertion::ProgramDataAddress {
                     value: Keypair::new().encodable_pubkey(),
@@ -204,7 +204,7 @@ async fn simple() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -230,7 +230,7 @@ async fn simple() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Buffer,
                     operator: EquatableOperator::Equal,
@@ -238,7 +238,7 @@ async fn simple() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::Buffer(
                     UpgradableBufferAssertion::Authority {
                         value: Some(authority_address),
@@ -259,7 +259,7 @@ async fn simple() {
     let failed_ixs = [
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
@@ -269,7 +269,7 @@ async fn simple() {
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Program(
                 UpgradeableProgramAssertion::ProgramDataAddress {
                     value: Keypair::new().encodable_pubkey(),
@@ -290,7 +290,7 @@ async fn simple() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -316,7 +316,7 @@ async fn simple() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::Program,
                     operator: EquatableOperator::Equal,
@@ -324,7 +324,7 @@ async fn simple() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(program_pubkey)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::Program(
                     UpgradeableProgramAssertion::ProgramDataAddress {
                         value: programdata_address,
@@ -345,7 +345,7 @@ async fn simple() {
     let failed_ixs = [
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                 UpgradeableProgramDataAssertion::Slot {
                     value: u64::MAX,
@@ -355,7 +355,7 @@ async fn simple() {
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Buffer(
                 UpgradableBufferAssertion::Authority {
                     value: None,
@@ -376,7 +376,7 @@ async fn simple() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -404,7 +404,7 @@ async fn simple() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::State {
                     value: UpgradeableLoaderStateType::ProgramData,
                     operator: EquatableOperator::Equal,
@@ -412,7 +412,7 @@ async fn simple() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: Some(upgrade_authority),
@@ -422,7 +422,7 @@ async fn simple() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::Slot {
                         value: u64::MAX,
@@ -443,7 +443,7 @@ async fn simple() {
     let failed_ixs = [
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Buffer(
                 UpgradableBufferAssertion::Authority {
                     value: None,
@@ -453,7 +453,7 @@ async fn simple() {
             .instruction(),
         AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(program_pubkey)
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::Program(
                 UpgradeableProgramAssertion::ProgramDataAddress {
                     value: Keypair::new().encodable_pubkey(),
@@ -474,7 +474,7 @@ async fn simple() {
         process_transaction_assert_failure(
             context,
             tx,
-            to_transaction_error(0, LighthouseError::AssertionFailed),
+            to_transaction_error(0, lighthausError::AssertionFailed),
             None,
         )
         .await
@@ -501,7 +501,7 @@ async fn simple() {
         &[
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: None,
@@ -511,7 +511,7 @@ async fn simple() {
                 .instruction(),
             AssertUpgradeableLoaderAccountBuilder::new()
                 .target_account(programdata_address)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(UpgradeableLoaderStateAssertion::ProgramData(
                     UpgradeableProgramDataAssertion::UpgradeAuthority {
                         value: Some(Keypair::new().encodable_pubkey()),
@@ -540,7 +540,7 @@ async fn not_owned_by_loader_program() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertUpgradeableLoaderAccountBuilder::new()
             .target_account(user.encodable_pubkey())
-            .log_level(lighthouse_sdk::types::LogLevel::Silent)
+            .log_level(lighthaus_sdk::types::LogLevel::Silent)
             .assertion(UpgradeableLoaderStateAssertion::State {
                 value: UpgradeableLoaderStateType::Buffer,
                 operator: EquatableOperator::Equal,
@@ -554,7 +554,7 @@ async fn not_owned_by_loader_program() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::AccountOwnerMismatch),
+        to_transaction_error(0, lighthausError::AccountOwnerMismatch),
         None,
     )
     .await

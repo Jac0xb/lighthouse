@@ -20,7 +20,7 @@ macro_rules! err_msg {
 
 #[derive(Debug, Error, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-pub enum LighthouseError {
+pub enum lighthausError {
     // Processor errors
     #[error("Invalid instruction")]
     InvalidInstructionData = 6000,
@@ -68,9 +68,9 @@ pub enum LighthouseError {
     CrossProgramInvokeViolation = 6016,
 }
 
-impl LighthouseError {
+impl lighthausError {
     pub fn map_multi_err(e: ProgramError, i: u32) -> ProgramError {
-        if e == LighthouseError::AssertionFailed.into() {
+        if e == lighthausError::AssertionFailed.into() {
             ProgramError::Custom(0x1900 + i)
         } else {
             e
@@ -79,27 +79,27 @@ impl LighthouseError {
 
     pub fn failed_borrow_err(e: ProgramError) -> ProgramError {
         err_msg!("Failed to borrow data for target account", e);
-        err!(LighthouseError::AccountBorrowFailed)
+        err!(lighthausError::AccountBorrowFailed)
     }
 
     pub fn stake_deser_err(e: io::Error) -> ProgramError {
         err_msg!("Failed to deserialize stake account state", e);
-        err!(LighthouseError::FailedToDeserialize)
+        err!(lighthausError::FailedToDeserialize)
     }
 
     pub fn oob_err(r: Range<usize>) -> ProgramError {
         msg!("Failed to access account data range {:?}: out of bounds", r);
-        LighthouseError::RangeOutOfBounds.into()
+        lighthausError::RangeOutOfBounds.into()
     }
 
     pub fn serialize_err(e: io::Error) -> ProgramError {
         err_msg!("Failed to serialize data", e);
-        err!(LighthouseError::FailedToSerialize)
+        err!(lighthausError::FailedToSerialize)
     }
 }
 
-impl From<LighthouseError> for ProgramError {
-    fn from(e: LighthouseError) -> Self {
+impl From<lighthausError> for ProgramError {
+    fn from(e: lighthausError) -> Self {
         ProgramError::Custom(e as u32)
     }
 }

@@ -1,7 +1,7 @@
 use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err,
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::evaluate::Evaluate,
     utils::{try_from_slice, Result},
 };
@@ -80,13 +80,13 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                 let a_account_data = a_account
                     .try_borrow_data()
-                    .map_err(LighthouseError::failed_borrow_err)?;
+                    .map_err(lighthausError::failed_borrow_err)?;
                 let b_account_data = b_account
                     .try_borrow_data()
-                    .map_err(LighthouseError::failed_borrow_err)?;
+                    .map_err(lighthausError::failed_borrow_err)?;
 
                 if a_account_data.is_empty() || b_account_data.is_empty() {
-                    return Err(LighthouseError::AccountNotInitialized.into());
+                    return Err(lighthausError::AccountNotInitialized.into());
                 }
 
                 match assertion {
@@ -183,13 +183,13 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                             .get(a_offset..(a_offset + *length as usize))
                             .ok_or_else(|| {
                                 msg!("Failed to read bytes from account_a");
-                                err!(LighthouseError::RangeOutOfBounds)
+                                err!(lighthausError::RangeOutOfBounds)
                             })?;
                         let b_value = b_account_data
                             .get(b_offset..(b_offset + *length as usize))
                             .ok_or_else(|| {
                                 msg!("Failed to read bytes from account_b");
-                                err!(LighthouseError::RangeOutOfBounds)
+                                err!(lighthausError::RangeOutOfBounds)
                             })?;
 
                         <[u8]>::evaluate(a_value, b_value, operator, log_level)
@@ -203,12 +203,12 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                 let (a_account, b_account) = accounts;
 
                 if a_account.data_is_empty() {
-                    return Err(LighthouseError::AccountNotInitialized.into());
+                    return Err(lighthausError::AccountNotInitialized.into());
                 }
 
                 let a_account_data = a_account
                     .try_borrow_data()
-                    .map_err(LighthouseError::failed_borrow_err)?;
+                    .map_err(lighthausError::failed_borrow_err)?;
 
                 let a_offset = *a_offset as usize;
 

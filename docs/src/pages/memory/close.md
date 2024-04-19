@@ -1,6 +1,6 @@
 ---
 title: Memory Close
-metaTitle: Lighthouse - Memory Close
+metaTitle: lighthaus - Memory Close
 description: MemoryClose Instruction.
 ---
 
@@ -16,7 +16,7 @@ The **MemoryClose** instruction
 MemoryWriteBuilder::new()
   .payer(user.encodable_pubkey())
   .source_account(token_account)
-  .program_id(lighthouse_sdk::ID)
+  .program_id(lighthaus_sdk::ID)
   .memory(memory)
   .memory_id(0)
   .write_offset(0)
@@ -44,7 +44,7 @@ let tx = Transaction::new_signed_with_payer(
     MemoryWriteBuilder::new()
         .payer(user.encodable_pubkey())
         .source_account(token_account)
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .memory(memory)
         .memory_id(0)
         .write_offset(0)
@@ -89,7 +89,7 @@ let tx = Transaction::new_signed_with_payer(
         .instruction(),
     MemoryCloseBuilder::new()
         .payer(user.encodable_pubkey())
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .memory(memory)
         .memory_bump(memory_bump)
         .memory_id(0)

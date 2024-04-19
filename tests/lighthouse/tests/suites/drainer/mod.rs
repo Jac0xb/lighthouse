@@ -5,11 +5,11 @@ use crate::utils::{
 };
 use crate::utils::{context::TestContext, create_mint, create_user};
 use anchor_spl::associated_token::get_associated_token_address;
-use lighthouse::types::{
+use lighthaus::types::{
     AccountInfoAssertion, EquatableOperator, IntegerOperator, TokenAccountAssertion,
 };
-use lighthouse::{error::LighthouseError, types::Assertion};
-use lighthouse_sdk::{blackhat_program::BlackhatProgram, LighthouseProgram};
+use lighthaus::{error::lighthausError, types::Assertion};
+use lighthaus_sdk::{blackhat_program::BlackhatProgram, lighthausProgram};
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::{signature::Keypair, signer::Signer};
@@ -22,7 +22,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 // #[tokio::test]
 // async fn test_bitflip_drain_token_account() {
 //     let context = &mut TestContext::new().await.unwrap();
-//     let mut lighthouse_program = LighthouseProgram {};
+//     let mut lighthaus_program = lighthausProgram {};
 //     let blackhat_program = BlackhatProgram {};
 
 //     let drainer = Keypair::new();
@@ -48,7 +48,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 
 //     let tx = blackhat_program
 //         .bitflip_drain_token_account(&user, &drainer.encodable_pubkey(), &mint.pubkey(), bytes)
-//         .append(lighthouse_program.create_assert(
+//         .append(lighthaus_program.create_assert(
 //             &user,
 //             user_ata,
 //             Assertion::TokenAccount(TokenAccount::Amount(69_000), evaluationEqual),
@@ -69,7 +69,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 //     // process_transaction_assert_failure(
 //     //     context,
 //     //     tx,
-//     //     to_transaction_error(1, LighthouseError::AssertionFailed),
+//     //     to_transaction_error(1, lighthausError::AssertionFailed),
 //     //     None,
 //     // )
 //     // .await

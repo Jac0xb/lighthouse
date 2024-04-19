@@ -1,21 +1,21 @@
 ---
 title: Getting Started
-metaTitle: Lighthouse - Getting Started
-description: How to Lighthouse.
+metaTitle: lighthaus - Getting Started
+description: How to lighthaus.
 ---
 
 ## Installing
 
-Lighthouse instructions can be built using either the rust or javascript sdk. For the rust sdk, you can install the sdk using cargo:
+lighthaus instructions can be built using either the rust or javascript sdk. For the rust sdk, you can install the sdk using cargo:
 
 ```bash
-$ cargo install lighthouse-sdk
+$ cargo install lighthaus-sdk
 ```
 
 For the javascript sdk, you can install the sdk using npm:
 
 ```bash
-$ npm install lighthouse-js
+$ npm install lighthaus-js
 ```
 
 ## Usage

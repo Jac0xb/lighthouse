@@ -1,7 +1,7 @@
 use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
     utils::{try_from_slice, Result},
 };
@@ -77,11 +77,11 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
 
         let data = account.try_borrow_data().map_err(|e| {
             err_msg!("Cannot borrow data for target account", e);
-            err!(LighthouseError::AccountBorrowFailed)
+            err!(lighthausError::AccountBorrowFailed)
         })?;
 
         if data.is_empty() {
-            return Err(LighthouseError::AccountNotInitialized.into());
+            return Err(lighthausError::AccountNotInitialized.into());
         }
 
         match assertion {
@@ -170,7 +170,7 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                     .get(offset..offset + assertion_value.len())
                     .ok_or_else(|| {
                         msg!("Data range out of bounds");
-                        err!(LighthouseError::RangeOutOfBounds)
+                        err!(lighthausError::RangeOutOfBounds)
                     })?;
 
                 <[u8]>::evaluate(actual_value, assertion_value, operator, log_level)
@@ -185,7 +185,7 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
                         offset..offset + 32
                     );
 
-                    LighthouseError::RangeOutOfBounds
+                    lighthausError::RangeOutOfBounds
                 })?;
                 let actual_value = bytemuck::from_bytes::<Pubkey>(data_slice);
 
@@ -199,7 +199,7 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
 mod tests {
     use super::DataValueAssertion;
     use crate::{
-        error::LighthouseError,
+        error::lighthausError,
         test_utils::{assert_failed, assert_passed, create_test_account},
         types::assert::{
             evaluate::{EquatableOperator, IntegerOperator},
@@ -407,7 +407,7 @@ mod tests {
         };
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+            assert_eq!(e, lighthausError::AccountNotInitialized.into());
         } else {
             panic!("Expected error");
         }
@@ -426,7 +426,7 @@ mod tests {
         };
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+            assert_eq!(e, lighthausError::AccountNotInitialized.into());
         } else {
             panic!("Expected error");
         }
@@ -446,7 +446,7 @@ mod tests {
 
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -467,7 +467,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -489,7 +489,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -511,7 +511,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -533,7 +533,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -555,7 +555,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -577,7 +577,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -599,7 +599,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -621,7 +621,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -643,7 +643,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::AccountNotInitialized.into());
+            assert_eq!(e, lighthausError::AccountNotInitialized.into());
         } else {
             panic!("Expected error");
         }
@@ -665,7 +665,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -688,7 +688,7 @@ mod tests {
         };
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -707,7 +707,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -726,7 +726,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::RangeOutOfBounds.into());
+            assert_eq!(e, lighthausError::RangeOutOfBounds.into());
         } else {
             panic!("Expected error");
         }
@@ -752,7 +752,7 @@ mod tests {
         let result = assertion.evaluate(&account_info, LogLevel::PlaintextMessage);
 
         if let Err(e) = result {
-            assert_eq!(e, LighthouseError::AccountBorrowFailed.into());
+            assert_eq!(e, lighthausError::AccountBorrowFailed.into());
         } else {
             panic!("Expected error");
         }

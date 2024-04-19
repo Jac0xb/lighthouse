@@ -11,7 +11,7 @@ use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct MemoryWrite {
-    /// Lighthouse program
+    /// lighthaus program
     pub program_id: solana_program::pubkey::Pubkey,
     /// System program
     pub system_program: solana_program::pubkey::Pubkey,
@@ -62,7 +62,7 @@ impl MemoryWrite {
         data.append(&mut args);
 
         solana_program::instruction::Instruction {
-            program_id: crate::LIGHTHOUSE_ID,
+            program_id: crate::lighthaus_ID,
             accounts,
             data,
         }
@@ -116,7 +116,7 @@ impl MemoryWriteBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Lighthouse program
+    /// lighthaus program
     #[inline(always)]
     pub fn program_id(&mut self, program_id: solana_program::pubkey::Pubkey) -> &mut Self {
         self.program_id = Some(program_id);
@@ -210,7 +210,7 @@ impl MemoryWriteBuilder {
 
 /// `memory_write` CPI accounts.
 pub struct MemoryWriteCpiAccounts<'a, 'b> {
-    /// Lighthouse program
+    /// lighthaus program
     pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -226,7 +226,7 @@ pub struct MemoryWriteCpiAccounts<'a, 'b> {
 pub struct MemoryWriteCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Lighthouse program
+    /// lighthaus program
     pub program_id: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -322,7 +322,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
         data.append(&mut args);
 
         let instruction = solana_program::instruction::Instruction {
-            program_id: crate::LIGHTHOUSE_ID,
+            program_id: crate::lighthaus_ID,
             accounts,
             data,
         };
@@ -375,7 +375,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Lighthouse program
+    /// lighthaus program
     #[inline(always)]
     pub fn program_id(
         &mut self,

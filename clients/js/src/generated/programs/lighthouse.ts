@@ -10,9 +10,9 @@ import { Address } from '@solana/addresses';
 import { getU8Encoder } from '@solana/codecs';
 import { Program, ProgramWithErrors } from '@solana/programs';
 import {
-  LighthouseProgramError,
-  LighthouseProgramErrorCode,
-  getLighthouseProgramErrorFromCode,
+  lighthausProgramError,
+  lighthausProgramErrorCode,
+  getlighthausProgramErrorFromCode,
 } from '../errors';
 import {
   ParsedAssertAccountDataInstruction,
@@ -35,24 +35,24 @@ import {
 } from '../instructions';
 import { memcmp } from '../shared';
 
-export const LIGHTHOUSE_PROGRAM_ADDRESS =
+export const lighthaus_PROGRAM_ADDRESS =
   'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
 
-export type LighthouseProgram =
+export type lighthausProgram =
   Program<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'> &
-    ProgramWithErrors<LighthouseProgramErrorCode, LighthouseProgramError>;
+    ProgramWithErrors<lighthausProgramErrorCode, lighthausProgramError>;
 
-export function getLighthouseProgram(): LighthouseProgram {
+export function getlighthausProgram(): lighthausProgram {
   return {
-    name: 'lighthouse',
-    address: LIGHTHOUSE_PROGRAM_ADDRESS,
-    getErrorFromCode(code: LighthouseProgramErrorCode, cause?: Error) {
-      return getLighthouseProgramErrorFromCode(code, cause);
+    name: 'lighthaus',
+    address: lighthaus_PROGRAM_ADDRESS,
+    getErrorFromCode(code: lighthausProgramErrorCode, cause?: Error) {
+      return getlighthausProgramErrorFromCode(code, cause);
     },
   };
 }
 
-export enum LighthouseInstruction {
+export enum lighthausInstruction {
   MemoryWrite,
   MemoryClose,
   AssertAccountData,
@@ -72,118 +72,118 @@ export enum LighthouseInstruction {
   AssertBubblegumTreeConfigAccount,
 }
 
-export function identifyLighthouseInstruction(
+export function identifylighthausInstruction(
   instruction: { data: Uint8Array } | Uint8Array
-): LighthouseInstruction {
+): lighthausInstruction {
   const data =
     instruction instanceof Uint8Array ? instruction : instruction.data;
   if (memcmp(data, getU8Encoder().encode(0), 0)) {
-    return LighthouseInstruction.MemoryWrite;
+    return lighthausInstruction.MemoryWrite;
   }
   if (memcmp(data, getU8Encoder().encode(1), 0)) {
-    return LighthouseInstruction.MemoryClose;
+    return lighthausInstruction.MemoryClose;
   }
   if (memcmp(data, getU8Encoder().encode(2), 0)) {
-    return LighthouseInstruction.AssertAccountData;
+    return lighthausInstruction.AssertAccountData;
   }
   if (memcmp(data, getU8Encoder().encode(3), 0)) {
-    return LighthouseInstruction.AssertAccountDelta;
+    return lighthausInstruction.AssertAccountDelta;
   }
   if (memcmp(data, getU8Encoder().encode(4), 0)) {
-    return LighthouseInstruction.AssertAccountInfo;
+    return lighthausInstruction.AssertAccountInfo;
   }
   if (memcmp(data, getU8Encoder().encode(5), 0)) {
-    return LighthouseInstruction.AssertAccountInfoMulti;
+    return lighthausInstruction.AssertAccountInfoMulti;
   }
   if (memcmp(data, getU8Encoder().encode(6), 0)) {
-    return LighthouseInstruction.AssertMintAccount;
+    return lighthausInstruction.AssertMintAccount;
   }
   if (memcmp(data, getU8Encoder().encode(7), 0)) {
-    return LighthouseInstruction.AssertMintAccountMulti;
+    return lighthausInstruction.AssertMintAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(8), 0)) {
-    return LighthouseInstruction.AssertTokenAccount;
+    return lighthausInstruction.AssertTokenAccount;
   }
   if (memcmp(data, getU8Encoder().encode(9), 0)) {
-    return LighthouseInstruction.AssertTokenAccountMulti;
+    return lighthausInstruction.AssertTokenAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(10), 0)) {
-    return LighthouseInstruction.AssertStakeAccount;
+    return lighthausInstruction.AssertStakeAccount;
   }
   if (memcmp(data, getU8Encoder().encode(11), 0)) {
-    return LighthouseInstruction.AssertStakeAccountMulti;
+    return lighthausInstruction.AssertStakeAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(12), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
+    return lighthausInstruction.AssertUpgradeableLoaderAccount;
   }
   if (memcmp(data, getU8Encoder().encode(13), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
+    return lighthausInstruction.AssertUpgradeableLoaderAccountMulti;
   }
   if (memcmp(data, getU8Encoder().encode(14), 0)) {
-    return LighthouseInstruction.AssertSysvarClock;
+    return lighthausInstruction.AssertSysvarClock;
   }
   if (memcmp(data, getU8Encoder().encode(15), 0)) {
-    return LighthouseInstruction.AssertMerkleTreeAccount;
+    return lighthausInstruction.AssertMerkleTreeAccount;
   }
   if (memcmp(data, getU8Encoder().encode(16), 0)) {
-    return LighthouseInstruction.AssertBubblegumTreeConfigAccount;
+    return lighthausInstruction.AssertBubblegumTreeConfigAccount;
   }
   throw new Error(
-    'The provided instruction could not be identified as a lighthouse instruction.'
+    'The provided instruction could not be identified as a lighthaus instruction.'
   );
 }
 
-export type ParsedLighthouseInstruction<
+export type ParsedlighthausInstruction<
   TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 > =
   | ({
-      instructionType: LighthouseInstruction.MemoryWrite;
+      instructionType: lighthausInstruction.MemoryWrite;
     } & ParsedMemoryWriteInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.MemoryClose;
+      instructionType: lighthausInstruction.MemoryClose;
     } & ParsedMemoryCloseInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertAccountData;
+      instructionType: lighthausInstruction.AssertAccountData;
     } & ParsedAssertAccountDataInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertAccountDelta;
+      instructionType: lighthausInstruction.AssertAccountDelta;
     } & ParsedAssertAccountDeltaInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertAccountInfo;
+      instructionType: lighthausInstruction.AssertAccountInfo;
     } & ParsedAssertAccountInfoInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertAccountInfoMulti;
+      instructionType: lighthausInstruction.AssertAccountInfoMulti;
     } & ParsedAssertAccountInfoMultiInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertMintAccount;
+      instructionType: lighthausInstruction.AssertMintAccount;
     } & ParsedAssertMintAccountInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertMintAccountMulti;
+      instructionType: lighthausInstruction.AssertMintAccountMulti;
     } & ParsedAssertMintAccountMultiInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertTokenAccount;
+      instructionType: lighthausInstruction.AssertTokenAccount;
     } & ParsedAssertTokenAccountInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertTokenAccountMulti;
+      instructionType: lighthausInstruction.AssertTokenAccountMulti;
     } & ParsedAssertTokenAccountMultiInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertStakeAccount;
+      instructionType: lighthausInstruction.AssertStakeAccount;
     } & ParsedAssertStakeAccountInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertStakeAccountMulti;
+      instructionType: lighthausInstruction.AssertStakeAccountMulti;
     } & ParsedAssertStakeAccountMultiInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccount;
+      instructionType: lighthausInstruction.AssertUpgradeableLoaderAccount;
     } & ParsedAssertUpgradeableLoaderAccountInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
+      instructionType: lighthausInstruction.AssertUpgradeableLoaderAccountMulti;
     } & ParsedAssertUpgradeableLoaderAccountMultiInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertSysvarClock;
+      instructionType: lighthausInstruction.AssertSysvarClock;
     } & ParsedAssertSysvarClockInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertMerkleTreeAccount;
+      instructionType: lighthausInstruction.AssertMerkleTreeAccount;
     } & ParsedAssertMerkleTreeAccountInstruction<TProgram>)
   | ({
-      instructionType: LighthouseInstruction.AssertBubblegumTreeConfigAccount;
+      instructionType: lighthausInstruction.AssertBubblegumTreeConfigAccount;
     } & ParsedAssertBubblegumTreeConfigAccountInstruction<TProgram>);

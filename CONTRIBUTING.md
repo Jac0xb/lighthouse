@@ -1,18 +1,18 @@
-# Contributing to Lighthouse
+# Contributing to lighthaus
 
-Thank you for your interest in contributing to Lighthouse! Your contributions are essential for making Lighthouse better and more efficient. We welcome and appreciate every form of contribution.
+Thank you for your interest in contributing to lighthaus! Your contributions are essential for making lighthaus better and more efficient. We welcome and appreciate every form of contribution.
 
 ## Code of Conduct
 
-Lighthouse is committed to fostering a welcoming community. As such, we have adopted a Code of Conduct that we expect project participants to adhere to. Please read the Code of Conduct at the bottom of this document.
+lighthaus is committed to fostering a welcoming community. As such, we have adopted a Code of Conduct that we expect project participants to adhere to. Please read the Code of Conduct at the bottom of this document.
 
 ## License
 
-Lighthouse is distributed under the MIT License. By contributing to Lighthouse, you agree that your contributions will be licensed under the same license.
+lighthaus is distributed under the MIT License. By contributing to lighthaus, you agree that your contributions will be licensed under the same license.
 
 ## How to Contribute
 
-There are many ways to contribute to Lighthouse, from writing code, reporting bugs, suggesting enhancements, and more:
+There are many ways to contribute to lighthaus, from writing code, reporting bugs, suggesting enhancements, and more:
 
 ### Reporting Bugs
 
@@ -25,7 +25,7 @@ Before creating bug reports, please check the issue tracker to avoid duplicating
 
 ### Suggesting Enhancements
 
-Feature requests are welcome. Before submitting an enhancement suggestion, please check if it's already been proposed. When suggesting enhancements, include as much detail as possible and consider the scope and objectives of Lighthouse.
+Feature requests are welcome. Before submitting an enhancement suggestion, please check if it's already been proposed. When suggesting enhancements, include as much detail as possible and consider the scope and objectives of lighthaus.
 
 ### Code Contributions
 
@@ -44,11 +44,11 @@ Not sure where to start? Look for issues tagged with `good-first-issue` or `help
 
 ## Setting Up Your Development Environment
 
-Please refer to the README.md file for instructions on setting up your development environment to start working on Lighthouse.
+Please refer to the README.md file for instructions on setting up your development environment to start working on lighthaus.
 
 ## Pull Requests
 
-We actively welcome your pull requests. If you've added code, please ensure it adheres to Lighthouse's coding style. Include unit tests for any new functionality and ensure that all tests pass.
+We actively welcome your pull requests. If you've added code, please ensure it adheres to lighthaus's coding style. Include unit tests for any new functionality and ensure that all tests pass.
 
 ## Additional Guidelines
 
@@ -56,11 +56,11 @@ We actively welcome your pull requests. If you've added code, please ensure it a
 - Document new code based on the project's standard.
 - Ensure your code is clean and well-commented.
 
-Thank you for contributing to Lighthouse, where your efforts help shine a light on open-source development!
+Thank you for contributing to lighthaus, where your efforts help shine a light on open-source development!
 
 ---
 
-# Code of Conduct for Lighthouse
+# Code of Conduct for lighthaus
 
 ## Our Pledge
 

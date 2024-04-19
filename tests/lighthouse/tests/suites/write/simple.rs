@@ -5,15 +5,15 @@ use crate::utils::{
 };
 use anchor_lang::*;
 use borsh::BorshSerialize;
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::instructions::{
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::instructions::{
     AssertAccountDataBuilder, AssertAccountDeltaBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
 };
-use lighthouse_sdk::types::{
+use lighthaus_sdk::types::{
     AccountDeltaAssertion, AccountInfoField, DataValue, DataValueAssertion,
     DataValueDeltaAssertion, EquatableOperator, IntegerOperator, LogLevel, WriteType,
 };
-use lighthouse_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
+use lighthaus_sdk::{find_memory_pda, find_memory_pda_bump_iterate};
 use solana_program_test::tokio;
 use solana_sdk::instruction::Instruction;
 use solana_sdk::pubkey::Pubkey;
@@ -52,7 +52,7 @@ async fn write_account_data() {
             .payer(user.encodable_pubkey())
             .source_account(test_account.encodable_pubkey())
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
             .write_offset(0)
@@ -81,7 +81,7 @@ async fn write_account_data() {
         &[
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -90,7 +90,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::I8 {
                     value: -1,
                     operator: IntegerOperator::Equal,
@@ -99,7 +99,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U16 {
                     value: (u8::MAX as u16) + 1,
                     operator: IntegerOperator::Equal,
@@ -108,7 +108,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::I16 {
                     value: (i8::MIN as i16) - 1,
                     operator: IntegerOperator::Equal,
@@ -117,7 +117,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U32 {
                     value: (u16::MAX as u32) + 1,
                     operator: IntegerOperator::Equal,
@@ -126,7 +126,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::I32 {
                     value: (i16::MIN as i32) - 1,
                     operator: IntegerOperator::Equal,
@@ -135,7 +135,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U64 {
                     value: (u32::MAX as u64) + 1,
                     operator: IntegerOperator::Equal,
@@ -144,7 +144,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::I64 {
                     value: (i32::MIN as i64) - 1,
                     operator: IntegerOperator::Equal,
@@ -153,7 +153,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U128 {
                     value: (u64::MAX as u128) + 1,
                     operator: IntegerOperator::Equal,
@@ -162,7 +162,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::I128 {
                     value: (i64::MIN as i128) - 1,
                     operator: IntegerOperator::Equal,
@@ -171,7 +171,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32],
                     operator: EquatableOperator::Equal,
@@ -180,7 +180,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bool {
                     value: true,
                     operator: EquatableOperator::Equal,
@@ -190,7 +190,7 @@ async fn write_account_data() {
             // False represented as 0
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -200,7 +200,7 @@ async fn write_account_data() {
             // Some in Option<u8>
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -209,7 +209,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U8 {
                     value: u8::MAX,
                     operator: IntegerOperator::Equal,
@@ -218,7 +218,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -227,7 +227,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [1, 255, 255].to_vec(),
                     operator: EquatableOperator::Equal,
@@ -236,7 +236,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [0].to_vec(),
                     operator: EquatableOperator::Equal,
@@ -245,7 +245,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Pubkey {
                     value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
@@ -254,7 +254,7 @@ async fn write_account_data() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: [32, 0, 0, 0]
                         .iter()
@@ -287,7 +287,7 @@ async fn write_account_type() {
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
             .write_offset(offset)
@@ -322,7 +322,7 @@ async fn write_account_type() {
             build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: expected_blob.clone(),
                     operator: EquatableOperator::Equal,
@@ -358,9 +358,9 @@ async fn write_reallocation() {
         &[
             MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
-                .source_account(lighthouse_sdk::ID)
+                .source_account(lighthaus_sdk::ID)
                 .memory(memory)
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory_bump(memory_bump)
                 .write_offset(0)
                 .memory_id(0)
@@ -369,7 +369,7 @@ async fn write_reallocation() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U64 {
                     value: u64::MAX / 2,
                     operator: IntegerOperator::Equal,
@@ -393,8 +393,8 @@ async fn write_reallocation() {
         &[
             MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
-                .source_account(lighthouse_sdk::ID)
-                .program_id(lighthouse_sdk::ID)
+                .source_account(lighthaus_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
                 .write_offset(512)
@@ -404,8 +404,8 @@ async fn write_reallocation() {
                 .instruction(),
             MemoryWriteBuilder::new()
                 .payer(user.encodable_pubkey())
-                .source_account(lighthouse_sdk::ID)
-                .program_id(lighthouse_sdk::ID)
+                .source_account(lighthaus_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
                 .write_offset(128)
@@ -417,7 +417,7 @@ async fn write_reallocation() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U64 {
                     value: u64::MAX / 2,
                     operator: IntegerOperator::Equal,
@@ -426,7 +426,7 @@ async fn write_reallocation() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Pubkey {
                     value: random_keypair.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
@@ -435,7 +435,7 @@ async fn write_reallocation() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::U128 {
                     value: u128::MAX,
                     operator: IntegerOperator::Equal,
@@ -487,7 +487,7 @@ async fn token_transfer() {
     let mut ixs = vec![MemoryWriteBuilder::new()
         .payer(user.encodable_pubkey())
         .source_account(token_account)
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .memory(memory)
         .memory_id(0)
         .write_offset(0)
@@ -537,7 +537,7 @@ async fn token_transfer() {
             .instruction(),
         MemoryCloseBuilder::new()
             .payer(user.encodable_pubkey())
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_bump(memory_bump)
             .memory_id(0)
@@ -567,7 +567,7 @@ async fn write_to_another_memory_index() {
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(8)
             .memory_bump(memory_bump)
             .write_offset(offset)
@@ -597,7 +597,7 @@ async fn write_to_another_memory_index() {
             build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![MAX; 94],
                     operator: EquatableOperator::Equal,
@@ -627,7 +627,7 @@ async fn write_to_another_bump() {
             .payer(user.encodable_pubkey())
             .source_account(user.encodable_pubkey())
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(4)
             .memory_bump(memory_bump)
             .write_offset(offset)
@@ -657,7 +657,7 @@ async fn write_to_another_bump() {
             build_memory(127, WriteType::DataValue(DataValue::Bool(false))),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
-                .log_level(lighthouse_sdk::types::LogLevel::Silent)
+                .log_level(lighthaus_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![MAX; 94],
                     operator: EquatableOperator::Equal,
@@ -688,7 +688,7 @@ async fn cpi_check() {
             accounts: test_program::accounts::Write {
                 signer: user.encodable_pubkey(),
                 source_account: user.encodable_pubkey(),
-                lighthouse: lighthouse_sdk::ID,
+                lighthaus: lighthaus_sdk::ID,
                 system_program: system_program::id(),
                 memory,
             }
@@ -703,7 +703,7 @@ async fn cpi_check() {
     process_transaction_assert_failure(
         context,
         tx,
-        to_transaction_error(0, LighthouseError::CrossProgramInvokeViolation),
+        to_transaction_error(0, lighthausError::CrossProgramInvokeViolation),
         None,
     )
     .await
@@ -732,7 +732,7 @@ async fn account_info() {
             .payer(user.encodable_pubkey())
             .source_account(test_account.encodable_pubkey())
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
             .write_offset(offset)
@@ -787,7 +787,7 @@ async fn account_info_program() {
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user(context).await.unwrap();
 
-    let program_acount_info = &mut context.get_account(lighthouse_sdk::ID).await.unwrap();
+    let program_acount_info = &mut context.get_account(lighthaus_sdk::ID).await.unwrap();
 
     let program_account_data = &program_acount_info.data;
     let program_account_lamports = program_acount_info.lamports;
@@ -798,9 +798,9 @@ async fn account_info_program() {
     let builder_fn = |write_type: WriteType, offset: u16| {
         MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
             .memory(memory)
-            .program_id(lighthouse_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
             .write_offset(offset)
@@ -847,5 +847,5 @@ async fn account_info_program() {
     assert_eq!(actual_value, program_account_rent_epoch);
 
     let actual_value = Pubkey::try_from_slice(&account_data[64..96]).unwrap();
-    assert_eq!(actual_value, lighthouse_sdk::ID);
+    assert_eq!(actual_value, lighthaus_sdk::ID);
 }

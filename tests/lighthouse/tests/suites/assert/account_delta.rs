@@ -6,13 +6,13 @@ use crate::utils::process_transaction_assert_success;
 use crate::utils::set_account_from_refs;
 use crate::utils::to_transaction_error;
 use borsh::BorshSerialize;
-use lighthouse_sdk::errors::LighthouseError;
-use lighthouse_sdk::find_memory_pda;
-use lighthouse_sdk::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
-use lighthouse_sdk::types::DataValueDeltaAssertion;
-use lighthouse_sdk::types::EquatableOperator;
-use lighthouse_sdk::types::IntegerOperator;
-use lighthouse_sdk::types::{
+use lighthaus_sdk::errors::lighthausError;
+use lighthaus_sdk::find_memory_pda;
+use lighthaus_sdk::instructions::{AssertAccountDeltaBuilder, MemoryWriteBuilder};
+use lighthaus_sdk::types::DataValueDeltaAssertion;
+use lighthaus_sdk::types::EquatableOperator;
+use lighthaus_sdk::types::IntegerOperator;
+use lighthaus_sdk::types::{
     AccountDeltaAssertion, AccountInfoDeltaAssertion, AccountInfoField, LogLevel, WriteType,
 };
 use solana_program_test::tokio;
@@ -42,7 +42,7 @@ async fn slippage_check() {
                 .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
                 .write_offset(0)
@@ -76,7 +76,7 @@ async fn slippage_check() {
                 .memory(memory)
                 .payer(user.encodable_pubkey())
                 .source_account(user.encodable_pubkey())
-                .program_id(lighthouse_sdk::ID)
+                .program_id(lighthaus_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
                 .write_offset(0)
@@ -422,7 +422,7 @@ async fn test_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -465,7 +465,7 @@ async fn test_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -506,7 +506,7 @@ async fn test_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -547,7 +547,7 @@ async fn test_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -596,7 +596,7 @@ async fn test_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
+        to_transaction_error(0, lighthausError::AssertionFailed),
         None,
     )
     .await
@@ -660,7 +660,7 @@ async fn out_of_bounds_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+        to_transaction_error(0, lighthausError::RangeOutOfBounds),
         None,
     )
     .await
@@ -685,7 +685,7 @@ async fn out_of_bounds_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+        to_transaction_error(0, lighthausError::RangeOutOfBounds),
         None,
     )
     .await
@@ -709,7 +709,7 @@ async fn out_of_bounds_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+        to_transaction_error(0, lighthausError::RangeOutOfBounds),
         None,
     )
     .await
@@ -734,7 +734,7 @@ async fn out_of_bounds_account_info_delta() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::RangeOutOfBounds),
+        to_transaction_error(0, lighthausError::RangeOutOfBounds),
         None,
     )
     .await
@@ -769,7 +769,7 @@ async fn account_empty() {
     process_transaction_assert_failure(
         ctx,
         tx,
-        to_transaction_error(0, LighthouseError::AccountNotInitialized),
+        to_transaction_error(0, lighthausError::AccountNotInitialized),
         None,
     )
     .await

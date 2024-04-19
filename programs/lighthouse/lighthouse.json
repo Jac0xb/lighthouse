@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "lighthouse",
+  "name": "lighthaus",
   "instructions": [
     {
       "name": "MemoryWrite",
@@ -10,7 +10,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Lighthouse program"
+            "lighthaus program"
           ]
         },
         {
@@ -79,7 +79,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Lighthouse program"
+            "lighthaus program"
           ]
         },
         {

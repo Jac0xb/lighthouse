@@ -6,4 +6,4 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './lighthouse';
+export * from './lighthaus';

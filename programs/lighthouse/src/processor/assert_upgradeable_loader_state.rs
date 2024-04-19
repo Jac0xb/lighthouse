@@ -1,6 +1,6 @@
 use crate::{
     err, err_msg,
-    error::LighthouseError,
+    error::lighthausError,
     types::assert::{Assert, LogLevel},
     utils::{keys_equal, Result},
 };
@@ -23,7 +23,7 @@ impl<'a, 'info> AssertUpgradeableLoaderStateContext<'a, 'info> {
             upgradeable_loader_account.owner,
             &bpf_loader_upgradeable::ID,
         ) {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            return Err(lighthausError::AccountOwnerMismatch.into());
         }
 
         Ok(Self {
@@ -44,11 +44,11 @@ pub(crate) fn assert_upgradeable_loader_state<
     let data = ctx
         .upgradeable_loader_account
         .try_borrow_data()
-        .map_err(LighthouseError::failed_borrow_err)?;
+        .map_err(lighthausError::failed_borrow_err)?;
 
     let state: UpgradeableLoaderState = bincode::deserialize(&data).map_err(|e| {
         err_msg!("Failed to deserialize upgradeable loader state", e);
-        err!(LighthouseError::AccountBorrowFailed)
+        err!(lighthausError::AccountBorrowFailed)
     })?;
 
     assertion.evaluate(&state, log_level)
@@ -66,17 +66,17 @@ pub(crate) fn assert_upgradeable_loader_state_multi<
     let data = ctx
         .upgradeable_loader_account
         .try_borrow_data()
-        .map_err(LighthouseError::failed_borrow_err)?;
+        .map_err(lighthausError::failed_borrow_err)?;
 
     let state: UpgradeableLoaderState = bincode::deserialize(&data).map_err(|e| {
         err_msg!("Failed to deserialize upgradeable loader state", e);
-        err!(LighthouseError::AccountBorrowFailed)
+        err!(lighthausError::AccountBorrowFailed)
     })?;
 
     for (i, assertion) in assertions.iter().enumerate() {
         assertion
             .evaluate(&state, log_level)
-            .map_err(|e| LighthouseError::map_multi_err(e, i as u32))?;
+            .map_err(|e| lighthausError::map_multi_err(e, i as u32))?;
     }
 
     Ok(())

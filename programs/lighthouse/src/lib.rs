@@ -15,20 +15,20 @@ pub use utils::Result;
 pub mod security {
     use solana_security_txt::security_txt;
     security_txt! {
-        name: "Lighthouse Protocol",
-        project_url: "https://github.com/Jac0xb/lighthouse",
+        name: "lighthaus Protocol",
+        project_url: "https://github.com/Jac0xb/lighthaus",
         contacts: "email:jacob@rektdefi.net",
         preferred_languages: "en",
-        source_code: "https://github.com/Jac0xb/lighthouse"
+        source_code: "https://github.com/Jac0xb/lighthaus"
     }
 }
 
 declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
-pub mod lighthouse {
+pub mod lighthaus {
     use crate::processor;
     use crate::processor::*;
     use crate::types::assert::LogLevel;
-    use crate::{error::LighthouseError, instruction::LighthouseInstruction};
+    use crate::{error::lighthausError, instruction::lighthausInstruction};
     use borsh::BorshDeserialize;
     use solana_program::{
         account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey,
@@ -43,15 +43,15 @@ pub mod lighthouse {
         instruction_data: &[u8],
     ) -> ProgramResult {
         let mut remaining_instruction_data = instruction_data;
-        let instruction = LighthouseInstruction::deserialize(&mut remaining_instruction_data)
-            .or(Err(LighthouseError::InvalidInstructionData))?;
+        let instruction = lighthausInstruction::deserialize(&mut remaining_instruction_data)
+            .or(Err(lighthausError::InvalidInstructionData))?;
 
         if instruction.get_log_level() == LogLevel::PlaintextMessage {
             msg!("Instruction: {}", instruction.get_name());
         }
 
         match instruction {
-            LighthouseInstruction::MemoryWrite {
+            lighthausInstruction::MemoryWrite {
                 memory_id,
                 memory_bump,
                 write_offset,
@@ -66,111 +66,111 @@ pub mod lighthouse {
                 )?;
                 processor::memory_write(&ctx, write_offset, &write_type)?;
             }
-            LighthouseInstruction::MemoryClose {
+            lighthausInstruction::MemoryClose {
                 memory_id,
                 memory_bump,
             } => {
                 let ctx = MemoryCloseContext::load(&mut accounts.iter(), memory_id, memory_bump)?;
                 processor::memory_close(&ctx)?;
             }
-            LighthouseInstruction::AssertAccountData {
+            lighthausInstruction::AssertAccountData {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account(ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertAccountDelta {
+            lighthausInstruction::AssertAccountDelta {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertAccountDeltaContext::load(&mut accounts.iter())?;
                 processor::assert_account_delta(&ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertAccountInfo {
+            lighthausInstruction::AssertAccountInfo {
                 assertion,
                 log_level,
             } => {
                 let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account(ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertAccountInfoMulti {
+            lighthausInstruction::AssertAccountInfoMulti {
                 log_level,
                 assertions,
             } => {
                 let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account_multi(ctx, &assertions, log_level)?;
             }
-            LighthouseInstruction::AssertMintAccount {
+            lighthausInstruction::AssertMintAccount {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertMintAccountContext::load(&mut accounts.iter())?;
                 processor::assert_mint_account(ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertMintAccountMulti {
+            lighthausInstruction::AssertMintAccountMulti {
                 log_level,
                 assertions,
             } => {
                 let ctx = AssertMintAccountContext::load(&mut accounts.iter())?;
                 processor::assert_mint_account_multi(ctx, &assertions, log_level)?;
             }
-            LighthouseInstruction::AssertTokenAccount {
+            lighthausInstruction::AssertTokenAccount {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertTokenAccountContext::load(&mut accounts.iter())?;
                 processor::assert_token_account(ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertTokenAccountMulti {
+            lighthausInstruction::AssertTokenAccountMulti {
                 log_level,
                 assertions,
             } => {
                 let ctx = AssertTokenAccountContext::load(&mut accounts.iter())?;
                 processor::assert_token_account_multi(ctx, &assertions, log_level)?;
             }
-            LighthouseInstruction::AssertStakeAccount {
+            lighthausInstruction::AssertStakeAccount {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertStakeAccountContext::load(&mut accounts.iter())?;
                 processor::assert_stake_account(ctx, assertion, log_level)?;
             }
-            LighthouseInstruction::AssertStakeAccountMulti {
+            lighthausInstruction::AssertStakeAccountMulti {
                 log_level,
                 assertions,
             } => {
                 let ctx = AssertStakeAccountContext::load(&mut accounts.iter())?;
                 processor::assert_stake_account_multi(ctx, &assertions, log_level)?
             }
-            LighthouseInstruction::AssertUpgradeableLoaderAccount {
+            lighthausInstruction::AssertUpgradeableLoaderAccount {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertUpgradeableLoaderStateContext::load(&mut accounts.iter())?;
                 processor::assert_upgradeable_loader_state(ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertUpgradeableLoaderAccountMulti {
+            lighthausInstruction::AssertUpgradeableLoaderAccountMulti {
                 log_level,
                 assertions,
             } => {
                 let ctx = AssertUpgradeableLoaderStateContext::load(&mut accounts.iter())?;
                 processor::assert_upgradeable_loader_state_multi(ctx, &assertions, log_level)?;
             }
-            LighthouseInstruction::AssertSysvarClock {
+            lighthausInstruction::AssertSysvarClock {
                 log_level,
                 assertion,
             } => {
                 processor::assert_clock(&assertion, log_level)?;
             }
-            LighthouseInstruction::AssertMerkleTreeAccount {
+            lighthausInstruction::AssertMerkleTreeAccount {
                 log_level,
                 assertion,
             } => {
                 let ctx = AssertMerkleTreeAccountContext::load(&mut accounts.iter())?;
                 processor::assert_merkle_tree_account(&ctx, &assertion, log_level)?;
             }
-            LighthouseInstruction::AssertBubblegumTreeConfigAccount {
+            lighthausInstruction::AssertBubblegumTreeConfigAccount {
                 log_level,
                 assertion,
             } => {

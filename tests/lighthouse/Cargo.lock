@@ -2237,7 +2237,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
+name = "lighthaus-sdk"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.0",
@@ -2250,7 +2250,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse_tests"
+name = "lighthaus_tests"
 version = "0.0.1"
 dependencies = [
  "anchor-lang",
@@ -2262,7 +2262,7 @@ dependencies = [
  "borsh 0.10.3",
  "bubblegum",
  "bytemuck",
- "lighthouse-sdk",
+ "lighthaus-sdk",
  "mpl-bubblegum",
  "mpl-token-metadata",
  "rand 0.8.5",
@@ -5437,7 +5437,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "arrayref",
- "lighthouse-sdk",
+ "lighthaus-sdk",
  "solana-program",
 ]
 

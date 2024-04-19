@@ -2124,7 +2124,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
+name = "lighthaus-sdk"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.0",
@@ -5135,7 +5135,7 @@ dependencies = [
  "anchor-spl",
  "arrayref",
  "async-trait",
- "lighthouse-sdk",
+ "lighthaus-sdk",
  "regex",
  "solana-banks-interface",
  "solana-program",

@@ -1,6 +1,6 @@
 ---
 title: Memory Write
-metaTitle: Lighthouse - Memory Write
+metaTitle: lighthaus - Memory Write
 description: MemoryWrite Instruction.
 ---
 
@@ -45,7 +45,7 @@ The following instruction writes the first 72 bytes of a token account to memory
 MemoryWriteBuilder::new()
   .payer(user.encodable_pubkey())
   .source_account(token_account_key)
-  .program_id(lighthouse_sdk::ID)
+  .program_id(lighthaus_sdk::ID)
   .memory(memory_key)
   .memory_id(0)
   .memory_bump(memory_bump)
@@ -111,7 +111,7 @@ Lastly, you can close the memory account to free up rent.
 ```rust
     MemoryCloseBuilder::new()
         .payer(user.encodable_pubkey())
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .memory(memory)
         .memory_bump(memory_bump)
         .memory_id(0)
@@ -135,7 +135,7 @@ let builder_fn = |write_type: WriteType, offset: u16| {
     MemoryWriteBuilder::new()
         .payer(user_key)
         .source_account(test_account_key)
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .memory(memory)
         .memory_id(0)
         .memory_bump(memory_bump)
@@ -166,15 +166,15 @@ let tx = Transaction::new_signed_with_payer(
 
 ### Example: Writing data value to a memory account using DataValue write type
 
-The following example writes a u128 and a pubkey to a memory account and then asserts on the written values using lighthouse assertions.
+The following example writes a u128 and a pubkey to a memory account and then asserts on the written values using lighthaus assertions.
 
 ```rust
 let tx = Transaction::new_signed_with_payer(
     &[
         MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
-            .program_id(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .memory_bump(memory_bump)
@@ -184,8 +184,8 @@ let tx = Transaction::new_signed_with_payer(
             .instruction(),
         MemoryWriteBuilder::new()
             .payer(user.encodable_pubkey())
-            .source_account(lighthouse_sdk::ID)
-            .program_id(lighthouse_sdk::ID)
+            .source_account(lighthaus_sdk::ID)
+            .program_id(lighthaus_sdk::ID)
             .memory(memory)
             .memory_id(0)
             .memory_bump(memory_bump)
@@ -234,9 +234,9 @@ let tx = Transaction::new_signed_with_payer(
         .memory(memory_key)
         .memory_id(4)   // You can write to multiple memory accounts in a single transaction
         .memory_bump(memory_bump)
-        .program_id(lighthouse_sdk::ID)
+        .program_id(lighthaus_sdk::ID)
         .payer(user.encodable_pubkey())
-        .source_account(lighthouse_sdk::ID) // This is ignore so should be an account already in the transaction to save transaction space.
+        .source_account(lighthaus_sdk::ID) // This is ignore so should be an account already in the transaction to save transaction space.
         .write_offset(0)
         .write_type(WriteType::Clock(ClockField::Slot))
         .instruction()],

@@ -12,8 +12,8 @@ use shank::ShankInstruction;
 
 #[derive(BorshSerialize, BorshDeserialize, ShankInstruction)]
 #[rustfmt::skip]
-pub(crate) enum LighthouseInstruction {
-    #[account(0, name = "program_id", desc = "Lighthouse program")]
+pub(crate) enum lighthausInstruction {
+    #[account(0, name = "program_id", desc = "lighthaus program")]
     #[account(1, name = "system_program", desc = "System program")]
     #[account(2, name = "payer", desc = "Payer account", signer, writable)]
     #[account(3, name = "memory", desc = "Memory account", writable)]
@@ -25,7 +25,7 @@ pub(crate) enum LighthouseInstruction {
         write_type: WriteType,
     },
 
-    #[account(0, name = "program_id", desc = "Lighthouse program")]
+    #[account(0, name = "program_id", desc = "lighthaus program")]
     #[account(1, name = "payer", desc = "Payer account", signer, writable)]
     #[account(2, name = "memory", desc = "Memory account", writable)]
     MemoryClose { memory_id: u8, memory_bump: u8 },
@@ -80,56 +80,56 @@ pub(crate) enum LighthouseInstruction {
     AssertBubblegumTreeConfigAccount { log_level: LogLevel, assertion: BubblegumTreeConfigAssertion },
 }
 
-impl LighthouseInstruction {
+impl lighthausInstruction {
     pub const fn get_name(&self) -> &'static str {
         match self {
-            LighthouseInstruction::MemoryWrite { .. } => "MemoryWrite",
-            LighthouseInstruction::MemoryClose { .. } => "MemoryClose",
-            LighthouseInstruction::AssertAccountData { .. } => "AssertAccountData",
-            LighthouseInstruction::AssertAccountDelta { .. } => "AssertAccountDelta",
-            LighthouseInstruction::AssertAccountInfo { .. } => "AssertAccountInfo",
-            LighthouseInstruction::AssertAccountInfoMulti { .. } => "AssertAccountInfoMulti",
-            LighthouseInstruction::AssertMintAccount { .. } => "AssertMintAccount",
-            LighthouseInstruction::AssertMintAccountMulti { .. } => "AssertMintAccountMulti",
-            LighthouseInstruction::AssertTokenAccount { .. } => "AssertTokenAccount",
-            LighthouseInstruction::AssertTokenAccountMulti { .. } => "AssertTokenAccountMulti",
-            LighthouseInstruction::AssertStakeAccount { .. } => "AssertStakeAccount",
-            LighthouseInstruction::AssertStakeAccountMulti { .. } => "AssertStakeAccountMulti",
-            LighthouseInstruction::AssertUpgradeableLoaderAccount { .. } => {
+            lighthausInstruction::MemoryWrite { .. } => "MemoryWrite",
+            lighthausInstruction::MemoryClose { .. } => "MemoryClose",
+            lighthausInstruction::AssertAccountData { .. } => "AssertAccountData",
+            lighthausInstruction::AssertAccountDelta { .. } => "AssertAccountDelta",
+            lighthausInstruction::AssertAccountInfo { .. } => "AssertAccountInfo",
+            lighthausInstruction::AssertAccountInfoMulti { .. } => "AssertAccountInfoMulti",
+            lighthausInstruction::AssertMintAccount { .. } => "AssertMintAccount",
+            lighthausInstruction::AssertMintAccountMulti { .. } => "AssertMintAccountMulti",
+            lighthausInstruction::AssertTokenAccount { .. } => "AssertTokenAccount",
+            lighthausInstruction::AssertTokenAccountMulti { .. } => "AssertTokenAccountMulti",
+            lighthausInstruction::AssertStakeAccount { .. } => "AssertStakeAccount",
+            lighthausInstruction::AssertStakeAccountMulti { .. } => "AssertStakeAccountMulti",
+            lighthausInstruction::AssertUpgradeableLoaderAccount { .. } => {
                 "AssertUpgradeableLoaderAccount"
             }
-            LighthouseInstruction::AssertUpgradeableLoaderAccountMulti { .. } => {
+            lighthausInstruction::AssertUpgradeableLoaderAccountMulti { .. } => {
                 "AssertUpgradeableLoaderAccountMulti"
             }
-            LighthouseInstruction::AssertSysvarClock { .. } => "AssertSysvarClock",
-            LighthouseInstruction::AssertBubblegumTreeConfigAccount { .. } => {
+            lighthausInstruction::AssertSysvarClock { .. } => "AssertSysvarClock",
+            lighthausInstruction::AssertBubblegumTreeConfigAccount { .. } => {
                 "AssertBubblegumTreeConfigAccount"
             }
-            LighthouseInstruction::AssertMerkleTreeAccount { .. } => "AssertMerkleTreeAccount",
+            lighthausInstruction::AssertMerkleTreeAccount { .. } => "AssertMerkleTreeAccount",
         }
     }
 
     pub fn get_log_level(&self) -> LogLevel {
         match self {
-            LighthouseInstruction::MemoryWrite { .. } => LogLevel::Silent,
-            LighthouseInstruction::MemoryClose { .. } => LogLevel::Silent,
-            LighthouseInstruction::AssertAccountData { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertAccountDelta { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertAccountInfo { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertAccountInfoMulti { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertMintAccount { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertMintAccountMulti { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertTokenAccount { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertTokenAccountMulti { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertStakeAccount { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertStakeAccountMulti { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertUpgradeableLoaderAccount { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertUpgradeableLoaderAccountMulti { log_level, .. } => {
+            lighthausInstruction::MemoryWrite { .. } => LogLevel::Silent,
+            lighthausInstruction::MemoryClose { .. } => LogLevel::Silent,
+            lighthausInstruction::AssertAccountData { log_level, .. } => *log_level,
+            lighthausInstruction::AssertAccountDelta { log_level, .. } => *log_level,
+            lighthausInstruction::AssertAccountInfo { log_level, .. } => *log_level,
+            lighthausInstruction::AssertAccountInfoMulti { log_level, .. } => *log_level,
+            lighthausInstruction::AssertMintAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertMintAccountMulti { log_level, .. } => *log_level,
+            lighthausInstruction::AssertTokenAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertTokenAccountMulti { log_level, .. } => *log_level,
+            lighthausInstruction::AssertStakeAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertStakeAccountMulti { log_level, .. } => *log_level,
+            lighthausInstruction::AssertUpgradeableLoaderAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertUpgradeableLoaderAccountMulti { log_level, .. } => {
                 *log_level
             }
-            LighthouseInstruction::AssertBubblegumTreeConfigAccount { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertSysvarClock { log_level, .. } => *log_level,
-            LighthouseInstruction::AssertMerkleTreeAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertBubblegumTreeConfigAccount { log_level, .. } => *log_level,
+            lighthausInstruction::AssertSysvarClock { log_level, .. } => *log_level,
+            lighthausInstruction::AssertMerkleTreeAccount { log_level, .. } => *log_level,
         }
     }
 }

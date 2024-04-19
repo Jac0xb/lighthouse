@@ -9,7 +9,7 @@ use num_derive::FromPrimitive;
 use thiserror::Error;
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
-pub enum LighthouseError {
+pub enum lighthausError {
     /// 6000 (0x1770) - Invalid instruction
     #[error("Invalid instruction")]
     InvalidInstructionData,
@@ -63,7 +63,7 @@ pub enum LighthouseError {
     CrossProgramInvokeViolation,
 }
 
-impl solana_program::program_error::PrintProgramError for LighthouseError {
+impl solana_program::program_error::PrintProgramError for lighthausError {
     fn print<E>(&self) {
         solana_program::msg!(&self.to_string());
     }

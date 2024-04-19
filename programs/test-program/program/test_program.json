@@ -57,7 +57,7 @@
           "isSigner": false
         },
         {
-          "name": "lighthouse",
+          "name": "lighthaus",
           "isMut": false,
           "isSigner": false
         },

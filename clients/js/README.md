@@ -1,3 +1,3 @@
 # JavaScript client
 
-A generated JavaScript library for the Lighthouse program.
+A generated JavaScript library for the lighthaus program.

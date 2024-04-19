@@ -1,12 +1,12 @@
 ---
 title: Overview
-metaTitle: Lighthouse - Overview
+metaTitle: lighthaus - Overview
 description:
 ---
 
 ## Assert Instruction Types
 
-The assert instructions for Lighthouse are the main building blocks for asserting on runtime state within the SVM while a transaction is being processed.
+The assert instructions for lighthaus are the main building blocks for asserting on runtime state within the SVM while a transaction is being processed.
 
 There are assertions such as `AssertAccountInfo`, `AssertAccountData`, and `AssertAccountDelta` which are used to make generic assertions about onchciain state.
 

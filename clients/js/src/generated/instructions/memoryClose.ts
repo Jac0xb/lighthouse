@@ -131,7 +131,7 @@ export type MemoryCloseInput<
   TAccountPayer extends string,
   TAccountMemory extends string
 > = {
-  /** Lighthouse program */
+  /** lighthaus program */
   programId?: Address<TAccountProgramId>;
   /** Payer account */
   payer: Address<TAccountPayer>;
@@ -146,7 +146,7 @@ export type MemoryCloseInputWithSigners<
   TAccountPayer extends string,
   TAccountMemory extends string
 > = {
-  /** Lighthouse program */
+  /** lighthaus program */
   programId?: Address<TAccountProgramId>;
   /** Payer account */
   payer: TransactionSigner<TAccountPayer>;
@@ -293,7 +293,7 @@ export type ParsedMemoryCloseInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Lighthouse program */
+    /** lighthaus program */
     programId: TAccountMetas[0];
     /** Payer account */
     payer: TAccountMetas[1];

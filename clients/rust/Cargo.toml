@@ -1,11 +1,11 @@
 [package]
-name = "lighthouse-sdk"
+name = "lighthaus-sdk"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
 license-file = "../../LICENSE"
-description = "A rust client for Lighthouse, a transaction safeguard Solana program"
-repository = "https://github.com/Jac0xb/lighthouse"
+description = "A rust client for lighthaus, a transaction safeguard Solana program"
+repository = "https://github.com/Jac0xb/lighthaus"
 license = "MIT"
 
 [lib]

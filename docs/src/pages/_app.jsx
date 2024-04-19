@@ -25,14 +25,14 @@ export default function App({ Component, pageProps }) {
         <meta property="og:title" content={page.metaTitle} />
         <meta name="twitter:title" content={page.metaTitle} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="http://lighthouse.voyage/" />
+        <meta property="twitter:domain" content="http://lighthaus.voyage/" />
         <meta
           property="og:image"
-          content="https://lighthouse.voyage/assets/lighthouse_widescreen.png"
+          content="https://lighthaus.voyage/assets/lighthaus_widescreen.png"
         />
         <meta
           name="twitter:image"
-          content="https://lighthouse.voyage/assets/lighthouse_widescreen.png"
+          content="https://lighthaus.voyage/assets/lighthaus_widescreen.png"
         />
 
         {page.description && (

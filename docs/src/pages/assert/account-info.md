@@ -29,7 +29,7 @@ pub struct AccountInfo<'a> {
 }
 ```
 
-Lighthouse exposes asserting on these `AccountInfo` through the assertion types `AssertAccountInfo` and `AssertAccountDelta` (which is discussed in [here](/assert/account-delta)).
+lighthaus exposes asserting on these `AccountInfo` through the assertion types `AssertAccountInfo` and `AssertAccountDelta` (which is discussed in [here](/assert/account-delta)).
 
 ### Lamports
 
@@ -212,7 +212,7 @@ To save transaction space it is possible to assert on account data by hashing a 
 
 Fields of the `VerifyDatahash` assertion are:
 
-`expected_hash` - the expected keccak hash which will be compared to what the lighthouse program hashes at runtime. If they do not match the program will throw a AssertionFailed error.
+`expected_hash` - the expected keccak hash which will be compared to what the lighthaus program hashes at runtime. If they do not match the program will throw a AssertionFailed error.
 
 `start` - the start index of the account data slice to be hashed. If `None`, start is 0.
 
@@ -291,7 +291,7 @@ To save transaction space there is an instruction AssertAccountInfoMulti which a
 let tx = Transaction::new_signed_with_payer(
     &[AssertAccountInfoMultiBuilder::new()
         .target_account(user_key)
-        .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
+        .log_level(lighthaus_sdk::types::LogLevel::PlaintextMessage)
         .assertions(vec![
             AccountInfoAssertion::Owner {
                 value: system_program::ID,

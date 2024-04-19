@@ -6,7 +6,7 @@ export function Hero({ page }) {
     <BaseHero page={page} subDescription="" primaryCta={undefined}>
       <HeroScreenshot
         src="/assets/splash.png"
-        alt="A screenshot of a lighthouse"
+        alt="A screenshot of a lighthaus"
         width={1392}
         height={860}
       />

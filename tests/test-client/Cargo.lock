@@ -2111,7 +2111,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-sdk"
+name = "lighthaus-sdk"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.0",
@@ -2123,14 +2123,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "lighthouse-test-client"
+name = "lighthaus-test-client"
 version = "0.1.0"
 dependencies = [
  "anchor-spl",
  "bincode",
  "borsh 0.10.3",
  "clap 4.5.1",
- "lighthouse-sdk",
+ "lighthaus-sdk",
  "rayon",
  "serde_json",
  "solana-client",

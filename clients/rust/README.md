@@ -1,3 +1,3 @@
 # Rust client
 
-A generated Rust library for the Lighthouse program.
+A generated Rust library for the lighthaus program.

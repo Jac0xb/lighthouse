@@ -1,6 +1,6 @@
 use std::any::type_name;
 
-use crate::error::LighthouseError;
+use crate::error::lighthausError;
 use borsh::BorshDeserialize;
 use sha2_const_stable::Sha256;
 use solana_program::{
@@ -27,7 +27,7 @@ pub fn unpack_coption_key(src: &[u8]) -> Result<Option<&Pubkey>> {
         [1, 0, 0, 0] => Ok(Option::Some(bytemuck::from_bytes(body))),
         _ => {
             msg!("Failed to deserialize COption<Pubkey> src: {:?}", src);
-            Err(LighthouseError::FailedToDeserialize.into())
+            Err(lighthausError::FailedToDeserialize.into())
         }
     }
 }
@@ -41,7 +41,7 @@ pub fn unpack_coption_u64(src: &[u8]) -> Result<Option<u64>> {
         [1, 0, 0, 0] => Ok(Option::Some(u64::from_le_bytes(body.try_into().unwrap()))),
         _ => {
             msg!("Failed to deserialize COption<u64> src: {:?}", src);
-            Err(LighthouseError::FailedToDeserialize.into())
+            Err(lighthausError::FailedToDeserialize.into())
         }
     }
 }
@@ -62,7 +62,7 @@ pub fn try_from_slice<T: BorshDeserialize + Sized>(
             start..end
         );
 
-        LighthouseError::RangeOutOfBounds
+        lighthausError::RangeOutOfBounds
     })?;
 
     Ok(T::try_from_slice(slice)?)

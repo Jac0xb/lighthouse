@@ -24,5 +24,5 @@ if [ ! -d ${PROGRAMS_OUTPUT_DIR} ]; then
 fi
 
 # for p in ${PROGRAMS[@]}; do
-cd ${WORKING_DIR}/tests/lighthouse
+cd ${WORKING_DIR}/tests/lighthaus
 cargo build
