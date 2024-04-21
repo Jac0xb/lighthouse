@@ -17,6 +17,32 @@ Using this over verify_leaf instruction saves 31 bytes (32 bytes reduced to 1 by
 To verify leaf using Lighthouse, fetch the proof path and generate the hash of the state you expect the leaf node to have at the end of the transaction.
 
 {% dialect-switcher title="Verify leaf through Lighthouse instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const proofPath: IAccountMeta[] = []
+
+const ix = getAssertMerkleTreeAccountInstructionRaw(
+  {
+    targetMerkleTree: treePubkey,
+    root: treeRoot,
+    splAccountCompression: splAccountCompressionProgramId,
+  },
+  {
+    assertion: {
+      __kind: 'VerifyLeaf',
+      leafIndex: leafIndex,
+      leafHash: expectedLeafHash,
+    },
+  },
+  LIGHTHOUSE_PROGRAM_ADDRESS,
+  proofPath
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

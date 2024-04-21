@@ -99,6 +99,33 @@ pub enum UpgradeableProgramDataAssertion {
 In this example, we assert that the upgradeable loader account is in the `Buffer` state.
 
 {% dialect-switcher title="Assert state transaction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: upgradeableLoaderAccount,
+          assertion: upgradeableLoaderStateAssertion('State', {
+            value: UpgradeableLoaderStateType.Buffer,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -144,6 +171,41 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 In this example, we assert that the authority of the buffer of the upgradeable loader account is equal to a specific pubkey.
 
 {% dialect-switcher title="Assert state + assert buffer transaction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programKey,
+          assertion: upgradeableLoaderStateAssertion('State', {
+            value: UpgradeableLoaderStateType.Buffer,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programKey,
+          assertion: upgradeableLoaderStateAssertion('Buffer', {
+            __kind: 'Authority',
+            value: authorityKey,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -214,6 +276,41 @@ let tx = Transaction::new_signed_with_payer(
 In this example, we assert that the program data address of the upgradeable loader account is equal to a specific pubkey.
 
 {% dialect-switcher title="Assert state + assert program transaction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programKey,
+          assertion: upgradeableLoaderStateAssertion('State', {
+            value: UpgradeableLoaderStateType.Program,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programKey,
+          assertion: upgradeableLoaderStateAssertion('Program', {
+            __kind: 'ProgramDataAddress',
+            value: programDataKey,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -284,6 +381,49 @@ let tx = Transaction::new_signed_with_payer(
 In this example, we assert that the upgrade authority of the program data of the upgradeable loader account is equal to a specific pubkey and that the slot of the upgrade matches a specific slot.
 
 {% dialect-switcher title="Assert state + assert program data transaction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programDataKey,
+          assertion: upgradeableLoaderStateAssertion('State', {
+            value: UpgradeableLoaderStateType.ProgramData,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programDataKey,
+          assertion: upgradeableLoaderStateAssertion('ProgramData', {
+            __kind: 'UpgradeAuthority',
+            value: upgradeAuthority,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertUpgradeableLoaderAccountInstruction({
+          targetAccount: programDataKey,
+          assertion: upgradeableLoaderStateAssertion('ProgramData', {
+            __kind: 'Slot',
+            value: expectedSlot,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

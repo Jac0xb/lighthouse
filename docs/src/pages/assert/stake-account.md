@@ -105,6 +105,35 @@ pub enum StakeAssertion {
 In this example, we assert that the stake account is in the `Stake` state.
 
 {% dialect-switcher title="Assert state instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertTokenAccountMultiInstruction({
+          targetAccount: stakeAccount,
+          assertions: [
+            stakeAccountAssertion('State', {
+              value: StakeStateType.Stake,
+              operator: EquatableOperator.Equal,
+            }),
+          ],
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -150,6 +179,68 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake` or `Initialized`, we can make assertions on the stake account. The following assertions will pass:
 
 {% dialect-switcher title="Assert meta instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('LockupCustodian', {
+            value: meta.lockup.custodian,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('LockupEpoch', {
+            value: meta.lockup.epoch,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('LockupUnixTimestamp', {
+            value: meta.lockup.unixTimestamp,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('AuthorizedStaker', {
+            value: meta.authorized.staker,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('AuthorizedWithdrawer', {
+            value: meta.authorized.withdrawer,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: metaAssertion('RentExemptReserve', {
+            value: meta.rentExemptReserve,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -323,6 +414,66 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake`, we can make assertions on the stake account. The following assertions will pass:
 
 {% dialect-switcher title="Assert stake instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeAssertion', {
+            __kind: 'CreditsObserved',
+            value: stake.creditsObserved,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeAssertion', {
+            __kind: 'DelegationStake',
+            value: stake.delegation.stake,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeAssertion', {
+            __kind: 'DelegationDeactivationEpoch',
+            value: stake.delegation.deactivationEpoch,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeAssertion', {
+            __kind: 'DelegationActivationEpoch',
+            value: stake.delegation.activationEpoch,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeAssertion', {
+            __kind: 'DelegationVoterPubkey',
+            value: stake.delegation.voterPubkey,
+            operator: EquatableOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -474,6 +625,47 @@ The `IntegerOperator` allows you to make bitwise assertions on the `StakeFlags` 
 Assuming the `StakeFlags` of a particular stake account is `0b00000000`, the following assertions will pass:
 
 {% dialect-switcher title="Assert stake flags instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeFlags', {
+            value: 255,
+            operator: IntegerOperator.DoesNotContain,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeFlags', {
+            value: 0,
+            operator: IntegerOperator.Contains,
+          }),
+        }),
+        getAssertStakeAccountInstruction({
+          targetAccount: stakeAccount,
+          assertion: stakeAccountAssertion('StakeFlags', {
+            value: 0,
+            operator: IntegerOperator.Equal,
+          }),
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

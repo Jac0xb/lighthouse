@@ -74,6 +74,64 @@ let account = Account {
 Then, the following example shows how to build an instruction that asserts the token account's data.
 
 {% dialect-switcher title="Example of the types of assertions there are for the token account" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertTokenAccountMultiInstruction({
+          targetAccount,
+          assertions: [
+            tokenAccountAssertion('Mint', {
+              value: mintKey,
+              operator: EquatableOperator.Equal,
+            }),
+            tokenAccountAssertion('Owner', {
+              value: userKey,
+              operator: EquatableOperator.Equal,
+            }),
+            tokenAccountAssertion('Amount', {
+              value: 100,
+              operator: IntegerOperator.Equal,
+            }),
+            tokenAccountAssertion('Delegate', {
+              value: null,
+              operator: EquatableOperator.Equal,
+            }),
+            tokenAccountAssertion('State', {
+              value: 3,
+              operator: IntegerOperator.NotEqual,
+            }),
+            tokenAccountAssertion('IsNative', {
+              value: null,
+              operator: EquatableOperator.Equal,
+            }),
+            tokenAccountAssertion('DelegatedAmount', {
+              value: 0,
+              operator: IntegerOperator.LessThanOrEqual,
+            }),
+            tokenAccountAssertion('CloseAuthority', {
+              value: null,
+              operator: EquatableOperator.Equal,
+            }),
+            tokenAccountAssertion('TokenAccountOwnerIsDerived'),
+          ],
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userPubkey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

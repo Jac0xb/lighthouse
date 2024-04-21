@@ -58,6 +58,51 @@ let mint = Mint {
 Then, the following assertions could be made about that account.
 
 {% dialect-switcher title="Example of the types of assertions there are for the mint account" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getAssertTokenAccountMultiInstruction({
+          targetAccount: mintKey,
+          assertions: [
+            mintAccountAssertion('MintAuthority', {
+              value: userKey,
+              operator: EquatableOperator.Equal,
+            }),
+            mintAccountAssertion('Supply', {
+              value: 69_000,
+              operator: IntegerOperator.Equal,
+            }),
+            mintAccountAssertion('Decimals', {
+              value: 9,
+              operator: IntegerOperator.Equal,
+            }),
+            mintAccountAssertion('IsInitialized', {
+              value: true,
+              operator: EquatableOperator.Equal,
+            }),
+            mintAccountAssertion('FreezeAuthority', {
+              value: null,
+              operator: EquatableOperator.Equal,
+            }),
+          ],
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userKey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
