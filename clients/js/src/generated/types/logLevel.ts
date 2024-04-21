@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum LogLevel {
   Silent,
@@ -24,14 +17,8 @@ export enum LogLevel {
 
 export type LogLevelArgs = LogLevel;
 
-export function getLogLevelEncoder(): Encoder<LogLevelArgs> {
-  return getScalarEnumEncoder(LogLevel);
-}
-
-export function getLogLevelDecoder(): Decoder<LogLevel> {
-  return getScalarEnumDecoder(LogLevel);
-}
-
-export function getLogLevelCodec(): Codec<LogLevelArgs, LogLevel> {
-  return combineCodec(getLogLevelEncoder(), getLogLevelDecoder());
+export function getLogLevelSerializer(): Serializer<LogLevelArgs, LogLevel> {
+  return scalarEnum<LogLevel>(LogLevel, {
+    description: 'LogLevel',
+  }) as Serializer<LogLevelArgs, LogLevel>;
 }

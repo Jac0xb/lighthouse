@@ -6,48 +6,32 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  dataEnum,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type MintAccountAssertion =
   | {
       __kind: 'MintAuthority';
-      value: Option<Address>;
+      value: Option<PublicKey>;
       operator: EquatableOperator;
     }
   | { __kind: 'Supply'; value: bigint; operator: IntegerOperator }
@@ -55,14 +39,14 @@ export type MintAccountAssertion =
   | { __kind: 'IsInitialized'; value: boolean; operator: EquatableOperator }
   | {
       __kind: 'FreezeAuthority';
-      value: Option<Address>;
+      value: Option<PublicKey>;
       operator: EquatableOperator;
     };
 
 export type MintAccountAssertionArgs =
   | {
       __kind: 'MintAuthority';
-      value: OptionOrNullable<Address>;
+      value: OptionOrNullable<PublicKey>;
       operator: EquatableOperatorArgs;
     }
   | { __kind: 'Supply'; value: number | bigint; operator: IntegerOperatorArgs }
@@ -70,98 +54,56 @@ export type MintAccountAssertionArgs =
   | { __kind: 'IsInitialized'; value: boolean; operator: EquatableOperatorArgs }
   | {
       __kind: 'FreezeAuthority';
-      value: OptionOrNullable<Address>;
+      value: OptionOrNullable<PublicKey>;
       operator: EquatableOperatorArgs;
     };
 
-export function getMintAccountAssertionEncoder(): Encoder<MintAccountAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'MintAuthority',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Supply',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Decimals',
-      getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsInitialized',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'FreezeAuthority',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getMintAccountAssertionDecoder(): Decoder<MintAccountAssertion> {
-  return getDataEnumDecoder([
-    [
-      'MintAuthority',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Supply',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Decimals',
-      getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsInitialized',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'FreezeAuthority',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getMintAccountAssertionCodec(): Codec<
+export function getMintAccountAssertionSerializer(): Serializer<
   MintAccountAssertionArgs,
   MintAccountAssertion
 > {
-  return combineCodec(
-    getMintAccountAssertionEncoder(),
-    getMintAccountAssertionDecoder()
-  );
+  return dataEnum<MintAccountAssertion>(
+    [
+      [
+        'MintAuthority',
+        struct<GetDataEnumKindContent<MintAccountAssertion, 'MintAuthority'>>([
+          ['value', option(publicKeySerializer())],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Supply',
+        struct<GetDataEnumKindContent<MintAccountAssertion, 'Supply'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Decimals',
+        struct<GetDataEnumKindContent<MintAccountAssertion, 'Decimals'>>([
+          ['value', u8()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsInitialized',
+        struct<GetDataEnumKindContent<MintAccountAssertion, 'IsInitialized'>>([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'FreezeAuthority',
+        struct<GetDataEnumKindContent<MintAccountAssertion, 'FreezeAuthority'>>(
+          [
+            ['value', option(publicKeySerializer())],
+            ['operator', getEquatableOperatorSerializer()],
+          ]
+        ),
+      ],
+    ],
+    { description: 'MintAccountAssertion' }
+  ) as Serializer<MintAccountAssertionArgs, MintAccountAssertion>;
 }
 
 // Data Enum Helpers.
@@ -192,7 +134,6 @@ export function mintAccountAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isMintAccountAssertion<
   K extends MintAccountAssertion['__kind']
 >(

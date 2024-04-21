@@ -6,66 +6,54 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-  getUnitDecoder,
-  getUnitEncoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+  u8,
+  unit,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type TokenAccountAssertion =
-  | { __kind: 'Mint'; value: Address; operator: EquatableOperator }
-  | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
+  | { __kind: 'Mint'; value: PublicKey; operator: EquatableOperator }
+  | { __kind: 'Owner'; value: PublicKey; operator: EquatableOperator }
   | { __kind: 'Amount'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Delegate'; value: Option<Address>; operator: EquatableOperator }
+  | {
+      __kind: 'Delegate';
+      value: Option<PublicKey>;
+      operator: EquatableOperator;
+    }
   | { __kind: 'State'; value: number; operator: IntegerOperator }
   | { __kind: 'IsNative'; value: Option<bigint>; operator: EquatableOperator }
   | { __kind: 'DelegatedAmount'; value: bigint; operator: IntegerOperator }
   | {
       __kind: 'CloseAuthority';
-      value: Option<Address>;
+      value: Option<PublicKey>;
       operator: EquatableOperator;
     }
   | { __kind: 'TokenAccountOwnerIsDerived' };
 
 export type TokenAccountAssertionArgs =
-  | { __kind: 'Mint'; value: Address; operator: EquatableOperatorArgs }
-  | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
+  | { __kind: 'Mint'; value: PublicKey; operator: EquatableOperatorArgs }
+  | { __kind: 'Owner'; value: PublicKey; operator: EquatableOperatorArgs }
   | { __kind: 'Amount'; value: number | bigint; operator: IntegerOperatorArgs }
   | {
       __kind: 'Delegate';
-      value: OptionOrNullable<Address>;
+      value: OptionOrNullable<PublicKey>;
       operator: EquatableOperatorArgs;
     }
   | { __kind: 'State'; value: number; operator: IntegerOperatorArgs }
@@ -81,143 +69,81 @@ export type TokenAccountAssertionArgs =
     }
   | {
       __kind: 'CloseAuthority';
-      value: OptionOrNullable<Address>;
+      value: OptionOrNullable<PublicKey>;
       operator: EquatableOperatorArgs;
     }
   | { __kind: 'TokenAccountOwnerIsDerived' };
 
-export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Mint',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Owner',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Amount',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Delegate',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'State',
-      getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsNative',
-      getStructEncoder([
-        ['value', getOptionEncoder(getU64Encoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DelegatedAmount',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'CloseAuthority',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    ['TokenAccountOwnerIsDerived', getUnitEncoder()],
-  ]);
-}
-
-export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Mint',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Owner',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Amount',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Delegate',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'State',
-      getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsNative',
-      getStructDecoder([
-        ['value', getOptionDecoder(getU64Decoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DelegatedAmount',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'CloseAuthority',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    ['TokenAccountOwnerIsDerived', getUnitDecoder()],
-  ]);
-}
-
-export function getTokenAccountAssertionCodec(): Codec<
+export function getTokenAccountAssertionSerializer(): Serializer<
   TokenAccountAssertionArgs,
   TokenAccountAssertion
 > {
-  return combineCodec(
-    getTokenAccountAssertionEncoder(),
-    getTokenAccountAssertionDecoder()
-  );
+  return dataEnum<TokenAccountAssertion>(
+    [
+      [
+        'Mint',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'Mint'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Owner',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'Owner'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Amount',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'Amount'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Delegate',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'Delegate'>>([
+          ['value', option(publicKeySerializer())],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'State',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'State'>>([
+          ['value', u8()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsNative',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'IsNative'>>([
+          ['value', option(u64())],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'DelegatedAmount',
+        struct<
+          GetDataEnumKindContent<TokenAccountAssertion, 'DelegatedAmount'>
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'CloseAuthority',
+        struct<GetDataEnumKindContent<TokenAccountAssertion, 'CloseAuthority'>>(
+          [
+            ['value', option(publicKeySerializer())],
+            ['operator', getEquatableOperatorSerializer()],
+          ]
+        ),
+      ],
+      ['TokenAccountOwnerIsDerived', unit()],
+    ],
+    { description: 'TokenAccountAssertion' }
+  ) as Serializer<TokenAccountAssertionArgs, TokenAccountAssertion>;
 }
 
 // Data Enum Helpers.
@@ -263,7 +189,6 @@ export function tokenAccountAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isTokenAccountAssertion<
   K extends TokenAccountAssertion['__kind']
 >(

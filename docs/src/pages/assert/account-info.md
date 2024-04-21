@@ -36,6 +36,23 @@ Lighthouse exposes asserting on these `AccountInfo` through the assertion types 
 It's possible to make assertions on the value of lamports of an account at runtime.
 
 {% dialect-switcher title="Lamport assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'Lamports',
+    value: 5_000_000,
+    operator: IntegerOperator.GreaterThan,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
+
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -58,6 +75,24 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to make assertions on which programs owns the account.
 
 {% dialect-switcher title="Account owner assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+import { publicKey } from '@metaplex-foundation/umi'
+
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'Owner',
+    value: publicKey(SystemProgram.programId),
+    operator: EquatableOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -96,6 +131,22 @@ pub enum KnownProgram {
 Here is an example of asserting that the account is owned by the system program.
 
 {% dialect-switcher title="KnownOwner account owner assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'KnownOwner',
+    value: KnownProgram.System,
+    operator: EquatableOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -118,6 +169,22 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to assert the
 
 {% dialect-switcher title="Rent Epoch assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'RentEpoch',
+    value: 0,
+    operator: IntegerOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -140,6 +207,22 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is a signer in the runtime.
 
 {% dialect-switcher title="IsSigner assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'IsSigner',
+    value: true,
+    operator: EquatableOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -165,6 +248,22 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is writable in the runtime.
 
 {% dialect-switcher title="IsWritable assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'IsWritable',
+    value: true,
+    operator: EquatableOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -188,6 +287,22 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is an executable account.
 
 {% dialect-switcher title="Executable assertion instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'IsWritable',
+    value: true,
+    operator: EquatableOperator.Equal,
+  },
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -221,6 +336,26 @@ Fields of the `VerifyDatahash` assertion are:
 The following is an example using the entire account data.
 
 {% dialect-switcher title="" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+import { keccak_256 } from 'js-sha3'
+
+const accountDataHash = Buffer.from(keccak_256.digest(accountDataBuffer))
+const tx = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'VerifyDatahash',
+    expectedHash: accountDataHash,
+    start: null,
+    length: null,
+  },
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -252,6 +387,28 @@ let tx = Transaction::new_signed_with_payer(
 The following is an example using start and length.
 
 {% dialect-switcher title="VerifyDatahash" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+import { keccak_256 } from 'js-sha3'
+
+const accountDataHash = Buffer.from(
+  keccak_256.digest(accountDataBuffer.subarray(128, 256))
+)
+const tx = assertAccountInfo(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'VerifyDatahash',
+    expectedHash: accountDataHash,
+    start: 128,
+    length: 128,
+  },
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -284,6 +441,59 @@ let tx = Transaction::new_signed_with_payer(
 To save transaction space there is an instruction AssertAccountInfoMulti which allows you join all your assertions into one vector. This elimiates duplicating instruction data.
 
 {% dialect-switcher title="AssertAccountInfoMulti instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertAccountInfoMulti(umi, {
+  targetAccount,
+  assertions: [
+    {
+      __kind: 'Owner',
+      value: publicKey(SystemProgram.programId),
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'KnownOwner',
+      value: KnownProgram.System,
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'Lamports',
+      value: userPrebalance - 5000,
+      operator: IntegerOperator.Equal,
+    },
+    {
+      __kind: 'DataLength',
+      value: 0,
+      operator: IntegerOperator.Equal,
+    },
+    {
+      __kind: 'Executable',
+      value: true,
+      operator: EquatableOperator.NotEqual,
+    },
+    {
+      __kind: 'Executable',
+      value: false,
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'Executable',
+      value: true,
+      operator: EquatableOperator.NotEqual,
+    },
+    {
+      __kind: 'RentEpoch',
+      value: accountInfo.rentEpoch,
+      operator: IntegerOperator.Equal,
+    },
+  ],
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

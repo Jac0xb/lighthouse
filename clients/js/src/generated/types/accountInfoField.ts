@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum AccountInfoField {
   Key,
@@ -26,20 +19,11 @@ export enum AccountInfoField {
 
 export type AccountInfoFieldArgs = AccountInfoField;
 
-export function getAccountInfoFieldEncoder(): Encoder<AccountInfoFieldArgs> {
-  return getScalarEnumEncoder(AccountInfoField);
-}
-
-export function getAccountInfoFieldDecoder(): Decoder<AccountInfoField> {
-  return getScalarEnumDecoder(AccountInfoField);
-}
-
-export function getAccountInfoFieldCodec(): Codec<
+export function getAccountInfoFieldSerializer(): Serializer<
   AccountInfoFieldArgs,
   AccountInfoField
 > {
-  return combineCodec(
-    getAccountInfoFieldEncoder(),
-    getAccountInfoFieldDecoder()
-  );
+  return scalarEnum<AccountInfoField>(AccountInfoField, {
+    description: 'AccountInfoField',
+  }) as Serializer<AccountInfoFieldArgs, AccountInfoField>;
 }

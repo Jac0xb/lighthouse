@@ -6,184 +6,50 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
-import { getU8Encoder } from '@solana/codecs';
-import { Program, ProgramWithErrors } from '@solana/programs';
 import {
-  LighthouseProgramError,
-  LighthouseProgramErrorCode,
-  getLighthouseProgramErrorFromCode,
+  ClusterFilter,
+  Context,
+  Program,
+  PublicKey,
+} from '@metaplex-foundation/umi';
+import {
+  getLighthouseErrorFromCode,
+  getLighthouseErrorFromName,
 } from '../errors';
-import {
-  ParsedAssertAccountDataInstruction,
-  ParsedAssertAccountDeltaInstruction,
-  ParsedAssertAccountInfoInstruction,
-  ParsedAssertAccountInfoMultiInstruction,
-  ParsedAssertBubblegumTreeConfigAccountInstruction,
-  ParsedAssertMerkleTreeAccountInstruction,
-  ParsedAssertMintAccountInstruction,
-  ParsedAssertMintAccountMultiInstruction,
-  ParsedAssertStakeAccountInstruction,
-  ParsedAssertStakeAccountMultiInstruction,
-  ParsedAssertSysvarClockInstruction,
-  ParsedAssertTokenAccountInstruction,
-  ParsedAssertTokenAccountMultiInstruction,
-  ParsedAssertUpgradeableLoaderAccountInstruction,
-  ParsedAssertUpgradeableLoaderAccountMultiInstruction,
-  ParsedMemoryCloseInstruction,
-  ParsedMemoryWriteInstruction,
-} from '../instructions';
-import { memcmp } from '../shared';
 
-export const LIGHTHOUSE_PROGRAM_ADDRESS =
-  'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+export const LIGHTHOUSE_PROGRAM_ID =
+  'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as PublicKey<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
 
-export type LighthouseProgram =
-  Program<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'> &
-    ProgramWithErrors<LighthouseProgramErrorCode, LighthouseProgramError>;
-
-export function getLighthouseProgram(): LighthouseProgram {
+export function createLighthouseProgram(): Program {
   return {
     name: 'lighthouse',
-    address: LIGHTHOUSE_PROGRAM_ADDRESS,
-    getErrorFromCode(code: LighthouseProgramErrorCode, cause?: Error) {
-      return getLighthouseProgramErrorFromCode(code, cause);
+    publicKey: LIGHTHOUSE_PROGRAM_ID,
+    getErrorFromCode(code: number, cause?: Error) {
+      return getLighthouseErrorFromCode(code, this, cause);
+    },
+    getErrorFromName(name: string, cause?: Error) {
+      return getLighthouseErrorFromName(name, this, cause);
+    },
+    isOnCluster() {
+      return true;
     },
   };
 }
 
-export enum LighthouseInstruction {
-  MemoryWrite,
-  MemoryClose,
-  AssertAccountData,
-  AssertAccountDelta,
-  AssertAccountInfo,
-  AssertAccountInfoMulti,
-  AssertMintAccount,
-  AssertMintAccountMulti,
-  AssertTokenAccount,
-  AssertTokenAccountMulti,
-  AssertStakeAccount,
-  AssertStakeAccountMulti,
-  AssertUpgradeableLoaderAccount,
-  AssertUpgradeableLoaderAccountMulti,
-  AssertSysvarClock,
-  AssertMerkleTreeAccount,
-  AssertBubblegumTreeConfigAccount,
+export function getLighthouseProgram<T extends Program = Program>(
+  context: Pick<Context, 'programs'>,
+  clusterFilter?: ClusterFilter
+): T {
+  return context.programs.get<T>('lighthouse', clusterFilter);
 }
 
-export function identifyLighthouseInstruction(
-  instruction: { data: Uint8Array } | Uint8Array
-): LighthouseInstruction {
-  const data =
-    instruction instanceof Uint8Array ? instruction : instruction.data;
-  if (memcmp(data, getU8Encoder().encode(0), 0)) {
-    return LighthouseInstruction.MemoryWrite;
-  }
-  if (memcmp(data, getU8Encoder().encode(1), 0)) {
-    return LighthouseInstruction.MemoryClose;
-  }
-  if (memcmp(data, getU8Encoder().encode(2), 0)) {
-    return LighthouseInstruction.AssertAccountData;
-  }
-  if (memcmp(data, getU8Encoder().encode(3), 0)) {
-    return LighthouseInstruction.AssertAccountDelta;
-  }
-  if (memcmp(data, getU8Encoder().encode(4), 0)) {
-    return LighthouseInstruction.AssertAccountInfo;
-  }
-  if (memcmp(data, getU8Encoder().encode(5), 0)) {
-    return LighthouseInstruction.AssertAccountInfoMulti;
-  }
-  if (memcmp(data, getU8Encoder().encode(6), 0)) {
-    return LighthouseInstruction.AssertMintAccount;
-  }
-  if (memcmp(data, getU8Encoder().encode(7), 0)) {
-    return LighthouseInstruction.AssertMintAccountMulti;
-  }
-  if (memcmp(data, getU8Encoder().encode(8), 0)) {
-    return LighthouseInstruction.AssertTokenAccount;
-  }
-  if (memcmp(data, getU8Encoder().encode(9), 0)) {
-    return LighthouseInstruction.AssertTokenAccountMulti;
-  }
-  if (memcmp(data, getU8Encoder().encode(10), 0)) {
-    return LighthouseInstruction.AssertStakeAccount;
-  }
-  if (memcmp(data, getU8Encoder().encode(11), 0)) {
-    return LighthouseInstruction.AssertStakeAccountMulti;
-  }
-  if (memcmp(data, getU8Encoder().encode(12), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
-  }
-  if (memcmp(data, getU8Encoder().encode(13), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
-  }
-  if (memcmp(data, getU8Encoder().encode(14), 0)) {
-    return LighthouseInstruction.AssertSysvarClock;
-  }
-  if (memcmp(data, getU8Encoder().encode(15), 0)) {
-    return LighthouseInstruction.AssertMerkleTreeAccount;
-  }
-  if (memcmp(data, getU8Encoder().encode(16), 0)) {
-    return LighthouseInstruction.AssertBubblegumTreeConfigAccount;
-  }
-  throw new Error(
-    'The provided instruction could not be identified as a lighthouse instruction.'
+export function getLighthouseProgramId(
+  context: Pick<Context, 'programs'>,
+  clusterFilter?: ClusterFilter
+): PublicKey {
+  return context.programs.getPublicKey(
+    'lighthouse',
+    LIGHTHOUSE_PROGRAM_ID,
+    clusterFilter
   );
 }
-
-export type ParsedLighthouseInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
-> =
-  | ({
-      instructionType: LighthouseInstruction.MemoryWrite;
-    } & ParsedMemoryWriteInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.MemoryClose;
-    } & ParsedMemoryCloseInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertAccountData;
-    } & ParsedAssertAccountDataInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertAccountDelta;
-    } & ParsedAssertAccountDeltaInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertAccountInfo;
-    } & ParsedAssertAccountInfoInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertAccountInfoMulti;
-    } & ParsedAssertAccountInfoMultiInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertMintAccount;
-    } & ParsedAssertMintAccountInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertMintAccountMulti;
-    } & ParsedAssertMintAccountMultiInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertTokenAccount;
-    } & ParsedAssertTokenAccountInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertTokenAccountMulti;
-    } & ParsedAssertTokenAccountMultiInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertStakeAccount;
-    } & ParsedAssertStakeAccountInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertStakeAccountMulti;
-    } & ParsedAssertStakeAccountMultiInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccount;
-    } & ParsedAssertUpgradeableLoaderAccountInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
-    } & ParsedAssertUpgradeableLoaderAccountMultiInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertSysvarClock;
-    } & ParsedAssertSysvarClockInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertMerkleTreeAccount;
-    } & ParsedAssertMerkleTreeAccountInstruction<TProgram>)
-  | ({
-      instructionType: LighthouseInstruction.AssertBubblegumTreeConfigAccount;
-    } & ParsedAssertBubblegumTreeConfigAccountInstruction<TProgram>);

@@ -6,56 +6,34 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI128Decoder,
-  getI128Encoder,
-  getI16Decoder,
-  getI16Encoder,
-  getI32Decoder,
-  getI32Encoder,
-  getI64Decoder,
-  getI64Encoder,
-  getI8Decoder,
-  getI8Encoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU128Decoder,
-  getU128Encoder,
-  getU16Decoder,
-  getU16Encoder,
-  getU32Decoder,
-  getU32Encoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  bytes,
+  dataEnum,
+  i128,
+  i16,
+  i32,
+  i64,
+  i8,
+  publicKey as publicKeySerializer,
+  struct,
+  u128,
+  u16,
+  u32,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type DataValueAssertion =
@@ -71,7 +49,7 @@ export type DataValueAssertion =
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperator }
-  | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
+  | { __kind: 'Pubkey'; value: PublicKey; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
   | { __kind: 'Bool'; value: boolean; operator: EquatableOperatorArgs }
@@ -86,208 +64,108 @@ export type DataValueAssertionArgs =
   | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperatorArgs }
-  | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
+  | { __kind: 'Pubkey'; value: PublicKey; operator: EquatableOperatorArgs };
 
-export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Bool',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U8',
-      getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I8',
-      getStructEncoder([
-        ['value', getI8Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U16',
-      getStructEncoder([
-        ['value', getU16Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I16',
-      getStructEncoder([
-        ['value', getI16Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U32',
-      getStructEncoder([
-        ['value', getU32Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I32',
-      getStructEncoder([
-        ['value', getI32Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U64',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I64',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U128',
-      getStructEncoder([
-        ['value', getU128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I128',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructEncoder([
-        ['value', getBytesEncoder({ size: getU32Encoder() })],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Bool',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U8',
-      getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I8',
-      getStructDecoder([
-        ['value', getI8Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U16',
-      getStructDecoder([
-        ['value', getU16Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I16',
-      getStructDecoder([
-        ['value', getI16Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U32',
-      getStructDecoder([
-        ['value', getU32Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I32',
-      getStructDecoder([
-        ['value', getI32Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U64',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I64',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U128',
-      getStructDecoder([
-        ['value', getU128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I128',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructDecoder([
-        ['value', getBytesDecoder({ size: getU32Decoder() })],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getDataValueAssertionCodec(): Codec<
+export function getDataValueAssertionSerializer(): Serializer<
   DataValueAssertionArgs,
   DataValueAssertion
 > {
-  return combineCodec(
-    getDataValueAssertionEncoder(),
-    getDataValueAssertionDecoder()
-  );
+  return dataEnum<DataValueAssertion>(
+    [
+      [
+        'Bool',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'Bool'>>([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U8',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'U8'>>([
+          ['value', u8()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I8',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'I8'>>([
+          ['value', i8()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U16',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'U16'>>([
+          ['value', u16()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I16',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'I16'>>([
+          ['value', i16()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U32',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'U32'>>([
+          ['value', u32()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I32',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'I32'>>([
+          ['value', i32()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U64',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'U64'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I64',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'I64'>>([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U128',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'U128'>>([
+          ['value', u128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I128',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'I128'>>([
+          ['value', i128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Bytes',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'Bytes'>>([
+          ['value', bytes({ size: u32() })],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Pubkey',
+        struct<GetDataEnumKindContent<DataValueAssertion, 'Pubkey'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'DataValueAssertion' }
+  ) as Serializer<DataValueAssertionArgs, DataValueAssertion>;
 }
 
 // Data Enum Helpers.
@@ -351,7 +229,6 @@ export function dataValueAssertion<K extends DataValueAssertionArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isDataValueAssertion<K extends DataValueAssertion['__kind']>(
   kind: K,
   value: DataValueAssertion

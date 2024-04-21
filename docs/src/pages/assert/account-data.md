@@ -26,11 +26,29 @@ pub struct TestAccount {
 Say we wanted to assert on the `balance` field in our `TestAccount` struct. If the struct uses a serialization schema that uses little-endian for integers (borsh, bytemuck, ...) we can deserialize the field and assert on that value at runtime!
 
 {% dialect-switcher title="Data value assertion instruction builder example" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountData(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'U64',
+    value: 420,
+    operator: IntegerOperator.GreaterThanOrEqual,
+  },
+  offset: 8,
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
+
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
 ```rust
-AssertAccountDataBuilder::new()
+let ix = AssertAccountDataBuilder::new()
     .target_account(test_account_key)
     .assertion(DataValueAssertion::U64 {
         value: 420, // The expected value.
@@ -59,6 +77,24 @@ pub struct TestAccount {
 Say we wanted to assert on the `owner` field in our `TestAccount` struct. We can deserialize the Pubkey and assert using the example code below.
 
 {% dialect-switcher title="Data value assertion instruction builder example" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountData(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'Pubkey',
+    value: ownerKey,
+    operator: EquatableOperator.Equal,
+  },
+  offset: 16,
+}).getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
+
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

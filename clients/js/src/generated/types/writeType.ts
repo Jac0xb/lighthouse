@@ -7,21 +7,14 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
-  getU16Decoder,
-  getU16Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  struct,
+  tuple,
+  u16,
+} from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoField,
   AccountInfoFieldArgs,
@@ -29,12 +22,9 @@ import {
   ClockFieldArgs,
   DataValue,
   DataValueArgs,
-  getAccountInfoFieldDecoder,
-  getAccountInfoFieldEncoder,
-  getClockFieldDecoder,
-  getClockFieldEncoder,
-  getDataValueDecoder,
-  getDataValueEncoder,
+  getAccountInfoFieldSerializer,
+  getClockFieldSerializer,
+  getDataValueSerializer,
 } from '.';
 
 export type WriteType =
@@ -49,60 +39,37 @@ export type WriteTypeArgs =
   | { __kind: 'DataValue'; fields: [DataValueArgs] }
   | { __kind: 'Clock'; fields: [ClockFieldArgs] };
 
-export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
-  return getDataEnumEncoder([
+export function getWriteTypeSerializer(): Serializer<WriteTypeArgs, WriteType> {
+  return dataEnum<WriteType>(
     [
-      'AccountData',
-      getStructEncoder([
-        ['offset', getU16Encoder()],
-        ['dataLength', getU16Encoder()],
-      ]),
+      [
+        'AccountData',
+        struct<GetDataEnumKindContent<WriteType, 'AccountData'>>([
+          ['offset', u16()],
+          ['dataLength', u16()],
+        ]),
+      ],
+      [
+        'AccountInfoField',
+        struct<GetDataEnumKindContent<WriteType, 'AccountInfoField'>>([
+          ['fields', tuple([getAccountInfoFieldSerializer()])],
+        ]),
+      ],
+      [
+        'DataValue',
+        struct<GetDataEnumKindContent<WriteType, 'DataValue'>>([
+          ['fields', tuple([getDataValueSerializer()])],
+        ]),
+      ],
+      [
+        'Clock',
+        struct<GetDataEnumKindContent<WriteType, 'Clock'>>([
+          ['fields', tuple([getClockFieldSerializer()])],
+        ]),
+      ],
     ],
-    [
-      'AccountInfoField',
-      getStructEncoder([
-        ['fields', getTupleEncoder([getAccountInfoFieldEncoder()])],
-      ]),
-    ],
-    [
-      'DataValue',
-      getStructEncoder([['fields', getTupleEncoder([getDataValueEncoder()])]]),
-    ],
-    [
-      'Clock',
-      getStructEncoder([['fields', getTupleEncoder([getClockFieldEncoder()])]]),
-    ],
-  ]);
-}
-
-export function getWriteTypeDecoder(): Decoder<WriteType> {
-  return getDataEnumDecoder([
-    [
-      'AccountData',
-      getStructDecoder([
-        ['offset', getU16Decoder()],
-        ['dataLength', getU16Decoder()],
-      ]),
-    ],
-    [
-      'AccountInfoField',
-      getStructDecoder([
-        ['fields', getTupleDecoder([getAccountInfoFieldDecoder()])],
-      ]),
-    ],
-    [
-      'DataValue',
-      getStructDecoder([['fields', getTupleDecoder([getDataValueDecoder()])]]),
-    ],
-    [
-      'Clock',
-      getStructDecoder([['fields', getTupleDecoder([getClockFieldDecoder()])]]),
-    ],
-  ]);
-}
-
-export function getWriteTypeCodec(): Codec<WriteTypeArgs, WriteType> {
-  return combineCodec(getWriteTypeEncoder(), getWriteTypeDecoder());
+    { description: 'WriteType' }
+  ) as Serializer<WriteTypeArgs, WriteType>;
 }
 
 // Data Enum Helpers.
@@ -130,7 +97,6 @@ export function writeType<K extends WriteTypeArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isWriteType<K extends WriteType['__kind']>(
   kind: K,
   value: WriteType

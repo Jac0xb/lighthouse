@@ -7,28 +7,20 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI128Decoder,
-  getI128Encoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  i128,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type AccountInfoDeltaAssertion =
@@ -55,68 +47,44 @@ export type AccountInfoDeltaAssertionArgs =
       operator: IntegerOperatorArgs;
     };
 
-export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Lamports',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DataLength',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    ['Owner', getStructEncoder([['operator', getEquatableOperatorEncoder()]])],
-    [
-      'RentEpoch',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountInfoDeltaAssertionDecoder(): Decoder<AccountInfoDeltaAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Lamports',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DataLength',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    ['Owner', getStructDecoder([['operator', getEquatableOperatorDecoder()]])],
-    [
-      'RentEpoch',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountInfoDeltaAssertionCodec(): Codec<
+export function getAccountInfoDeltaAssertionSerializer(): Serializer<
   AccountInfoDeltaAssertionArgs,
   AccountInfoDeltaAssertion
 > {
-  return combineCodec(
-    getAccountInfoDeltaAssertionEncoder(),
-    getAccountInfoDeltaAssertionDecoder()
-  );
+  return dataEnum<AccountInfoDeltaAssertion>(
+    [
+      [
+        'Lamports',
+        struct<GetDataEnumKindContent<AccountInfoDeltaAssertion, 'Lamports'>>([
+          ['value', i128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'DataLength',
+        struct<GetDataEnumKindContent<AccountInfoDeltaAssertion, 'DataLength'>>(
+          [
+            ['value', i128()],
+            ['operator', getIntegerOperatorSerializer()],
+          ]
+        ),
+      ],
+      [
+        'Owner',
+        struct<GetDataEnumKindContent<AccountInfoDeltaAssertion, 'Owner'>>([
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'RentEpoch',
+        struct<GetDataEnumKindContent<AccountInfoDeltaAssertion, 'RentEpoch'>>([
+          ['value', i128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'AccountInfoDeltaAssertion' }
+  ) as Serializer<AccountInfoDeltaAssertionArgs, AccountInfoDeltaAssertion>;
 }
 
 // Data Enum Helpers.
@@ -143,7 +111,6 @@ export function accountInfoDeltaAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isAccountInfoDeltaAssertion<
   K extends AccountInfoDeltaAssertion['__kind']
 >(

@@ -99,6 +99,22 @@ pub enum UpgradeableProgramDataAssertion {
 In this example, we assert that the upgradeable loader account is in the `Buffer` state.
 
 {% dialect-switcher title="Assert state transaction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertUpgradeableLoaderAccount(umi, {
+  targetAccount: publicKey(upgradeableLoaderAccountPubkey),
+  assertion: {
+    __kind: 'State',
+    value: UpgradeableLoaderStateType.Buffer,
+    operator: EquatableOperator.Equal,
+  },
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -128,6 +144,38 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 In this example, we assert that the authority of the buffer of the upgradeable loader account is equal to a specific pubkey.
 
 {% dialect-switcher title="Assert state + assert buffer transaction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertUpgradeableLoaderAccount(umi, {
+  targetAccount: publicKey(upgradeableLoaderAccountPubkey),
+  assertion: {
+    __kind: 'State',
+    value: UpgradeableLoaderStateType.Buffer,
+    operator: EquatableOperator.Equal,
+  },
+})
+  .append(
+    assertUpgradeableLoaderAccount(umi, {
+      targetAccount: publicKey(upgradeableLoaderAccountPubkey),
+      assertion: {
+        __kind: 'Buffer',
+        fields: [
+          {
+            __kind: 'Authority',
+            value: publicKey(authorityKey),
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -166,6 +214,38 @@ let tx = Transaction::new_signed_with_payer(
 In this example, we assert that the program data address of the upgradeable loader account is equal to a specific pubkey.
 
 {% dialect-switcher title="Assert state + assert program transaction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertUpgradeableLoaderAccount(umi, {
+  targetAccount: publicKey(programKey),
+  assertion: {
+    __kind: 'State',
+    value: UpgradeableLoaderStateType.Program,
+    operator: EquatableOperator.Equal,
+  },
+})
+  .append(
+    assertUpgradeableLoaderAccount(umi, {
+      targetAccount: publicKey(programKey),
+      assertion: {
+        __kind: 'Program',
+        fields: [
+          {
+            __kind: 'ProgramDataAddress',
+            value: publicKey(programDataKey),
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -204,6 +284,38 @@ let tx = Transaction::new_signed_with_payer(
 In this example, we assert that the upgrade authority of the program data of the upgradeable loader account is equal to a specific pubkey and that the slot of the upgrade matches a specific slot.
 
 {% dialect-switcher title="Assert state + assert program data transaction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertUpgradeableLoaderAccount(umi, {
+  targetAccount: publicKey(programDataKey),
+  assertion: {
+    __kind: 'State',
+    value: UpgradeableLoaderStateType.ProgramData,
+    operator: EquatableOperator.Equal,
+  },
+})
+  .append(
+    assertUpgradeableLoaderAccount(umi, {
+      targetAccount: publicKey(programDataKey),
+      assertion: {
+        __kind: 'ProgramData',
+        fields: [
+          {
+            __kind: 'UpgradeAuthority',
+            value: upgradeAuthority,
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

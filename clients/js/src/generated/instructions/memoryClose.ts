@@ -6,86 +6,37 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
+  Context,
+  Pda,
+  PublicKey,
+  Signer,
+  TransactionBuilder,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
-  AccountRole,
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-  WritableAccount,
-  WritableSignerAccount,
-} from '@solana/instructions';
-import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
+  Serializer,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
 } from '../shared';
 
-export type MemoryCloseInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountProgramId extends string
-        ? ReadonlyAccount<TAccountProgramId>
-        : TAccountProgramId,
-      TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer>
-        : TAccountPayer,
-      TAccountMemory extends string
-        ? WritableAccount<TAccountMemory>
-        : TAccountMemory,
-      ...TRemainingAccounts
-    ]
-  >;
+// Accounts.
+export type MemoryCloseInstructionAccounts = {
+  /** Lighthouse program */
+  programId?: PublicKey | Pda;
+  /** Payer account */
+  payer?: Signer;
+  /** Memory account */
+  memory: PublicKey | Pda;
+};
 
-export type MemoryCloseInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountProgramId extends string
-        ? ReadonlyAccount<TAccountProgramId>
-        : TAccountProgramId,
-      TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer> &
-            IAccountSignerMeta<TAccountPayer>
-        : TAccountPayer,
-      TAccountMemory extends string
-        ? WritableAccount<TAccountMemory>
-        : TAccountMemory,
-      ...TRemainingAccounts
-    ]
-  >;
-
+// Data.
 export type MemoryCloseInstructionData = {
   discriminator: number;
   memoryId: number;
@@ -97,237 +48,93 @@ export type MemoryCloseInstructionDataArgs = {
   memoryBump: number;
 };
 
-export function getMemoryCloseInstructionDataEncoder(): Encoder<MemoryCloseInstructionDataArgs> {
-  return mapEncoder(
-    getStructEncoder([
-      ['discriminator', getU8Encoder()],
-      ['memoryId', getU8Encoder()],
-      ['memoryBump', getU8Encoder()],
-    ]),
-    (value) => ({ ...value, discriminator: 1 })
-  );
-}
-
-export function getMemoryCloseInstructionDataDecoder(): Decoder<MemoryCloseInstructionData> {
-  return getStructDecoder([
-    ['discriminator', getU8Decoder()],
-    ['memoryId', getU8Decoder()],
-    ['memoryBump', getU8Decoder()],
-  ]);
-}
-
-export function getMemoryCloseInstructionDataCodec(): Codec<
+export function getMemoryCloseInstructionDataSerializer(): Serializer<
   MemoryCloseInstructionDataArgs,
   MemoryCloseInstructionData
 > {
-  return combineCodec(
-    getMemoryCloseInstructionDataEncoder(),
-    getMemoryCloseInstructionDataDecoder()
-  );
+  return mapSerializer<
+    MemoryCloseInstructionDataArgs,
+    any,
+    MemoryCloseInstructionData
+  >(
+    struct<MemoryCloseInstructionData>(
+      [
+        ['discriminator', u8()],
+        ['memoryId', u8()],
+        ['memoryBump', u8()],
+      ],
+      { description: 'MemoryCloseInstructionData' }
+    ),
+    (value) => ({ ...value, discriminator: 1 })
+  ) as Serializer<MemoryCloseInstructionDataArgs, MemoryCloseInstructionData>;
 }
 
-export type MemoryCloseInput<
-  TAccountProgramId extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** Payer account */
-  payer: Address<TAccountPayer>;
-  /** Memory account */
-  memory: Address<TAccountMemory>;
-  memoryId: MemoryCloseInstructionDataArgs['memoryId'];
-  memoryBump: MemoryCloseInstructionDataArgs['memoryBump'];
-};
+// Args.
+export type MemoryCloseInstructionArgs = MemoryCloseInstructionDataArgs;
 
-export type MemoryCloseInputWithSigners<
-  TAccountProgramId extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** Payer account */
-  payer: TransactionSigner<TAccountPayer>;
-  /** Memory account */
-  memory: Address<TAccountMemory>;
-  memoryId: MemoryCloseInstructionDataArgs['memoryId'];
-  memoryBump: MemoryCloseInstructionDataArgs['memoryBump'];
-};
-
-export function getMemoryCloseInstruction<
-  TAccountProgramId extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryCloseInputWithSigners<
-    TAccountProgramId,
-    TAccountPayer,
-    TAccountMemory
-  >
-): MemoryCloseInstructionWithSigners<
-  TProgram,
-  TAccountProgramId,
-  TAccountPayer,
-  TAccountMemory
->;
-export function getMemoryCloseInstruction<
-  TAccountProgramId extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryCloseInput<TAccountProgramId, TAccountPayer, TAccountMemory>
-): MemoryCloseInstruction<
-  TProgram,
-  TAccountProgramId,
-  TAccountPayer,
-  TAccountMemory
->;
-export function getMemoryCloseInstruction<
-  TAccountProgramId extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryCloseInput<TAccountProgramId, TAccountPayer, TAccountMemory>
-): IInstruction {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getMemoryCloseInstructionRaw<
-      TProgram,
-      TAccountProgramId,
-      TAccountPayer,
-      TAccountMemory
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    programId: { value: input.programId ?? null, isWritable: false },
-    payer: { value: input.payer ?? null, isWritable: true },
-    memory: { value: input.memory ?? null, isWritable: true },
-  };
-
-  // Original args.
-  const args = { ...input };
-
-  // Resolve default values.
-  if (!accounts.programId.value) {
-    accounts.programId.value = programAddress;
-    accounts.programId.isWritable = false;
-  }
-
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
+// Instruction.
+export function memoryClose(
+  context: Pick<Context, 'payer' | 'programs'>,
+  input: MemoryCloseInstructionAccounts & MemoryCloseInstructionArgs
+): TransactionBuilder {
+  // Program ID.
+  const programId = context.programs.getPublicKey(
+    'lighthouse',
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
   );
 
-  const instruction = getMemoryCloseInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as MemoryCloseInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
-}
-
-export function getMemoryCloseInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    programId?: TAccountProgramId extends string
-      ? Address<TAccountProgramId>
-      : TAccountProgramId;
-    payer: TAccountPayer extends string
-      ? Address<TAccountPayer>
-      : TAccountPayer;
-    memory: TAccountMemory extends string
-      ? Address<TAccountMemory>
-      : TAccountMemory;
-  },
-  args: MemoryCloseInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(
-        accounts.programId ?? {
-          address:
-            'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
-          role: AccountRole.READONLY,
-        },
-        AccountRole.READONLY
-      ),
-      accountMetaWithDefault(accounts.payer, AccountRole.WRITABLE_SIGNER),
-      accountMetaWithDefault(accounts.memory, AccountRole.WRITABLE),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getMemoryCloseInstructionDataEncoder().encode(args),
-    programAddress,
-  } as MemoryCloseInstruction<
-    TProgram,
-    TAccountProgramId,
-    TAccountPayer,
-    TAccountMemory,
-    TRemainingAccounts
-  >;
-}
-
-export type ParsedMemoryCloseInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
-> = {
-  programAddress: Address<TProgram>;
-  accounts: {
-    /** Lighthouse program */
-    programId: TAccountMetas[0];
-    /** Payer account */
-    payer: TAccountMetas[1];
-    /** Memory account */
-    memory: TAccountMetas[2];
-  };
-  data: MemoryCloseInstructionData;
-};
-
-export function parseMemoryCloseInstruction<
-  TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
->(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
-): ParsedMemoryCloseInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error('Not enough accounts');
-  }
-  let accountIndex = 0;
-  const getNextAccount = () => {
-    const accountMeta = instruction.accounts![accountIndex]!;
-    accountIndex += 1;
-    return accountMeta;
-  };
-  return {
-    programAddress: instruction.programAddress,
-    accounts: {
-      programId: getNextAccount(),
-      payer: getNextAccount(),
-      memory: getNextAccount(),
+  // Accounts.
+  const resolvedAccounts = {
+    programId: {
+      index: 0,
+      isWritable: false as boolean,
+      value: input.programId ?? null,
     },
-    data: getMemoryCloseInstructionDataDecoder().decode(instruction.data),
-  };
+    payer: {
+      index: 1,
+      isWritable: true as boolean,
+      value: input.payer ?? null,
+    },
+    memory: {
+      index: 2,
+      isWritable: true as boolean,
+      value: input.memory ?? null,
+    },
+  } satisfies ResolvedAccountsWithIndices;
+
+  // Arguments.
+  const resolvedArgs: MemoryCloseInstructionArgs = { ...input };
+
+  // Default values.
+  if (!resolvedAccounts.programId.value) {
+    resolvedAccounts.programId.value = programId;
+    resolvedAccounts.programId.isWritable = false;
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
+
+  // Data.
+  const data = getMemoryCloseInstructionDataSerializer().serialize(
+    resolvedArgs as MemoryCloseInstructionDataArgs
+  );
+
+  // Bytes Created On Chain.
+  const bytesCreatedOnChain = 0;
+
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

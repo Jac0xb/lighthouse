@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum StakeStateType {
   Uninitialized,
@@ -24,17 +17,11 @@ export enum StakeStateType {
 
 export type StakeStateTypeArgs = StakeStateType;
 
-export function getStakeStateTypeEncoder(): Encoder<StakeStateTypeArgs> {
-  return getScalarEnumEncoder(StakeStateType);
-}
-
-export function getStakeStateTypeDecoder(): Decoder<StakeStateType> {
-  return getScalarEnumDecoder(StakeStateType);
-}
-
-export function getStakeStateTypeCodec(): Codec<
+export function getStakeStateTypeSerializer(): Serializer<
   StakeStateTypeArgs,
   StakeStateType
 > {
-  return combineCodec(getStakeStateTypeEncoder(), getStakeStateTypeDecoder());
+  return scalarEnum<StakeStateType>(StakeStateType, {
+    description: 'StakeStateType',
+  }) as Serializer<StakeStateTypeArgs, StakeStateType>;
 }

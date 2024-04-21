@@ -105,6 +105,22 @@ pub enum StakeAssertion {
 In this example, we assert that the stake account is in the `Stake` state.
 
 {% dialect-switcher title="Assert state instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertStakeAccount(umi, {
+  targetAccount: publicKey(stakeAccount),
+  assertion: {
+    __kind: 'State',
+    value: StakeStateType.Stake,
+    operator: EquatableOperator.Equal,
+  },
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -134,6 +150,103 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake` or `Initialized`, we can make assertions on the stake account. The following assertions will pass:
 
 {% dialect-switcher title="Assert meta instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const meta = assertStakeAccount(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'MetaAssertion',
+    fields: [
+      {
+        __kind: 'LockupCustodian',
+        value: publicKey(meta.lockup.custodian),
+        operator: EquatableOperator.Equal,
+      },
+    ],
+  },
+})
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'MetaAssertion',
+        fields: [
+          {
+            __kind: 'LockupEpoch',
+            value: meta.lockup.epoch,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'MetaAssertion',
+        fields: [
+          {
+            __kind: 'LockupUnixTimestamp',
+            value: meta.lockup.unixTimestamp,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'MetaAssertion',
+        fields: [
+          {
+            __kind: 'AuthorizedStaker',
+            value: publicKey(meta.authorized.staker),
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'MetaAssertion',
+        fields: [
+          {
+            __kind: 'AuthorizedWithdrawer',
+            value: publicKey(meta.authorized.withdrawer),
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'MetaAssertion',
+        fields: [
+          {
+            __kind: 'RentExemptReserve',
+            value: meta.rentExemptReserve,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -210,6 +323,88 @@ let tx: Transaction = Transaction::new_signed_with_payer(
 Using the **solana_sdk** and deserializing an example state account in the state of `Stake`, we can make assertions on the stake account. The following assertions will pass:
 
 {% dialect-switcher title="Assert stake instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertStakeAccount(umi, {
+  targetAccount: publicKey(stakeAccount),
+  assertion: {
+    __kind: 'StakeAssertion',
+    fields: [
+      {
+        __kind: 'CreditsObserved',
+        value: stake.creditsObserved,
+        operator: IntegerOperator.Equal,
+      },
+    ],
+  },
+})
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeAssertion',
+        fields: [
+          {
+            __kind: 'DelegationStake',
+            value: stake.delegation.stake,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeAssertion',
+        fields: [
+          {
+            __kind: 'DelegationDeactivationEpoch',
+            value: stake.delegation.deactivationEpoch,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeAssertion',
+        fields: [
+          {
+            __kind: 'DelegationActivationEpoch',
+            value: stake.delegation.activationEpoch,
+            operator: IntegerOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeAssertion',
+        fields: [
+          {
+            __kind: 'DelegationVoterPubkey',
+            value: publicKey(stake.delegation.voterPubkey),
+            operator: EquatableOperator.Equal,
+          },
+        ],
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -279,6 +474,43 @@ The `IntegerOperator` allows you to make bitwise assertions on the `StakeFlags` 
 Assuming the `StakeFlags` of a particular stake account is `0b00000000`, the following assertions will pass:
 
 {% dialect-switcher title="Assert stake flags instruction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertStakeAccount(umi, {
+  targetAccount: publicKey(stakeAccount),
+  assertion: {
+    __kind: 'StakeFlags',
+    value: 255,
+    operator: IntegerOperator.DoesNotContain,
+  },
+})
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeFlags',
+        value: 0,
+        operator: IntegerOperator.Contains,
+      },
+    })
+  )
+  .append(
+    assertStakeAccount(umi, {
+      targetAccount: publicKey(stakeAccount),
+      assertion: {
+        __kind: 'StakeFlags',
+        value: 0,
+        operator: IntegerOperator.Equal,
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

@@ -6,72 +6,40 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
+  Context,
+  Pda,
+  PublicKey,
+  TransactionBuilder,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
-  AccountRole,
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-} from '@solana/instructions';
+  Serializer,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
 } from '../shared';
 import {
   BubblegumTreeConfigAssertion,
   BubblegumTreeConfigAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getBubblegumTreeConfigAssertionDecoder,
-  getBubblegumTreeConfigAssertionEncoder,
-  getLogLevelDecoder,
-  getLogLevelEncoder,
+  getBubblegumTreeConfigAssertionSerializer,
+  getLogLevelSerializer,
 } from '../types';
 
-export type AssertBubblegumTreeConfigAccountInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
+// Accounts.
+export type AssertBubblegumTreeConfigAccountInstructionAccounts = {
+  /** Target mpl-bubblegum tree config account to be asserted */
+  targetAccount: PublicKey | Pda;
+};
 
-export type AssertBubblegumTreeConfigAccountInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
-
+// Data.
 export type AssertBubblegumTreeConfigAccountInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
@@ -83,179 +51,86 @@ export type AssertBubblegumTreeConfigAccountInstructionDataArgs = {
   assertion: BubblegumTreeConfigAssertionArgs;
 };
 
-export function getAssertBubblegumTreeConfigAccountInstructionDataEncoder(): Encoder<AssertBubblegumTreeConfigAccountInstructionDataArgs> {
-  return mapEncoder(
-    getStructEncoder([
-      ['discriminator', getU8Encoder()],
-      ['logLevel', getLogLevelEncoder()],
-      ['assertion', getBubblegumTreeConfigAssertionEncoder()],
-    ]),
+export function getAssertBubblegumTreeConfigAccountInstructionDataSerializer(): Serializer<
+  AssertBubblegumTreeConfigAccountInstructionDataArgs,
+  AssertBubblegumTreeConfigAccountInstructionData
+> {
+  return mapSerializer<
+    AssertBubblegumTreeConfigAccountInstructionDataArgs,
+    any,
+    AssertBubblegumTreeConfigAccountInstructionData
+  >(
+    struct<AssertBubblegumTreeConfigAccountInstructionData>(
+      [
+        ['discriminator', u8()],
+        ['logLevel', getLogLevelSerializer()],
+        ['assertion', getBubblegumTreeConfigAssertionSerializer()],
+      ],
+      { description: 'AssertBubblegumTreeConfigAccountInstructionData' }
+    ),
     (value) => ({
       ...value,
       discriminator: 16,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
-  );
-}
-
-export function getAssertBubblegumTreeConfigAccountInstructionDataDecoder(): Decoder<AssertBubblegumTreeConfigAccountInstructionData> {
-  return getStructDecoder([
-    ['discriminator', getU8Decoder()],
-    ['logLevel', getLogLevelDecoder()],
-    ['assertion', getBubblegumTreeConfigAssertionDecoder()],
-  ]);
-}
-
-export function getAssertBubblegumTreeConfigAccountInstructionDataCodec(): Codec<
-  AssertBubblegumTreeConfigAccountInstructionDataArgs,
-  AssertBubblegumTreeConfigAccountInstructionData
-> {
-  return combineCodec(
-    getAssertBubblegumTreeConfigAccountInstructionDataEncoder(),
-    getAssertBubblegumTreeConfigAccountInstructionDataDecoder()
-  );
-}
-
-export type AssertBubblegumTreeConfigAccountInput<
-  TAccountTargetAccount extends string
-> = {
-  /** Target mpl-bubblegum tree config account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertBubblegumTreeConfigAccountInstructionDataArgs['logLevel'];
-  assertion: AssertBubblegumTreeConfigAccountInstructionDataArgs['assertion'];
-};
-
-export type AssertBubblegumTreeConfigAccountInputWithSigners<
-  TAccountTargetAccount extends string
-> = {
-  /** Target mpl-bubblegum tree config account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertBubblegumTreeConfigAccountInstructionDataArgs['logLevel'];
-  assertion: AssertBubblegumTreeConfigAccountInstructionDataArgs['assertion'];
-};
-
-export function getAssertBubblegumTreeConfigAccountInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertBubblegumTreeConfigAccountInputWithSigners<TAccountTargetAccount>
-): AssertBubblegumTreeConfigAccountInstructionWithSigners<
-  TProgram,
-  TAccountTargetAccount
->;
-export function getAssertBubblegumTreeConfigAccountInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertBubblegumTreeConfigAccountInput<TAccountTargetAccount>
-): AssertBubblegumTreeConfigAccountInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertBubblegumTreeConfigAccountInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertBubblegumTreeConfigAccountInput<TAccountTargetAccount>
-): IInstruction {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getAssertBubblegumTreeConfigAccountInstructionRaw<
-      TProgram,
-      TAccountTargetAccount
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    targetAccount: { value: input.targetAccount ?? null, isWritable: false },
-  };
-
-  // Original args.
-  const args = { ...input };
-
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getAssertBubblegumTreeConfigAccountInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertBubblegumTreeConfigAccountInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
-}
-
-export function getAssertBubblegumTreeConfigAccountInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    targetAccount: TAccountTargetAccount extends string
-      ? Address<TAccountTargetAccount>
-      : TAccountTargetAccount;
-  },
-  args: AssertBubblegumTreeConfigAccountInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getAssertBubblegumTreeConfigAccountInstructionDataEncoder().encode(
-      args
-    ),
-    programAddress,
-  } as AssertBubblegumTreeConfigAccountInstruction<
-    TProgram,
-    TAccountTargetAccount,
-    TRemainingAccounts
+  ) as Serializer<
+    AssertBubblegumTreeConfigAccountInstructionDataArgs,
+    AssertBubblegumTreeConfigAccountInstructionData
   >;
 }
 
-export type ParsedAssertBubblegumTreeConfigAccountInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
-> = {
-  programAddress: Address<TProgram>;
-  accounts: {
-    /** Target mpl-bubblegum tree config account to be asserted */
-    targetAccount: TAccountMetas[0];
-  };
-  data: AssertBubblegumTreeConfigAccountInstructionData;
-};
+// Args.
+export type AssertBubblegumTreeConfigAccountInstructionArgs =
+  AssertBubblegumTreeConfigAccountInstructionDataArgs;
 
-export function parseAssertBubblegumTreeConfigAccountInstruction<
-  TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
->(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
-): ParsedAssertBubblegumTreeConfigAccountInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 1) {
-    // TODO: Coded error.
-    throw new Error('Not enough accounts');
-  }
-  let accountIndex = 0;
-  const getNextAccount = () => {
-    const accountMeta = instruction.accounts![accountIndex]!;
-    accountIndex += 1;
-    return accountMeta;
-  };
-  return {
-    programAddress: instruction.programAddress,
-    accounts: {
-      targetAccount: getNextAccount(),
+// Instruction.
+export function assertBubblegumTreeConfigAccount(
+  context: Pick<Context, 'programs'>,
+  input: AssertBubblegumTreeConfigAccountInstructionAccounts &
+    AssertBubblegumTreeConfigAccountInstructionArgs
+): TransactionBuilder {
+  // Program ID.
+  const programId = context.programs.getPublicKey(
+    'lighthouse',
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+  );
+
+  // Accounts.
+  const resolvedAccounts = {
+    targetAccount: {
+      index: 0,
+      isWritable: false as boolean,
+      value: input.targetAccount ?? null,
     },
-    data: getAssertBubblegumTreeConfigAccountInstructionDataDecoder().decode(
-      instruction.data
-    ),
+  } satisfies ResolvedAccountsWithIndices;
+
+  // Arguments.
+  const resolvedArgs: AssertBubblegumTreeConfigAccountInstructionArgs = {
+    ...input,
   };
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
+
+  // Data.
+  const data =
+    getAssertBubblegumTreeConfigAccountInstructionDataSerializer().serialize(
+      resolvedArgs as AssertBubblegumTreeConfigAccountInstructionDataArgs
+    );
+
+  // Bytes Created On Chain.
+  const bytesCreatedOnChain = 0;
+
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

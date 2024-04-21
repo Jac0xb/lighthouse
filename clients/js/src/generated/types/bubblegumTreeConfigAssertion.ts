@@ -6,51 +6,42 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  dataEnum,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type BubblegumTreeConfigAssertion =
-  | { __kind: 'TreeCreator'; value: Address; operator: EquatableOperator }
-  | { __kind: 'TreeDelegate'; value: Address; operator: EquatableOperator }
+  | { __kind: 'TreeCreator'; value: PublicKey; operator: EquatableOperator }
+  | { __kind: 'TreeDelegate'; value: PublicKey; operator: EquatableOperator }
   | { __kind: 'TotalMintCapacity'; value: bigint; operator: IntegerOperator }
   | { __kind: 'NumMinted'; value: bigint; operator: IntegerOperator }
   | { __kind: 'IsPublic'; value: boolean; operator: EquatableOperator }
   | { __kind: 'IsDecompressible'; value: number; operator: EquatableOperator };
 
 export type BubblegumTreeConfigAssertionArgs =
-  | { __kind: 'TreeCreator'; value: Address; operator: EquatableOperatorArgs }
-  | { __kind: 'TreeDelegate'; value: Address; operator: EquatableOperatorArgs }
+  | { __kind: 'TreeCreator'; value: PublicKey; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'TreeDelegate';
+      value: PublicKey;
+      operator: EquatableOperatorArgs;
+    }
   | {
       __kind: 'TotalMintCapacity';
       value: number | bigint;
@@ -68,108 +59,78 @@ export type BubblegumTreeConfigAssertionArgs =
       operator: EquatableOperatorArgs;
     };
 
-export function getBubblegumTreeConfigAssertionEncoder(): Encoder<BubblegumTreeConfigAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'TreeCreator',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'TreeDelegate',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'TotalMintCapacity',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'NumMinted',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsPublic',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsDecompressible',
-      getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getBubblegumTreeConfigAssertionDecoder(): Decoder<BubblegumTreeConfigAssertion> {
-  return getDataEnumDecoder([
-    [
-      'TreeCreator',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'TreeDelegate',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'TotalMintCapacity',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'NumMinted',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsPublic',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsDecompressible',
-      getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getBubblegumTreeConfigAssertionCodec(): Codec<
+export function getBubblegumTreeConfigAssertionSerializer(): Serializer<
   BubblegumTreeConfigAssertionArgs,
   BubblegumTreeConfigAssertion
 > {
-  return combineCodec(
-    getBubblegumTreeConfigAssertionEncoder(),
-    getBubblegumTreeConfigAssertionDecoder()
-  );
+  return dataEnum<BubblegumTreeConfigAssertion>(
+    [
+      [
+        'TreeCreator',
+        struct<
+          GetDataEnumKindContent<BubblegumTreeConfigAssertion, 'TreeCreator'>
+        >([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'TreeDelegate',
+        struct<
+          GetDataEnumKindContent<BubblegumTreeConfigAssertion, 'TreeDelegate'>
+        >([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'TotalMintCapacity',
+        struct<
+          GetDataEnumKindContent<
+            BubblegumTreeConfigAssertion,
+            'TotalMintCapacity'
+          >
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'NumMinted',
+        struct<
+          GetDataEnumKindContent<BubblegumTreeConfigAssertion, 'NumMinted'>
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsPublic',
+        struct<
+          GetDataEnumKindContent<BubblegumTreeConfigAssertion, 'IsPublic'>
+        >([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsDecompressible',
+        struct<
+          GetDataEnumKindContent<
+            BubblegumTreeConfigAssertion,
+            'IsDecompressible'
+          >
+        >([
+          ['value', u8()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'BubblegumTreeConfigAssertion' }
+  ) as Serializer<
+    BubblegumTreeConfigAssertionArgs,
+    BubblegumTreeConfigAssertion
+  >;
 }
 
 // Data Enum Helpers.
@@ -213,7 +174,6 @@ export function bubblegumTreeConfigAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isBubblegumTreeConfigAssertion<
   K extends BubblegumTreeConfigAssertion['__kind']
 >(

@@ -6,44 +6,30 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type UpgradeableProgramDataAssertion =
   | {
       __kind: 'UpgradeAuthority';
-      value: Option<Address>;
+      value: Option<PublicKey>;
       operator: EquatableOperator;
     }
   | { __kind: 'Slot'; value: bigint; operator: IntegerOperator };
@@ -51,57 +37,44 @@ export type UpgradeableProgramDataAssertion =
 export type UpgradeableProgramDataAssertionArgs =
   | {
       __kind: 'UpgradeAuthority';
-      value: OptionOrNullable<Address>;
+      value: OptionOrNullable<PublicKey>;
       operator: EquatableOperatorArgs;
     }
   | { __kind: 'Slot'; value: number | bigint; operator: IntegerOperatorArgs };
 
-export function getUpgradeableProgramDataAssertionEncoder(): Encoder<UpgradeableProgramDataAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'UpgradeAuthority',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Slot',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableProgramDataAssertionDecoder(): Decoder<UpgradeableProgramDataAssertion> {
-  return getDataEnumDecoder([
-    [
-      'UpgradeAuthority',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Slot',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableProgramDataAssertionCodec(): Codec<
+export function getUpgradeableProgramDataAssertionSerializer(): Serializer<
   UpgradeableProgramDataAssertionArgs,
   UpgradeableProgramDataAssertion
 > {
-  return combineCodec(
-    getUpgradeableProgramDataAssertionEncoder(),
-    getUpgradeableProgramDataAssertionDecoder()
-  );
+  return dataEnum<UpgradeableProgramDataAssertion>(
+    [
+      [
+        'UpgradeAuthority',
+        struct<
+          GetDataEnumKindContent<
+            UpgradeableProgramDataAssertion,
+            'UpgradeAuthority'
+          >
+        >([
+          ['value', option(publicKeySerializer())],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Slot',
+        struct<GetDataEnumKindContent<UpgradeableProgramDataAssertion, 'Slot'>>(
+          [
+            ['value', u64()],
+            ['operator', getIntegerOperatorSerializer()],
+          ]
+        ),
+      ],
+    ],
+    { description: 'UpgradeableProgramDataAssertion' }
+  ) as Serializer<
+    UpgradeableProgramDataAssertionArgs,
+    UpgradeableProgramDataAssertion
+  >;
 }
 
 // Data Enum Helpers.
@@ -126,7 +99,6 @@ export function upgradeableProgramDataAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isUpgradeableProgramDataAssertion<
   K extends UpgradeableProgramDataAssertion['__kind']
 >(

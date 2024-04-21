@@ -6,114 +6,43 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
+  Context,
+  Pda,
+  PublicKey,
+  Signer,
+  TransactionBuilder,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
-  AccountRole,
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-  WritableAccount,
-  WritableSignerAccount,
-} from '@solana/instructions';
-import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
+  Serializer,
+  mapSerializer,
+  struct,
+  u16,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
 } from '../shared';
-import {
-  WriteType,
-  WriteTypeArgs,
-  getWriteTypeDecoder,
-  getWriteTypeEncoder,
-} from '../types';
+import { WriteType, WriteTypeArgs, getWriteTypeSerializer } from '../types';
 
-export type MemoryWriteInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends
-    | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TAccountSourceAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountProgramId extends string
-        ? ReadonlyAccount<TAccountProgramId>
-        : TAccountProgramId,
-      TAccountSystemProgram extends string
-        ? ReadonlyAccount<TAccountSystemProgram>
-        : TAccountSystemProgram,
-      TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer>
-        : TAccountPayer,
-      TAccountMemory extends string
-        ? WritableAccount<TAccountMemory>
-        : TAccountMemory,
-      TAccountSourceAccount extends string
-        ? ReadonlyAccount<TAccountSourceAccount>
-        : TAccountSourceAccount,
-      ...TRemainingAccounts
-    ]
-  >;
+// Accounts.
+export type MemoryWriteInstructionAccounts = {
+  /** Lighthouse program */
+  programId?: PublicKey | Pda;
+  /** System program */
+  systemProgram?: PublicKey | Pda;
+  /** Payer account */
+  payer?: Signer;
+  /** Memory account */
+  memory: PublicKey | Pda;
+  /** Account to be written to memory */
+  sourceAccount: PublicKey | Pda;
+};
 
-export type MemoryWriteInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends
-    | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TAccountSourceAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountProgramId extends string
-        ? ReadonlyAccount<TAccountProgramId>
-        : TAccountProgramId,
-      TAccountSystemProgram extends string
-        ? ReadonlyAccount<TAccountSystemProgram>
-        : TAccountSystemProgram,
-      TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer> &
-            IAccountSignerMeta<TAccountPayer>
-        : TAccountPayer,
-      TAccountMemory extends string
-        ? WritableAccount<TAccountMemory>
-        : TAccountMemory,
-      TAccountSourceAccount extends string
-        ? ReadonlyAccount<TAccountSourceAccount>
-        : TAccountSourceAccount,
-      ...TRemainingAccounts
-    ]
-  >;
-
+// Data.
 export type MemoryWriteInstructionData = {
   discriminator: number;
   memoryId: number;
@@ -129,313 +58,112 @@ export type MemoryWriteInstructionDataArgs = {
   writeType: WriteTypeArgs;
 };
 
-export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstructionDataArgs> {
-  return mapEncoder(
-    getStructEncoder([
-      ['discriminator', getU8Encoder()],
-      ['memoryId', getU8Encoder()],
-      ['memoryBump', getU8Encoder()],
-      ['writeOffset', getU16Encoder()],
-      ['writeType', getWriteTypeEncoder()],
-    ]),
-    (value) => ({ ...value, discriminator: 0, memoryId: value.memoryId ?? 0 })
-  );
-}
-
-export function getMemoryWriteInstructionDataDecoder(): Decoder<MemoryWriteInstructionData> {
-  return getStructDecoder([
-    ['discriminator', getU8Decoder()],
-    ['memoryId', getU8Decoder()],
-    ['memoryBump', getU8Decoder()],
-    ['writeOffset', getU16Decoder()],
-    ['writeType', getWriteTypeDecoder()],
-  ]);
-}
-
-export function getMemoryWriteInstructionDataCodec(): Codec<
+export function getMemoryWriteInstructionDataSerializer(): Serializer<
   MemoryWriteInstructionDataArgs,
   MemoryWriteInstructionData
 > {
-  return combineCodec(
-    getMemoryWriteInstructionDataEncoder(),
-    getMemoryWriteInstructionDataDecoder()
-  );
+  return mapSerializer<
+    MemoryWriteInstructionDataArgs,
+    any,
+    MemoryWriteInstructionData
+  >(
+    struct<MemoryWriteInstructionData>(
+      [
+        ['discriminator', u8()],
+        ['memoryId', u8()],
+        ['memoryBump', u8()],
+        ['writeOffset', u16()],
+        ['writeType', getWriteTypeSerializer()],
+      ],
+      { description: 'MemoryWriteInstructionData' }
+    ),
+    (value) => ({ ...value, discriminator: 0, memoryId: value.memoryId ?? 0 })
+  ) as Serializer<MemoryWriteInstructionDataArgs, MemoryWriteInstructionData>;
 }
 
-export type MemoryWriteInput<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TAccountSourceAccount extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** System program */
-  systemProgram?: Address<TAccountSystemProgram>;
-  /** Payer account */
-  payer: Address<TAccountPayer>;
-  /** Memory account */
-  memory: Address<TAccountMemory>;
-  /** Account to be written to memory */
-  sourceAccount: Address<TAccountSourceAccount>;
-  memoryId?: MemoryWriteInstructionDataArgs['memoryId'];
-  memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
-  writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
-  writeType: MemoryWriteInstructionDataArgs['writeType'];
-};
+// Args.
+export type MemoryWriteInstructionArgs = MemoryWriteInstructionDataArgs;
 
-export type MemoryWriteInputWithSigners<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TAccountSourceAccount extends string
-> = {
-  /** Lighthouse program */
-  programId?: Address<TAccountProgramId>;
-  /** System program */
-  systemProgram?: Address<TAccountSystemProgram>;
-  /** Payer account */
-  payer: TransactionSigner<TAccountPayer>;
-  /** Memory account */
-  memory: Address<TAccountMemory>;
-  /** Account to be written to memory */
-  sourceAccount: Address<TAccountSourceAccount>;
-  memoryId?: MemoryWriteInstructionDataArgs['memoryId'];
-  memoryBump: MemoryWriteInstructionDataArgs['memoryBump'];
-  writeOffset: MemoryWriteInstructionDataArgs['writeOffset'];
-  writeType: MemoryWriteInstructionDataArgs['writeType'];
-};
-
-export function getMemoryWriteInstruction<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteInputWithSigners<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemory,
-    TAccountSourceAccount
-  >
-): MemoryWriteInstructionWithSigners<
-  TProgram,
-  TAccountProgramId,
-  TAccountSystemProgram,
-  TAccountPayer,
-  TAccountMemory,
-  TAccountSourceAccount
->;
-export function getMemoryWriteInstruction<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteInput<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemory,
-    TAccountSourceAccount
-  >
-): MemoryWriteInstruction<
-  TProgram,
-  TAccountProgramId,
-  TAccountSystemProgram,
-  TAccountPayer,
-  TAccountMemory,
-  TAccountSourceAccount
->;
-export function getMemoryWriteInstruction<
-  TAccountProgramId extends string,
-  TAccountSystemProgram extends string,
-  TAccountPayer extends string,
-  TAccountMemory extends string,
-  TAccountSourceAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: MemoryWriteInput<
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemory,
-    TAccountSourceAccount
-  >
-): IInstruction {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getMemoryWriteInstructionRaw<
-      TProgram,
-      TAccountProgramId,
-      TAccountSystemProgram,
-      TAccountPayer,
-      TAccountMemory,
-      TAccountSourceAccount
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    programId: { value: input.programId ?? null, isWritable: false },
-    systemProgram: { value: input.systemProgram ?? null, isWritable: false },
-    payer: { value: input.payer ?? null, isWritable: true },
-    memory: { value: input.memory ?? null, isWritable: true },
-    sourceAccount: { value: input.sourceAccount ?? null, isWritable: false },
-  };
-
-  // Original args.
-  const args = { ...input };
-
-  // Resolve default values.
-  if (!accounts.programId.value) {
-    accounts.programId.value = programAddress;
-    accounts.programId.isWritable = false;
-  }
-  if (!accounts.systemProgram.value) {
-    accounts.systemProgram.value =
-      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
-  }
-
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
+// Instruction.
+export function memoryWrite(
+  context: Pick<Context, 'payer' | 'programs'>,
+  input: MemoryWriteInstructionAccounts & MemoryWriteInstructionArgs
+): TransactionBuilder {
+  // Program ID.
+  const programId = context.programs.getPublicKey(
+    'lighthouse',
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
   );
 
-  const instruction = getMemoryWriteInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as MemoryWriteInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
-}
-
-export function getMemoryWriteInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountProgramId extends
-    | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountSystemProgram extends
-    | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TAccountSourceAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    programId?: TAccountProgramId extends string
-      ? Address<TAccountProgramId>
-      : TAccountProgramId;
-    systemProgram?: TAccountSystemProgram extends string
-      ? Address<TAccountSystemProgram>
-      : TAccountSystemProgram;
-    payer: TAccountPayer extends string
-      ? Address<TAccountPayer>
-      : TAccountPayer;
-    memory: TAccountMemory extends string
-      ? Address<TAccountMemory>
-      : TAccountMemory;
-    sourceAccount: TAccountSourceAccount extends string
-      ? Address<TAccountSourceAccount>
-      : TAccountSourceAccount;
-  },
-  args: MemoryWriteInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(
-        accounts.programId ?? {
-          address:
-            'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
-          role: AccountRole.READONLY,
-        },
-        AccountRole.READONLY
-      ),
-      accountMetaWithDefault(
-        accounts.systemProgram ??
-          ('11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>),
-        AccountRole.READONLY
-      ),
-      accountMetaWithDefault(accounts.payer, AccountRole.WRITABLE_SIGNER),
-      accountMetaWithDefault(accounts.memory, AccountRole.WRITABLE),
-      accountMetaWithDefault(accounts.sourceAccount, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getMemoryWriteInstructionDataEncoder().encode(args),
-    programAddress,
-  } as MemoryWriteInstruction<
-    TProgram,
-    TAccountProgramId,
-    TAccountSystemProgram,
-    TAccountPayer,
-    TAccountMemory,
-    TAccountSourceAccount,
-    TRemainingAccounts
-  >;
-}
-
-export type ParsedMemoryWriteInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
-> = {
-  programAddress: Address<TProgram>;
-  accounts: {
-    /** Lighthouse program */
-    programId: TAccountMetas[0];
-    /** System program */
-    systemProgram: TAccountMetas[1];
-    /** Payer account */
-    payer: TAccountMetas[2];
-    /** Memory account */
-    memory: TAccountMetas[3];
-    /** Account to be written to memory */
-    sourceAccount: TAccountMetas[4];
-  };
-  data: MemoryWriteInstructionData;
-};
-
-export function parseMemoryWriteInstruction<
-  TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
->(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
-): ParsedMemoryWriteInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error('Not enough accounts');
-  }
-  let accountIndex = 0;
-  const getNextAccount = () => {
-    const accountMeta = instruction.accounts![accountIndex]!;
-    accountIndex += 1;
-    return accountMeta;
-  };
-  return {
-    programAddress: instruction.programAddress,
-    accounts: {
-      programId: getNextAccount(),
-      systemProgram: getNextAccount(),
-      payer: getNextAccount(),
-      memory: getNextAccount(),
-      sourceAccount: getNextAccount(),
+  // Accounts.
+  const resolvedAccounts = {
+    programId: {
+      index: 0,
+      isWritable: false as boolean,
+      value: input.programId ?? null,
     },
-    data: getMemoryWriteInstructionDataDecoder().decode(instruction.data),
-  };
+    systemProgram: {
+      index: 1,
+      isWritable: false as boolean,
+      value: input.systemProgram ?? null,
+    },
+    payer: {
+      index: 2,
+      isWritable: true as boolean,
+      value: input.payer ?? null,
+    },
+    memory: {
+      index: 3,
+      isWritable: true as boolean,
+      value: input.memory ?? null,
+    },
+    sourceAccount: {
+      index: 4,
+      isWritable: false as boolean,
+      value: input.sourceAccount ?? null,
+    },
+  } satisfies ResolvedAccountsWithIndices;
+
+  // Arguments.
+  const resolvedArgs: MemoryWriteInstructionArgs = { ...input };
+
+  // Default values.
+  if (!resolvedAccounts.programId.value) {
+    resolvedAccounts.programId.value = programId;
+    resolvedAccounts.programId.isWritable = false;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
+
+  // Data.
+  const data = getMemoryWriteInstructionDataSerializer().serialize(
+    resolvedArgs as MemoryWriteInstructionDataArgs
+  );
+
+  // Bytes Created On Chain.
+  const bytesCreatedOnChain = 0;
+
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

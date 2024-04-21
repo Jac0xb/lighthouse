@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum KnownProgram {
   System,
@@ -29,14 +22,11 @@ export enum KnownProgram {
 
 export type KnownProgramArgs = KnownProgram;
 
-export function getKnownProgramEncoder(): Encoder<KnownProgramArgs> {
-  return getScalarEnumEncoder(KnownProgram);
-}
-
-export function getKnownProgramDecoder(): Decoder<KnownProgram> {
-  return getScalarEnumDecoder(KnownProgram);
-}
-
-export function getKnownProgramCodec(): Codec<KnownProgramArgs, KnownProgram> {
-  return combineCodec(getKnownProgramEncoder(), getKnownProgramDecoder());
+export function getKnownProgramSerializer(): Serializer<
+  KnownProgramArgs,
+  KnownProgram
+> {
+  return scalarEnum<KnownProgram>(KnownProgram, {
+    description: 'KnownProgram',
+  }) as Serializer<KnownProgramArgs, KnownProgram>;
 }

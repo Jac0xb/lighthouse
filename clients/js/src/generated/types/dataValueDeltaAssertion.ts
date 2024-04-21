@@ -7,36 +7,24 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI128Decoder,
-  getI128Encoder,
-  getI16Decoder,
-  getI16Encoder,
-  getI32Decoder,
-  getI32Encoder,
-  getI64Decoder,
-  getI64Encoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  i128,
+  i16,
+  i32,
+  i64,
+  struct,
+  u16,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type DataValueDeltaAssertion =
@@ -61,150 +49,78 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'Bytes'; length: number; operator: EquatableOperatorArgs };
 
-export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'U8',
-      getStructEncoder([
-        ['value', getI16Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I8',
-      getStructEncoder([
-        ['value', getI16Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U16',
-      getStructEncoder([
-        ['value', getI32Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I16',
-      getStructEncoder([
-        ['value', getI32Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U32',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I32',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'U64',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'I64',
-      getStructEncoder([
-        ['value', getI128Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructEncoder([
-        ['length', getU16Encoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAssertion> {
-  return getDataEnumDecoder([
-    [
-      'U8',
-      getStructDecoder([
-        ['value', getI16Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I8',
-      getStructDecoder([
-        ['value', getI16Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U16',
-      getStructDecoder([
-        ['value', getI32Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I16',
-      getStructDecoder([
-        ['value', getI32Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U32',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I32',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'U64',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'I64',
-      getStructDecoder([
-        ['value', getI128Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructDecoder([
-        ['length', getU16Decoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getDataValueDeltaAssertionCodec(): Codec<
+export function getDataValueDeltaAssertionSerializer(): Serializer<
   DataValueDeltaAssertionArgs,
   DataValueDeltaAssertion
 > {
-  return combineCodec(
-    getDataValueDeltaAssertionEncoder(),
-    getDataValueDeltaAssertionDecoder()
-  );
+  return dataEnum<DataValueDeltaAssertion>(
+    [
+      [
+        'U8',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'U8'>>([
+          ['value', i16()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I8',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'I8'>>([
+          ['value', i16()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U16',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'U16'>>([
+          ['value', i32()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I16',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'I16'>>([
+          ['value', i32()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U32',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'U32'>>([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I32',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'I32'>>([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'U64',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'U64'>>([
+          ['value', i128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'I64',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'I64'>>([
+          ['value', i128()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Bytes',
+        struct<GetDataEnumKindContent<DataValueDeltaAssertion, 'Bytes'>>([
+          ['length', u16()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'DataValueDeltaAssertion' }
+  ) as Serializer<DataValueDeltaAssertionArgs, DataValueDeltaAssertion>;
 }
 
 // Data Enum Helpers.
@@ -251,7 +167,6 @@ export function dataValueDeltaAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isDataValueDeltaAssertion<
   K extends DataValueDeltaAssertion['__kind']
 >(

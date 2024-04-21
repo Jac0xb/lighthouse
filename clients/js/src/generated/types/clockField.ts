@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum ClockField {
   Slot,
@@ -25,14 +18,11 @@ export enum ClockField {
 
 export type ClockFieldArgs = ClockField;
 
-export function getClockFieldEncoder(): Encoder<ClockFieldArgs> {
-  return getScalarEnumEncoder(ClockField);
-}
-
-export function getClockFieldDecoder(): Decoder<ClockField> {
-  return getScalarEnumDecoder(ClockField);
-}
-
-export function getClockFieldCodec(): Codec<ClockFieldArgs, ClockField> {
-  return combineCodec(getClockFieldEncoder(), getClockFieldDecoder());
+export function getClockFieldSerializer(): Serializer<
+  ClockFieldArgs,
+  ClockField
+> {
+  return scalarEnum<ClockField>(ClockField, {
+    description: 'ClockField',
+  }) as Serializer<ClockFieldArgs, ClockField>;
 }

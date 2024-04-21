@@ -6,49 +6,45 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI64Decoder,
-  getI64Encoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  i64,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type MetaAssertion =
   | { __kind: 'RentExemptReserve'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'AuthorizedStaker'; value: Address; operator: EquatableOperator }
+  | {
+      __kind: 'AuthorizedStaker';
+      value: PublicKey;
+      operator: EquatableOperator;
+    }
   | {
       __kind: 'AuthorizedWithdrawer';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperator;
     }
   | { __kind: 'LockupUnixTimestamp'; value: bigint; operator: IntegerOperator }
   | { __kind: 'LockupEpoch'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'LockupCustodian'; value: Address; operator: EquatableOperator };
+  | {
+      __kind: 'LockupCustodian';
+      value: PublicKey;
+      operator: EquatableOperator;
+    };
 
 export type MetaAssertionArgs =
   | {
@@ -58,12 +54,12 @@ export type MetaAssertionArgs =
     }
   | {
       __kind: 'AuthorizedStaker';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperatorArgs;
     }
   | {
       __kind: 'AuthorizedWithdrawer';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperatorArgs;
     }
   | {
@@ -78,109 +74,61 @@ export type MetaAssertionArgs =
     }
   | {
       __kind: 'LockupCustodian';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperatorArgs;
     };
 
-export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'RentExemptReserve',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'AuthorizedStaker',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'AuthorizedWithdrawer',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'LockupUnixTimestamp',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'LockupEpoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'LockupCustodian',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getMetaAssertionDecoder(): Decoder<MetaAssertion> {
-  return getDataEnumDecoder([
-    [
-      'RentExemptReserve',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'AuthorizedStaker',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'AuthorizedWithdrawer',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'LockupUnixTimestamp',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'LockupEpoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'LockupCustodian',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getMetaAssertionCodec(): Codec<
+export function getMetaAssertionSerializer(): Serializer<
   MetaAssertionArgs,
   MetaAssertion
 > {
-  return combineCodec(getMetaAssertionEncoder(), getMetaAssertionDecoder());
+  return dataEnum<MetaAssertion>(
+    [
+      [
+        'RentExemptReserve',
+        struct<GetDataEnumKindContent<MetaAssertion, 'RentExemptReserve'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'AuthorizedStaker',
+        struct<GetDataEnumKindContent<MetaAssertion, 'AuthorizedStaker'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'AuthorizedWithdrawer',
+        struct<GetDataEnumKindContent<MetaAssertion, 'AuthorizedWithdrawer'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'LockupUnixTimestamp',
+        struct<GetDataEnumKindContent<MetaAssertion, 'LockupUnixTimestamp'>>([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'LockupEpoch',
+        struct<GetDataEnumKindContent<MetaAssertion, 'LockupEpoch'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'LockupCustodian',
+        struct<GetDataEnumKindContent<MetaAssertion, 'LockupCustodian'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'MetaAssertion' }
+  ) as Serializer<MetaAssertionArgs, MetaAssertion>;
 }
 
 // Data Enum Helpers.
@@ -216,7 +164,6 @@ export function metaAssertion<K extends MetaAssertionArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isMetaAssertion<K extends MetaAssertion['__kind']>(
   kind: K,
   value: MetaAssertion

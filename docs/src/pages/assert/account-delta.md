@@ -14,6 +14,75 @@ You may want to assert on the lamport delta of an account during a transaction.
 To do this we can use the [memory account](/memory) and delta assertion instructions that lighthouse offers. This involves writing the lamports of user's account into a memory account and asserting on the delta change.
 
 {% dialect-switcher title="Memory write + delta assertion transaction" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+import {
+  createLighthouseProgram,
+  IntegerOperator,
+  assertAccountDelta,
+  memoryWrite,
+  findMemoryPda,
+  AccountInfoField,
+} from 'lighthouse-sdk-legacy'
+import { toWeb3JsInstruction } from '@metaplex-foundation/umi-web3js-adapters'
+
+const umi = createUmi('https://api.mainnet-beta.solana.com')
+umi.programs.add(createLighthouseProgram())
+
+let tx = new Transaction()
+
+let [memory, memoryBump] = findMemoryPda({
+  payer: userPubkey,
+  memoryId: 0,
+})
+
+tx.add(
+  toWeb3JsInstruction(
+    memoryWrite(umi, {
+      memory: publicKey(memory),
+      sourceAccount: publicKey(userPubkey),
+      writeType: {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.Lamports],
+      },
+      memoryId: 0,
+      writeOffset: 0,
+      memoryBump,
+    }).getInstructions()[0]
+  )
+)
+
+tx.add(
+  SystemProgram.transfer({
+    fromPubkey: userPubkey,
+    toPubkey: destinationPubkey,
+    lamports: 1e9,
+  })
+)
+
+tx.add(
+  toWeb3JsInstruction(
+    assertAccountDelta(umi, {
+      accountA: publicKey(memory),
+      accountB: publicKey(userPubkey),
+      assertion: {
+        __kind: 'AccountInfo',
+        aOffset: 0,
+        assertion: {
+          __kind: 'Lamports',
+          value: -1e9,
+          operator: IntegerOperator.Equal,
+        },
+      },
+    }).getInstructions()[0]
+  )
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -79,6 +148,28 @@ pub struct TestAccount {
 Say we wanted to assert about the difference between two test accounts' vault balance.
 
 {% dialect-switcher title="Instruction building example for account data delta assertion" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+let ixs = assertAccountDelta(umi, {
+  accountA: publicKey(accountAKey),
+  accountB: publicKey(accountBKey),
+  assertion: {
+    __kind: 'Data',
+    aOffset: 8, // The byte offset in account A to deserialize into a u64 (vault_balance).
+    bOffset: 8, // The byte offset in account B to deserialize into a u64 (vault_balance).
+    assertion: {
+      __kind: 'U64',
+      value: expectedDiffBound, // b.vault_balance - a.vault_balance
+      operator: IntegerOperator.LessThan,
+    },
+  },
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

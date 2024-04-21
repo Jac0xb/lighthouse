@@ -3,7 +3,6 @@ const fs = require('fs');
 const { generateIdl } = require('@metaplex-foundation/shank-js');
 
 const binaryInstallDir = path.join(__dirname, '..', '.crates');
-// const binaryInstallDir = path.join(__dirname, '..', 'programs', '.bin');
 const programsDir = path.join(__dirname, '..', '');
 
 getPrograms().forEach((program) => {

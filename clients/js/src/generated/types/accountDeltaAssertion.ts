@@ -7,28 +7,20 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  struct,
+  u16,
+} from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoDeltaAssertion,
   AccountInfoDeltaAssertionArgs,
   DataValueDeltaAssertion,
   DataValueDeltaAssertionArgs,
-  getAccountInfoDeltaAssertionDecoder,
-  getAccountInfoDeltaAssertionEncoder,
-  getDataValueDeltaAssertionDecoder,
-  getDataValueDeltaAssertionEncoder,
+  getAccountInfoDeltaAssertionSerializer,
+  getDataValueDeltaAssertionSerializer,
 } from '.';
 
 export type AccountDeltaAssertion =
@@ -57,54 +49,30 @@ export type AccountDeltaAssertionArgs =
       assertion: DataValueDeltaAssertionArgs;
     };
 
-export function getAccountDeltaAssertionEncoder(): Encoder<AccountDeltaAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'AccountInfo',
-      getStructEncoder([
-        ['aOffset', getU16Encoder()],
-        ['assertion', getAccountInfoDeltaAssertionEncoder()],
-      ]),
-    ],
-    [
-      'Data',
-      getStructEncoder([
-        ['aOffset', getU16Encoder()],
-        ['bOffset', getU16Encoder()],
-        ['assertion', getDataValueDeltaAssertionEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountDeltaAssertionDecoder(): Decoder<AccountDeltaAssertion> {
-  return getDataEnumDecoder([
-    [
-      'AccountInfo',
-      getStructDecoder([
-        ['aOffset', getU16Decoder()],
-        ['assertion', getAccountInfoDeltaAssertionDecoder()],
-      ]),
-    ],
-    [
-      'Data',
-      getStructDecoder([
-        ['aOffset', getU16Decoder()],
-        ['bOffset', getU16Decoder()],
-        ['assertion', getDataValueDeltaAssertionDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountDeltaAssertionCodec(): Codec<
+export function getAccountDeltaAssertionSerializer(): Serializer<
   AccountDeltaAssertionArgs,
   AccountDeltaAssertion
 > {
-  return combineCodec(
-    getAccountDeltaAssertionEncoder(),
-    getAccountDeltaAssertionDecoder()
-  );
+  return dataEnum<AccountDeltaAssertion>(
+    [
+      [
+        'AccountInfo',
+        struct<GetDataEnumKindContent<AccountDeltaAssertion, 'AccountInfo'>>([
+          ['aOffset', u16()],
+          ['assertion', getAccountInfoDeltaAssertionSerializer()],
+        ]),
+      ],
+      [
+        'Data',
+        struct<GetDataEnumKindContent<AccountDeltaAssertion, 'Data'>>([
+          ['aOffset', u16()],
+          ['bOffset', u16()],
+          ['assertion', getDataValueDeltaAssertionSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'AccountDeltaAssertion' }
+  ) as Serializer<AccountDeltaAssertionArgs, AccountDeltaAssertion>;
 }
 
 // Data Enum Helpers.
@@ -123,7 +91,6 @@ export function accountDeltaAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isAccountDeltaAssertion<
   K extends AccountDeltaAssertion['__kind']
 >(

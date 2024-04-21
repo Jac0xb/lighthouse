@@ -7,21 +7,14 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getBytesDecoder,
-  getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bytes,
+  dataEnum,
+  struct,
+  u32,
+} from '@metaplex-foundation/umi/serializers';
 
 export type MerkleTreeAssertion = {
   __kind: 'VerifyLeaf';
@@ -31,38 +24,22 @@ export type MerkleTreeAssertion = {
 
 export type MerkleTreeAssertionArgs = MerkleTreeAssertion;
 
-export function getMerkleTreeAssertionEncoder(): Encoder<MerkleTreeAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'VerifyLeaf',
-      getStructEncoder([
-        ['leafIndex', getU32Encoder()],
-        ['leafHash', getBytesEncoder({ size: 32 })],
-      ]),
-    ],
-  ]);
-}
-
-export function getMerkleTreeAssertionDecoder(): Decoder<MerkleTreeAssertion> {
-  return getDataEnumDecoder([
-    [
-      'VerifyLeaf',
-      getStructDecoder([
-        ['leafIndex', getU32Decoder()],
-        ['leafHash', getBytesDecoder({ size: 32 })],
-      ]),
-    ],
-  ]);
-}
-
-export function getMerkleTreeAssertionCodec(): Codec<
+export function getMerkleTreeAssertionSerializer(): Serializer<
   MerkleTreeAssertionArgs,
   MerkleTreeAssertion
 > {
-  return combineCodec(
-    getMerkleTreeAssertionEncoder(),
-    getMerkleTreeAssertionDecoder()
-  );
+  return dataEnum<MerkleTreeAssertion>(
+    [
+      [
+        'VerifyLeaf',
+        struct<GetDataEnumKindContent<MerkleTreeAssertion, 'VerifyLeaf'>>([
+          ['leafIndex', u32()],
+          ['leafHash', bytes({ size: 32 })],
+        ]),
+      ],
+    ],
+    { description: 'MerkleTreeAssertion' }
+  ) as Serializer<MerkleTreeAssertionArgs, MerkleTreeAssertion>;
 }
 
 // Data Enum Helpers.
@@ -77,7 +54,6 @@ export function merkleTreeAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isMerkleTreeAssertion<K extends MerkleTreeAssertion['__kind']>(
   kind: K,
   value: MerkleTreeAssertion

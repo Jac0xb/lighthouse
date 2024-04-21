@@ -7,20 +7,21 @@
  */
 
 import {
-  Address,
-  isProgramDerivedAddress,
-  ProgramDerivedAddress,
-} from '@solana/addresses';
-import {
-  AccountRole,
-  IAccountMeta,
-  upgradeRoleToSigner,
-} from '@solana/instructions';
-import {
-  IAccountSignerMeta,
-  isTransactionSigner as web3JsIsTransactionSigner,
-  TransactionSigner,
-} from '@solana/signers';
+  AccountMeta,
+  isSigner,
+  Pda,
+  publicKey,
+  PublicKey,
+  Signer,
+  isPda,
+} from '@metaplex-foundation/umi';
+
+/**
+ * Transforms the given object such that the given keys are optional.
+ * @internal
+ */
+export type PickPartial<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 /**
  * Asserts that the given value is not null or undefined.
@@ -37,58 +38,24 @@ export function expectSome<T>(value: T | null | undefined): T {
  * Asserts that the given value is a PublicKey.
  * @internal
  */
-export function expectAddress<T extends string = string>(
-  value:
-    | Address<T>
-    | ProgramDerivedAddress<T>
-    | TransactionSigner<T>
-    | null
-    | undefined
-): Address<T> {
+export function expectPublicKey(
+  value: PublicKey | Pda | Signer | null | undefined
+): PublicKey {
   if (!value) {
-    throw new Error('Expected a Address.');
+    throw new Error('Expected a PublicKey.');
   }
-  if (typeof value === 'object' && 'address' in value) {
-    return value.address;
-  }
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value as Address<T>;
+  return publicKey(value, false);
 }
 
 /**
  * Asserts that the given value is a PDA.
  * @internal
  */
-export function expectProgramDerivedAddress<T extends string = string>(
-  value:
-    | Address<T>
-    | ProgramDerivedAddress<T>
-    | TransactionSigner<T>
-    | null
-    | undefined
-): ProgramDerivedAddress<T> {
-  if (!value || !Array.isArray(value) || !isProgramDerivedAddress(value)) {
-    throw new Error('Expected a ProgramDerivedAddress.');
-  }
-  return value;
-}
-
-/**
- * Asserts that the given value is a TransactionSigner.
- * @internal
- */
-export function expectTransactionSigner<T extends string = string>(
-  value:
-    | Address<T>
-    | ProgramDerivedAddress<T>
-    | TransactionSigner<T>
-    | null
-    | undefined
-): TransactionSigner<T> {
-  if (!value || !isTransactionSigner(value)) {
-    throw new Error('Expected a TransactionSigner.');
+export function expectPda(
+  value: PublicKey | Pda | Signer | null | undefined
+): Pda {
+  if (!value || !Array.isArray(value) || !isPda(value)) {
+    throw new Error('Expected a PDA.');
   }
   return value;
 }
@@ -97,95 +64,54 @@ export function expectTransactionSigner<T extends string = string>(
  * Defines an instruction account to resolve.
  * @internal
  */
-export type ResolvedAccount<
-  T extends string = string,
-  U extends
-    | Address<T>
-    | ProgramDerivedAddress<T>
-    | TransactionSigner<T>
-    | null = Address<T> | ProgramDerivedAddress<T> | TransactionSigner<T> | null
-> = {
+export type ResolvedAccount<T = PublicKey | Pda | Signer | null> = {
   isWritable: boolean;
-  value: U;
+  value: T;
 };
 
 /**
- * Add an account meta with a default role if only an address is provided.
+ * Defines a set of instruction account to resolve.
  * @internal
  */
-export function accountMetaWithDefault<
-  TAccount extends string | IAccountMeta<string>,
-  TRole extends AccountRole
->(account: TAccount | undefined, role: TRole) {
-  if (account === undefined) return undefined;
-  return (
-    typeof account === 'string' ? { address: account, role } : account
-  ) as TAccount extends string
-    ? { address: Address<TAccount>; role: TRole }
-    : TAccount;
-}
+export type ResolvedAccounts = Record<string, ResolvedAccount>;
 
 /**
- * Defines an instruction that stores additional bytes on-chain.
+ * Defines a set of instruction account to resolve with their indices.
  * @internal
  */
-export type IInstructionWithByteDelta = {
-  byteDelta: number;
-};
+export type ResolvedAccountsWithIndices = Record<
+  string,
+  ResolvedAccount & { index: number }
+>;
 
 /**
  * Get account metas and signers from resolved accounts.
  * @internal
  */
-export function getAccountMetasWithSigners<TKey extends string = string>(
-  accounts: Record<TKey, ResolvedAccount>,
+export function getAccountMetasAndSigners(
+  accounts: ResolvedAccount[],
   optionalAccountStrategy: 'omitted' | 'programId',
-  programAddress: Address
-): Record<TKey, IAccountMeta | IAccountSignerMeta> {
-  const accountMetas: Record<string, IAccountMeta | IAccountSignerMeta> = {};
+  programId: PublicKey
+): [AccountMeta[], Signer[]] {
+  const keys: AccountMeta[] = [];
+  const signers: Signer[] = [];
 
-  Object.keys(accounts).forEach((key) => {
-    const account = accounts[key as TKey] as ResolvedAccount;
+  accounts.forEach((account) => {
     if (!account.value) {
       if (optionalAccountStrategy === 'omitted') return;
-      accountMetas[key] = {
-        address: programAddress,
-        role: AccountRole.READONLY,
-      };
+      keys.push({ pubkey: programId, isSigner: false, isWritable: false });
       return;
     }
 
-    const writableRole = account.isWritable
-      ? AccountRole.WRITABLE
-      : AccountRole.READONLY;
-    accountMetas[key] = Object.freeze({
-      address: expectAddress(account.value),
-      role: isTransactionSigner(account.value)
-        ? upgradeRoleToSigner(writableRole)
-        : writableRole,
-      ...(isTransactionSigner(account.value) ? { signer: account.value } : {}),
+    if (isSigner(account.value)) {
+      signers.push(account.value);
+    }
+    keys.push({
+      pubkey: publicKey(account.value, false),
+      isSigner: isSigner(account.value),
+      isWritable: account.isWritable,
     });
   });
 
-  return accountMetas;
-}
-
-export function isTransactionSigner<TAddress extends string = string>(
-  value:
-    | Address<TAddress>
-    | ProgramDerivedAddress<TAddress>
-    | TransactionSigner<TAddress>
-): value is TransactionSigner<TAddress> {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    'address' in value &&
-    web3JsIsTransactionSigner(value)
-  );
-}
-
-export function memcmp(data: Uint8Array, bytes: Uint8Array, offset: number) {
-  const slice = data.slice(offset, offset + bytes.length);
-  if (slice.length !== bytes.length) return false;
-  return bytes.every((b, i) => b === slice[i]);
+  return [keys, signers];
 }
