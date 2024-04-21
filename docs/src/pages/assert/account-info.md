@@ -36,6 +36,21 @@ Lighthouse exposes asserting on these `AccountInfo` through the assertion types 
 It's possible to make assertions on the value of lamports of an account at runtime.
 
 {% dialect-switcher title="Lamport assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('Lamports', {
+    value: 5_000_000,
+    operator: IntegerOperator.GreaterThan,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -75,13 +90,28 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to make assertions on which programs owns the account.
 
 {% dialect-switcher title="Account owner assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('Owner', {
+    value: SystemProgram.programId,
+    operator: EquatableOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
 import { publicKey } from '@metaplex-foundation/umi'
 
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'Owner',
@@ -131,11 +161,26 @@ pub enum KnownProgram {
 Here is an example of asserting that the account is owned by the system program.
 
 {% dialect-switcher title="KnownOwner account owner assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('KnownOwner', {
+    value: KnownProgram.System,
+    operator: EquatableOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'KnownOwner',
@@ -169,11 +214,26 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to assert the
 
 {% dialect-switcher title="Rent Epoch assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('RentEpoch', {
+    value: 0,
+    operator: IntegerOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'RentEpoch',
@@ -207,11 +267,26 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is a signer in the runtime.
 
 {% dialect-switcher title="IsSigner assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('IsSigner', {
+    value: true,
+    operator: EquatableOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'IsSigner',
@@ -227,7 +302,6 @@ const ixs = assertAccountInfo(umi, {
 {% totem %}
 
 ```rust
-
 let ix = AssertAccountInfoBuilder::new()
     .target_account(user_key)
     .log_level(LogLevel::PlaintextMessage) // Logs assertion results.
@@ -236,7 +310,6 @@ let ix = AssertAccountInfoBuilder::new()
         operator: EquatableOperator::Equal,
     })
     .instruction();
-
 ```
 
 {% /totem %}
@@ -248,11 +321,26 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is writable in the runtime.
 
 {% dialect-switcher title="IsWritable assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('IsWritable', {
+    value: true,
+    operator: EquatableOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'IsWritable',
@@ -287,11 +375,26 @@ let ix = AssertAccountInfoBuilder::new()
 It's possible to get whether an account is an executable account.
 
 {% dialect-switcher title="Executable assertion instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('IsWritable', {
+    value: true,
+    operator: EquatableOperator.Equal,
+  }),
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
 ```typescript
-const ixs = assertAccountInfo(umi, {
+const [ix] = assertAccountInfo(umi, {
   targetAccount,
   assertion: {
     __kind: 'IsWritable',
@@ -336,6 +439,33 @@ Fields of the `VerifyDatahash` assertion are:
 The following is an example using the entire account data.
 
 {% dialect-switcher title="" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+import { keccak_256 } from 'js-sha3'
+
+const accountDataHash = Buffer.from(keccak_256.digest(accountDataBuffer))
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('VerifyDatahash', {
+    expectedHash: Buffer.from(accountDataHash),
+    start: null,
+    length: null,
+  }),
+})
+
+const transaction = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) => setTransactionFeePayer(signer.address, tx),
+  (tx) => appendTransactionInstructions([ix], tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([signer.keyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -387,6 +517,33 @@ let tx = Transaction::new_signed_with_payer(
 The following is an example using start and length.
 
 {% dialect-switcher title="VerifyDatahash" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const accountDataHash = Buffer.from(
+  keccak_256.digest(accountDataBuffer.subarray(128, 256))
+)
+const ix = getAssertAccountInfoInstruction({
+  targetAccount,
+  assertion: accountInfoAssertion('VerifyDatahash', {
+    expectedHash: Buffer.from(accountDataHash),
+    start: 128,
+    length: 128,
+  }),
+})
+
+const transaction = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) => setTransactionFeePayer(signer.address, tx),
+  (tx) => appendTransactionInstructions([ix], tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([signer.keyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -441,6 +598,60 @@ let tx = Transaction::new_signed_with_payer(
 To save transaction space there is an instruction AssertAccountInfoMulti which allows you join all your assertions into one vector. This elimiates duplicating instruction data.
 
 {% dialect-switcher title="AssertAccountInfoMulti instruction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountInfoMultiInstruction({
+  targetAccount,
+  logLevel: LogLevel.PlaintextMessage,
+  assertions: [
+    accountInfoAssertion('Owner', {
+      value: SystemProgram.programId,
+      operator: 'Equal',
+    }),
+    accountInfoAssertion('KnownOwner', {
+      value: KnownProgram.System,
+      operator: 'Equal',
+    }),
+    accountInfoAssertion('Lamports', {
+      value: userPrebalance - 5000,
+      operator: 'Equal',
+    }),
+    accountInfoAssertion('DataLength', {
+      value: 0,
+      operator: 'Equal',
+    }),
+    accountInfoAssertion('Executable', {
+      value: true,
+      operator: 'NotEqual',
+    }),
+    accountInfoAssertion('Executable', {
+      value: false,
+      operator: 'Equal',
+    }),
+    accountInfoAssertion('Executable', {
+      value: true,
+      operator: 'NotEqual',
+    }),
+    accountInfoAssertion('RentEpoch', {
+      value: account.rentEpoch,
+      operator: 'Equal',
+    }),
+  ],
+})
+
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) => setTransactionFeePayer(signer.address, tx),
+  (tx) => appendTransactionInstructions([ix], tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([signer.keyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

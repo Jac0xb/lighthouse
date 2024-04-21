@@ -14,6 +14,60 @@ You may want to assert on the lamport delta of an account during a transaction.
 To do this we can use the [memory account](/memory) and delta assertion instructions that lighthouse offers. This involves writing the lamports of user's account into a memory account and asserting on the delta change.
 
 {% dialect-switcher title="Memory write + delta assertion transaction" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getMemoryWriteInstruction({
+          memory,
+          payer: userPubkey,
+          sourceAccount: userPubkey,
+          writeType: writeType('AccountInfoField', {
+            fields: ['Lamports'],
+          }),
+          memoryId: 0,
+          writeOffset: 0,
+          memoryBump,
+        }),
+        SystemProgram.transfer({
+          fromPubkey: userPubkey,
+          toPubkey: destinationPubkey,
+          lamports: 1e9,
+        }),
+        getAssertAccountDeltaInstruction({
+          accountA: memory,
+          accountB: userPubkey,
+          assertion: {
+            __kind: 'AccountInfo',
+            aOffset: 0,
+            assertion: {
+              __kind: 'Lamports',
+              value: -1e9,
+              operator: IntegerOperator.Equal,
+            },
+          },
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userPubkey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([userKeyPair], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -148,6 +202,28 @@ pub struct TestAccount {
 Say we wanted to assert about the difference between two test accounts' vault balance.
 
 {% dialect-switcher title="Instruction building example for account data delta assertion" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const ix = getAssertAccountDeltaInstruction({
+  accountA: testAccountA,
+  accountB: testAccountB,
+  assertion: {
+    __kind: 'Data',
+    aOffset: 8, // The byte offset in account A to deserialize into a u64 (vault_balance).
+    bOffset: 8, // The byte offset in account B to deserialize into a u64 (vault_balance).
+    assertion: {
+      __kind: 'U64',
+      value: expectedDiffBound, // b.vault_balance - a.vault_balance
+      operator: IntegerOperator.LessThan,
+    },
+  },
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 

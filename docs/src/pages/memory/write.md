@@ -38,6 +38,33 @@ You can write data to a memory account in the following ways:
 The following instruction writes the first 72 bytes of a token account to memory. The first 72 bytes being the **Mint** (Pubkey), **Owner** (Pubkey), and **Amount** (u64).
 
 {% dialect-switcher title="Writing token account data to memory" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const ix = getMemoryWriteInstruction({
+  payer: userPubkey,
+  sourceAccount: tokenAccountKey,
+  programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+  memory,
+  memoryId: 0,
+  memoryBump: memoryBump,
+  writeOffset: 0,
+  writeType: {
+    __kind: 'AccountData',
+    offset: 0,
+    dataLength: 72,
+  },
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -90,6 +117,45 @@ MemoryWriteBuilder::new()
 Writing these fields to memory means we can now assert on the delta changes between the token account and the memory account.
 
 {% dialect-switcher title="Asserting on stored memory" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const ixs = [
+  getAssertAccountDeltaInstruction({
+    accountA: memory,
+    accountB: tokenAccountKey,
+    assertion: accountDeltaAssertion('Data', {
+      aOffset: 0,
+      bOffset: 0,
+      assertion: dataValueDeltaAssertion('Bytes', {
+        operator: ByteSliceOperator.Equal,
+        length: 64,
+      }),
+    }),
+  }),
+  getAssertAccountDeltaInstruction({
+    accountA: memory,
+    accountB: tokenAccountKey,
+    assertion: accountDeltaAssertion('Data', {
+      aOffset: 64,
+      bOffset: 64,
+      assertion: dataValueDeltaAssertion('U64', {
+        value: -50,
+        operator: IntegerOperator.GreaterThan,
+      }),
+    }),
+  }),
+]
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -170,6 +236,26 @@ The following delta assertions are checking that nothing has changed in the firs
 Lastly, you can close the memory account to free up rent.
 
 {% dialect-switcher title="Closing memory account" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const ix = getMemoryCloseInstruction({
+  payer: userPubkey,
+  programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+  memory,
+  memoryBump,
+  memoryId: 0,
+})
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -211,6 +297,86 @@ const ix = memoryClose(umi, {
 The following example writes the account info fields of a token account to memory. The account info fields are **DataLength**, **Executable**, **Owner**, **Lamports**, **RentEpoch**, and **Key**.
 
 {% dialect-switcher title="Writing account info to memory" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const builderFn = (writeType: WriteType, offset: number) => {
+  return getMemoryWriteInstruction({
+    payer: userPubkey,
+    sourceAccount: testAccountKey,
+    programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+    memory,
+    memoryId: 0,
+    memoryBump,
+    writeOffset: offset,
+    writeType,
+  })
+}
+
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.DataLength],
+          },
+          0
+        ),
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.Executable],
+          },
+          8
+        ),
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.Owner],
+          },
+          16
+        ),
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.Lamports],
+          },
+          48
+        ),
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.RentEpoch],
+          },
+          56
+        ),
+        builderFn(
+          {
+            __kind: 'AccountInfoField',
+            fields: [AccountInfoField.Key],
+          },
+          64
+        ),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userPubkey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([user], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -332,6 +498,83 @@ let tx = Transaction::new_signed_with_payer(
 The following example writes a u128 and a pubkey to a memory account and then asserts on the written values using lighthouse assertions.
 
 {% dialect-switcher title="Writing data value to memory" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 0,
+  payer: userPubkey,
+})
+
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getMemoryWriteInstruction({
+          payer: userPubkey,
+          sourceAccount: LIGHTHOUSE_PROGRAM_ADDRESS,
+          programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+          memory,
+          memoryId: 0,
+          memoryBump,
+          writeOffset: 0,
+          writeType: {
+            __kind: 'DataValue',
+            fields: [
+              {
+                __kind: 'U128',
+                fields: [BigInt('340282366920938463463374607431768211455')],
+              },
+            ],
+          },
+        }),
+        getMemoryWriteInstruction({
+          payer: userPubkey,
+          sourceAccount: LIGHTHOUSE_PROGRAM_ADDRESS,
+          programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+          memory,
+          memoryId: 0,
+          memoryBump,
+          writeOffset: 32,
+          writeType: {
+            __kind: 'DataValue',
+            fields: [
+              {
+                __kind: 'Pubkey',
+                fields: [someKey],
+              },
+            ],
+          },
+        }),
+        getAssertAccountDataInstruction({
+          targetAccount: memory,
+          assertion: dataValueAssertion('U128', {
+            value: BigInt('340282366920938463463374607431768211455'),
+            operator: IntegerOperator.Equal,
+          }),
+          offset: 0,
+        }),
+        getAssertAccountDataInstruction({
+          targetAccount: memory,
+          assertion: dataValueAssertion('Pubkey', {
+            value: someKey,
+            operator: EquatableOperator.Equal,
+          }),
+          offset: 32,
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userPubkey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([user], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -459,6 +702,44 @@ let tx = Transaction::new_signed_with_payer(
 ### Example: Writing clock fields to a memory account using Clock write type
 
 {% dialect-switcher title="Writing clock fields to memory" %}
+{% dialect title="web3.js (Preview)" id="js-preview" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = await findMemoryPda({
+  memoryId: 4,
+  payer: userPubkey,
+})
+
+const tx = await pipe(
+  createTransaction({ version: 0 }),
+  (tx) =>
+    appendTransactionInstructions(
+      [
+        getMemoryWriteInstruction({
+          memory,
+          memoryId: 4, // You can write to multiple memory accounts in a single transaction
+          memoryBump,
+          programId: LIGHTHOUSE_PROGRAM_ADDRESS,
+          payer: userPubkey,
+          sourceAccount: LIGHTHOUSE_PROGRAM_ADDRESS, // This account is ignored so should be an account already in the transaction to save transaction space.
+          writeOffset: 0,
+          writeType: {
+            __kind: 'Clock',
+            fields: [ClockField.Slot],
+          },
+        }),
+      ],
+      tx
+    ),
+  (tx) => setTransactionFeePayer(userPubkey, tx),
+  (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash, tx),
+  (tx) => signTransaction([user], tx)
+)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="web3.js (Legacy)" id="js-legacy" %}
 {% totem %}
 
@@ -474,7 +755,7 @@ const tx = memoryWrite(umi, {
   memoryBump,
   programId: LIGHTHOUSE_PROGRAM_ID,
   payer: publicKey(userPubkey),
-  sourceAccount: publicKey(LIGHTHOUSE_PROGRAM_ID), // This is ignore so should be an account already in the transaction to save transaction space.
+  sourceAccount: publicKey(LIGHTHOUSE_PROGRAM_ID), // This account is ignored so should be an account already in the transaction to save transaction space.
   writeOffset: 0,
   writeType: {
     __kind: 'Clock',
@@ -496,7 +777,7 @@ let tx = Transaction::new_signed_with_payer(
         .memory_bump(memory_bump)
         .program_id(lighthouse_sdk::ID)
         .payer(user.encodable_pubkey())
-        .source_account(lighthouse_sdk::ID) // This is ignore so should be an account already in the transaction to save transaction space.
+        .source_account(lighthouse_sdk::ID) // This account is ignored so should be an account already in the transaction to save transaction space.
         .write_offset(0)
         .write_type(WriteType::Clock(ClockField::Slot))
         .instruction()],

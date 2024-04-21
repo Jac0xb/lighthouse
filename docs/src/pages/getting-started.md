@@ -36,6 +36,10 @@ function main() {
 }
 ```
 
+{% callout %}
+If you'd like to minimize umi usage you can use the conversion functions in `@metaplex-foundation/umi-web3js-adapters` to convert back and forth between umi and web3.js objects like `toWeb3JsTransaction`, `toWeb3JsInstruction`, and `fromWeb3JsPublicKey`.
+{% /callout %}
+
 ## Usage
 
 For examples of how to build all the assertion instructions see [here](/assert).
