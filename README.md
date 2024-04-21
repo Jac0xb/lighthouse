@@ -104,7 +104,7 @@ TODO
    $ solana-verify build
    $ solana-verify get-executable-hash target/deploy/lighthouse.so
    $ solana program deploy programs/lighthouse/target/deploy/lighthouse.so --with-compute-unit-price 500000
-   $ solana-verify verify-from-repo -um --program-id L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK https://github.com/jac0xb/lighthouse --library-name lighthouse -- --features mainnet-beta
+   $ solana-verify verify-from-repo -um --program-id L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse -- --features mainnet-beta
    ```
 
 ## Usage

@@ -6,78 +6,50 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
+  getEquatableOperatorSerializer,
 } from '.';
 
 export type UpgradableBufferAssertion = {
   __kind: 'Authority';
-  value: Option<Address>;
+  value: Option<PublicKey>;
   operator: EquatableOperator;
 };
 
 export type UpgradableBufferAssertionArgs = {
   __kind: 'Authority';
-  value: OptionOrNullable<Address>;
+  value: OptionOrNullable<PublicKey>;
   operator: EquatableOperatorArgs;
 };
 
-export function getUpgradableBufferAssertionEncoder(): Encoder<UpgradableBufferAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Authority',
-      getStructEncoder([
-        ['value', getOptionEncoder(getAddressEncoder())],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradableBufferAssertionDecoder(): Decoder<UpgradableBufferAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Authority',
-      getStructDecoder([
-        ['value', getOptionDecoder(getAddressDecoder())],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradableBufferAssertionCodec(): Codec<
+export function getUpgradableBufferAssertionSerializer(): Serializer<
   UpgradableBufferAssertionArgs,
   UpgradableBufferAssertion
 > {
-  return combineCodec(
-    getUpgradableBufferAssertionEncoder(),
-    getUpgradableBufferAssertionDecoder()
-  );
+  return dataEnum<UpgradableBufferAssertion>(
+    [
+      [
+        'Authority',
+        struct<GetDataEnumKindContent<UpgradableBufferAssertion, 'Authority'>>([
+          ['value', option(publicKeySerializer())],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'UpgradableBufferAssertion' }
+  ) as Serializer<UpgradableBufferAssertionArgs, UpgradableBufferAssertion>;
 }
 
 // Data Enum Helpers.
@@ -92,7 +64,6 @@ export function upgradableBufferAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isUpgradableBufferAssertion<
   K extends UpgradableBufferAssertion['__kind']
 >(

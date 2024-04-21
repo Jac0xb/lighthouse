@@ -7,26 +7,18 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI64Decoder,
-  getI64Encoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  i64,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 import {
   IntegerOperator,
   IntegerOperatorArgs,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type SysvarClockAssertion =
@@ -55,94 +47,54 @@ export type SysvarClockAssertionArgs =
       operator: IntegerOperatorArgs;
     };
 
-export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Slot',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'EpochStartTimestamp',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Epoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'LeaderScheduleEpoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'UnixTimestamp',
-      getStructEncoder([
-        ['value', getI64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getSysvarClockAssertionDecoder(): Decoder<SysvarClockAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Slot',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'EpochStartTimestamp',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Epoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'LeaderScheduleEpoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'UnixTimestamp',
-      getStructDecoder([
-        ['value', getI64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getSysvarClockAssertionCodec(): Codec<
+export function getSysvarClockAssertionSerializer(): Serializer<
   SysvarClockAssertionArgs,
   SysvarClockAssertion
 > {
-  return combineCodec(
-    getSysvarClockAssertionEncoder(),
-    getSysvarClockAssertionDecoder()
-  );
+  return dataEnum<SysvarClockAssertion>(
+    [
+      [
+        'Slot',
+        struct<GetDataEnumKindContent<SysvarClockAssertion, 'Slot'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'EpochStartTimestamp',
+        struct<
+          GetDataEnumKindContent<SysvarClockAssertion, 'EpochStartTimestamp'>
+        >([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Epoch',
+        struct<GetDataEnumKindContent<SysvarClockAssertion, 'Epoch'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'LeaderScheduleEpoch',
+        struct<
+          GetDataEnumKindContent<SysvarClockAssertion, 'LeaderScheduleEpoch'>
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'UnixTimestamp',
+        struct<GetDataEnumKindContent<SysvarClockAssertion, 'UnixTimestamp'>>([
+          ['value', i64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'SysvarClockAssertion' }
+  ) as Serializer<SysvarClockAssertionArgs, SysvarClockAssertion>;
 }
 
 // Data Enum Helpers.
@@ -173,7 +125,6 @@ export function sysvarClockAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isSysvarClockAssertion<
   K extends SysvarClockAssertion['__kind']
 >(

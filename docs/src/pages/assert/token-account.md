@@ -74,6 +74,62 @@ let account = Account {
 Then, the following example shows how to build an instruction that asserts the token account's data.
 
 {% dialect-switcher title="Example of the types of assertions there are for the token account" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const tx = assertTokenAccountMulti(umi, {
+  targetAccount: publicKey(tokenAccount),
+  assertions: [
+    {
+      __kind: 'Mint',
+      value: publicKey(mintKey),
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'Owner',
+      value: publicKey(userKey),
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'Amount',
+      value: 100,
+      operator: IntegerOperator.Equal,
+    },
+    {
+      __kind: 'Delegate',
+      value: null,
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'State',
+      value: 1,
+      operator: IntegerOperator.NotEqual,
+    },
+    {
+      __kind: 'IsNative',
+      value: null,
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'DelegatedAmount',
+      value: 0,
+      operator: IntegerOperator.LessThanOrEqual,
+    },
+    {
+      __kind: 'CloseAuthority',
+      value: null,
+      operator: EquatableOperator.Equal,
+    },
+    {
+      __kind: 'TokenAccountOwnerIsDerived',
+    },
+  ],
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 
 ```rust

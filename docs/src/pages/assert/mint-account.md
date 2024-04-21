@@ -58,6 +58,63 @@ let mint = Mint {
 Then, the following assertions could be made about that account.
 
 {% dialect-switcher title="Example of the types of assertions there are for the mint account" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertMintAccount(umi, {
+  targetAccount,
+  assertion: {
+    __kind: 'MintAuthority',
+    value: publicKey(userPubkey),
+    operator: EquatableOperator.Equal,
+  },
+})
+  .append(
+    assertMintAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'Supply',
+        value: 69_000,
+        operator: IntegerOperator.Equal,
+      },
+    })
+  )
+  .append(
+    assertMintAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'Decimals',
+        value: 9,
+        operator: IntegerOperator.Equal,
+      },
+    })
+  )
+  .append(
+    assertMintAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'IsInitialized',
+        value: true,
+        operator: EquatableOperator.Equal,
+      },
+    })
+  )
+  .append(
+    assertMintAccount(umi, {
+      targetAccount,
+      assertion: {
+        __kind: 'FreezeAuthority',
+        value: null,
+        operator: EquatableOperator.Equal,
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 
 ```rust

@@ -6,40 +6,29 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU64Decoder,
-  getU64Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
 } from '.';
 
 export type StakeAssertion =
   | {
       __kind: 'DelegationVoterPubkey';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperator;
     }
   | { __kind: 'DelegationStake'; value: bigint; operator: IntegerOperator }
@@ -58,7 +47,7 @@ export type StakeAssertion =
 export type StakeAssertionArgs =
   | {
       __kind: 'DelegationVoterPubkey';
-      value: Address;
+      value: PublicKey;
       operator: EquatableOperatorArgs;
     }
   | {
@@ -82,91 +71,56 @@ export type StakeAssertionArgs =
       operator: IntegerOperatorArgs;
     };
 
-export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'DelegationVoterPubkey',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DelegationStake',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DelegationActivationEpoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DelegationDeactivationEpoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'CreditsObserved',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getStakeAssertionDecoder(): Decoder<StakeAssertion> {
-  return getDataEnumDecoder([
-    [
-      'DelegationVoterPubkey',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DelegationStake',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DelegationActivationEpoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DelegationDeactivationEpoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'CreditsObserved',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getStakeAssertionCodec(): Codec<
+export function getStakeAssertionSerializer(): Serializer<
   StakeAssertionArgs,
   StakeAssertion
 > {
-  return combineCodec(getStakeAssertionEncoder(), getStakeAssertionDecoder());
+  return dataEnum<StakeAssertion>(
+    [
+      [
+        'DelegationVoterPubkey',
+        struct<GetDataEnumKindContent<StakeAssertion, 'DelegationVoterPubkey'>>(
+          [
+            ['value', publicKeySerializer()],
+            ['operator', getEquatableOperatorSerializer()],
+          ]
+        ),
+      ],
+      [
+        'DelegationStake',
+        struct<GetDataEnumKindContent<StakeAssertion, 'DelegationStake'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'DelegationActivationEpoch',
+        struct<
+          GetDataEnumKindContent<StakeAssertion, 'DelegationActivationEpoch'>
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'DelegationDeactivationEpoch',
+        struct<
+          GetDataEnumKindContent<StakeAssertion, 'DelegationDeactivationEpoch'>
+        >([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'CreditsObserved',
+        struct<GetDataEnumKindContent<StakeAssertion, 'CreditsObserved'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'StakeAssertion' }
+  ) as Serializer<StakeAssertionArgs, StakeAssertion>;
 }
 
 // Data Enum Helpers.
@@ -201,7 +155,6 @@ export function stakeAssertion<K extends StakeAssertionArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isStakeAssertion<K extends StakeAssertion['__kind']>(
   kind: K,
   value: StakeAssertion

@@ -3,13 +3,7 @@ const k = require('@metaplex-foundation/kinobi');
 
 // Paths.
 const clientDir = path.join(__dirname, '..', 'clients');
-const programDir = path.join(
-  __dirname,
-  '..',
-  'programs',
-  'lighthouse',
-  'program'
-);
+const programDir = path.join(__dirname, '..', 'programs', 'lighthouse');
 
 // Instanciate Kinobi.
 const kinobi = k.createFromIdls([path.join(programDir, 'lighthouse.json')]);
@@ -82,10 +76,23 @@ kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 //   })
 // );
 
-// Render JavaScript.
+// Render preview JavaScript.
+const previewJsDir = path.join(clientDir, 'preview-js', 'src', 'generated');
+const previewPrettier = require(path.join(
+  clientDir,
+  'preview-js',
+  '.prettierrc.json'
+));
+kinobi.accept(
+  k.renderJavaScriptExperimentalVisitor(previewJsDir, {
+    prettier: previewPrettier,
+  })
+);
+
+// Render preview JavaScript.
 const jsDir = path.join(clientDir, 'js', 'src', 'generated');
 const prettier = require(path.join(clientDir, 'js', '.prettierrc.json'));
-kinobi.accept(k.renderJavaScriptExperimentalVisitor(jsDir, { prettier }));
+kinobi.accept(k.renderJavaScriptVisitor(jsDir, { prettier }));
 
 // Render Rust.
 const crateDir = path.join(clientDir, 'rust');

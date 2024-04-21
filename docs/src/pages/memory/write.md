@@ -38,6 +38,32 @@ You can write data to a memory account in the following ways:
 The following instruction writes the first 72 bytes of a token account to memory. The first 72 bytes being the **Mint** (Pubkey), **Owner** (Pubkey), and **Amount** (u64).
 
 {% dialect-switcher title="Writing token account data to memory" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = findMemoryPda({
+  payer: publicKey(userPubkey),
+  memoryId: 0,
+})
+
+const tx = memoryWrite(umi, {
+  memory: publicKey(memory),
+  sourceAccount: publicKey(tokenAccountKey),
+  payer: publicKey(userPubkey),
+  writeType: {
+    __kind: 'AccountData',
+    offset: 0,
+    dataLength: 72,
+  },
+  memoryId: 0,
+  writeOffset: 0,
+  memoryBump,
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -64,6 +90,45 @@ MemoryWriteBuilder::new()
 Writing these fields to memory means we can now assert on the delta changes between the token account and the memory account.
 
 {% dialect-switcher title="Asserting on stored memory" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const ixs = assertAccountDelta(umi, {
+  accountA: publicKey(memory),
+  accountB: publicKey(tokenAccountKey),
+  assertion: {
+    __kind: 'Data',
+    aOffset: 0,
+    bOffset: 0,
+    assertion: {
+      __kind: 'Bytes',
+      length: 64,
+      operator: ByteSliceOperator.Equal,
+    },
+  },
+})
+  .append(
+    assertAccountDelta(umi, {
+      accountA: publicKey(memory),
+      accountB: publicKey(tokenAccountKey),
+      assertion: {
+        __kind: 'Data',
+        aOffset: 64,
+        bOffset: 64,
+        assertion: {
+          __kind: 'U64',
+          value: -50,
+          operator: IntegerOperator.GreaterThan,
+        },
+      },
+    })
+  )
+  .getInstructions()
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -105,6 +170,25 @@ The following delta assertions are checking that nothing has changed in the firs
 Lastly, you can close the memory account to free up rent.
 
 {% dialect-switcher title="Closing memory account" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = findMemoryPda({
+  payer: publicKey(userPubkey),
+  memoryId: 0,
+})
+
+const ix = memoryClose(umi, {
+  memory: publicKey(memory),
+  memoryBump,
+  memoryId: 0,
+  payer: publicKey(userPubkey),
+}).getInstructions()[0]
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -127,6 +211,85 @@ Lastly, you can close the memory account to free up rent.
 The following example writes the account info fields of a token account to memory. The account info fields are **DataLength**, **Executable**, **Owner**, **Lamports**, **RentEpoch**, and **Key**.
 
 {% dialect-switcher title="Writing account info to memory" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = findMemoryPda({
+  payer: publicKey(userPubkey),
+  memoryId: 0,
+})
+
+const builderFn = (writeType: WriteType, offset: number) => {
+  return memoryWrite(umi, {
+    payer: publicKey(userPubkey),
+    sourceAccount: publicKey(testAccountKey),
+    programId: LIGHTHOUSE_PROGRAM_ID,
+    memory: publicKey(memory),
+    memoryId: 0,
+    memoryBump,
+    writeOffset: offset,
+    writeType,
+  })
+}
+
+const tx = builderFn(
+  {
+    __kind: 'AccountInfoField',
+    fields: [AccountInfoField.DataLength],
+  },
+  0
+)
+  .append(
+    builderFn(
+      {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.Executable],
+      },
+      8
+    )
+  )
+  .append(
+    builderFn(
+      {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.Owner],
+      },
+      16
+    )
+  )
+  .append(
+    builderFn(
+      {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.Lamports],
+      },
+      48
+    )
+  )
+  .append(
+    builderFn(
+      {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.RentEpoch],
+      },
+      56
+    )
+  )
+  .append(
+    builderFn(
+      {
+        __kind: 'AccountInfoField',
+        fields: [AccountInfoField.Key],
+      },
+      64
+    )
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 
@@ -167,6 +330,77 @@ let tx = Transaction::new_signed_with_payer(
 ### Example: Writing data value to a memory account using DataValue write type
 
 The following example writes a u128 and a pubkey to a memory account and then asserts on the written values using lighthouse assertions.
+
+{% dialect-switcher title="Writing data value to memory" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const [memory, memoryBump] = findMemoryPda({
+  payer: publicKey(userPubkey),
+  memoryId: 0,
+})
+
+const tx = memoryWrite(umi, {
+  memory: publicKey(memory),
+  sourceAccount: publicKey(LIGHTHOUSE_PROGRAM_ID),
+  programId: LIGHTHOUSE_PROGRAM_ID,
+  memoryId: 0,
+  memoryBump,
+  writeOffset: 0,
+  writeType: {
+    __kind: 'DataValue',
+    fields: [
+      {
+        __kind: 'U128',
+        fields: [BigInt('340282366920938463463374607431768211455')],
+      },
+    ],
+  },
+})
+  .append(
+    memoryWrite(umi, {
+      memory: publicKey(memory),
+      sourceAccount: publicKey(LIGHTHOUSE_PROGRAM_ID),
+      programId: LIGHTHOUSE_PROGRAM_ID,
+      memoryId: 0,
+      memoryBump,
+      writeOffset: 32,
+      writeType: {
+        __kind: 'DataValue',
+        fields: [{ __kind: 'Pubkey', fields: [publicKey(somePubkey)] }],
+      },
+    })
+  )
+  .append(
+    assertAccountData(umi, {
+      targetAccount: publicKey(memory),
+      offset: 0,
+      assertion: {
+        __kind: 'U128',
+        value: BigInt('340282366920938463463374607431768211455'),
+        operator: IntegerOperator.Equal,
+      },
+    })
+  )
+  .append(
+    assertAccountData(umi, {
+      targetAccount: publicKey(memory),
+      offset: 32,
+      assertion: {
+        __kind: 'Pubkey',
+        value: publicKey(somePubkey),
+        operator: EquatableOperator.Equal,
+      },
+    })
+  )
+  .build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
+{% dialect title="Rust" id="rust" %}
+{% totem %}
 
 ```rust
 let tx = Transaction::new_signed_with_payer(
@@ -225,6 +459,32 @@ let tx = Transaction::new_signed_with_payer(
 ### Example: Writing clock fields to a memory account using Clock write type
 
 {% dialect-switcher title="Writing clock fields to memory" %}
+{% dialect title="web3.js (Legacy)" id="js-legacy" %}
+{% totem %}
+
+```typescript
+const [memoryKey, memoryBump] = findMemoryPda({
+  payer: publicKey(userPubkey),
+  memoryId: 4,
+})
+
+const tx = memoryWrite(umi, {
+  memory: publicKey(memoryKey),
+  memoryId: 4, // You can write to multiple memory accounts in a single transaction
+  memoryBump,
+  programId: LIGHTHOUSE_PROGRAM_ID,
+  payer: publicKey(userPubkey),
+  sourceAccount: publicKey(LIGHTHOUSE_PROGRAM_ID), // This is ignore so should be an account already in the transaction to save transaction space.
+  writeOffset: 0,
+  writeType: {
+    __kind: 'Clock',
+    fields: [ClockField.Slot],
+  },
+}).build(umi)
+```
+
+{% /totem %}
+{% /dialect %}
 {% dialect title="Rust" id="rust" %}
 {% totem %}
 

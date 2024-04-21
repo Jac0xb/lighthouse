@@ -7,21 +7,14 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  struct,
+  tuple,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -33,16 +26,11 @@ import {
   StakeAssertionArgs,
   StakeStateType,
   StakeStateTypeArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
-  getMetaAssertionDecoder,
-  getMetaAssertionEncoder,
-  getStakeAssertionDecoder,
-  getStakeAssertionEncoder,
-  getStakeStateTypeDecoder,
-  getStakeStateTypeEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
+  getMetaAssertionSerializer,
+  getStakeAssertionSerializer,
+  getStakeStateTypeSerializer,
 } from '.';
 
 export type StakeAccountAssertion =
@@ -61,76 +49,41 @@ export type StakeAccountAssertionArgs =
   | { __kind: 'StakeAssertion'; fields: [StakeAssertionArgs] }
   | { __kind: 'StakeFlags'; value: number; operator: IntegerOperatorArgs };
 
-export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'State',
-      getStructEncoder([
-        ['value', getStakeStateTypeEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'MetaAssertion',
-      getStructEncoder([
-        ['fields', getTupleEncoder([getMetaAssertionEncoder()])],
-      ]),
-    ],
-    [
-      'StakeAssertion',
-      getStructEncoder([
-        ['fields', getTupleEncoder([getStakeAssertionEncoder()])],
-      ]),
-    ],
-    [
-      'StakeFlags',
-      getStructEncoder([
-        ['value', getU8Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getStakeAccountAssertionDecoder(): Decoder<StakeAccountAssertion> {
-  return getDataEnumDecoder([
-    [
-      'State',
-      getStructDecoder([
-        ['value', getStakeStateTypeDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'MetaAssertion',
-      getStructDecoder([
-        ['fields', getTupleDecoder([getMetaAssertionDecoder()])],
-      ]),
-    ],
-    [
-      'StakeAssertion',
-      getStructDecoder([
-        ['fields', getTupleDecoder([getStakeAssertionDecoder()])],
-      ]),
-    ],
-    [
-      'StakeFlags',
-      getStructDecoder([
-        ['value', getU8Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getStakeAccountAssertionCodec(): Codec<
+export function getStakeAccountAssertionSerializer(): Serializer<
   StakeAccountAssertionArgs,
   StakeAccountAssertion
 > {
-  return combineCodec(
-    getStakeAccountAssertionEncoder(),
-    getStakeAccountAssertionDecoder()
-  );
+  return dataEnum<StakeAccountAssertion>(
+    [
+      [
+        'State',
+        struct<GetDataEnumKindContent<StakeAccountAssertion, 'State'>>([
+          ['value', getStakeStateTypeSerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'MetaAssertion',
+        struct<GetDataEnumKindContent<StakeAccountAssertion, 'MetaAssertion'>>([
+          ['fields', tuple([getMetaAssertionSerializer()])],
+        ]),
+      ],
+      [
+        'StakeAssertion',
+        struct<GetDataEnumKindContent<StakeAccountAssertion, 'StakeAssertion'>>(
+          [['fields', tuple([getStakeAssertionSerializer()])]]
+        ),
+      ],
+      [
+        'StakeFlags',
+        struct<GetDataEnumKindContent<StakeAccountAssertion, 'StakeFlags'>>([
+          ['value', u8()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'StakeAccountAssertion' }
+  ) as Serializer<StakeAccountAssertionArgs, StakeAccountAssertion>;
 }
 
 // Data Enum Helpers.
@@ -163,7 +116,6 @@ export function stakeAccountAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isStakeAccountAssertion<
   K extends StakeAccountAssertion['__kind']
 >(

@@ -4,7 +4,7 @@
 **/*.rs.bk
 node_modules
 test-ledger
-dist
+# dist
 .amman
 .crates
 test-programs

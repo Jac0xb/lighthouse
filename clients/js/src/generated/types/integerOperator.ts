@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum IntegerOperator {
   Equal,
@@ -28,17 +21,11 @@ export enum IntegerOperator {
 
 export type IntegerOperatorArgs = IntegerOperator;
 
-export function getIntegerOperatorEncoder(): Encoder<IntegerOperatorArgs> {
-  return getScalarEnumEncoder(IntegerOperator);
-}
-
-export function getIntegerOperatorDecoder(): Decoder<IntegerOperator> {
-  return getScalarEnumDecoder(IntegerOperator);
-}
-
-export function getIntegerOperatorCodec(): Codec<
+export function getIntegerOperatorSerializer(): Serializer<
   IntegerOperatorArgs,
   IntegerOperator
 > {
-  return combineCodec(getIntegerOperatorEncoder(), getIntegerOperatorDecoder());
+  return scalarEnum<IntegerOperator>(IntegerOperator, {
+    description: 'IntegerOperator',
+  }) as Serializer<IntegerOperatorArgs, IntegerOperator>;
 }

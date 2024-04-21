@@ -7,19 +7,13 @@
  */
 
 import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  struct,
+  tuple,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -31,16 +25,11 @@ import {
   UpgradeableProgramAssertionArgs,
   UpgradeableProgramDataAssertion,
   UpgradeableProgramDataAssertionArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getUpgradableBufferAssertionDecoder,
-  getUpgradableBufferAssertionEncoder,
-  getUpgradeableLoaderStateTypeDecoder,
-  getUpgradeableLoaderStateTypeEncoder,
-  getUpgradeableProgramAssertionDecoder,
-  getUpgradeableProgramAssertionEncoder,
-  getUpgradeableProgramDataAssertionDecoder,
-  getUpgradeableProgramDataAssertionEncoder,
+  getEquatableOperatorSerializer,
+  getUpgradableBufferAssertionSerializer,
+  getUpgradeableLoaderStateTypeSerializer,
+  getUpgradeableProgramAssertionSerializer,
+  getUpgradeableProgramDataAssertionSerializer,
 } from '.';
 
 export type UpgradeableLoaderStateAssertion =
@@ -63,80 +52,47 @@ export type UpgradeableLoaderStateAssertionArgs =
   | { __kind: 'Program'; fields: [UpgradeableProgramAssertionArgs] }
   | { __kind: 'ProgramData'; fields: [UpgradeableProgramDataAssertionArgs] };
 
-export function getUpgradeableLoaderStateAssertionEncoder(): Encoder<UpgradeableLoaderStateAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'State',
-      getStructEncoder([
-        ['value', getUpgradeableLoaderStateTypeEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Buffer',
-      getStructEncoder([
-        ['fields', getTupleEncoder([getUpgradableBufferAssertionEncoder()])],
-      ]),
-    ],
-    [
-      'Program',
-      getStructEncoder([
-        ['fields', getTupleEncoder([getUpgradeableProgramAssertionEncoder()])],
-      ]),
-    ],
-    [
-      'ProgramData',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getUpgradeableProgramDataAssertionEncoder()]),
-        ],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableLoaderStateAssertionDecoder(): Decoder<UpgradeableLoaderStateAssertion> {
-  return getDataEnumDecoder([
-    [
-      'State',
-      getStructDecoder([
-        ['value', getUpgradeableLoaderStateTypeDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Buffer',
-      getStructDecoder([
-        ['fields', getTupleDecoder([getUpgradableBufferAssertionDecoder()])],
-      ]),
-    ],
-    [
-      'Program',
-      getStructDecoder([
-        ['fields', getTupleDecoder([getUpgradeableProgramAssertionDecoder()])],
-      ]),
-    ],
-    [
-      'ProgramData',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getUpgradeableProgramDataAssertionDecoder()]),
-        ],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableLoaderStateAssertionCodec(): Codec<
+export function getUpgradeableLoaderStateAssertionSerializer(): Serializer<
   UpgradeableLoaderStateAssertionArgs,
   UpgradeableLoaderStateAssertion
 > {
-  return combineCodec(
-    getUpgradeableLoaderStateAssertionEncoder(),
-    getUpgradeableLoaderStateAssertionDecoder()
-  );
+  return dataEnum<UpgradeableLoaderStateAssertion>(
+    [
+      [
+        'State',
+        struct<
+          GetDataEnumKindContent<UpgradeableLoaderStateAssertion, 'State'>
+        >([
+          ['value', getUpgradeableLoaderStateTypeSerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Buffer',
+        struct<
+          GetDataEnumKindContent<UpgradeableLoaderStateAssertion, 'Buffer'>
+        >([['fields', tuple([getUpgradableBufferAssertionSerializer()])]]),
+      ],
+      [
+        'Program',
+        struct<
+          GetDataEnumKindContent<UpgradeableLoaderStateAssertion, 'Program'>
+        >([['fields', tuple([getUpgradeableProgramAssertionSerializer()])]]),
+      ],
+      [
+        'ProgramData',
+        struct<
+          GetDataEnumKindContent<UpgradeableLoaderStateAssertion, 'ProgramData'>
+        >([
+          ['fields', tuple([getUpgradeableProgramDataAssertionSerializer()])],
+        ]),
+      ],
+    ],
+    { description: 'UpgradeableLoaderStateAssertion' }
+  ) as Serializer<
+    UpgradeableLoaderStateAssertionArgs,
+    UpgradeableLoaderStateAssertion
+  >;
 }
 
 // Data Enum Helpers.
@@ -175,7 +131,6 @@ export function upgradeableLoaderStateAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isUpgradeableLoaderStateAssertion<
   K extends UpgradeableLoaderStateAssertion['__kind']
 >(

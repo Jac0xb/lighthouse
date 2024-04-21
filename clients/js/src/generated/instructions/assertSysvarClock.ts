@@ -6,49 +6,32 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
+  Context,
+  TransactionBuilder,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-} from '@solana/instructions';
+  Serializer,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
+} from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
   SysvarClockAssertion,
   SysvarClockAssertionArgs,
-  getLogLevelDecoder,
-  getLogLevelEncoder,
-  getSysvarClockAssertionDecoder,
-  getSysvarClockAssertionEncoder,
+  getLogLevelSerializer,
+  getSysvarClockAssertionSerializer,
 } from '../types';
 
-export type AssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<TRemainingAccounts>;
-
-export type AssertSysvarClockInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<TRemainingAccounts>;
-
+// Data.
 export type AssertSysvarClockInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
@@ -60,102 +43,77 @@ export type AssertSysvarClockInstructionDataArgs = {
   assertion: SysvarClockAssertionArgs;
 };
 
-export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysvarClockInstructionDataArgs> {
-  return mapEncoder(
-    getStructEncoder([
-      ['discriminator', getU8Encoder()],
-      ['logLevel', getLogLevelEncoder()],
-      ['assertion', getSysvarClockAssertionEncoder()],
-    ]),
+export function getAssertSysvarClockInstructionDataSerializer(): Serializer<
+  AssertSysvarClockInstructionDataArgs,
+  AssertSysvarClockInstructionData
+> {
+  return mapSerializer<
+    AssertSysvarClockInstructionDataArgs,
+    any,
+    AssertSysvarClockInstructionData
+  >(
+    struct<AssertSysvarClockInstructionData>(
+      [
+        ['discriminator', u8()],
+        ['logLevel', getLogLevelSerializer()],
+        ['assertion', getSysvarClockAssertionSerializer()],
+      ],
+      { description: 'AssertSysvarClockInstructionData' }
+    ),
     (value) => ({
       ...value,
       discriminator: 14,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
-  );
+  ) as Serializer<
+    AssertSysvarClockInstructionDataArgs,
+    AssertSysvarClockInstructionData
+  >;
 }
 
-export function getAssertSysvarClockInstructionDataDecoder(): Decoder<AssertSysvarClockInstructionData> {
-  return getStructDecoder([
-    ['discriminator', getU8Decoder()],
-    ['logLevel', getLogLevelDecoder()],
-    ['assertion', getSysvarClockAssertionDecoder()],
+// Args.
+export type AssertSysvarClockInstructionArgs =
+  AssertSysvarClockInstructionDataArgs;
+
+// Instruction.
+export function assertSysvarClock(
+  context: Pick<Context, 'programs'>,
+  input: AssertSysvarClockInstructionArgs
+): TransactionBuilder {
+  // Program ID.
+  const programId = context.programs.getPublicKey(
+    'lighthouse',
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+  );
+
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices =
+    {} satisfies ResolvedAccountsWithIndices;
+
+  // Arguments.
+  const resolvedArgs: AssertSysvarClockInstructionArgs = { ...input };
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
+
+  // Data.
+  const data = getAssertSysvarClockInstructionDataSerializer().serialize(
+    resolvedArgs as AssertSysvarClockInstructionDataArgs
+  );
+
+  // Bytes Created On Chain.
+  const bytesCreatedOnChain = 0;
+
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
   ]);
-}
-
-export function getAssertSysvarClockInstructionDataCodec(): Codec<
-  AssertSysvarClockInstructionDataArgs,
-  AssertSysvarClockInstructionData
-> {
-  return combineCodec(
-    getAssertSysvarClockInstructionDataEncoder(),
-    getAssertSysvarClockInstructionDataDecoder()
-  );
-}
-
-export type AssertSysvarClockInput = {
-  logLevel?: AssertSysvarClockInstructionDataArgs['logLevel'];
-  assertion: AssertSysvarClockInstructionDataArgs['assertion'];
-};
-
-export type AssertSysvarClockInputWithSigners = {
-  logLevel?: AssertSysvarClockInstructionDataArgs['logLevel'];
-  assertion: AssertSysvarClockInstructionDataArgs['assertion'];
-};
-
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertSysvarClockInputWithSigners
-): AssertSysvarClockInstructionWithSigners<TProgram>;
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertSysvarClockInput): AssertSysvarClockInstruction<TProgram>;
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertSysvarClockInput): IInstruction {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original args.
-  const args = { ...input };
-
-  const instruction = getAssertSysvarClockInstructionRaw(
-    args as AssertSysvarClockInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
-}
-
-export function getAssertSysvarClockInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  args: AssertSysvarClockInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: remainingAccounts ?? [],
-    data: getAssertSysvarClockInstructionDataEncoder().encode(args),
-    programAddress,
-  } as AssertSysvarClockInstruction<TProgram, TRemainingAccounts>;
-}
-
-export type ParsedAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
-> = {
-  programAddress: Address<TProgram>;
-  data: AssertSysvarClockInstructionData;
-};
-
-export function parseAssertSysvarClockInstruction<TProgram extends string>(
-  instruction: IInstruction<TProgram> & IInstructionWithData<Uint8Array>
-): ParsedAssertSysvarClockInstruction<TProgram> {
-  return {
-    programAddress: instruction.programAddress,
-    data: getAssertSysvarClockInstructionDataDecoder().decode(instruction.data),
-  };
 }

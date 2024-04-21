@@ -6,35 +6,20 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
-  getU64Decoder,
-  getU64Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  bytes,
+  dataEnum,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+  u16,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -42,18 +27,15 @@ import {
   IntegerOperatorArgs,
   KnownProgram,
   KnownProgramArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
-  getKnownProgramDecoder,
-  getKnownProgramEncoder,
+  getEquatableOperatorSerializer,
+  getIntegerOperatorSerializer,
+  getKnownProgramSerializer,
 } from '.';
 
 export type AccountInfoAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
   | { __kind: 'DataLength'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Owner'; value: Address; operator: EquatableOperator }
+  | { __kind: 'Owner'; value: PublicKey; operator: EquatableOperator }
   | { __kind: 'KnownOwner'; value: KnownProgram; operator: EquatableOperator }
   | { __kind: 'RentEpoch'; value: bigint; operator: IntegerOperator }
   | { __kind: 'IsSigner'; value: boolean; operator: EquatableOperator }
@@ -77,7 +59,7 @@ export type AccountInfoAssertionArgs =
       value: number | bigint;
       operator: IntegerOperatorArgs;
     }
-  | { __kind: 'Owner'; value: Address; operator: EquatableOperatorArgs }
+  | { __kind: 'Owner'; value: PublicKey; operator: EquatableOperatorArgs }
   | {
       __kind: 'KnownOwner';
       value: KnownProgramArgs;
@@ -98,152 +80,79 @@ export type AccountInfoAssertionArgs =
       length: OptionOrNullable<number>;
     };
 
-export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'Lamports',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'DataLength',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Owner',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'KnownOwner',
-      getStructEncoder([
-        ['value', getKnownProgramEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'RentEpoch',
-      getStructEncoder([
-        ['value', getU64Encoder()],
-        ['operator', getIntegerOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsSigner',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'IsWritable',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'Executable',
-      getStructEncoder([
-        ['value', getBooleanEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-    [
-      'VerifyDatahash',
-      getStructEncoder([
-        ['expectedHash', getBytesEncoder({ size: 32 })],
-        ['start', getOptionEncoder(getU16Encoder())],
-        ['length', getOptionEncoder(getU16Encoder())],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> {
-  return getDataEnumDecoder([
-    [
-      'Lamports',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'DataLength',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Owner',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'KnownOwner',
-      getStructDecoder([
-        ['value', getKnownProgramDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'RentEpoch',
-      getStructDecoder([
-        ['value', getU64Decoder()],
-        ['operator', getIntegerOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsSigner',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'IsWritable',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'Executable',
-      getStructDecoder([
-        ['value', getBooleanDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-    [
-      'VerifyDatahash',
-      getStructDecoder([
-        ['expectedHash', getBytesDecoder({ size: 32 })],
-        ['start', getOptionDecoder(getU16Decoder())],
-        ['length', getOptionDecoder(getU16Decoder())],
-      ]),
-    ],
-  ]);
-}
-
-export function getAccountInfoAssertionCodec(): Codec<
+export function getAccountInfoAssertionSerializer(): Serializer<
   AccountInfoAssertionArgs,
   AccountInfoAssertion
 > {
-  return combineCodec(
-    getAccountInfoAssertionEncoder(),
-    getAccountInfoAssertionDecoder()
-  );
+  return dataEnum<AccountInfoAssertion>(
+    [
+      [
+        'Lamports',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'Lamports'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'DataLength',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'DataLength'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Owner',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'Owner'>>([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'KnownOwner',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'KnownOwner'>>([
+          ['value', getKnownProgramSerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'RentEpoch',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'RentEpoch'>>([
+          ['value', u64()],
+          ['operator', getIntegerOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsSigner',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'IsSigner'>>([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'IsWritable',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'IsWritable'>>([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'Executable',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'Executable'>>([
+          ['value', bool()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+      [
+        'VerifyDatahash',
+        struct<GetDataEnumKindContent<AccountInfoAssertion, 'VerifyDatahash'>>([
+          ['expectedHash', bytes({ size: 32 })],
+          ['start', option(u16())],
+          ['length', option(u16())],
+        ]),
+      ],
+    ],
+    { description: 'AccountInfoAssertion' }
+  ) as Serializer<AccountInfoAssertionArgs, AccountInfoAssertion>;
 }
 
 // Data Enum Helpers.
@@ -290,7 +199,6 @@ export function accountInfoAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isAccountInfoAssertion<
   K extends AccountInfoAssertion['__kind']
 >(

@@ -6,74 +6,54 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getStructDecoder,
-  getStructEncoder,
-} from '@solana/codecs';
+  Serializer,
+  dataEnum,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  getEquatableOperatorDecoder,
-  getEquatableOperatorEncoder,
+  getEquatableOperatorSerializer,
 } from '.';
 
 export type UpgradeableProgramAssertion = {
   __kind: 'ProgramDataAddress';
-  value: Address;
+  value: PublicKey;
   operator: EquatableOperator;
 };
 
 export type UpgradeableProgramAssertionArgs = {
   __kind: 'ProgramDataAddress';
-  value: Address;
+  value: PublicKey;
   operator: EquatableOperatorArgs;
 };
 
-export function getUpgradeableProgramAssertionEncoder(): Encoder<UpgradeableProgramAssertionArgs> {
-  return getDataEnumEncoder([
-    [
-      'ProgramDataAddress',
-      getStructEncoder([
-        ['value', getAddressEncoder()],
-        ['operator', getEquatableOperatorEncoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableProgramAssertionDecoder(): Decoder<UpgradeableProgramAssertion> {
-  return getDataEnumDecoder([
-    [
-      'ProgramDataAddress',
-      getStructDecoder([
-        ['value', getAddressDecoder()],
-        ['operator', getEquatableOperatorDecoder()],
-      ]),
-    ],
-  ]);
-}
-
-export function getUpgradeableProgramAssertionCodec(): Codec<
+export function getUpgradeableProgramAssertionSerializer(): Serializer<
   UpgradeableProgramAssertionArgs,
   UpgradeableProgramAssertion
 > {
-  return combineCodec(
-    getUpgradeableProgramAssertionEncoder(),
-    getUpgradeableProgramAssertionDecoder()
-  );
+  return dataEnum<UpgradeableProgramAssertion>(
+    [
+      [
+        'ProgramDataAddress',
+        struct<
+          GetDataEnumKindContent<
+            UpgradeableProgramAssertion,
+            'ProgramDataAddress'
+          >
+        >([
+          ['value', publicKeySerializer()],
+          ['operator', getEquatableOperatorSerializer()],
+        ]),
+      ],
+    ],
+    { description: 'UpgradeableProgramAssertion' }
+  ) as Serializer<UpgradeableProgramAssertionArgs, UpgradeableProgramAssertion>;
 }
 
 // Data Enum Helpers.
@@ -94,7 +74,6 @@ export function upgradeableProgramAssertion<
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isUpgradeableProgramAssertion<
   K extends UpgradeableProgramAssertion['__kind']
 >(

@@ -6,72 +6,40 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
+  Context,
+  Pda,
+  PublicKey,
+  TransactionBuilder,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
-  AccountRole,
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-} from '@solana/instructions';
+  Serializer,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
 } from '../shared';
 import {
   AccountInfoAssertion,
   AccountInfoAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getAccountInfoAssertionDecoder,
-  getAccountInfoAssertionEncoder,
-  getLogLevelDecoder,
-  getLogLevelEncoder,
+  getAccountInfoAssertionSerializer,
+  getLogLevelSerializer,
 } from '../types';
 
-export type AssertAccountInfoInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
+// Accounts.
+export type AssertAccountInfoInstructionAccounts = {
+  /** Target account to be asserted */
+  targetAccount: PublicKey | Pda;
+};
 
-export type AssertAccountInfoInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
-
+// Data.
 export type AssertAccountInfoInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
@@ -83,165 +51,82 @@ export type AssertAccountInfoInstructionDataArgs = {
   assertion: AccountInfoAssertionArgs;
 };
 
-export function getAssertAccountInfoInstructionDataEncoder(): Encoder<AssertAccountInfoInstructionDataArgs> {
-  return mapEncoder(
-    getStructEncoder([
-      ['discriminator', getU8Encoder()],
-      ['logLevel', getLogLevelEncoder()],
-      ['assertion', getAccountInfoAssertionEncoder()],
-    ]),
+export function getAssertAccountInfoInstructionDataSerializer(): Serializer<
+  AssertAccountInfoInstructionDataArgs,
+  AssertAccountInfoInstructionData
+> {
+  return mapSerializer<
+    AssertAccountInfoInstructionDataArgs,
+    any,
+    AssertAccountInfoInstructionData
+  >(
+    struct<AssertAccountInfoInstructionData>(
+      [
+        ['discriminator', u8()],
+        ['logLevel', getLogLevelSerializer()],
+        ['assertion', getAccountInfoAssertionSerializer()],
+      ],
+      { description: 'AssertAccountInfoInstructionData' }
+    ),
     (value) => ({
       ...value,
       discriminator: 4,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
-  );
-}
-
-export function getAssertAccountInfoInstructionDataDecoder(): Decoder<AssertAccountInfoInstructionData> {
-  return getStructDecoder([
-    ['discriminator', getU8Decoder()],
-    ['logLevel', getLogLevelDecoder()],
-    ['assertion', getAccountInfoAssertionDecoder()],
-  ]);
-}
-
-export function getAssertAccountInfoInstructionDataCodec(): Codec<
-  AssertAccountInfoInstructionDataArgs,
-  AssertAccountInfoInstructionData
-> {
-  return combineCodec(
-    getAssertAccountInfoInstructionDataEncoder(),
-    getAssertAccountInfoInstructionDataDecoder()
-  );
-}
-
-export type AssertAccountInfoInput<TAccountTargetAccount extends string> = {
-  /** Target account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertAccountInfoInstructionDataArgs['logLevel'];
-  assertion: AssertAccountInfoInstructionDataArgs['assertion'];
-};
-
-export type AssertAccountInfoInputWithSigners<
-  TAccountTargetAccount extends string
-> = {
-  /** Target account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertAccountInfoInstructionDataArgs['logLevel'];
-  assertion: AssertAccountInfoInstructionDataArgs['assertion'];
-};
-
-export function getAssertAccountInfoInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertAccountInfoInputWithSigners<TAccountTargetAccount>
-): AssertAccountInfoInstructionWithSigners<TProgram, TAccountTargetAccount>;
-export function getAssertAccountInfoInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertAccountInfoInput<TAccountTargetAccount>
-): AssertAccountInfoInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertAccountInfoInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertAccountInfoInput<TAccountTargetAccount>): IInstruction {
-  // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
-
-  // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getAssertAccountInfoInstructionRaw<TProgram, TAccountTargetAccount>
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
-    targetAccount: { value: input.targetAccount ?? null, isWritable: false },
-  };
-
-  // Original args.
-  const args = { ...input };
-
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getAssertAccountInfoInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertAccountInfoInstructionDataArgs,
-    programAddress
-  );
-
-  return instruction;
-}
-
-export function getAssertAccountInfoInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    targetAccount: TAccountTargetAccount extends string
-      ? Address<TAccountTargetAccount>
-      : TAccountTargetAccount;
-  },
-  args: AssertAccountInfoInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getAssertAccountInfoInstructionDataEncoder().encode(args),
-    programAddress,
-  } as AssertAccountInfoInstruction<
-    TProgram,
-    TAccountTargetAccount,
-    TRemainingAccounts
+  ) as Serializer<
+    AssertAccountInfoInstructionDataArgs,
+    AssertAccountInfoInstructionData
   >;
 }
 
-export type ParsedAssertAccountInfoInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
-> = {
-  programAddress: Address<TProgram>;
-  accounts: {
-    /** Target account to be asserted */
-    targetAccount: TAccountMetas[0];
-  };
-  data: AssertAccountInfoInstructionData;
-};
+// Args.
+export type AssertAccountInfoInstructionArgs =
+  AssertAccountInfoInstructionDataArgs;
 
-export function parseAssertAccountInfoInstruction<
-  TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
->(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
-): ParsedAssertAccountInfoInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 1) {
-    // TODO: Coded error.
-    throw new Error('Not enough accounts');
-  }
-  let accountIndex = 0;
-  const getNextAccount = () => {
-    const accountMeta = instruction.accounts![accountIndex]!;
-    accountIndex += 1;
-    return accountMeta;
-  };
-  return {
-    programAddress: instruction.programAddress,
-    accounts: {
-      targetAccount: getNextAccount(),
+// Instruction.
+export function assertAccountInfo(
+  context: Pick<Context, 'programs'>,
+  input: AssertAccountInfoInstructionAccounts & AssertAccountInfoInstructionArgs
+): TransactionBuilder {
+  // Program ID.
+  const programId = context.programs.getPublicKey(
+    'lighthouse',
+    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+  );
+
+  // Accounts.
+  const resolvedAccounts = {
+    targetAccount: {
+      index: 0,
+      isWritable: false as boolean,
+      value: input.targetAccount ?? null,
     },
-    data: getAssertAccountInfoInstructionDataDecoder().decode(instruction.data),
-  };
+  } satisfies ResolvedAccountsWithIndices;
+
+  // Arguments.
+  const resolvedArgs: AssertAccountInfoInstructionArgs = { ...input };
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
+
+  // Data.
+  const data = getAssertAccountInfoInstructionDataSerializer().serialize(
+    resolvedArgs as AssertAccountInfoInstructionDataArgs
+  );
+
+  // Bytes Created On Chain.
+  const bytesCreatedOnChain = 0;
+
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

@@ -6,14 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  Codec,
-  Decoder,
-  Encoder,
-  combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum UpgradeableLoaderStateType {
   Uninitialized,
@@ -24,20 +17,11 @@ export enum UpgradeableLoaderStateType {
 
 export type UpgradeableLoaderStateTypeArgs = UpgradeableLoaderStateType;
 
-export function getUpgradeableLoaderStateTypeEncoder(): Encoder<UpgradeableLoaderStateTypeArgs> {
-  return getScalarEnumEncoder(UpgradeableLoaderStateType);
-}
-
-export function getUpgradeableLoaderStateTypeDecoder(): Decoder<UpgradeableLoaderStateType> {
-  return getScalarEnumDecoder(UpgradeableLoaderStateType);
-}
-
-export function getUpgradeableLoaderStateTypeCodec(): Codec<
+export function getUpgradeableLoaderStateTypeSerializer(): Serializer<
   UpgradeableLoaderStateTypeArgs,
   UpgradeableLoaderStateType
 > {
-  return combineCodec(
-    getUpgradeableLoaderStateTypeEncoder(),
-    getUpgradeableLoaderStateTypeDecoder()
-  );
+  return scalarEnum<UpgradeableLoaderStateType>(UpgradeableLoaderStateType, {
+    description: 'UpgradeableLoaderStateType',
+  }) as Serializer<UpgradeableLoaderStateTypeArgs, UpgradeableLoaderStateType>;
 }

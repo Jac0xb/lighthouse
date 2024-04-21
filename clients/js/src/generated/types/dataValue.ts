@@ -6,49 +6,28 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI128Decoder,
-  getI128Encoder,
-  getI16Decoder,
-  getI16Encoder,
-  getI32Decoder,
-  getI32Encoder,
-  getI64Decoder,
-  getI64Encoder,
-  getI8Decoder,
-  getI8Encoder,
-  getStructDecoder,
-  getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
-  getU128Decoder,
-  getU128Encoder,
-  getU16Decoder,
-  getU16Encoder,
-  getU32Decoder,
-  getU32Encoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  bytes,
+  dataEnum,
+  i128,
+  i16,
+  i32,
+  i64,
+  i8,
+  publicKey as publicKeySerializer,
+  struct,
+  tuple,
+  u128,
+  u16,
+  u32,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 export type DataValue =
   | { __kind: 'Bool'; fields: [boolean] }
@@ -63,7 +42,7 @@ export type DataValue =
   | { __kind: 'U128'; fields: [bigint] }
   | { __kind: 'I128'; fields: [bigint] }
   | { __kind: 'Bytes'; fields: [Uint8Array] }
-  | { __kind: 'Pubkey'; fields: [Address] };
+  | { __kind: 'Pubkey'; fields: [PublicKey] };
 
 export type DataValueArgs =
   | { __kind: 'Bool'; fields: [boolean] }
@@ -78,86 +57,92 @@ export type DataValueArgs =
   | { __kind: 'U128'; fields: [number | bigint] }
   | { __kind: 'I128'; fields: [number | bigint] }
   | { __kind: 'Bytes'; fields: [Uint8Array] }
-  | { __kind: 'Pubkey'; fields: [Address] };
+  | { __kind: 'Pubkey'; fields: [PublicKey] };
 
-export function getDataValueEncoder(): Encoder<DataValueArgs> {
-  return getDataEnumEncoder([
+export function getDataValueSerializer(): Serializer<DataValueArgs, DataValue> {
+  return dataEnum<DataValue>(
     [
-      'Bool',
-      getStructEncoder([['fields', getTupleEncoder([getBooleanEncoder()])]]),
+      [
+        'Bool',
+        struct<GetDataEnumKindContent<DataValue, 'Bool'>>([
+          ['fields', tuple([bool()])],
+        ]),
+      ],
+      [
+        'U8',
+        struct<GetDataEnumKindContent<DataValue, 'U8'>>([
+          ['fields', tuple([u8()])],
+        ]),
+      ],
+      [
+        'I8',
+        struct<GetDataEnumKindContent<DataValue, 'I8'>>([
+          ['fields', tuple([i8()])],
+        ]),
+      ],
+      [
+        'U16',
+        struct<GetDataEnumKindContent<DataValue, 'U16'>>([
+          ['fields', tuple([u16()])],
+        ]),
+      ],
+      [
+        'I16',
+        struct<GetDataEnumKindContent<DataValue, 'I16'>>([
+          ['fields', tuple([i16()])],
+        ]),
+      ],
+      [
+        'U32',
+        struct<GetDataEnumKindContent<DataValue, 'U32'>>([
+          ['fields', tuple([u32()])],
+        ]),
+      ],
+      [
+        'I32',
+        struct<GetDataEnumKindContent<DataValue, 'I32'>>([
+          ['fields', tuple([i32()])],
+        ]),
+      ],
+      [
+        'U64',
+        struct<GetDataEnumKindContent<DataValue, 'U64'>>([
+          ['fields', tuple([u64()])],
+        ]),
+      ],
+      [
+        'I64',
+        struct<GetDataEnumKindContent<DataValue, 'I64'>>([
+          ['fields', tuple([i64()])],
+        ]),
+      ],
+      [
+        'U128',
+        struct<GetDataEnumKindContent<DataValue, 'U128'>>([
+          ['fields', tuple([u128()])],
+        ]),
+      ],
+      [
+        'I128',
+        struct<GetDataEnumKindContent<DataValue, 'I128'>>([
+          ['fields', tuple([i128()])],
+        ]),
+      ],
+      [
+        'Bytes',
+        struct<GetDataEnumKindContent<DataValue, 'Bytes'>>([
+          ['fields', tuple([bytes({ size: u32() })])],
+        ]),
+      ],
+      [
+        'Pubkey',
+        struct<GetDataEnumKindContent<DataValue, 'Pubkey'>>([
+          ['fields', tuple([publicKeySerializer()])],
+        ]),
+      ],
     ],
-    ['U8', getStructEncoder([['fields', getTupleEncoder([getU8Encoder()])]])],
-    ['I8', getStructEncoder([['fields', getTupleEncoder([getI8Encoder()])]])],
-    ['U16', getStructEncoder([['fields', getTupleEncoder([getU16Encoder()])]])],
-    ['I16', getStructEncoder([['fields', getTupleEncoder([getI16Encoder()])]])],
-    ['U32', getStructEncoder([['fields', getTupleEncoder([getU32Encoder()])]])],
-    ['I32', getStructEncoder([['fields', getTupleEncoder([getI32Encoder()])]])],
-    ['U64', getStructEncoder([['fields', getTupleEncoder([getU64Encoder()])]])],
-    ['I64', getStructEncoder([['fields', getTupleEncoder([getI64Encoder()])]])],
-    [
-      'U128',
-      getStructEncoder([['fields', getTupleEncoder([getU128Encoder()])]]),
-    ],
-    [
-      'I128',
-      getStructEncoder([['fields', getTupleEncoder([getI128Encoder()])]]),
-    ],
-    [
-      'Bytes',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([getBytesEncoder({ size: getU32Encoder() })]),
-        ],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructEncoder([['fields', getTupleEncoder([getAddressEncoder()])]]),
-    ],
-  ]);
-}
-
-export function getDataValueDecoder(): Decoder<DataValue> {
-  return getDataEnumDecoder([
-    [
-      'Bool',
-      getStructDecoder([['fields', getTupleDecoder([getBooleanDecoder()])]]),
-    ],
-    ['U8', getStructDecoder([['fields', getTupleDecoder([getU8Decoder()])]])],
-    ['I8', getStructDecoder([['fields', getTupleDecoder([getI8Decoder()])]])],
-    ['U16', getStructDecoder([['fields', getTupleDecoder([getU16Decoder()])]])],
-    ['I16', getStructDecoder([['fields', getTupleDecoder([getI16Decoder()])]])],
-    ['U32', getStructDecoder([['fields', getTupleDecoder([getU32Decoder()])]])],
-    ['I32', getStructDecoder([['fields', getTupleDecoder([getI32Decoder()])]])],
-    ['U64', getStructDecoder([['fields', getTupleDecoder([getU64Decoder()])]])],
-    ['I64', getStructDecoder([['fields', getTupleDecoder([getI64Decoder()])]])],
-    [
-      'U128',
-      getStructDecoder([['fields', getTupleDecoder([getU128Decoder()])]]),
-    ],
-    [
-      'I128',
-      getStructDecoder([['fields', getTupleDecoder([getI128Decoder()])]]),
-    ],
-    [
-      'Bytes',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([getBytesDecoder({ size: getU32Decoder() })]),
-        ],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructDecoder([['fields', getTupleDecoder([getAddressDecoder()])]]),
-    ],
-  ]);
-}
-
-export function getDataValueCodec(): Codec<DataValueArgs, DataValue> {
-  return combineCodec(getDataValueEncoder(), getDataValueDecoder());
+    { description: 'DataValue' }
+  ) as Serializer<DataValueArgs, DataValue>;
 }
 
 // Data Enum Helpers.
@@ -221,7 +206,6 @@ export function dataValue<K extends DataValueArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isDataValue<K extends DataValue['__kind']>(
   kind: K,
   value: DataValue

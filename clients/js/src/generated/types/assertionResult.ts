@@ -6,53 +6,29 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
-  Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
-  Codec,
-  Decoder,
-  Encoder,
   GetDataEnumKind,
   GetDataEnumKindContent,
-  Option,
-  OptionOrNullable,
-  combineCodec,
-  getBooleanDecoder,
-  getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
-  getI128Decoder,
-  getI128Encoder,
-  getI16Decoder,
-  getI16Encoder,
-  getI32Decoder,
-  getI32Encoder,
-  getI64Decoder,
-  getI64Encoder,
-  getI8Decoder,
-  getI8Encoder,
-  getOptionDecoder,
-  getOptionEncoder,
-  getStructDecoder,
-  getStructEncoder,
-  getTupleDecoder,
-  getTupleEncoder,
-  getU128Decoder,
-  getU128Encoder,
-  getU16Decoder,
-  getU16Encoder,
-  getU32Decoder,
-  getU32Encoder,
-  getU64Decoder,
-  getU64Encoder,
-  getU8Decoder,
-  getU8Encoder,
-} from '@solana/codecs';
+  Serializer,
+  bool,
+  bytes,
+  dataEnum,
+  i128,
+  i16,
+  i32,
+  i64,
+  i8,
+  option,
+  publicKey as publicKeySerializer,
+  struct,
+  tuple,
+  u128,
+  u16,
+  u32,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 export type AssertionResult =
   | { __kind: 'U8'; fields: [Option<number>, Option<number>, number, boolean] }
@@ -73,7 +49,7 @@ export type AssertionResult =
     }
   | {
       __kind: 'Pubkey';
-      fields: [Option<Address>, Option<Address>, number, boolean];
+      fields: [Option<PublicKey>, Option<PublicKey>, number, boolean];
     }
   | { __kind: 'Bytes'; fields: [Uint8Array, Uint8Array, number, boolean] }
   | {
@@ -175,8 +151,8 @@ export type AssertionResultArgs =
   | {
       __kind: 'Pubkey';
       fields: [
-        OptionOrNullable<Address>,
-        OptionOrNullable<Address>,
+        OptionOrNullable<PublicKey>,
+        OptionOrNullable<PublicKey>,
         number,
         boolean
       ];
@@ -192,385 +168,109 @@ export type AssertionResultArgs =
       ];
     };
 
-export function getAssertionResultEncoder(): Encoder<AssertionResultArgs> {
-  return getDataEnumEncoder([
-    [
-      'U8',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU8Encoder()),
-            getOptionEncoder(getU8Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U16',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU16Encoder()),
-            getOptionEncoder(getU16Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U32',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU32Encoder()),
-            getOptionEncoder(getU32Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U64',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU64Encoder()),
-            getOptionEncoder(getU64Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U128',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getU128Encoder()),
-            getOptionEncoder(getU128Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I8',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getI8Encoder()),
-            getOptionEncoder(getI8Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I16',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getI16Encoder()),
-            getOptionEncoder(getI16Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I32',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getI32Encoder()),
-            getOptionEncoder(getI32Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I64',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getI64Encoder()),
-            getOptionEncoder(getI64Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I128',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getI128Encoder()),
-            getOptionEncoder(getI128Encoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getAddressEncoder()),
-            getOptionEncoder(getAddressEncoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getBytesEncoder({ size: getU32Encoder() }),
-            getBytesEncoder({ size: getU32Encoder() }),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Bool',
-      getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            getOptionEncoder(getBooleanEncoder()),
-            getOptionEncoder(getBooleanEncoder()),
-            getU8Encoder(),
-            getBooleanEncoder(),
-          ]),
-        ],
-      ]),
-    ],
-  ]);
-}
-
-export function getAssertionResultDecoder(): Decoder<AssertionResult> {
-  return getDataEnumDecoder([
-    [
-      'U8',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU8Decoder()),
-            getOptionDecoder(getU8Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U16',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU16Decoder()),
-            getOptionDecoder(getU16Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U32',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU32Decoder()),
-            getOptionDecoder(getU32Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U64',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU64Decoder()),
-            getOptionDecoder(getU64Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'U128',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getU128Decoder()),
-            getOptionDecoder(getU128Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I8',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getI8Decoder()),
-            getOptionDecoder(getI8Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I16',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getI16Decoder()),
-            getOptionDecoder(getI16Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I32',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getI32Decoder()),
-            getOptionDecoder(getI32Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I64',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getI64Decoder()),
-            getOptionDecoder(getI64Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'I128',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getI128Decoder()),
-            getOptionDecoder(getI128Decoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Pubkey',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getAddressDecoder()),
-            getOptionDecoder(getAddressDecoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Bytes',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getBytesDecoder({ size: getU32Decoder() }),
-            getBytesDecoder({ size: getU32Decoder() }),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-    [
-      'Bool',
-      getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            getOptionDecoder(getBooleanDecoder()),
-            getOptionDecoder(getBooleanDecoder()),
-            getU8Decoder(),
-            getBooleanDecoder(),
-          ]),
-        ],
-      ]),
-    ],
-  ]);
-}
-
-export function getAssertionResultCodec(): Codec<
+export function getAssertionResultSerializer(): Serializer<
   AssertionResultArgs,
   AssertionResult
 > {
-  return combineCodec(getAssertionResultEncoder(), getAssertionResultDecoder());
+  return dataEnum<AssertionResult>(
+    [
+      [
+        'U8',
+        struct<GetDataEnumKindContent<AssertionResult, 'U8'>>([
+          ['fields', tuple([option(u8()), option(u8()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'U16',
+        struct<GetDataEnumKindContent<AssertionResult, 'U16'>>([
+          ['fields', tuple([option(u16()), option(u16()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'U32',
+        struct<GetDataEnumKindContent<AssertionResult, 'U32'>>([
+          ['fields', tuple([option(u32()), option(u32()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'U64',
+        struct<GetDataEnumKindContent<AssertionResult, 'U64'>>([
+          ['fields', tuple([option(u64()), option(u64()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'U128',
+        struct<GetDataEnumKindContent<AssertionResult, 'U128'>>([
+          ['fields', tuple([option(u128()), option(u128()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'I8',
+        struct<GetDataEnumKindContent<AssertionResult, 'I8'>>([
+          ['fields', tuple([option(i8()), option(i8()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'I16',
+        struct<GetDataEnumKindContent<AssertionResult, 'I16'>>([
+          ['fields', tuple([option(i16()), option(i16()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'I32',
+        struct<GetDataEnumKindContent<AssertionResult, 'I32'>>([
+          ['fields', tuple([option(i32()), option(i32()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'I64',
+        struct<GetDataEnumKindContent<AssertionResult, 'I64'>>([
+          ['fields', tuple([option(i64()), option(i64()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'I128',
+        struct<GetDataEnumKindContent<AssertionResult, 'I128'>>([
+          ['fields', tuple([option(i128()), option(i128()), u8(), bool()])],
+        ]),
+      ],
+      [
+        'Pubkey',
+        struct<GetDataEnumKindContent<AssertionResult, 'Pubkey'>>([
+          [
+            'fields',
+            tuple([
+              option(publicKeySerializer()),
+              option(publicKeySerializer()),
+              u8(),
+              bool(),
+            ]),
+          ],
+        ]),
+      ],
+      [
+        'Bytes',
+        struct<GetDataEnumKindContent<AssertionResult, 'Bytes'>>([
+          [
+            'fields',
+            tuple([
+              bytes({ size: u32() }),
+              bytes({ size: u32() }),
+              u8(),
+              bool(),
+            ]),
+          ],
+        ]),
+      ],
+      [
+        'Bool',
+        struct<GetDataEnumKindContent<AssertionResult, 'Bool'>>([
+          ['fields', tuple([option(bool()), option(bool()), u8(), bool()])],
+        ]),
+      ],
+    ],
+    { description: 'AssertionResult' }
+  ) as Serializer<AssertionResultArgs, AssertionResult>;
 }
 
 // Data Enum Helpers.
@@ -634,7 +334,6 @@ export function assertionResult<K extends AssertionResultArgs['__kind']>(
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
-
 export function isAssertionResult<K extends AssertionResult['__kind']>(
   kind: K,
   value: AssertionResult
