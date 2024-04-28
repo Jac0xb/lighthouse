@@ -117,15 +117,16 @@ export function accountDeltaAssertion(
   data: GetDataEnumKindContent<AccountDeltaAssertionArgs, 'Data'>
 ): GetDataEnumKind<AccountDeltaAssertionArgs, 'Data'>;
 export function accountDeltaAssertion<
-  K extends AccountDeltaAssertionArgs['__kind']
->(kind: K, data?: any): Extract<AccountDeltaAssertionArgs, { __kind: K }> {
+  K extends AccountDeltaAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isAccountDeltaAssertion<
-  K extends AccountDeltaAssertion['__kind']
+  K extends AccountDeltaAssertion['__kind'],
 >(
   kind: K,
   value: AccountDeltaAssertion

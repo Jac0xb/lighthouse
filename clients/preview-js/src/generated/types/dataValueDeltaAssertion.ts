@@ -245,15 +245,16 @@ export function dataValueDeltaAssertion(
   data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'Bytes'>
 ): GetDataEnumKind<DataValueDeltaAssertionArgs, 'Bytes'>;
 export function dataValueDeltaAssertion<
-  K extends DataValueDeltaAssertionArgs['__kind']
->(kind: K, data?: any): Extract<DataValueDeltaAssertionArgs, { __kind: K }> {
+  K extends DataValueDeltaAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isDataValueDeltaAssertion<
-  K extends DataValueDeltaAssertion['__kind']
+  K extends DataValueDeltaAssertion['__kind'],
 >(
   kind: K,
   value: DataValueDeltaAssertion

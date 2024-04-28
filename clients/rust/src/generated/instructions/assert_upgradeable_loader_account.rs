@@ -50,12 +50,12 @@ impl AssertUpgradeableLoaderAccount {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertUpgradeableLoaderAccountInstructionData {
+pub struct AssertUpgradeableLoaderAccountInstructionData {
     discriminator: u8,
 }
 
 impl AssertUpgradeableLoaderAccountInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 12 }
     }
 }

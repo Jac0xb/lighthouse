@@ -213,10 +213,10 @@ export function dataValue(
   kind: 'Pubkey',
   data: GetDataEnumKindContent<DataValueArgs, 'Pubkey'>['fields']
 ): GetDataEnumKind<DataValueArgs, 'Pubkey'>;
-export function dataValue<K extends DataValueArgs['__kind']>(
+export function dataValue<K extends DataValueArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<DataValueArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

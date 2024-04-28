@@ -85,18 +85,16 @@ export function upgradeableProgramAssertion(
   >
 ): GetDataEnumKind<UpgradeableProgramAssertionArgs, 'ProgramDataAddress'>;
 export function upgradeableProgramAssertion<
-  K extends UpgradeableProgramAssertionArgs['__kind']
->(
-  kind: K,
-  data?: any
-): Extract<UpgradeableProgramAssertionArgs, { __kind: K }> {
+  K extends UpgradeableProgramAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isUpgradeableProgramAssertion<
-  K extends UpgradeableProgramAssertion['__kind']
+  K extends UpgradeableProgramAssertion['__kind'],
 >(
   kind: K,
   value: UpgradeableProgramAssertion

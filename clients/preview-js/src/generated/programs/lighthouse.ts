@@ -134,7 +134,7 @@ export function identifyLighthouseInstruction(
 }
 
 export type ParsedLighthouseInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
 > =
   | ({
       instructionType: LighthouseInstruction.MemoryWrite;

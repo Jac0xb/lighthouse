@@ -57,12 +57,12 @@ impl MemoryClose {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct MemoryCloseInstructionData {
+pub struct MemoryCloseInstructionData {
     discriminator: u8,
 }
 
 impl MemoryCloseInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 1 }
     }
 }

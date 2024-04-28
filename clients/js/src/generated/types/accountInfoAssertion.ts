@@ -193,14 +193,14 @@ export function accountInfoAssertion(
   data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'VerifyDatahash'>
 ): GetDataEnumKind<AccountInfoAssertionArgs, 'VerifyDatahash'>;
 export function accountInfoAssertion<
-  K extends AccountInfoAssertionArgs['__kind']
+  K extends AccountInfoAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<AccountInfoAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isAccountInfoAssertion<
-  K extends AccountInfoAssertion['__kind']
+  K extends AccountInfoAssertion['__kind'],
 >(
   kind: K,
   value: AccountInfoAssertion

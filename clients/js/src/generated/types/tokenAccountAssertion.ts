@@ -183,14 +183,14 @@ export function tokenAccountAssertion(
   kind: 'TokenAccountOwnerIsDerived'
 ): GetDataEnumKind<TokenAccountAssertionArgs, 'TokenAccountOwnerIsDerived'>;
 export function tokenAccountAssertion<
-  K extends TokenAccountAssertionArgs['__kind']
+  K extends TokenAccountAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<TokenAccountAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isTokenAccountAssertion<
-  K extends TokenAccountAssertion['__kind']
+  K extends TokenAccountAssertion['__kind'],
 >(
   kind: K,
   value: TokenAccountAssertion

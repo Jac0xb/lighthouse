@@ -50,12 +50,12 @@ impl AssertBubblegumTreeConfigAccount {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertBubblegumTreeConfigAccountInstructionData {
+pub struct AssertBubblegumTreeConfigAccountInstructionData {
     discriminator: u8,
 }
 
 impl AssertBubblegumTreeConfigAccountInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 16 }
     }
 }

@@ -21,18 +21,14 @@ import {
   mapEncoder,
 } from '@solana/codecs';
 import {
-  AccountRole,
   IAccountMeta,
   IInstruction,
   IInstructionWithAccounts,
   IInstructionWithData,
   ReadonlyAccount,
 } from '@solana/instructions';
-import {
-  ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
-} from '../shared';
+import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
+import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
@@ -45,9 +41,9 @@ import {
 } from '../types';
 
 export type AssertMintAccountMultiInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
+  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
@@ -55,22 +51,7 @@ export type AssertMintAccountMultiInstruction<
       TAccountTargetAccount extends string
         ? ReadonlyAccount<TAccountTargetAccount>
         : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
-
-export type AssertMintAccountMultiInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
+      ...TRemainingAccounts,
     ]
   >;
 
@@ -118,16 +99,8 @@ export function getAssertMintAccountMultiInstructionDataCodec(): Codec<
   );
 }
 
-export type AssertMintAccountMultiInput<TAccountTargetAccount extends string> =
-  {
-    /** Target account to be asserted */
-    targetAccount: Address<TAccountTargetAccount>;
-    logLevel?: AssertMintAccountMultiInstructionDataArgs['logLevel'];
-    assertions: AssertMintAccountMultiInstructionDataArgs['assertions'];
-  };
-
-export type AssertMintAccountMultiInputWithSigners<
-  TAccountTargetAccount extends string
+export type AssertMintAccountMultiInput<
+  TAccountTargetAccount extends string = string,
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
@@ -137,88 +110,45 @@ export type AssertMintAccountMultiInputWithSigners<
 
 export function getAssertMintAccountMultiInstruction<
   TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertMintAccountMultiInputWithSigners<TAccountTargetAccount>
-): AssertMintAccountMultiInstructionWithSigners<
-  TProgram,
-  TAccountTargetAccount
->;
-export function getAssertMintAccountMultiInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
   input: AssertMintAccountMultiInput<TAccountTargetAccount>
-): AssertMintAccountMultiInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertMintAccountMultiInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertMintAccountMultiInput<TAccountTargetAccount>): IInstruction {
+): AssertMintAccountMultiInstruction<
+  typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TAccountTargetAccount
+> {
   // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+  const programAddress = LIGHTHOUSE_PROGRAM_ADDRESS;
 
   // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getAssertMintAccountMultiInstructionRaw<
-      TProgram,
-      TAccountTargetAccount
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
+  const originalAccounts = {
     targetAccount: { value: input.targetAccount ?? null, isWritable: false },
   };
+  const accounts = originalAccounts as Record<
+    keyof typeof originalAccounts,
+    ResolvedAccount
+  >;
 
   // Original args.
   const args = { ...input };
 
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getAssertMintAccountMultiInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertMintAccountMultiInstructionDataArgs,
-    programAddress
-  );
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
+  const instruction = {
+    accounts: [getAccountMeta(accounts.targetAccount)],
+    programAddress,
+    data: getAssertMintAccountMultiInstructionDataEncoder().encode(
+      args as AssertMintAccountMultiInstructionDataArgs
+    ),
+  } as AssertMintAccountMultiInstruction<
+    typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+    TAccountTargetAccount
+  >;
 
   return instruction;
 }
 
-export function getAssertMintAccountMultiInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    targetAccount: TAccountTargetAccount extends string
-      ? Address<TAccountTargetAccount>
-      : TAccountTargetAccount;
-  },
-  args: AssertMintAccountMultiInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getAssertMintAccountMultiInstructionDataEncoder().encode(args),
-    programAddress,
-  } as AssertMintAccountMultiInstruction<
-    TProgram,
-    TAccountTargetAccount,
-    TRemainingAccounts
-  >;
-}
-
 export type ParsedAssertMintAccountMultiInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -230,7 +160,7 @@ export type ParsedAssertMintAccountMultiInstruction<
 
 export function parseAssertMintAccountMultiInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
+  TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &

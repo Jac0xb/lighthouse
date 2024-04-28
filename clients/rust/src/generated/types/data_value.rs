@@ -24,5 +24,9 @@ pub enum DataValue {
     U128(u128),
     I128(i128),
     Bytes(Vec<u8>),
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+    )]
     Pubkey(Pubkey),
 }

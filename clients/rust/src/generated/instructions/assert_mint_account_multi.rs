@@ -50,12 +50,12 @@ impl AssertMintAccountMulti {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertMintAccountMultiInstructionData {
+pub struct AssertMintAccountMultiInstructionData {
     discriminator: u8,
 }
 
 impl AssertMintAccountMultiInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 7 }
     }
 }

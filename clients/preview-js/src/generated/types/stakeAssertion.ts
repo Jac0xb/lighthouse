@@ -193,10 +193,10 @@ export function stakeAssertion(
   kind: 'CreditsObserved',
   data: GetDataEnumKindContent<StakeAssertionArgs, 'CreditsObserved'>
 ): GetDataEnumKind<StakeAssertionArgs, 'CreditsObserved'>;
-export function stakeAssertion<K extends StakeAssertionArgs['__kind']>(
+export function stakeAssertion<K extends StakeAssertionArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<StakeAssertionArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

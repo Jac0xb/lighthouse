@@ -343,10 +343,10 @@ export function dataValueAssertion(
   kind: 'Pubkey',
   data: GetDataEnumKindContent<DataValueAssertionArgs, 'Pubkey'>
 ): GetDataEnumKind<DataValueAssertionArgs, 'Pubkey'>;
-export function dataValueAssertion<K extends DataValueAssertionArgs['__kind']>(
-  kind: K,
-  data?: any
-): Extract<DataValueAssertionArgs, { __kind: K }> {
+export function dataValueAssertion<
+  K extends DataValueAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

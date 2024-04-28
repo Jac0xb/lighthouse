@@ -117,18 +117,16 @@ export function upgradeableProgramDataAssertion(
   data: GetDataEnumKindContent<UpgradeableProgramDataAssertionArgs, 'Slot'>
 ): GetDataEnumKind<UpgradeableProgramDataAssertionArgs, 'Slot'>;
 export function upgradeableProgramDataAssertion<
-  K extends UpgradeableProgramDataAssertionArgs['__kind']
->(
-  kind: K,
-  data?: any
-): Extract<UpgradeableProgramDataAssertionArgs, { __kind: K }> {
+  K extends UpgradeableProgramDataAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isUpgradeableProgramDataAssertion<
-  K extends UpgradeableProgramDataAssertion['__kind']
+  K extends UpgradeableProgramDataAssertion['__kind'],
 >(
   kind: K,
   value: UpgradeableProgramDataAssertion

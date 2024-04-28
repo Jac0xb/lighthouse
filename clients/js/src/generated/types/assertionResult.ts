@@ -64,7 +64,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -73,7 +73,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -82,7 +82,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -91,7 +91,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -100,7 +100,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -109,7 +109,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -118,7 +118,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -127,7 +127,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -136,7 +136,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -145,7 +145,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -154,7 +154,7 @@ export type AssertionResultArgs =
         OptionOrNullable<PublicKey>,
         OptionOrNullable<PublicKey>,
         number,
-        boolean
+        boolean,
       ];
     }
   | { __kind: 'Bytes'; fields: [Uint8Array, Uint8Array, number, boolean] }
@@ -164,7 +164,7 @@ export type AssertionResultArgs =
         OptionOrNullable<boolean>,
         OptionOrNullable<boolean>,
         number,
-        boolean
+        boolean,
       ];
     };
 

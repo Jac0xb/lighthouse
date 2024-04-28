@@ -27,7 +27,7 @@ export async function findMemoryPda(
   const {
     programAddress = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
   } = config;
-  return getProgramDerivedAddress({
+  return await getProgramDerivedAddress({
     programAddress,
     seeds: [
       getStringEncoder({ size: 'variable' }).encode('memory'),

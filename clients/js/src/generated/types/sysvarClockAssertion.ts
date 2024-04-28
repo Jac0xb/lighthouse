@@ -119,14 +119,14 @@ export function sysvarClockAssertion(
   data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'UnixTimestamp'>
 ): GetDataEnumKind<SysvarClockAssertionArgs, 'UnixTimestamp'>;
 export function sysvarClockAssertion<
-  K extends SysvarClockAssertionArgs['__kind']
+  K extends SysvarClockAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<SysvarClockAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isSysvarClockAssertion<
-  K extends SysvarClockAssertion['__kind']
+  K extends SysvarClockAssertion['__kind'],
 >(
   kind: K,
   value: SysvarClockAssertion

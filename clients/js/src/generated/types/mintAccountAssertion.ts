@@ -128,14 +128,14 @@ export function mintAccountAssertion(
   data: GetDataEnumKindContent<MintAccountAssertionArgs, 'FreezeAuthority'>
 ): GetDataEnumKind<MintAccountAssertionArgs, 'FreezeAuthority'>;
 export function mintAccountAssertion<
-  K extends MintAccountAssertionArgs['__kind']
+  K extends MintAccountAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<MintAccountAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isMintAccountAssertion<
-  K extends MintAccountAssertion['__kind']
+  K extends MintAccountAssertion['__kind'],
 >(
   kind: K,
   value: MintAccountAssertion

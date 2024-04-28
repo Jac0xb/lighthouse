@@ -24,6 +24,7 @@ import {
   IInstructionWithAccounts,
   IInstructionWithData,
 } from '@solana/instructions';
+import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import {
   LogLevel,
   LogLevelArgs,
@@ -36,15 +37,8 @@ import {
 } from '../types';
 
 export type AssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<TRemainingAccounts>;
-
-export type AssertSysvarClockInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<TRemainingAccounts>;
@@ -98,54 +92,27 @@ export type AssertSysvarClockInput = {
   assertion: AssertSysvarClockInstructionDataArgs['assertion'];
 };
 
-export type AssertSysvarClockInputWithSigners = {
-  logLevel?: AssertSysvarClockInstructionDataArgs['logLevel'];
-  assertion: AssertSysvarClockInstructionDataArgs['assertion'];
-};
-
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertSysvarClockInputWithSigners
-): AssertSysvarClockInstructionWithSigners<TProgram>;
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertSysvarClockInput): AssertSysvarClockInstruction<TProgram>;
-export function getAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(input: AssertSysvarClockInput): IInstruction {
+export function getAssertSysvarClockInstruction(
+  input: AssertSysvarClockInput
+): AssertSysvarClockInstruction<typeof LIGHTHOUSE_PROGRAM_ADDRESS> {
   // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+  const programAddress = LIGHTHOUSE_PROGRAM_ADDRESS;
 
   // Original args.
   const args = { ...input };
 
-  const instruction = getAssertSysvarClockInstructionRaw(
-    args as AssertSysvarClockInstructionDataArgs,
-    programAddress
-  );
+  const instruction = {
+    programAddress,
+    data: getAssertSysvarClockInstructionDataEncoder().encode(
+      args as AssertSysvarClockInstructionDataArgs
+    ),
+  } as AssertSysvarClockInstruction<typeof LIGHTHOUSE_PROGRAM_ADDRESS>;
 
   return instruction;
 }
 
-export function getAssertSysvarClockInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  args: AssertSysvarClockInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: remainingAccounts ?? [],
-    data: getAssertSysvarClockInstructionDataEncoder().encode(args),
-    programAddress,
-  } as AssertSysvarClockInstruction<TProgram, TRemainingAccounts>;
-}
-
 export type ParsedAssertSysvarClockInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
 > = {
   programAddress: Address<TProgram>;
   data: AssertSysvarClockInstructionData;

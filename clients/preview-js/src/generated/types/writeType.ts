@@ -122,10 +122,10 @@ export function writeType(
   kind: 'Clock',
   data: GetDataEnumKindContent<WriteTypeArgs, 'Clock'>['fields']
 ): GetDataEnumKind<WriteTypeArgs, 'Clock'>;
-export function writeType<K extends WriteTypeArgs['__kind']>(
+export function writeType<K extends WriteTypeArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<WriteTypeArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

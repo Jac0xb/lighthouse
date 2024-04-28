@@ -208,10 +208,10 @@ export function metaAssertion(
   kind: 'LockupCustodian',
   data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupCustodian'>
 ): GetDataEnumKind<MetaAssertionArgs, 'LockupCustodian'>;
-export function metaAssertion<K extends MetaAssertionArgs['__kind']>(
+export function metaAssertion<K extends MetaAssertionArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<MetaAssertionArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

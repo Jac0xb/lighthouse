@@ -87,16 +87,15 @@ export function assertSysvarClock(
   );
 
   // Accounts.
-  const resolvedAccounts: ResolvedAccountsWithIndices =
-    {} satisfies ResolvedAccountsWithIndices;
+  const resolvedAccounts = {} satisfies ResolvedAccountsWithIndices;
 
   // Arguments.
   const resolvedArgs: AssertSysvarClockInstructionArgs = { ...input };
 
   // Accounts in order.
   const orderedAccounts: ResolvedAccount[] = Object.values(
-    resolvedAccounts
-  ).sort((a, b) => a.index - b.index);
+    resolvedAccounts as ResolvedAccountsWithIndices
+  );
 
   // Keys and Signers.
   const [keys, signers] = getAccountMetasAndSigners(

@@ -70,12 +70,12 @@ impl MemoryWrite {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct MemoryWriteInstructionData {
+pub struct MemoryWriteInstructionData {
     discriminator: u8,
 }
 
 impl MemoryWriteInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 0 }
     }
 }

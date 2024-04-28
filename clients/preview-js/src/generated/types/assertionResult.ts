@@ -88,7 +88,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -97,7 +97,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -106,7 +106,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -115,7 +115,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -124,7 +124,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -133,7 +133,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -142,7 +142,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -151,7 +151,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -160,7 +160,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -169,7 +169,7 @@ export type AssertionResultArgs =
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
@@ -178,7 +178,7 @@ export type AssertionResultArgs =
         OptionOrNullable<Address>,
         OptionOrNullable<Address>,
         number,
-        boolean
+        boolean,
       ];
     }
   | { __kind: 'Bytes'; fields: [Uint8Array, Uint8Array, number, boolean] }
@@ -188,7 +188,7 @@ export type AssertionResultArgs =
         OptionOrNullable<boolean>,
         OptionOrNullable<boolean>,
         number,
-        boolean
+        boolean,
       ];
     };
 
@@ -626,10 +626,10 @@ export function assertionResult(
   kind: 'Bool',
   data: GetDataEnumKindContent<AssertionResultArgs, 'Bool'>['fields']
 ): GetDataEnumKind<AssertionResultArgs, 'Bool'>;
-export function assertionResult<K extends AssertionResultArgs['__kind']>(
+export function assertionResult<K extends AssertionResultArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<AssertionResultArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

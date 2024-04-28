@@ -13,6 +13,7 @@
       "noFallthroughCasesInSwitch": true,
       "noUnusedLocals": false,
       "noUnusedParameters": false,
+      "noImplicitAny": false,
       "outDir": "./dist",
       "preserveWatchOutput": true,
       "skipLibCheck": true,

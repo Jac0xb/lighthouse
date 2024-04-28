@@ -204,18 +204,16 @@ export function bubblegumTreeConfigAssertion(
   >
 ): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'IsDecompressible'>;
 export function bubblegumTreeConfigAssertion<
-  K extends BubblegumTreeConfigAssertionArgs['__kind']
->(
-  kind: K,
-  data?: any
-): Extract<BubblegumTreeConfigAssertionArgs, { __kind: K }> {
+  K extends BubblegumTreeConfigAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isBubblegumTreeConfigAssertion<
-  K extends BubblegumTreeConfigAssertion['__kind']
+  K extends BubblegumTreeConfigAssertion['__kind'],
 >(
   kind: K,
   value: BubblegumTreeConfigAssertion

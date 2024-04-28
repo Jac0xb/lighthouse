@@ -19,18 +19,14 @@ import {
   mapEncoder,
 } from '@solana/codecs';
 import {
-  AccountRole,
   IAccountMeta,
   IInstruction,
   IInstructionWithAccounts,
   IInstructionWithData,
   ReadonlyAccount,
 } from '@solana/instructions';
-import {
-  ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
-} from '../shared';
+import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
+import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
@@ -43,9 +39,9 @@ import {
 } from '../types';
 
 export type AssertUpgradeableLoaderAccountInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
+  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
@@ -53,22 +49,7 @@ export type AssertUpgradeableLoaderAccountInstruction<
       TAccountTargetAccount extends string
         ? ReadonlyAccount<TAccountTargetAccount>
         : TAccountTargetAccount,
-      ...TRemainingAccounts
-    ]
-  >;
-
-export type AssertUpgradeableLoaderAccountInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountTargetAccount extends string
-        ? ReadonlyAccount<TAccountTargetAccount>
-        : TAccountTargetAccount,
-      ...TRemainingAccounts
+      ...TRemainingAccounts,
     ]
   >;
 
@@ -117,16 +98,7 @@ export function getAssertUpgradeableLoaderAccountInstructionDataCodec(): Codec<
 }
 
 export type AssertUpgradeableLoaderAccountInput<
-  TAccountTargetAccount extends string
-> = {
-  /** Target account to be asserted */
-  targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertUpgradeableLoaderAccountInstructionDataArgs['logLevel'];
-  assertion: AssertUpgradeableLoaderAccountInstructionDataArgs['assertion'];
-};
-
-export type AssertUpgradeableLoaderAccountInputWithSigners<
-  TAccountTargetAccount extends string
+  TAccountTargetAccount extends string = string,
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
@@ -136,92 +108,45 @@ export type AssertUpgradeableLoaderAccountInputWithSigners<
 
 export function getAssertUpgradeableLoaderAccountInstruction<
   TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertUpgradeableLoaderAccountInputWithSigners<TAccountTargetAccount>
-): AssertUpgradeableLoaderAccountInstructionWithSigners<
-  TProgram,
+  input: AssertUpgradeableLoaderAccountInput<TAccountTargetAccount>
+): AssertUpgradeableLoaderAccountInstruction<
+  typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountTargetAccount
->;
-export function getAssertUpgradeableLoaderAccountInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertUpgradeableLoaderAccountInput<TAccountTargetAccount>
-): AssertUpgradeableLoaderAccountInstruction<TProgram, TAccountTargetAccount>;
-export function getAssertUpgradeableLoaderAccountInstruction<
-  TAccountTargetAccount extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertUpgradeableLoaderAccountInput<TAccountTargetAccount>
-): IInstruction {
+> {
   // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+  const programAddress = LIGHTHOUSE_PROGRAM_ADDRESS;
 
   // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getAssertUpgradeableLoaderAccountInstructionRaw<
-      TProgram,
-      TAccountTargetAccount
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
+  const originalAccounts = {
     targetAccount: { value: input.targetAccount ?? null, isWritable: false },
   };
+  const accounts = originalAccounts as Record<
+    keyof typeof originalAccounts,
+    ResolvedAccount
+  >;
 
   // Original args.
   const args = { ...input };
 
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getAssertUpgradeableLoaderAccountInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertUpgradeableLoaderAccountInstructionDataArgs,
-    programAddress
-  );
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
+  const instruction = {
+    accounts: [getAccountMeta(accounts.targetAccount)],
+    programAddress,
+    data: getAssertUpgradeableLoaderAccountInstructionDataEncoder().encode(
+      args as AssertUpgradeableLoaderAccountInstructionDataArgs
+    ),
+  } as AssertUpgradeableLoaderAccountInstruction<
+    typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+    TAccountTargetAccount
+  >;
 
   return instruction;
 }
 
-export function getAssertUpgradeableLoaderAccountInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    targetAccount: TAccountTargetAccount extends string
-      ? Address<TAccountTargetAccount>
-      : TAccountTargetAccount;
-  },
-  args: AssertUpgradeableLoaderAccountInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(accounts.targetAccount, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getAssertUpgradeableLoaderAccountInstructionDataEncoder().encode(
-      args
-    ),
-    programAddress,
-  } as AssertUpgradeableLoaderAccountInstruction<
-    TProgram,
-    TAccountTargetAccount,
-    TRemainingAccounts
-  >;
-}
-
 export type ParsedAssertUpgradeableLoaderAccountInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -233,7 +158,7 @@ export type ParsedAssertUpgradeableLoaderAccountInstruction<
 
 export function parseAssertUpgradeableLoaderAccountInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
+  TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &

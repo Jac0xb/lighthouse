@@ -166,18 +166,16 @@ export function upgradeableLoaderStateAssertion(
   >['fields']
 ): GetDataEnumKind<UpgradeableLoaderStateAssertionArgs, 'ProgramData'>;
 export function upgradeableLoaderStateAssertion<
-  K extends UpgradeableLoaderStateAssertionArgs['__kind']
->(
-  kind: K,
-  data?: any
-): Extract<UpgradeableLoaderStateAssertionArgs, { __kind: K }> {
+  K extends UpgradeableLoaderStateAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isUpgradeableLoaderStateAssertion<
-  K extends UpgradeableLoaderStateAssertion['__kind']
+  K extends UpgradeableLoaderStateAssertion['__kind'],
 >(
   kind: K,
   value: UpgradeableLoaderStateAssertion

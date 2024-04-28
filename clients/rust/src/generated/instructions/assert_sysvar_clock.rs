@@ -43,12 +43,12 @@ impl AssertSysvarClock {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertSysvarClockInstructionData {
+pub struct AssertSysvarClockInstructionData {
     discriminator: u8,
 }
 
 impl AssertSysvarClockInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 14 }
     }
 }

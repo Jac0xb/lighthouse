@@ -61,12 +61,12 @@ impl AssertMerkleTreeAccount {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertMerkleTreeAccountInstructionData {
+pub struct AssertMerkleTreeAccountInstructionData {
     discriminator: u8,
 }
 
 impl AssertMerkleTreeAccountInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 15 }
     }
 }
