@@ -6,11 +6,16 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
+  Address,
   Codec,
   Decoder,
   Encoder,
+  IAccountMeta,
+  IInstruction,
+  IInstructionWithAccounts,
+  IInstructionWithData,
+  ReadonlyAccount,
   combineCodec,
   getStructDecoder,
   getStructEncoder,
@@ -18,15 +23,8 @@ import {
   getU16Encoder,
   getU8Decoder,
   getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
-import {
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-} from '@solana/instructions';
+  transformEncoder,
+} from '@solana/web3.js';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
@@ -69,7 +67,7 @@ export type AssertAccountDataInstructionDataArgs = {
 };
 
 export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAccountDataInstructionDataArgs> {
-  return mapEncoder(
+  return transformEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],

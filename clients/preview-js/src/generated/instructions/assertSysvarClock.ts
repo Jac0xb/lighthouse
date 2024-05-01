@@ -6,24 +6,22 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
+  Address,
   Codec,
   Decoder,
   Encoder,
+  IAccountMeta,
+  IInstruction,
+  IInstructionWithAccounts,
+  IInstructionWithData,
   combineCodec,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
-import {
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-} from '@solana/instructions';
+  transformEncoder,
+} from '@solana/web3.js';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import {
   LogLevel,
@@ -55,7 +53,7 @@ export type AssertSysvarClockInstructionDataArgs = {
 };
 
 export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysvarClockInstructionDataArgs> {
-  return mapEncoder(
+  return transformEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],

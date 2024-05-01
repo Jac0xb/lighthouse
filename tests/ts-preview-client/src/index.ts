@@ -14,23 +14,30 @@ import {
 } from '@solana-program/system';
 import {
   KeyPairSigner,
+  addSignersToTransactionMessage,
   createKeyPairSignerFromBytes,
   generateKeyPairSigner,
+  setTransactionMessageFeePayerSigner,
+  signTransactionMessageWithSigners,
 } from '@solana/signers';
 import {
   AccountInfoBase,
   AccountInfoWithBase64EncodedData,
-  ITransactionWithFeePayer,
+  ITransactionMessageWithFeePayer,
   Rpc,
   SolanaRpcApi,
   Transaction,
-  appendTransactionInstructions,
+  TransactionMessage,
+  appendTransactionMessageInstruction,
+  appendTransactionMessageInstructions,
+  compileTransactionMessage,
   createSolanaRpc,
-  createTransaction,
+  createTransactionMessage,
+  decompileTransactionMessage,
   getBase64EncodedWireTransaction,
   pipe,
-  setTransactionFeePayer,
-  setTransactionLifetimeUsingBlockhash,
+  setTransactionMessageFeePayer,
+  setTransactionMessageLifetimeUsingBlockhash,
   signTransaction,
 } from '@solana/web3.js';
 import { generateKeyPairSync } from 'crypto';
@@ -83,8 +90,9 @@ import {
     [signer]
   );
 
-  const { writeableAccounts, signerAccounts } =
-    await getWriteablesAndSigners(tx);
+  const { writeableAccounts, signerAccounts } = await getWriteablesAndSigners(
+    tx
+  );
 
   console.log(writeableAccounts);
   console.log(signerAccounts);
@@ -115,13 +123,15 @@ async function buildTransaction(
 ) {
   const { value: recentBlockhash } = await rpc.getLatestBlockhash().send();
 
-  return await pipe(
-    createTransaction({ version: 0 }),
-    (tx) => appendTransactionInstructions(instructions, tx),
-    (tx) => setTransactionFeePayer(signers[0].address, tx),
-    (tx) => setTransactionLifetimeUsingBlockhash(recentBlockhash as any, tx),
-    (tx) => signTransaction([signers[0].keyPair], tx)
+  const message = pipe(
+    createTransactionMessage({ version: 0 }),
+    (msg) => appendTransactionMessageInstructions(instructions, msg),
+    (msg) => setTransactionMessageFeePayer(signers[0].address, msg),
+    (msg) => addSignersToTransactionMessage(signers, msg),
+    (m) => setTransactionMessageLifetimeUsingBlockhash(recentBlockhash, m)
   );
+
+  return await signTransactionMessageWithSigners(message);
 }
 
 (BigInt.prototype as any).toJSON = function () {
@@ -130,26 +140,27 @@ async function buildTransaction(
 
 async function strictVerify() {}
 
-async function getWriteablesAndSigners(
-  tx: ITransactionWithFeePayer & Transaction
-) {
+async function getWriteablesAndSigners(tx: Transaction) {
   const signerAccounts: Set<Address> = new Set();
   const writeableAccounts: Set<Address> = new Set();
 
-  for (const instruction of tx.instructions) {
-    for (const account of instruction.accounts ?? []) {
-      if (account.role === AccountRole.WRITABLE) {
-        writeableAccounts.add(account.address);
-      }
+  // const message: TransactionMessage & ITransactionMessageWithFeePayer =
+  //   createTransactionMessage({});
 
-      if (account.role === AccountRole.WRITABLE_SIGNER) {
-        writeableAccounts.add(account.address);
-        signerAccounts.add(account.address);
-      }
-    }
-  }
+  // for (const instruction of tx.messageBytes.instructions) {
+  //   for (const account of instruction.accounts ?? []) {
+  //     if (account.role === AccountRole.WRITABLE) {
+  //       writeableAccounts.add(account.address);
+  //     }
 
-  signerAccounts.add(tx.feePayer);
+  //     if (account.role === AccountRole.WRITABLE_SIGNER) {
+  //       writeableAccounts.add(account.address);
+  //       signerAccounts.add(account.address);
+  //     }
+  //   }
+  // }
+
+  // signerAccounts.add(tx.feePayer);
 
   return {
     writeableAccounts: [...writeableAccounts],

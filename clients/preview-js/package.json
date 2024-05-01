@@ -1,6 +1,6 @@
 {
   "name": "lighthouse-sdk",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "@solana/web3.js preview client for Lighthouse",
   "sideEffects": false,
   "module": "dist/src/index.mjs",
@@ -31,18 +31,13 @@
     "registry": "https://registry.npmjs.org"
   },
   "license": "MIT",
-  "dependencies": {
-    "@solana/accounts": "2.0.0-preview.2",
-    "@solana/addresses": "2.0.0-preview.2",
-    "@solana/codecs": "2.0.0-preview.2",
-    "@solana/instructions": "2.0.0-preview.2",
-    "@solana/programs": "2.0.0-preview.2",
-    "@solana/signers": "2.0.0-preview.2"
+  "peerDependencies": {
+    "@solana/web3.js": "2.0.0-preview.3"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
-    "@solana/web3.js": "2.0.0-preview.2",
-    "@solana/webcrypto-ed25519-polyfill": "2.0.0-preview.2",
+    "@solana/web3.js": "2.0.0-preview.3",
+    "@solana/webcrypto-ed25519-polyfill": "2.0.0-preview.3",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "ava": "^6.1.2",

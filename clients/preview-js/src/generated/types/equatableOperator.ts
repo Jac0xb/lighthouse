@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum EquatableOperator {
   Equal,
@@ -23,11 +23,11 @@ export enum EquatableOperator {
 export type EquatableOperatorArgs = EquatableOperator;
 
 export function getEquatableOperatorEncoder(): Encoder<EquatableOperatorArgs> {
-  return getScalarEnumEncoder(EquatableOperator);
+  return getEnumEncoder(EquatableOperator);
 }
 
 export function getEquatableOperatorDecoder(): Decoder<EquatableOperator> {
-  return getScalarEnumDecoder(EquatableOperator);
+  return getEnumDecoder(EquatableOperator);
 }
 
 export function getEquatableOperatorCodec(): Codec<

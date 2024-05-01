@@ -72,7 +72,7 @@ pub struct AssertUpgradeableLoaderAccountInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertUpgradeableLoaderAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
@@ -237,6 +237,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
+#[derive(Clone, Debug)]
 pub struct AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
     instruction: Box<AssertUpgradeableLoaderAccountCpiBuilderInstruction<'a, 'b>>,
 }
@@ -341,6 +342,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertUpgradeableLoaderAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,

@@ -8,25 +8,23 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getAddressDecoder,
+  getAddressEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -47,7 +45,7 @@ export type UpgradableBufferAssertionArgs = {
 };
 
 export function getUpgradableBufferAssertionEncoder(): Encoder<UpgradableBufferAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Authority',
       getStructEncoder([
@@ -59,7 +57,7 @@ export function getUpgradableBufferAssertionEncoder(): Encoder<UpgradableBufferA
 }
 
 export function getUpgradableBufferAssertionDecoder(): Decoder<UpgradableBufferAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Authority',
       getStructDecoder([
@@ -83,8 +81,16 @@ export function getUpgradableBufferAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function upgradableBufferAssertion(
   kind: 'Authority',
-  data: GetDataEnumKindContent<UpgradableBufferAssertionArgs, 'Authority'>
-): GetDataEnumKind<UpgradableBufferAssertionArgs, 'Authority'>;
+  data: GetDiscriminatedUnionVariantContent<
+    UpgradableBufferAssertionArgs,
+    '__kind',
+    'Authority'
+  >
+): GetDiscriminatedUnionVariant<
+  UpgradableBufferAssertionArgs,
+  '__kind',
+  'Authority'
+>;
 export function upgradableBufferAssertion<
   K extends UpgradableBufferAssertionArgs['__kind'],
   Data,

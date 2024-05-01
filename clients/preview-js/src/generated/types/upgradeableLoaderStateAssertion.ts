@@ -10,16 +10,16 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -49,9 +49,12 @@ export type UpgradeableLoaderStateAssertion =
       value: UpgradeableLoaderStateType;
       operator: EquatableOperator;
     }
-  | { __kind: 'Buffer'; fields: [UpgradableBufferAssertion] }
-  | { __kind: 'Program'; fields: [UpgradeableProgramAssertion] }
-  | { __kind: 'ProgramData'; fields: [UpgradeableProgramDataAssertion] };
+  | { __kind: 'Buffer'; fields: readonly [UpgradableBufferAssertion] }
+  | { __kind: 'Program'; fields: readonly [UpgradeableProgramAssertion] }
+  | {
+      __kind: 'ProgramData';
+      fields: readonly [UpgradeableProgramDataAssertion];
+    };
 
 export type UpgradeableLoaderStateAssertionArgs =
   | {
@@ -59,12 +62,15 @@ export type UpgradeableLoaderStateAssertionArgs =
       value: UpgradeableLoaderStateTypeArgs;
       operator: EquatableOperatorArgs;
     }
-  | { __kind: 'Buffer'; fields: [UpgradableBufferAssertionArgs] }
-  | { __kind: 'Program'; fields: [UpgradeableProgramAssertionArgs] }
-  | { __kind: 'ProgramData'; fields: [UpgradeableProgramDataAssertionArgs] };
+  | { __kind: 'Buffer'; fields: readonly [UpgradableBufferAssertionArgs] }
+  | { __kind: 'Program'; fields: readonly [UpgradeableProgramAssertionArgs] }
+  | {
+      __kind: 'ProgramData';
+      fields: readonly [UpgradeableProgramDataAssertionArgs];
+    };
 
 export function getUpgradeableLoaderStateAssertionEncoder(): Encoder<UpgradeableLoaderStateAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'State',
       getStructEncoder([
@@ -97,7 +103,7 @@ export function getUpgradeableLoaderStateAssertionEncoder(): Encoder<Upgradeable
 }
 
 export function getUpgradeableLoaderStateAssertionDecoder(): Decoder<UpgradeableLoaderStateAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'State',
       getStructDecoder([
@@ -142,29 +148,52 @@ export function getUpgradeableLoaderStateAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function upgradeableLoaderStateAssertion(
   kind: 'State',
-  data: GetDataEnumKindContent<UpgradeableLoaderStateAssertionArgs, 'State'>
-): GetDataEnumKind<UpgradeableLoaderStateAssertionArgs, 'State'>;
+  data: GetDiscriminatedUnionVariantContent<
+    UpgradeableLoaderStateAssertionArgs,
+    '__kind',
+    'State'
+  >
+): GetDiscriminatedUnionVariant<
+  UpgradeableLoaderStateAssertionArgs,
+  '__kind',
+  'State'
+>;
 export function upgradeableLoaderStateAssertion(
   kind: 'Buffer',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     UpgradeableLoaderStateAssertionArgs,
+    '__kind',
     'Buffer'
   >['fields']
-): GetDataEnumKind<UpgradeableLoaderStateAssertionArgs, 'Buffer'>;
+): GetDiscriminatedUnionVariant<
+  UpgradeableLoaderStateAssertionArgs,
+  '__kind',
+  'Buffer'
+>;
 export function upgradeableLoaderStateAssertion(
   kind: 'Program',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     UpgradeableLoaderStateAssertionArgs,
+    '__kind',
     'Program'
   >['fields']
-): GetDataEnumKind<UpgradeableLoaderStateAssertionArgs, 'Program'>;
+): GetDiscriminatedUnionVariant<
+  UpgradeableLoaderStateAssertionArgs,
+  '__kind',
+  'Program'
+>;
 export function upgradeableLoaderStateAssertion(
   kind: 'ProgramData',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     UpgradeableLoaderStateAssertionArgs,
+    '__kind',
     'ProgramData'
   >['fields']
-): GetDataEnumKind<UpgradeableLoaderStateAssertionArgs, 'ProgramData'>;
+): GetDiscriminatedUnionVariant<
+  UpgradeableLoaderStateAssertionArgs,
+  '__kind',
+  'ProgramData'
+>;
 export function upgradeableLoaderStateAssertion<
   K extends UpgradeableLoaderStateAssertionArgs['__kind'],
   Data,

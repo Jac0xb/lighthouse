@@ -8,27 +8,25 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getAddressDecoder,
+  getAddressEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -57,7 +55,7 @@ export type UpgradeableProgramDataAssertionArgs =
   | { __kind: 'Slot'; value: number | bigint; operator: IntegerOperatorArgs };
 
 export function getUpgradeableProgramDataAssertionEncoder(): Encoder<UpgradeableProgramDataAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'UpgradeAuthority',
       getStructEncoder([
@@ -76,7 +74,7 @@ export function getUpgradeableProgramDataAssertionEncoder(): Encoder<Upgradeable
 }
 
 export function getUpgradeableProgramDataAssertionDecoder(): Decoder<UpgradeableProgramDataAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'UpgradeAuthority',
       getStructDecoder([
@@ -107,15 +105,28 @@ export function getUpgradeableProgramDataAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function upgradeableProgramDataAssertion(
   kind: 'UpgradeAuthority',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     UpgradeableProgramDataAssertionArgs,
+    '__kind',
     'UpgradeAuthority'
   >
-): GetDataEnumKind<UpgradeableProgramDataAssertionArgs, 'UpgradeAuthority'>;
+): GetDiscriminatedUnionVariant<
+  UpgradeableProgramDataAssertionArgs,
+  '__kind',
+  'UpgradeAuthority'
+>;
 export function upgradeableProgramDataAssertion(
   kind: 'Slot',
-  data: GetDataEnumKindContent<UpgradeableProgramDataAssertionArgs, 'Slot'>
-): GetDataEnumKind<UpgradeableProgramDataAssertionArgs, 'Slot'>;
+  data: GetDiscriminatedUnionVariantContent<
+    UpgradeableProgramDataAssertionArgs,
+    '__kind',
+    'Slot'
+  >
+): GetDiscriminatedUnionVariant<
+  UpgradeableProgramDataAssertionArgs,
+  '__kind',
+  'Slot'
+>;
 export function upgradeableProgramDataAssertion<
   K extends UpgradeableProgramDataAssertionArgs['__kind'],
   Data,

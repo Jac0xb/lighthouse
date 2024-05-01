@@ -6,159 +6,87 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export const enum LighthouseProgramErrorCode {
-  /** InvalidInstructionData: Invalid instruction */
-  INVALID_INSTRUCTION_DATA = 0x1770, // 6000
-  /** AssertionFailed: AssertionFailed */
-  ASSERTION_FAILED = 0x1771, // 6001
-  /** NotEnoughAccounts: NotEnoughAccounts */
-  NOT_ENOUGH_ACCOUNTS = 0x1772, // 6002
-  /** BumpNotFound: BumpNotFound */
-  BUMP_NOT_FOUND = 0x1773, // 6003
-  /** AccountBorrowFailed: AccountBorrowFailed */
-  ACCOUNT_BORROW_FAILED = 0x1774, // 6004
-  /** RangeOutOfBounds: RangeOutOfBounds */
-  RANGE_OUT_OF_BOUNDS = 0x1775, // 6005
-  /** IndexOutOfBounds: IndexOutOfBounds */
-  INDEX_OUT_OF_BOUNDS = 0x1776, // 6006
-  /** FailedToDeserialize: FailedToDeserialize */
-  FAILED_TO_DESERIALIZE = 0x1777, // 6007
-  /** FailedToSerialize: FailedToSerialize */
-  FAILED_TO_SERIALIZE = 0x1778, // 6008
-  /** AccountOwnerMismatch: AccountOwnerMismatch */
-  ACCOUNT_OWNER_MISMATCH = 0x1779, // 6009
-  /** AccountKeyMismatch: AccountKeyMismatch */
-  ACCOUNT_KEY_MISMATCH = 0x177a, // 6010
-  /** AccountNotInitialized: AccountNotInitialized */
-  ACCOUNT_NOT_INITIALIZED = 0x177b, // 6011
-  /** AccountOwnerValidationFailed: AccountOwnerValidationFailed */
-  ACCOUNT_OWNER_VALIDATION_FAILED = 0x177c, // 6012
-  /** AccountFundedValidationFailed: AccountFundedValidationFailed */
-  ACCOUNT_FUNDED_VALIDATION_FAILED = 0x177d, // 6013
-  /** AccountDiscriminatorValidationFailed: AccountDiscriminatorValidationFailed */
-  ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED = 0x177e, // 6014
-  /** AccountValidationFailed: AccountValidaitonFailed */
-  ACCOUNT_VALIDATION_FAILED = 0x177f, // 6015
-  /** CrossProgramInvokeViolation: CrossProgramInvokeViolation */
-  CROSS_PROGRAM_INVOKE_VIOLATION = 0x1780, // 6016
-}
+/** InvalidInstructionData: Invalid instruction */
+export const LIGHTHOUSE_ERROR__INVALID_INSTRUCTION_DATA = 0x1770; // 6000
+/** AssertionFailed: AssertionFailed */
+export const LIGHTHOUSE_ERROR__ASSERTION_FAILED = 0x1771; // 6001
+/** NotEnoughAccounts: NotEnoughAccounts */
+export const LIGHTHOUSE_ERROR__NOT_ENOUGH_ACCOUNTS = 0x1772; // 6002
+/** BumpNotFound: BumpNotFound */
+export const LIGHTHOUSE_ERROR__BUMP_NOT_FOUND = 0x1773; // 6003
+/** AccountBorrowFailed: AccountBorrowFailed */
+export const LIGHTHOUSE_ERROR__ACCOUNT_BORROW_FAILED = 0x1774; // 6004
+/** RangeOutOfBounds: RangeOutOfBounds */
+export const LIGHTHOUSE_ERROR__RANGE_OUT_OF_BOUNDS = 0x1775; // 6005
+/** IndexOutOfBounds: IndexOutOfBounds */
+export const LIGHTHOUSE_ERROR__INDEX_OUT_OF_BOUNDS = 0x1776; // 6006
+/** FailedToDeserialize: FailedToDeserialize */
+export const LIGHTHOUSE_ERROR__FAILED_TO_DESERIALIZE = 0x1777; // 6007
+/** FailedToSerialize: FailedToSerialize */
+export const LIGHTHOUSE_ERROR__FAILED_TO_SERIALIZE = 0x1778; // 6008
+/** AccountOwnerMismatch: AccountOwnerMismatch */
+export const LIGHTHOUSE_ERROR__ACCOUNT_OWNER_MISMATCH = 0x1779; // 6009
+/** AccountKeyMismatch: AccountKeyMismatch */
+export const LIGHTHOUSE_ERROR__ACCOUNT_KEY_MISMATCH = 0x177a; // 6010
+/** AccountNotInitialized: AccountNotInitialized */
+export const LIGHTHOUSE_ERROR__ACCOUNT_NOT_INITIALIZED = 0x177b; // 6011
+/** AccountOwnerValidationFailed: AccountOwnerValidationFailed */
+export const LIGHTHOUSE_ERROR__ACCOUNT_OWNER_VALIDATION_FAILED = 0x177c; // 6012
+/** AccountFundedValidationFailed: AccountFundedValidationFailed */
+export const LIGHTHOUSE_ERROR__ACCOUNT_FUNDED_VALIDATION_FAILED = 0x177d; // 6013
+/** AccountDiscriminatorValidationFailed: AccountDiscriminatorValidationFailed */
+export const LIGHTHOUSE_ERROR__ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED = 0x177e; // 6014
+/** AccountValidationFailed: AccountValidaitonFailed */
+export const LIGHTHOUSE_ERROR__ACCOUNT_VALIDATION_FAILED = 0x177f; // 6015
+/** CrossProgramInvokeViolation: CrossProgramInvokeViolation */
+export const LIGHTHOUSE_ERROR__CROSS_PROGRAM_INVOKE_VIOLATION = 0x1780; // 6016
 
-export class LighthouseProgramError extends Error {
-  override readonly name = 'LighthouseProgramError';
+export type LighthouseError =
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_BORROW_FAILED
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_FUNDED_VALIDATION_FAILED
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_KEY_MISMATCH
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_NOT_INITIALIZED
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_OWNER_MISMATCH
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_OWNER_VALIDATION_FAILED
+  | typeof LIGHTHOUSE_ERROR__ACCOUNT_VALIDATION_FAILED
+  | typeof LIGHTHOUSE_ERROR__ASSERTION_FAILED
+  | typeof LIGHTHOUSE_ERROR__BUMP_NOT_FOUND
+  | typeof LIGHTHOUSE_ERROR__CROSS_PROGRAM_INVOKE_VIOLATION
+  | typeof LIGHTHOUSE_ERROR__FAILED_TO_DESERIALIZE
+  | typeof LIGHTHOUSE_ERROR__FAILED_TO_SERIALIZE
+  | typeof LIGHTHOUSE_ERROR__INDEX_OUT_OF_BOUNDS
+  | typeof LIGHTHOUSE_ERROR__INVALID_INSTRUCTION_DATA
+  | typeof LIGHTHOUSE_ERROR__NOT_ENOUGH_ACCOUNTS
+  | typeof LIGHTHOUSE_ERROR__RANGE_OUT_OF_BOUNDS;
 
-  readonly code: LighthouseProgramErrorCode;
-
-  readonly cause: Error | undefined;
-
-  constructor(
-    code: LighthouseProgramErrorCode,
-    name: string,
-    message: string,
-    cause?: Error
-  ) {
-    super(`${name} (${code}): ${message}`);
-    this.code = code;
-    this.cause = cause;
-  }
-}
-
-let lighthouseProgramErrorCodeMap:
-  | Record<LighthouseProgramErrorCode, [string, string]>
-  | undefined;
+let lighthouseErrorMessages: Record<LighthouseError, string> | undefined;
 if (__DEV__) {
-  lighthouseProgramErrorCodeMap = {
-    [LighthouseProgramErrorCode.INVALID_INSTRUCTION_DATA]: [
-      'InvalidInstructionData',
-      `Invalid instruction`,
-    ],
-    [LighthouseProgramErrorCode.ASSERTION_FAILED]: [
-      'AssertionFailed',
-      `AssertionFailed`,
-    ],
-    [LighthouseProgramErrorCode.NOT_ENOUGH_ACCOUNTS]: [
-      'NotEnoughAccounts',
-      `NotEnoughAccounts`,
-    ],
-    [LighthouseProgramErrorCode.BUMP_NOT_FOUND]: [
-      'BumpNotFound',
-      `BumpNotFound`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_BORROW_FAILED]: [
-      'AccountBorrowFailed',
-      `AccountBorrowFailed`,
-    ],
-    [LighthouseProgramErrorCode.RANGE_OUT_OF_BOUNDS]: [
-      'RangeOutOfBounds',
-      `RangeOutOfBounds`,
-    ],
-    [LighthouseProgramErrorCode.INDEX_OUT_OF_BOUNDS]: [
-      'IndexOutOfBounds',
-      `IndexOutOfBounds`,
-    ],
-    [LighthouseProgramErrorCode.FAILED_TO_DESERIALIZE]: [
-      'FailedToDeserialize',
-      `FailedToDeserialize`,
-    ],
-    [LighthouseProgramErrorCode.FAILED_TO_SERIALIZE]: [
-      'FailedToSerialize',
-      `FailedToSerialize`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_OWNER_MISMATCH]: [
-      'AccountOwnerMismatch',
-      `AccountOwnerMismatch`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_KEY_MISMATCH]: [
-      'AccountKeyMismatch',
-      `AccountKeyMismatch`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_NOT_INITIALIZED]: [
-      'AccountNotInitialized',
-      `AccountNotInitialized`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_OWNER_VALIDATION_FAILED]: [
-      'AccountOwnerValidationFailed',
-      `AccountOwnerValidationFailed`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_FUNDED_VALIDATION_FAILED]: [
-      'AccountFundedValidationFailed',
-      `AccountFundedValidationFailed`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED]: [
-      'AccountDiscriminatorValidationFailed',
-      `AccountDiscriminatorValidationFailed`,
-    ],
-    [LighthouseProgramErrorCode.ACCOUNT_VALIDATION_FAILED]: [
-      'AccountValidationFailed',
-      `AccountValidaitonFailed`,
-    ],
-    [LighthouseProgramErrorCode.CROSS_PROGRAM_INVOKE_VIOLATION]: [
-      'CrossProgramInvokeViolation',
-      `CrossProgramInvokeViolation`,
-    ],
+  lighthouseErrorMessages = {
+    [LIGHTHOUSE_ERROR__ACCOUNT_BORROW_FAILED]: `AccountBorrowFailed`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_DISCRIMINATOR_VALIDATION_FAILED]: `AccountDiscriminatorValidationFailed`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_FUNDED_VALIDATION_FAILED]: `AccountFundedValidationFailed`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_KEY_MISMATCH]: `AccountKeyMismatch`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_NOT_INITIALIZED]: `AccountNotInitialized`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_OWNER_MISMATCH]: `AccountOwnerMismatch`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_OWNER_VALIDATION_FAILED]: `AccountOwnerValidationFailed`,
+    [LIGHTHOUSE_ERROR__ACCOUNT_VALIDATION_FAILED]: `AccountValidaitonFailed`,
+    [LIGHTHOUSE_ERROR__ASSERTION_FAILED]: `AssertionFailed`,
+    [LIGHTHOUSE_ERROR__BUMP_NOT_FOUND]: `BumpNotFound`,
+    [LIGHTHOUSE_ERROR__CROSS_PROGRAM_INVOKE_VIOLATION]: `CrossProgramInvokeViolation`,
+    [LIGHTHOUSE_ERROR__FAILED_TO_DESERIALIZE]: `FailedToDeserialize`,
+    [LIGHTHOUSE_ERROR__FAILED_TO_SERIALIZE]: `FailedToSerialize`,
+    [LIGHTHOUSE_ERROR__INDEX_OUT_OF_BOUNDS]: `IndexOutOfBounds`,
+    [LIGHTHOUSE_ERROR__INVALID_INSTRUCTION_DATA]: `Invalid instruction`,
+    [LIGHTHOUSE_ERROR__NOT_ENOUGH_ACCOUNTS]: `NotEnoughAccounts`,
+    [LIGHTHOUSE_ERROR__RANGE_OUT_OF_BOUNDS]: `RangeOutOfBounds`,
   };
 }
 
-export function getLighthouseProgramErrorFromCode(
-  code: LighthouseProgramErrorCode,
-  cause?: Error
-): LighthouseProgramError {
+export function getLighthouseErrorMessage(code: LighthouseError): string {
   if (__DEV__) {
-    return new LighthouseProgramError(
-      code,
-      ...(
-        lighthouseProgramErrorCodeMap as Record<
-          LighthouseProgramErrorCode,
-          [string, string]
-        >
-      )[code],
-      cause
-    );
+    return (lighthouseErrorMessages as Record<LighthouseError, string>)[code];
   }
 
-  return new LighthouseProgramError(
-    code,
-    'Unknown',
-    'Error message not available in production bundles. Compile with __DEV__ set to true to see more information.',
-    cause
-  );
+  return 'Error message not available in production bundles. Compile with `__DEV__` set to true to see more information.';
 }

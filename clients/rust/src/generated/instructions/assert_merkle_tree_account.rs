@@ -85,7 +85,7 @@ pub struct AssertMerkleTreeAccountInstructionArgs {
 ///   0. `[]` target_merkle_tree
 ///   1. `[]` root
 ///   2. `[]` spl_account_compression
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertMerkleTreeAccountBuilder {
     target_merkle_tree: Option<solana_program::pubkey::Pubkey>,
     root: Option<solana_program::pubkey::Pubkey>,
@@ -298,6 +298,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpi<'a, 'b> {
 ///   0. `[]` target_merkle_tree
 ///   1. `[]` root
 ///   2. `[]` spl_account_compression
+#[derive(Clone, Debug)]
 pub struct AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     instruction: Box<AssertMerkleTreeAccountCpiBuilderInstruction<'a, 'b>>,
 }
@@ -426,6 +427,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertMerkleTreeAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,

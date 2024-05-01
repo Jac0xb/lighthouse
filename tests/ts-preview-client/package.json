@@ -22,19 +22,19 @@
   "license": "MIT",
   "dependencies": {
     "@solana-program/system": "^0.2.0",
-    "@solana/accounts": "tp2",
-    "@solana/addresses": "tp2",
-    "@solana/codecs": "tp2",
-    "@solana/instructions": "tp2",
-    "@solana/programs": "tp2",
-    "@solana/signers": "tp2",
+    "@solana/accounts": "2.0.0-preview.3",
+    "@solana/addresses": "2.0.0-preview.3",
+    "@solana/codecs": "2.0.0-preview.3",
+    "@solana/instructions": "2.0.0-preview.3",
+    "@solana/programs": "2.0.0-preview.3",
+    "@solana/signers": "2.0.0-preview.3",
     "@solana/spl-token": "^0.4.6",
-    "@solana/transactions": "tp2",
-    "@solana/web3.js": "tp2",
+    "@solana/transactions": "2.0.0-preview.3",
+    "@solana/web3.js": "2.0.0-preview.3",
     "lighthouse-sdk-legacy": "0.1.2",
     "legacy-web3.js": "npm:@solana/web3.js@1.91.7",
     "js-sha3": "^0.9.3",
-    "lighthouse-sdk": "0.1.4"
+    "lighthouse-sdk": "0.1.6"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
@@ -55,40 +55,5 @@
     "typedoc-plugin-missing-exports": "^2.2.0",
     "typescript": "^5.4.5"
   },
-  "packageManager": "pnpm@9.0.3",
-  "pnpm": {
-    "overrides": {
-      "@solana/accounts": "tp2",
-      "@solana/addresses": "tp2",
-      "@solana/assertions": "tp2",
-      "@solana/codecs-core": "tp2",
-      "@solana/codecs-data-structures": "tp2",
-      "@solana/codecs-numbers": "tp2",
-      "@solana/codecs-strings": "tp2",
-      "@solana/codecs": "tp2",
-      "@solana/errors": "tp2",
-      "@solana/functional": "tp2",
-      "@solana/instructions": "tp2",
-      "@solana/keys": "tp2",
-      "@solana/options": "tp2",
-      "@solana/programs": "tp2",
-      "@solana/rpc-api": "tp2",
-      "@solana/rpc-parsed-types": "tp2",
-      "@solana/rpc-spec-types": "tp2",
-      "@solana/rpc-spec": "tp2",
-      "@solana/rpc-subscriptions-api": "tp2",
-      "@solana/rpc-subscriptions-spec": "tp2",
-      "@solana/rpc-subscriptions-transport-websocket": "tp2",
-      "@solana/rpc-subscriptions": "tp2",
-      "@solana/rpc-transformers": "tp2",
-      "@solana/rpc-transport-http": "tp2",
-      "@solana/rpc-types": "tp2",
-      "@solana/rpc": "tp2",
-      "@solana/signers": "tp2",
-      "@solana/transaction-confirmation": "tp2",
-      "@solana/transaction-messages": "tp2",
-      "@solana/transactions": "tp2",
-      "@solana/web3.js": "tp2"
-    }
-  }
+  "packageManager": "pnpm@9.0.3"
 }

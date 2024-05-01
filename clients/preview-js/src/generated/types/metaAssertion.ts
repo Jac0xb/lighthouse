@@ -8,25 +8,23 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getAddressDecoder,
+  getAddressEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI64Decoder,
   getI64Encoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -83,7 +81,7 @@ export type MetaAssertionArgs =
     };
 
 export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'RentExemptReserve',
       getStructEncoder([
@@ -130,7 +128,7 @@ export function getMetaAssertionEncoder(): Encoder<MetaAssertionArgs> {
 }
 
 export function getMetaAssertionDecoder(): Decoder<MetaAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'RentExemptReserve',
       getStructDecoder([
@@ -186,28 +184,68 @@ export function getMetaAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function metaAssertion(
   kind: 'RentExemptReserve',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'RentExemptReserve'>
-): GetDataEnumKind<MetaAssertionArgs, 'RentExemptReserve'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'RentExemptReserve'
+  >
+): GetDiscriminatedUnionVariant<
+  MetaAssertionArgs,
+  '__kind',
+  'RentExemptReserve'
+>;
 export function metaAssertion(
   kind: 'AuthorizedStaker',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'AuthorizedStaker'>
-): GetDataEnumKind<MetaAssertionArgs, 'AuthorizedStaker'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'AuthorizedStaker'
+  >
+): GetDiscriminatedUnionVariant<
+  MetaAssertionArgs,
+  '__kind',
+  'AuthorizedStaker'
+>;
 export function metaAssertion(
   kind: 'AuthorizedWithdrawer',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'AuthorizedWithdrawer'>
-): GetDataEnumKind<MetaAssertionArgs, 'AuthorizedWithdrawer'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'AuthorizedWithdrawer'
+  >
+): GetDiscriminatedUnionVariant<
+  MetaAssertionArgs,
+  '__kind',
+  'AuthorizedWithdrawer'
+>;
 export function metaAssertion(
   kind: 'LockupUnixTimestamp',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupUnixTimestamp'>
-): GetDataEnumKind<MetaAssertionArgs, 'LockupUnixTimestamp'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'LockupUnixTimestamp'
+  >
+): GetDiscriminatedUnionVariant<
+  MetaAssertionArgs,
+  '__kind',
+  'LockupUnixTimestamp'
+>;
 export function metaAssertion(
   kind: 'LockupEpoch',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupEpoch'>
-): GetDataEnumKind<MetaAssertionArgs, 'LockupEpoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'LockupEpoch'
+  >
+): GetDiscriminatedUnionVariant<MetaAssertionArgs, '__kind', 'LockupEpoch'>;
 export function metaAssertion(
   kind: 'LockupCustodian',
-  data: GetDataEnumKindContent<MetaAssertionArgs, 'LockupCustodian'>
-): GetDataEnumKind<MetaAssertionArgs, 'LockupCustodian'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MetaAssertionArgs,
+    '__kind',
+    'LockupCustodian'
+  >
+): GetDiscriminatedUnionVariant<MetaAssertionArgs, '__kind', 'LockupCustodian'>;
 export function metaAssertion<K extends MetaAssertionArgs['__kind'], Data>(
   kind: K,
   data?: Data

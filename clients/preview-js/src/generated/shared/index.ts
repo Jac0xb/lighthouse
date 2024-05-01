@@ -7,20 +7,16 @@
  */
 
 import {
-  Address,
-  isProgramDerivedAddress,
-  ProgramDerivedAddress,
-} from '@solana/addresses';
-import {
   AccountRole,
+  Address,
   IAccountMeta,
-  upgradeRoleToSigner,
-} from '@solana/instructions';
-import {
   IAccountSignerMeta,
-  isTransactionSigner as web3JsIsTransactionSigner,
+  ProgramDerivedAddress,
   TransactionSigner,
-} from '@solana/signers';
+  isProgramDerivedAddress,
+  isTransactionSigner as web3JsIsTransactionSigner,
+  upgradeRoleToSigner,
+} from '@solana/web3.js';
 
 /**
  * Asserts that the given value is not null or undefined.
@@ -165,10 +161,4 @@ export function isTransactionSigner<TAddress extends string = string>(
     'address' in value &&
     web3JsIsTransactionSigner(value)
   );
-}
-
-export function memcmp(data: Uint8Array, bytes: Uint8Array, offset: number) {
-  const slice = data.slice(offset, offset + bytes.length);
-  if (slice.length !== bytes.length) return false;
-  return bytes.every((b, i) => b === slice[i]);
 }

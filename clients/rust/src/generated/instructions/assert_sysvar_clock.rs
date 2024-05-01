@@ -64,7 +64,7 @@ pub struct AssertSysvarClockInstructionArgs {
 ///
 /// ### Accounts:
 ///
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertSysvarClockBuilder {
     log_level: Option<LogLevel>,
     assertion: Option<SysvarClockAssertion>,
@@ -204,6 +204,7 @@ impl<'a, 'b> AssertSysvarClockCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
+#[derive(Clone, Debug)]
 pub struct AssertSysvarClockCpiBuilder<'a, 'b> {
     instruction: Box<AssertSysvarClockCpiBuilderInstruction<'a, 'b>>,
 }
@@ -293,6 +294,7 @@ impl<'a, 'b> AssertSysvarClockCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertSysvarClockCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     log_level: Option<LogLevel>,

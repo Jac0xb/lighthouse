@@ -6,11 +6,20 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
+  Address,
   Codec,
   Decoder,
   Encoder,
+  IAccountMeta,
+  IAccountSignerMeta,
+  IInstruction,
+  IInstructionWithAccounts,
+  IInstructionWithData,
+  ReadonlyAccount,
+  TransactionSigner,
+  WritableAccount,
+  WritableSignerAccount,
   combineCodec,
   getStructDecoder,
   getStructEncoder,
@@ -18,18 +27,8 @@ import {
   getU16Encoder,
   getU8Decoder,
   getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
-import {
-  IAccountMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
-  ReadonlyAccount,
-  WritableAccount,
-  WritableSignerAccount,
-} from '@solana/instructions';
-import { IAccountSignerMeta, TransactionSigner } from '@solana/signers';
+  transformEncoder,
+} from '@solana/web3.js';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
@@ -91,7 +90,7 @@ export type MemoryWriteInstructionDataArgs = {
 };
 
 export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstructionDataArgs> {
-  return mapEncoder(
+  return transformEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['memoryId', getU8Encoder()],

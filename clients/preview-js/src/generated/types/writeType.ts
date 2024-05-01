@@ -10,18 +10,18 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getU16Decoder,
   getU16Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   AccountInfoField,
   AccountInfoFieldArgs,
@@ -39,18 +39,18 @@ import {
 
 export type WriteType =
   | { __kind: 'AccountData'; offset: number; dataLength: number }
-  | { __kind: 'AccountInfoField'; fields: [AccountInfoField] }
-  | { __kind: 'DataValue'; fields: [DataValue] }
-  | { __kind: 'Clock'; fields: [ClockField] };
+  | { __kind: 'AccountInfoField'; fields: readonly [AccountInfoField] }
+  | { __kind: 'DataValue'; fields: readonly [DataValue] }
+  | { __kind: 'Clock'; fields: readonly [ClockField] };
 
 export type WriteTypeArgs =
   | { __kind: 'AccountData'; offset: number; dataLength: number }
-  | { __kind: 'AccountInfoField'; fields: [AccountInfoFieldArgs] }
-  | { __kind: 'DataValue'; fields: [DataValueArgs] }
-  | { __kind: 'Clock'; fields: [ClockFieldArgs] };
+  | { __kind: 'AccountInfoField'; fields: readonly [AccountInfoFieldArgs] }
+  | { __kind: 'DataValue'; fields: readonly [DataValueArgs] }
+  | { __kind: 'Clock'; fields: readonly [ClockFieldArgs] };
 
 export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'AccountData',
       getStructEncoder([
@@ -76,7 +76,7 @@ export function getWriteTypeEncoder(): Encoder<WriteTypeArgs> {
 }
 
 export function getWriteTypeDecoder(): Decoder<WriteType> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'AccountData',
       getStructDecoder([
@@ -108,20 +108,36 @@ export function getWriteTypeCodec(): Codec<WriteTypeArgs, WriteType> {
 // Data Enum Helpers.
 export function writeType(
   kind: 'AccountData',
-  data: GetDataEnumKindContent<WriteTypeArgs, 'AccountData'>
-): GetDataEnumKind<WriteTypeArgs, 'AccountData'>;
+  data: GetDiscriminatedUnionVariantContent<
+    WriteTypeArgs,
+    '__kind',
+    'AccountData'
+  >
+): GetDiscriminatedUnionVariant<WriteTypeArgs, '__kind', 'AccountData'>;
 export function writeType(
   kind: 'AccountInfoField',
-  data: GetDataEnumKindContent<WriteTypeArgs, 'AccountInfoField'>['fields']
-): GetDataEnumKind<WriteTypeArgs, 'AccountInfoField'>;
+  data: GetDiscriminatedUnionVariantContent<
+    WriteTypeArgs,
+    '__kind',
+    'AccountInfoField'
+  >['fields']
+): GetDiscriminatedUnionVariant<WriteTypeArgs, '__kind', 'AccountInfoField'>;
 export function writeType(
   kind: 'DataValue',
-  data: GetDataEnumKindContent<WriteTypeArgs, 'DataValue'>['fields']
-): GetDataEnumKind<WriteTypeArgs, 'DataValue'>;
+  data: GetDiscriminatedUnionVariantContent<
+    WriteTypeArgs,
+    '__kind',
+    'DataValue'
+  >['fields']
+): GetDiscriminatedUnionVariant<WriteTypeArgs, '__kind', 'DataValue'>;
 export function writeType(
   kind: 'Clock',
-  data: GetDataEnumKindContent<WriteTypeArgs, 'Clock'>['fields']
-): GetDataEnumKind<WriteTypeArgs, 'Clock'>;
+  data: GetDiscriminatedUnionVariantContent<
+    WriteTypeArgs,
+    '__kind',
+    'Clock'
+  >['fields']
+): GetDiscriminatedUnionVariant<WriteTypeArgs, '__kind', 'Clock'>;
 export function writeType<K extends WriteTypeArgs['__kind'], Data>(
   kind: K,
   data?: Data

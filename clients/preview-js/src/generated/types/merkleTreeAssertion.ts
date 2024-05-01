@@ -10,46 +10,49 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
+  ReadonlyUint8Array,
   combineCodec,
+  fixDecoderSize,
+  fixEncoderSize,
   getBytesDecoder,
   getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU32Decoder,
   getU32Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 
 export type MerkleTreeAssertion = {
   __kind: 'VerifyLeaf';
   leafIndex: number;
-  leafHash: Uint8Array;
+  leafHash: ReadonlyUint8Array;
 };
 
 export type MerkleTreeAssertionArgs = MerkleTreeAssertion;
 
 export function getMerkleTreeAssertionEncoder(): Encoder<MerkleTreeAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'VerifyLeaf',
       getStructEncoder([
         ['leafIndex', getU32Encoder()],
-        ['leafHash', getBytesEncoder({ size: 32 })],
+        ['leafHash', fixEncoderSize(getBytesEncoder(), 32)],
       ]),
     ],
   ]);
 }
 
 export function getMerkleTreeAssertionDecoder(): Decoder<MerkleTreeAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'VerifyLeaf',
       getStructDecoder([
         ['leafIndex', getU32Decoder()],
-        ['leafHash', getBytesDecoder({ size: 32 })],
+        ['leafHash', fixDecoderSize(getBytesDecoder(), 32)],
       ]),
     ],
   ]);
@@ -68,8 +71,16 @@ export function getMerkleTreeAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function merkleTreeAssertion(
   kind: 'VerifyLeaf',
-  data: GetDataEnumKindContent<MerkleTreeAssertionArgs, 'VerifyLeaf'>
-): GetDataEnumKind<MerkleTreeAssertionArgs, 'VerifyLeaf'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MerkleTreeAssertionArgs,
+    '__kind',
+    'VerifyLeaf'
+  >
+): GetDiscriminatedUnionVariant<
+  MerkleTreeAssertionArgs,
+  '__kind',
+  'VerifyLeaf'
+>;
 export function merkleTreeAssertion<
   K extends MerkleTreeAssertionArgs['__kind'],
   Data,

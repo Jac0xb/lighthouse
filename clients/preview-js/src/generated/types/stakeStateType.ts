@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum StakeStateType {
   Uninitialized,
@@ -25,11 +25,11 @@ export enum StakeStateType {
 export type StakeStateTypeArgs = StakeStateType;
 
 export function getStakeStateTypeEncoder(): Encoder<StakeStateTypeArgs> {
-  return getScalarEnumEncoder(StakeStateType);
+  return getEnumEncoder(StakeStateType);
 }
 
 export function getStakeStateTypeDecoder(): Decoder<StakeStateType> {
-  return getScalarEnumDecoder(StakeStateType);
+  return getEnumDecoder(StakeStateType);
 }
 
 export function getStakeStateTypeCodec(): Codec<

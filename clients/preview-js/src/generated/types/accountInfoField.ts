@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum AccountInfoField {
   Key,
@@ -27,11 +27,11 @@ export enum AccountInfoField {
 export type AccountInfoFieldArgs = AccountInfoField;
 
 export function getAccountInfoFieldEncoder(): Encoder<AccountInfoFieldArgs> {
-  return getScalarEnumEncoder(AccountInfoField);
+  return getEnumEncoder(AccountInfoField);
 }
 
 export function getAccountInfoFieldDecoder(): Decoder<AccountInfoField> {
-  return getScalarEnumDecoder(AccountInfoField);
+  return getEnumDecoder(AccountInfoField);
 }
 
 export function getAccountInfoFieldCodec(): Codec<

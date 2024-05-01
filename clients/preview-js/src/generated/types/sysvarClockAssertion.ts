@@ -10,18 +10,18 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI64Decoder,
   getI64Encoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   IntegerOperator,
   IntegerOperatorArgs,
@@ -56,7 +56,7 @@ export type SysvarClockAssertionArgs =
     };
 
 export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Slot',
       getStructEncoder([
@@ -96,7 +96,7 @@ export function getSysvarClockAssertionEncoder(): Encoder<SysvarClockAssertionAr
 }
 
 export function getSysvarClockAssertionDecoder(): Decoder<SysvarClockAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Slot',
       getStructDecoder([
@@ -148,24 +148,56 @@ export function getSysvarClockAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function sysvarClockAssertion(
   kind: 'Slot',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Slot'>
-): GetDataEnumKind<SysvarClockAssertionArgs, 'Slot'>;
+  data: GetDiscriminatedUnionVariantContent<
+    SysvarClockAssertionArgs,
+    '__kind',
+    'Slot'
+  >
+): GetDiscriminatedUnionVariant<SysvarClockAssertionArgs, '__kind', 'Slot'>;
 export function sysvarClockAssertion(
   kind: 'EpochStartTimestamp',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'EpochStartTimestamp'>
-): GetDataEnumKind<SysvarClockAssertionArgs, 'EpochStartTimestamp'>;
+  data: GetDiscriminatedUnionVariantContent<
+    SysvarClockAssertionArgs,
+    '__kind',
+    'EpochStartTimestamp'
+  >
+): GetDiscriminatedUnionVariant<
+  SysvarClockAssertionArgs,
+  '__kind',
+  'EpochStartTimestamp'
+>;
 export function sysvarClockAssertion(
   kind: 'Epoch',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'Epoch'>
-): GetDataEnumKind<SysvarClockAssertionArgs, 'Epoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    SysvarClockAssertionArgs,
+    '__kind',
+    'Epoch'
+  >
+): GetDiscriminatedUnionVariant<SysvarClockAssertionArgs, '__kind', 'Epoch'>;
 export function sysvarClockAssertion(
   kind: 'LeaderScheduleEpoch',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'LeaderScheduleEpoch'>
-): GetDataEnumKind<SysvarClockAssertionArgs, 'LeaderScheduleEpoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    SysvarClockAssertionArgs,
+    '__kind',
+    'LeaderScheduleEpoch'
+  >
+): GetDiscriminatedUnionVariant<
+  SysvarClockAssertionArgs,
+  '__kind',
+  'LeaderScheduleEpoch'
+>;
 export function sysvarClockAssertion(
   kind: 'UnixTimestamp',
-  data: GetDataEnumKindContent<SysvarClockAssertionArgs, 'UnixTimestamp'>
-): GetDataEnumKind<SysvarClockAssertionArgs, 'UnixTimestamp'>;
+  data: GetDiscriminatedUnionVariantContent<
+    SysvarClockAssertionArgs,
+    '__kind',
+    'UnixTimestamp'
+  >
+): GetDiscriminatedUnionVariant<
+  SysvarClockAssertionArgs,
+  '__kind',
+  'UnixTimestamp'
+>;
 export function sysvarClockAssertion<
   K extends SysvarClockAssertionArgs['__kind'],
   Data,

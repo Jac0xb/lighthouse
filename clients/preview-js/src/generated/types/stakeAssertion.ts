@@ -8,23 +8,21 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getAddressDecoder,
+  getAddressEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -83,7 +81,7 @@ export type StakeAssertionArgs =
     };
 
 export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'DelegationVoterPubkey',
       getStructEncoder([
@@ -123,7 +121,7 @@ export function getStakeAssertionEncoder(): Encoder<StakeAssertionArgs> {
 }
 
 export function getStakeAssertionDecoder(): Decoder<StakeAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'DelegationVoterPubkey',
       getStructDecoder([
@@ -172,27 +170,64 @@ export function getStakeAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function stakeAssertion(
   kind: 'DelegationVoterPubkey',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationVoterPubkey'>
-): GetDataEnumKind<StakeAssertionArgs, 'DelegationVoterPubkey'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAssertionArgs,
+    '__kind',
+    'DelegationVoterPubkey'
+  >
+): GetDiscriminatedUnionVariant<
+  StakeAssertionArgs,
+  '__kind',
+  'DelegationVoterPubkey'
+>;
 export function stakeAssertion(
   kind: 'DelegationStake',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationStake'>
-): GetDataEnumKind<StakeAssertionArgs, 'DelegationStake'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAssertionArgs,
+    '__kind',
+    'DelegationStake'
+  >
+): GetDiscriminatedUnionVariant<
+  StakeAssertionArgs,
+  '__kind',
+  'DelegationStake'
+>;
 export function stakeAssertion(
   kind: 'DelegationActivationEpoch',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'DelegationActivationEpoch'>
-): GetDataEnumKind<StakeAssertionArgs, 'DelegationActivationEpoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAssertionArgs,
+    '__kind',
+    'DelegationActivationEpoch'
+  >
+): GetDiscriminatedUnionVariant<
+  StakeAssertionArgs,
+  '__kind',
+  'DelegationActivationEpoch'
+>;
 export function stakeAssertion(
   kind: 'DelegationDeactivationEpoch',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     StakeAssertionArgs,
+    '__kind',
     'DelegationDeactivationEpoch'
   >
-): GetDataEnumKind<StakeAssertionArgs, 'DelegationDeactivationEpoch'>;
+): GetDiscriminatedUnionVariant<
+  StakeAssertionArgs,
+  '__kind',
+  'DelegationDeactivationEpoch'
+>;
 export function stakeAssertion(
   kind: 'CreditsObserved',
-  data: GetDataEnumKindContent<StakeAssertionArgs, 'CreditsObserved'>
-): GetDataEnumKind<StakeAssertionArgs, 'CreditsObserved'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAssertionArgs,
+    '__kind',
+    'CreditsObserved'
+  >
+): GetDiscriminatedUnionVariant<
+  StakeAssertionArgs,
+  '__kind',
+  'CreditsObserved'
+>;
 export function stakeAssertion<K extends StakeAssertionArgs['__kind'], Data>(
   kind: K,
   data?: Data

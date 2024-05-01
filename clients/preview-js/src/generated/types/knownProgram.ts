@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum KnownProgram {
   System,
@@ -30,11 +30,11 @@ export enum KnownProgram {
 export type KnownProgramArgs = KnownProgram;
 
 export function getKnownProgramEncoder(): Encoder<KnownProgramArgs> {
-  return getScalarEnumEncoder(KnownProgram);
+  return getEnumEncoder(KnownProgram);
 }
 
 export function getKnownProgramDecoder(): Decoder<KnownProgram> {
-  return getScalarEnumDecoder(KnownProgram);
+  return getEnumDecoder(KnownProgram);
 }
 
 export function getKnownProgramCodec(): Codec<KnownProgramArgs, KnownProgram> {

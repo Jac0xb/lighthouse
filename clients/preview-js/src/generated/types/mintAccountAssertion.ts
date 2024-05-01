@@ -8,22 +8,20 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
@@ -32,7 +30,7 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -75,7 +73,7 @@ export type MintAccountAssertionArgs =
     };
 
 export function getMintAccountAssertionEncoder(): Encoder<MintAccountAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'MintAuthority',
       getStructEncoder([
@@ -115,7 +113,7 @@ export function getMintAccountAssertionEncoder(): Encoder<MintAccountAssertionAr
 }
 
 export function getMintAccountAssertionDecoder(): Decoder<MintAccountAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'MintAuthority',
       getStructDecoder([
@@ -167,24 +165,56 @@ export function getMintAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function mintAccountAssertion(
   kind: 'MintAuthority',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'MintAuthority'>
-): GetDataEnumKind<MintAccountAssertionArgs, 'MintAuthority'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MintAccountAssertionArgs,
+    '__kind',
+    'MintAuthority'
+  >
+): GetDiscriminatedUnionVariant<
+  MintAccountAssertionArgs,
+  '__kind',
+  'MintAuthority'
+>;
 export function mintAccountAssertion(
   kind: 'Supply',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Supply'>
-): GetDataEnumKind<MintAccountAssertionArgs, 'Supply'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MintAccountAssertionArgs,
+    '__kind',
+    'Supply'
+  >
+): GetDiscriminatedUnionVariant<MintAccountAssertionArgs, '__kind', 'Supply'>;
 export function mintAccountAssertion(
   kind: 'Decimals',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'Decimals'>
-): GetDataEnumKind<MintAccountAssertionArgs, 'Decimals'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MintAccountAssertionArgs,
+    '__kind',
+    'Decimals'
+  >
+): GetDiscriminatedUnionVariant<MintAccountAssertionArgs, '__kind', 'Decimals'>;
 export function mintAccountAssertion(
   kind: 'IsInitialized',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'IsInitialized'>
-): GetDataEnumKind<MintAccountAssertionArgs, 'IsInitialized'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MintAccountAssertionArgs,
+    '__kind',
+    'IsInitialized'
+  >
+): GetDiscriminatedUnionVariant<
+  MintAccountAssertionArgs,
+  '__kind',
+  'IsInitialized'
+>;
 export function mintAccountAssertion(
   kind: 'FreezeAuthority',
-  data: GetDataEnumKindContent<MintAccountAssertionArgs, 'FreezeAuthority'>
-): GetDataEnumKind<MintAccountAssertionArgs, 'FreezeAuthority'>;
+  data: GetDiscriminatedUnionVariantContent<
+    MintAccountAssertionArgs,
+    '__kind',
+    'FreezeAuthority'
+  >
+): GetDiscriminatedUnionVariant<
+  MintAccountAssertionArgs,
+  '__kind',
+  'FreezeAuthority'
+>;
 export function mintAccountAssertion<
   K extends MintAccountAssertionArgs['__kind'],
   Data,
