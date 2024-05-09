@@ -48,7 +48,7 @@ export function merkleTreeAssertion(
   data: GetDataEnumKindContent<MerkleTreeAssertionArgs, 'VerifyLeaf'>
 ): GetDataEnumKind<MerkleTreeAssertionArgs, 'VerifyLeaf'>;
 export function merkleTreeAssertion<
-  K extends MerkleTreeAssertionArgs['__kind']
+  K extends MerkleTreeAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<MerkleTreeAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }

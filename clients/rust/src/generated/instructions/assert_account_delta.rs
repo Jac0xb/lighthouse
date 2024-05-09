@@ -56,12 +56,12 @@ impl AssertAccountDelta {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertAccountDeltaInstructionData {
+pub struct AssertAccountDeltaInstructionData {
     discriminator: u8,
 }
 
 impl AssertAccountDeltaInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 3 }
     }
 }
@@ -79,7 +79,7 @@ pub struct AssertAccountDeltaInstructionArgs {
 ///
 ///   0. `[]` account_a
 ///   1. `[]` account_b
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertAccountDeltaBuilder {
     account_a: Option<solana_program::pubkey::Pubkey>,
     account_b: Option<solana_program::pubkey::Pubkey>,
@@ -263,6 +263,7 @@ impl<'a, 'b> AssertAccountDeltaCpi<'a, 'b> {
 ///
 ///   0. `[]` account_a
 ///   1. `[]` account_b
+#[derive(Clone, Debug)]
 pub struct AssertAccountDeltaCpiBuilder<'a, 'b> {
     instruction: Box<AssertAccountDeltaCpiBuilderInstruction<'a, 'b>>,
 }
@@ -376,6 +377,7 @@ impl<'a, 'b> AssertAccountDeltaCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertAccountDeltaCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     account_a: Option<&'b solana_program::account_info::AccountInfo<'a>>,

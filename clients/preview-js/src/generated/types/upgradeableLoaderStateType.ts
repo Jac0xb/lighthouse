@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum UpgradeableLoaderStateType {
   Uninitialized,
@@ -25,11 +25,11 @@ export enum UpgradeableLoaderStateType {
 export type UpgradeableLoaderStateTypeArgs = UpgradeableLoaderStateType;
 
 export function getUpgradeableLoaderStateTypeEncoder(): Encoder<UpgradeableLoaderStateTypeArgs> {
-  return getScalarEnumEncoder(UpgradeableLoaderStateType);
+  return getEnumEncoder(UpgradeableLoaderStateType);
 }
 
 export function getUpgradeableLoaderStateTypeDecoder(): Decoder<UpgradeableLoaderStateType> {
-  return getScalarEnumDecoder(UpgradeableLoaderStateType);
+  return getEnumDecoder(UpgradeableLoaderStateType);
 }
 
 export function getUpgradeableLoaderStateTypeCodec(): Codec<

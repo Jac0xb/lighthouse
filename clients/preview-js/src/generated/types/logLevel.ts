@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum LogLevel {
   Silent,
@@ -25,11 +25,11 @@ export enum LogLevel {
 export type LogLevelArgs = LogLevel;
 
 export function getLogLevelEncoder(): Encoder<LogLevelArgs> {
-  return getScalarEnumEncoder(LogLevel);
+  return getEnumEncoder(LogLevel);
 }
 
 export function getLogLevelDecoder(): Decoder<LogLevel> {
-  return getScalarEnumDecoder(LogLevel);
+  return getEnumDecoder(LogLevel);
 }
 
 export function getLogLevelCodec(): Codec<LogLevelArgs, LogLevel> {

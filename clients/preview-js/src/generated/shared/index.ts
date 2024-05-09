@@ -7,20 +7,16 @@
  */
 
 import {
-  Address,
-  isProgramDerivedAddress,
-  ProgramDerivedAddress,
-} from '@solana/addresses';
-import {
   AccountRole,
+  Address,
   IAccountMeta,
-  upgradeRoleToSigner,
-} from '@solana/instructions';
-import {
   IAccountSignerMeta,
-  isTransactionSigner as web3JsIsTransactionSigner,
+  ProgramDerivedAddress,
   TransactionSigner,
-} from '@solana/signers';
+  isProgramDerivedAddress,
+  isTransactionSigner as web3JsIsTransactionSigner,
+  upgradeRoleToSigner,
+} from '@solana/web3.js';
 
 /**
  * Asserts that the given value is not null or undefined.
@@ -103,27 +99,15 @@ export type ResolvedAccount<
     | Address<T>
     | ProgramDerivedAddress<T>
     | TransactionSigner<T>
-    | null = Address<T> | ProgramDerivedAddress<T> | TransactionSigner<T> | null
+    | null =
+    | Address<T>
+    | ProgramDerivedAddress<T>
+    | TransactionSigner<T>
+    | null,
 > = {
   isWritable: boolean;
   value: U;
 };
-
-/**
- * Add an account meta with a default role if only an address is provided.
- * @internal
- */
-export function accountMetaWithDefault<
-  TAccount extends string | IAccountMeta<string>,
-  TRole extends AccountRole
->(account: TAccount | undefined, role: TRole) {
-  if (account === undefined) return undefined;
-  return (
-    typeof account === 'string' ? { address: account, role } : account
-  ) as TAccount extends string
-    ? { address: Address<TAccount>; role: TRole }
-    : TAccount;
-}
 
 /**
  * Defines an instruction that stores additional bytes on-chain.
@@ -137,37 +121,32 @@ export type IInstructionWithByteDelta = {
  * Get account metas and signers from resolved accounts.
  * @internal
  */
-export function getAccountMetasWithSigners<TKey extends string = string>(
-  accounts: Record<TKey, ResolvedAccount>,
-  optionalAccountStrategy: 'omitted' | 'programId',
-  programAddress: Address
-): Record<TKey, IAccountMeta | IAccountSignerMeta> {
-  const accountMetas: Record<string, IAccountMeta | IAccountSignerMeta> = {};
-
-  Object.keys(accounts).forEach((key) => {
-    const account = accounts[key as TKey] as ResolvedAccount;
+export function getAccountMetaFactory(
+  programAddress: Address,
+  optionalAccountStrategy: 'omitted' | 'programId'
+) {
+  return (
+    account: ResolvedAccount
+  ): IAccountMeta | IAccountSignerMeta | undefined => {
     if (!account.value) {
       if (optionalAccountStrategy === 'omitted') return;
-      accountMetas[key] = {
+      return Object.freeze({
         address: programAddress,
         role: AccountRole.READONLY,
-      };
-      return;
+      });
     }
 
     const writableRole = account.isWritable
       ? AccountRole.WRITABLE
       : AccountRole.READONLY;
-    accountMetas[key] = Object.freeze({
+    return Object.freeze({
       address: expectAddress(account.value),
       role: isTransactionSigner(account.value)
         ? upgradeRoleToSigner(writableRole)
         : writableRole,
       ...(isTransactionSigner(account.value) ? { signer: account.value } : {}),
     });
-  });
-
-  return accountMetas;
+  };
 }
 
 export function isTransactionSigner<TAddress extends string = string>(
@@ -182,10 +161,4 @@ export function isTransactionSigner<TAddress extends string = string>(
     'address' in value &&
     web3JsIsTransactionSigner(value)
   );
-}
-
-export function memcmp(data: Uint8Array, bytes: Uint8Array, offset: number) {
-  const slice = data.slice(offset, offset + bytes.length);
-  if (slice.length !== bytes.length) return false;
-  return bytes.every((b, i) => b === slice[i]);
 }

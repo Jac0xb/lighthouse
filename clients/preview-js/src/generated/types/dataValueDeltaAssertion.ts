@@ -10,11 +10,11 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI128Decoder,
   getI128Encoder,
   getI16Decoder,
@@ -27,7 +27,7 @@ import {
   getStructEncoder,
   getU16Decoder,
   getU16Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -62,7 +62,7 @@ export type DataValueDeltaAssertionArgs =
   | { __kind: 'Bytes'; length: number; operator: EquatableOperatorArgs };
 
 export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'U8',
       getStructEncoder([
@@ -130,7 +130,7 @@ export function getDataValueDeltaAssertionEncoder(): Encoder<DataValueDeltaAsser
 }
 
 export function getDataValueDeltaAssertionDecoder(): Decoder<DataValueDeltaAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'U8',
       getStructDecoder([
@@ -210,50 +210,87 @@ export function getDataValueDeltaAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function dataValueDeltaAssertion(
   kind: 'U8',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U8'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'U8'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'U8'>;
 export function dataValueDeltaAssertion(
   kind: 'I8',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I8'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'I8'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'I8'>;
 export function dataValueDeltaAssertion(
   kind: 'U16',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U16'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'U16'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'U16'>;
 export function dataValueDeltaAssertion(
   kind: 'I16',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I16'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'I16'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'I16'>;
 export function dataValueDeltaAssertion(
   kind: 'U32',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U32'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'U32'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'U32'>;
 export function dataValueDeltaAssertion(
   kind: 'I32',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I32'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'I32'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'I32'>;
 export function dataValueDeltaAssertion(
   kind: 'U64',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'U64'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'U64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'U64'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'U64'>;
 export function dataValueDeltaAssertion(
   kind: 'I64',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'I64'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'I64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'I64'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'I64'>;
 export function dataValueDeltaAssertion(
   kind: 'Bytes',
-  data: GetDataEnumKindContent<DataValueDeltaAssertionArgs, 'Bytes'>
-): GetDataEnumKind<DataValueDeltaAssertionArgs, 'Bytes'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueDeltaAssertionArgs,
+    '__kind',
+    'Bytes'
+  >
+): GetDiscriminatedUnionVariant<DataValueDeltaAssertionArgs, '__kind', 'Bytes'>;
 export function dataValueDeltaAssertion<
-  K extends DataValueDeltaAssertionArgs['__kind']
->(kind: K, data?: any): Extract<DataValueDeltaAssertionArgs, { __kind: K }> {
+  K extends DataValueDeltaAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isDataValueDeltaAssertion<
-  K extends DataValueDeltaAssertion['__kind']
+  K extends DataValueDeltaAssertion['__kind'],
 >(
   kind: K,
   value: DataValueDeltaAssertion

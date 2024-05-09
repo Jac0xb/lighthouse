@@ -8,22 +8,23 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
+  ReadonlyUint8Array,
+  addDecoderSizePrefix,
+  addEncoderSizePrefix,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI128Decoder,
   getI128Encoder,
   getI16Decoder,
@@ -46,7 +47,7 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -70,7 +71,7 @@ export type DataValueAssertion =
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperator }
+  | { __kind: 'Bytes'; value: ReadonlyUint8Array; operator: EquatableOperator }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
@@ -85,11 +86,15 @@ export type DataValueAssertionArgs =
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'Bytes';
+      value: ReadonlyUint8Array;
+      operator: EquatableOperatorArgs;
+    }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
 
 export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Bool',
       getStructEncoder([
@@ -170,7 +175,7 @@ export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> 
     [
       'Bytes',
       getStructEncoder([
-        ['value', getBytesEncoder({ size: getU32Encoder() })],
+        ['value', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
         ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
@@ -185,7 +190,7 @@ export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> 
 }
 
 export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Bool',
       getStructDecoder([
@@ -266,7 +271,7 @@ export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
     [
       'Bytes',
       getStructDecoder([
-        ['value', getBytesDecoder({ size: getU32Decoder() })],
+        ['value', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
         ['operator', getEquatableOperatorDecoder()],
       ]),
     ],
@@ -293,60 +298,112 @@ export function getDataValueAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function dataValueAssertion(
   kind: 'Bool',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'Bool'>
-): GetDataEnumKind<DataValueAssertionArgs, 'Bool'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'Bool'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'Bool'>;
 export function dataValueAssertion(
   kind: 'U8',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'U8'>
-): GetDataEnumKind<DataValueAssertionArgs, 'U8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'U8'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'U8'>;
 export function dataValueAssertion(
   kind: 'I8',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'I8'>
-): GetDataEnumKind<DataValueAssertionArgs, 'I8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'I8'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'I8'>;
 export function dataValueAssertion(
   kind: 'U16',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'U16'>
-): GetDataEnumKind<DataValueAssertionArgs, 'U16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'U16'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'U16'>;
 export function dataValueAssertion(
   kind: 'I16',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'I16'>
-): GetDataEnumKind<DataValueAssertionArgs, 'I16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'I16'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'I16'>;
 export function dataValueAssertion(
   kind: 'U32',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'U32'>
-): GetDataEnumKind<DataValueAssertionArgs, 'U32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'U32'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'U32'>;
 export function dataValueAssertion(
   kind: 'I32',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'I32'>
-): GetDataEnumKind<DataValueAssertionArgs, 'I32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'I32'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'I32'>;
 export function dataValueAssertion(
   kind: 'U64',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'U64'>
-): GetDataEnumKind<DataValueAssertionArgs, 'U64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'U64'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'U64'>;
 export function dataValueAssertion(
   kind: 'I64',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'I64'>
-): GetDataEnumKind<DataValueAssertionArgs, 'I64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'I64'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'I64'>;
 export function dataValueAssertion(
   kind: 'U128',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'U128'>
-): GetDataEnumKind<DataValueAssertionArgs, 'U128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'U128'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'U128'>;
 export function dataValueAssertion(
   kind: 'I128',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'I128'>
-): GetDataEnumKind<DataValueAssertionArgs, 'I128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'I128'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'I128'>;
 export function dataValueAssertion(
   kind: 'Bytes',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'Bytes'>
-): GetDataEnumKind<DataValueAssertionArgs, 'Bytes'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'Bytes'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'Bytes'>;
 export function dataValueAssertion(
   kind: 'Pubkey',
-  data: GetDataEnumKindContent<DataValueAssertionArgs, 'Pubkey'>
-): GetDataEnumKind<DataValueAssertionArgs, 'Pubkey'>;
-export function dataValueAssertion<K extends DataValueAssertionArgs['__kind']>(
-  kind: K,
-  data?: any
-): Extract<DataValueAssertionArgs, { __kind: K }> {
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueAssertionArgs,
+    '__kind',
+    'Pubkey'
+  >
+): GetDiscriminatedUnionVariant<DataValueAssertionArgs, '__kind', 'Pubkey'>;
+export function dataValueAssertion<
+  K extends DataValueAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

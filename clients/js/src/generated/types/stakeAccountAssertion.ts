@@ -110,14 +110,14 @@ export function stakeAccountAssertion(
   data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'StakeFlags'>
 ): GetDataEnumKind<StakeAccountAssertionArgs, 'StakeFlags'>;
 export function stakeAccountAssertion<
-  K extends StakeAccountAssertionArgs['__kind']
+  K extends StakeAccountAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<StakeAccountAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isStakeAccountAssertion<
-  K extends StakeAccountAssertion['__kind']
+  K extends StakeAccountAssertion['__kind'],
 >(
   kind: K,
   value: StakeAccountAssertion

@@ -10,16 +10,16 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU16Decoder,
   getU16Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   AccountInfoDeltaAssertion,
   AccountInfoDeltaAssertionArgs,
@@ -58,7 +58,7 @@ export type AccountDeltaAssertionArgs =
     };
 
 export function getAccountDeltaAssertionEncoder(): Encoder<AccountDeltaAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'AccountInfo',
       getStructEncoder([
@@ -78,7 +78,7 @@ export function getAccountDeltaAssertionEncoder(): Encoder<AccountDeltaAssertion
 }
 
 export function getAccountDeltaAssertionDecoder(): Decoder<AccountDeltaAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'AccountInfo',
       getStructDecoder([
@@ -110,22 +110,35 @@ export function getAccountDeltaAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function accountDeltaAssertion(
   kind: 'AccountInfo',
-  data: GetDataEnumKindContent<AccountDeltaAssertionArgs, 'AccountInfo'>
-): GetDataEnumKind<AccountDeltaAssertionArgs, 'AccountInfo'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountDeltaAssertionArgs,
+    '__kind',
+    'AccountInfo'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountDeltaAssertionArgs,
+  '__kind',
+  'AccountInfo'
+>;
 export function accountDeltaAssertion(
   kind: 'Data',
-  data: GetDataEnumKindContent<AccountDeltaAssertionArgs, 'Data'>
-): GetDataEnumKind<AccountDeltaAssertionArgs, 'Data'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountDeltaAssertionArgs,
+    '__kind',
+    'Data'
+  >
+): GetDiscriminatedUnionVariant<AccountDeltaAssertionArgs, '__kind', 'Data'>;
 export function accountDeltaAssertion<
-  K extends AccountDeltaAssertionArgs['__kind']
->(kind: K, data?: any): Extract<AccountDeltaAssertionArgs, { __kind: K }> {
+  K extends AccountDeltaAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isAccountDeltaAssertion<
-  K extends AccountDeltaAssertion['__kind']
+  K extends AccountDeltaAssertion['__kind'],
 >(
   kind: K,
   value: AccountDeltaAssertion

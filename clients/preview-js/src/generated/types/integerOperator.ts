@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum IntegerOperator {
   Equal,
@@ -29,11 +29,11 @@ export enum IntegerOperator {
 export type IntegerOperatorArgs = IntegerOperator;
 
 export function getIntegerOperatorEncoder(): Encoder<IntegerOperatorArgs> {
-  return getScalarEnumEncoder(IntegerOperator);
+  return getEnumEncoder(IntegerOperator);
 }
 
 export function getIntegerOperatorDecoder(): Decoder<IntegerOperator> {
-  return getScalarEnumDecoder(IntegerOperator);
+  return getEnumDecoder(IntegerOperator);
 }
 
 export function getIntegerOperatorCodec(): Codec<

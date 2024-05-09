@@ -8,24 +8,25 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
+  ReadonlyUint8Array,
   combineCodec,
+  fixDecoderSize,
+  fixEncoderSize,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
@@ -34,7 +35,7 @@ import {
   getU16Encoder,
   getU64Decoder,
   getU64Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -61,7 +62,7 @@ export type AccountInfoAssertion =
   | { __kind: 'Executable'; value: boolean; operator: EquatableOperator }
   | {
       __kind: 'VerifyDatahash';
-      expectedHash: Uint8Array;
+      expectedHash: ReadonlyUint8Array;
       start: Option<number>;
       length: Option<number>;
     };
@@ -93,13 +94,13 @@ export type AccountInfoAssertionArgs =
   | { __kind: 'Executable'; value: boolean; operator: EquatableOperatorArgs }
   | {
       __kind: 'VerifyDatahash';
-      expectedHash: Uint8Array;
+      expectedHash: ReadonlyUint8Array;
       start: OptionOrNullable<number>;
       length: OptionOrNullable<number>;
     };
 
 export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Lamports',
       getStructEncoder([
@@ -159,7 +160,7 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
     [
       'VerifyDatahash',
       getStructEncoder([
-        ['expectedHash', getBytesEncoder({ size: 32 })],
+        ['expectedHash', fixEncoderSize(getBytesEncoder(), 32)],
         ['start', getOptionEncoder(getU16Encoder())],
         ['length', getOptionEncoder(getU16Encoder())],
       ]),
@@ -168,7 +169,7 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
 }
 
 export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Lamports',
       getStructDecoder([
@@ -228,7 +229,7 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
     [
       'VerifyDatahash',
       getStructDecoder([
-        ['expectedHash', getBytesDecoder({ size: 32 })],
+        ['expectedHash', fixDecoderSize(getBytesDecoder(), 32)],
         ['start', getOptionDecoder(getU16Decoder())],
         ['length', getOptionDecoder(getU16Decoder())],
       ]),
@@ -249,50 +250,111 @@ export function getAccountInfoAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function accountInfoAssertion(
   kind: 'Lamports',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Lamports'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'Lamports'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'Lamports'
+  >
+): GetDiscriminatedUnionVariant<AccountInfoAssertionArgs, '__kind', 'Lamports'>;
 export function accountInfoAssertion(
   kind: 'DataLength',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'DataLength'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'DataLength'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'DataLength'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'DataLength'
+>;
 export function accountInfoAssertion(
   kind: 'Owner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Owner'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'Owner'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'Owner'
+  >
+): GetDiscriminatedUnionVariant<AccountInfoAssertionArgs, '__kind', 'Owner'>;
 export function accountInfoAssertion(
   kind: 'KnownOwner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'KnownOwner'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'KnownOwner'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'KnownOwner'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'KnownOwner'
+>;
 export function accountInfoAssertion(
   kind: 'RentEpoch',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'RentEpoch'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'RentEpoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'RentEpoch'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'RentEpoch'
+>;
 export function accountInfoAssertion(
   kind: 'IsSigner',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsSigner'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'IsSigner'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'IsSigner'
+  >
+): GetDiscriminatedUnionVariant<AccountInfoAssertionArgs, '__kind', 'IsSigner'>;
 export function accountInfoAssertion(
   kind: 'IsWritable',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'IsWritable'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'IsWritable'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'IsWritable'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'IsWritable'
+>;
 export function accountInfoAssertion(
   kind: 'Executable',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'Executable'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'Executable'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'Executable'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'Executable'
+>;
 export function accountInfoAssertion(
   kind: 'VerifyDatahash',
-  data: GetDataEnumKindContent<AccountInfoAssertionArgs, 'VerifyDatahash'>
-): GetDataEnumKind<AccountInfoAssertionArgs, 'VerifyDatahash'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoAssertionArgs,
+    '__kind',
+    'VerifyDatahash'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoAssertionArgs,
+  '__kind',
+  'VerifyDatahash'
+>;
 export function accountInfoAssertion<
-  K extends AccountInfoAssertionArgs['__kind']
->(kind: K, data?: any): Extract<AccountInfoAssertionArgs, { __kind: K }> {
+  K extends AccountInfoAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isAccountInfoAssertion<
-  K extends AccountInfoAssertion['__kind']
+  K extends AccountInfoAssertion['__kind'],
 >(
   kind: K,
   value: AccountInfoAssertion

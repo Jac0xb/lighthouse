@@ -57,12 +57,12 @@ impl MemoryClose {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct MemoryCloseInstructionData {
+pub struct MemoryCloseInstructionData {
     discriminator: u8,
 }
 
 impl MemoryCloseInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 1 }
     }
 }
@@ -81,7 +81,7 @@ pub struct MemoryCloseInstructionArgs {
 ///   0. `[]` program_id
 ///   1. `[writable, signer]` payer
 ///   2. `[writable]` memory
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct MemoryCloseBuilder {
     program_id: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
@@ -281,6 +281,7 @@ impl<'a, 'b> MemoryCloseCpi<'a, 'b> {
 ///   0. `[]` program_id
 ///   1. `[writable, signer]` payer
 ///   2. `[writable]` memory
+#[derive(Clone, Debug)]
 pub struct MemoryCloseCpiBuilder<'a, 'b> {
     instruction: Box<MemoryCloseCpiBuilderInstruction<'a, 'b>>,
 }
@@ -402,6 +403,7 @@ impl<'a, 'b> MemoryCloseCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct MemoryCloseCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,

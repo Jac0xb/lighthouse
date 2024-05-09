@@ -6,14 +6,14 @@ const clientDir = path.join(__dirname, '..', 'clients');
 const programDir = path.join(__dirname, '..', 'programs', 'lighthouse');
 
 // Instanciate Kinobi.
-const kinobi = k.createFromIdls([path.join(programDir, 'lighthouse.json')]);
+const kinobi = k.createFromIdl(path.join(programDir, 'lighthouse.json'));
 
 // Memory account PDA
 kinobi.update(
   k.addPdasVisitor({
     lighthouse: [
       k.pdaNode('memory', [
-        k.constantPdaSeedNodeFromString('memory'),
+        k.constantPdaSeedNodeFromString('utf8', 'memory'),
         k.variablePdaSeedNode('payer', k.publicKeyTypeNode()),
         k.variablePdaSeedNode('memory_id', k.numberTypeNode('u8')),
       ]),
@@ -21,7 +21,7 @@ kinobi.update(
   })
 );
 
-//
+//c
 // How to set a default value for an account in an instruction.
 //
 kinobi.update(
@@ -78,11 +78,9 @@ kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 
 // Render preview JavaScript.
 const previewJsDir = path.join(clientDir, 'preview-js', 'src', 'generated');
-const previewPrettier = require(path.join(
-  clientDir,
-  'preview-js',
-  '.prettierrc.json'
-));
+const previewPrettier = require(
+  path.join(clientDir, 'preview-js', '.prettierrc.json')
+);
 kinobi.accept(
   k.renderJavaScriptExperimentalVisitor(previewJsDir, {
     prettier: previewPrettier,

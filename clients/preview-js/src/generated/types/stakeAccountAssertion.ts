@@ -10,18 +10,18 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -47,8 +47,8 @@ import {
 
 export type StakeAccountAssertion =
   | { __kind: 'State'; value: StakeStateType; operator: EquatableOperator }
-  | { __kind: 'MetaAssertion'; fields: [MetaAssertion] }
-  | { __kind: 'StakeAssertion'; fields: [StakeAssertion] }
+  | { __kind: 'MetaAssertion'; fields: readonly [MetaAssertion] }
+  | { __kind: 'StakeAssertion'; fields: readonly [StakeAssertion] }
   | { __kind: 'StakeFlags'; value: number; operator: IntegerOperator };
 
 export type StakeAccountAssertionArgs =
@@ -57,12 +57,12 @@ export type StakeAccountAssertionArgs =
       value: StakeStateTypeArgs;
       operator: EquatableOperatorArgs;
     }
-  | { __kind: 'MetaAssertion'; fields: [MetaAssertionArgs] }
-  | { __kind: 'StakeAssertion'; fields: [StakeAssertionArgs] }
+  | { __kind: 'MetaAssertion'; fields: readonly [MetaAssertionArgs] }
+  | { __kind: 'StakeAssertion'; fields: readonly [StakeAssertionArgs] }
   | { __kind: 'StakeFlags'; value: number; operator: IntegerOperatorArgs };
 
 export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'State',
       getStructEncoder([
@@ -93,7 +93,7 @@ export function getStakeAccountAssertionEncoder(): Encoder<StakeAccountAssertion
 }
 
 export function getStakeAccountAssertionDecoder(): Decoder<StakeAccountAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'State',
       getStructDecoder([
@@ -136,36 +136,59 @@ export function getStakeAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function stakeAccountAssertion(
   kind: 'State',
-  data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'State'>
-): GetDataEnumKind<StakeAccountAssertionArgs, 'State'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAccountAssertionArgs,
+    '__kind',
+    'State'
+  >
+): GetDiscriminatedUnionVariant<StakeAccountAssertionArgs, '__kind', 'State'>;
 export function stakeAccountAssertion(
   kind: 'MetaAssertion',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     StakeAccountAssertionArgs,
+    '__kind',
     'MetaAssertion'
   >['fields']
-): GetDataEnumKind<StakeAccountAssertionArgs, 'MetaAssertion'>;
+): GetDiscriminatedUnionVariant<
+  StakeAccountAssertionArgs,
+  '__kind',
+  'MetaAssertion'
+>;
 export function stakeAccountAssertion(
   kind: 'StakeAssertion',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     StakeAccountAssertionArgs,
+    '__kind',
     'StakeAssertion'
   >['fields']
-): GetDataEnumKind<StakeAccountAssertionArgs, 'StakeAssertion'>;
+): GetDiscriminatedUnionVariant<
+  StakeAccountAssertionArgs,
+  '__kind',
+  'StakeAssertion'
+>;
 export function stakeAccountAssertion(
   kind: 'StakeFlags',
-  data: GetDataEnumKindContent<StakeAccountAssertionArgs, 'StakeFlags'>
-): GetDataEnumKind<StakeAccountAssertionArgs, 'StakeFlags'>;
+  data: GetDiscriminatedUnionVariantContent<
+    StakeAccountAssertionArgs,
+    '__kind',
+    'StakeFlags'
+  >
+): GetDiscriminatedUnionVariant<
+  StakeAccountAssertionArgs,
+  '__kind',
+  'StakeFlags'
+>;
 export function stakeAccountAssertion<
-  K extends StakeAccountAssertionArgs['__kind']
->(kind: K, data?: any): Extract<StakeAccountAssertionArgs, { __kind: K }> {
+  K extends StakeAccountAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isStakeAccountAssertion<
-  K extends StakeAccountAssertion['__kind']
+  K extends StakeAccountAssertion['__kind'],
 >(
   kind: K,
   value: StakeAccountAssertion

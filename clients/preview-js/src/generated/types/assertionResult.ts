@@ -8,24 +8,25 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
+  ReadonlyUint8Array,
+  addDecoderSizePrefix,
+  addEncoderSizePrefix,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI128Decoder,
   getI128Encoder,
   getI16Decoder,
@@ -52,148 +53,188 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 
 export type AssertionResult =
-  | { __kind: 'U8'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'U16'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'U32'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'U64'; fields: [Option<bigint>, Option<bigint>, number, boolean] }
+  | {
+      __kind: 'U8';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'U16';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'U32';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'U64';
+      fields: readonly [Option<bigint>, Option<bigint>, number, boolean];
+    }
   | {
       __kind: 'U128';
-      fields: [Option<bigint>, Option<bigint>, number, boolean];
+      fields: readonly [Option<bigint>, Option<bigint>, number, boolean];
     }
-  | { __kind: 'I8'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'I16'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'I32'; fields: [Option<number>, Option<number>, number, boolean] }
-  | { __kind: 'I64'; fields: [Option<bigint>, Option<bigint>, number, boolean] }
+  | {
+      __kind: 'I8';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'I16';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'I32';
+      fields: readonly [Option<number>, Option<number>, number, boolean];
+    }
+  | {
+      __kind: 'I64';
+      fields: readonly [Option<bigint>, Option<bigint>, number, boolean];
+    }
   | {
       __kind: 'I128';
-      fields: [Option<bigint>, Option<bigint>, number, boolean];
+      fields: readonly [Option<bigint>, Option<bigint>, number, boolean];
     }
   | {
       __kind: 'Pubkey';
-      fields: [Option<Address>, Option<Address>, number, boolean];
+      fields: readonly [Option<Address>, Option<Address>, number, boolean];
     }
-  | { __kind: 'Bytes'; fields: [Uint8Array, Uint8Array, number, boolean] }
+  | {
+      __kind: 'Bytes';
+      fields: readonly [
+        ReadonlyUint8Array,
+        ReadonlyUint8Array,
+        number,
+        boolean,
+      ];
+    }
   | {
       __kind: 'Bool';
-      fields: [Option<boolean>, Option<boolean>, number, boolean];
+      fields: readonly [Option<boolean>, Option<boolean>, number, boolean];
     };
 
 export type AssertionResultArgs =
   | {
       __kind: 'U8';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'U16';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'U32';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'U64';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'U128';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'I8';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'I16';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'I32';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number>,
         OptionOrNullable<number>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'I64';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'I128';
-      fields: [
+      fields: readonly [
         OptionOrNullable<number | bigint>,
         OptionOrNullable<number | bigint>,
         number,
-        boolean
+        boolean,
       ];
     }
   | {
       __kind: 'Pubkey';
-      fields: [
+      fields: readonly [
         OptionOrNullable<Address>,
         OptionOrNullable<Address>,
         number,
-        boolean
+        boolean,
       ];
     }
-  | { __kind: 'Bytes'; fields: [Uint8Array, Uint8Array, number, boolean] }
+  | {
+      __kind: 'Bytes';
+      fields: readonly [
+        ReadonlyUint8Array,
+        ReadonlyUint8Array,
+        number,
+        boolean,
+      ];
+    }
   | {
       __kind: 'Bool';
-      fields: [
+      fields: readonly [
         OptionOrNullable<boolean>,
         OptionOrNullable<boolean>,
         number,
-        boolean
+        boolean,
       ];
     };
 
 export function getAssertionResultEncoder(): Encoder<AssertionResultArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'U8',
       getStructEncoder([
@@ -354,8 +395,8 @@ export function getAssertionResultEncoder(): Encoder<AssertionResultArgs> {
         [
           'fields',
           getTupleEncoder([
-            getBytesEncoder({ size: getU32Encoder() }),
-            getBytesEncoder({ size: getU32Encoder() }),
+            addEncoderSizePrefix(getBytesEncoder(), getU32Encoder()),
+            addEncoderSizePrefix(getBytesEncoder(), getU32Encoder()),
             getU8Encoder(),
             getBooleanEncoder(),
           ]),
@@ -380,7 +421,7 @@ export function getAssertionResultEncoder(): Encoder<AssertionResultArgs> {
 }
 
 export function getAssertionResultDecoder(): Decoder<AssertionResult> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'U8',
       getStructDecoder([
@@ -541,8 +582,8 @@ export function getAssertionResultDecoder(): Decoder<AssertionResult> {
         [
           'fields',
           getTupleDecoder([
-            getBytesDecoder({ size: getU32Decoder() }),
-            getBytesDecoder({ size: getU32Decoder() }),
+            addDecoderSizePrefix(getBytesDecoder(), getU32Decoder()),
+            addDecoderSizePrefix(getBytesDecoder(), getU32Decoder()),
             getU8Decoder(),
             getBooleanDecoder(),
           ]),
@@ -576,60 +617,112 @@ export function getAssertionResultCodec(): Codec<
 // Data Enum Helpers.
 export function assertionResult(
   kind: 'U8',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'U8'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'U8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'U8'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'U8'>;
 export function assertionResult(
   kind: 'U16',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'U16'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'U16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'U16'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'U16'>;
 export function assertionResult(
   kind: 'U32',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'U32'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'U32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'U32'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'U32'>;
 export function assertionResult(
   kind: 'U64',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'U64'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'U64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'U64'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'U64'>;
 export function assertionResult(
   kind: 'U128',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'U128'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'U128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'U128'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'U128'>;
 export function assertionResult(
   kind: 'I8',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'I8'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'I8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'I8'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'I8'>;
 export function assertionResult(
   kind: 'I16',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'I16'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'I16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'I16'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'I16'>;
 export function assertionResult(
   kind: 'I32',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'I32'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'I32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'I32'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'I32'>;
 export function assertionResult(
   kind: 'I64',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'I64'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'I64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'I64'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'I64'>;
 export function assertionResult(
   kind: 'I128',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'I128'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'I128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'I128'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'I128'>;
 export function assertionResult(
   kind: 'Pubkey',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'Pubkey'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'Pubkey'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'Pubkey'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'Pubkey'>;
 export function assertionResult(
   kind: 'Bytes',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'Bytes'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'Bytes'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'Bytes'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'Bytes'>;
 export function assertionResult(
   kind: 'Bool',
-  data: GetDataEnumKindContent<AssertionResultArgs, 'Bool'>['fields']
-): GetDataEnumKind<AssertionResultArgs, 'Bool'>;
-export function assertionResult<K extends AssertionResultArgs['__kind']>(
+  data: GetDiscriminatedUnionVariantContent<
+    AssertionResultArgs,
+    '__kind',
+    'Bool'
+  >['fields']
+): GetDiscriminatedUnionVariant<AssertionResultArgs, '__kind', 'Bool'>;
+export function assertionResult<K extends AssertionResultArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<AssertionResultArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

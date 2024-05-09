@@ -6,31 +6,25 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Address } from '@solana/addresses';
 import {
+  Address,
   Codec,
   Decoder,
   Encoder,
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  mapEncoder,
-} from '@solana/codecs';
-import {
-  AccountRole,
   IAccountMeta,
   IInstruction,
   IInstructionWithAccounts,
   IInstructionWithData,
   ReadonlyAccount,
-} from '@solana/instructions';
-import {
-  ResolvedAccount,
-  accountMetaWithDefault,
-  getAccountMetasWithSigners,
-} from '../shared';
+  combineCodec,
+  getStructDecoder,
+  getStructEncoder,
+  getU8Decoder,
+  getU8Encoder,
+  transformEncoder,
+} from '@solana/web3.js';
+import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
+import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   AccountDeltaAssertion,
   AccountDeltaAssertionArgs,
@@ -43,10 +37,10 @@ import {
 } from '../types';
 
 export type AssertAccountDeltaInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountAccountA extends string | IAccountMeta<string> = string,
   TAccountAccountB extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
+  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
@@ -57,26 +51,7 @@ export type AssertAccountDeltaInstruction<
       TAccountAccountB extends string
         ? ReadonlyAccount<TAccountAccountB>
         : TAccountAccountB,
-      ...TRemainingAccounts
-    ]
-  >;
-
-export type AssertAccountDeltaInstructionWithSigners<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountAccountA extends string | IAccountMeta<string> = string,
-  TAccountAccountB extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
-    [
-      TAccountAccountA extends string
-        ? ReadonlyAccount<TAccountAccountA>
-        : TAccountAccountA,
-      TAccountAccountB extends string
-        ? ReadonlyAccount<TAccountAccountB>
-        : TAccountAccountB,
-      ...TRemainingAccounts
+      ...TRemainingAccounts,
     ]
   >;
 
@@ -92,7 +67,7 @@ export type AssertAccountDeltaInstructionDataArgs = {
 };
 
 export function getAssertAccountDeltaInstructionDataEncoder(): Encoder<AssertAccountDeltaInstructionDataArgs> {
-  return mapEncoder(
+  return transformEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
@@ -125,20 +100,8 @@ export function getAssertAccountDeltaInstructionDataCodec(): Codec<
 }
 
 export type AssertAccountDeltaInput<
-  TAccountAccountA extends string,
-  TAccountAccountB extends string
-> = {
-  /** Account A where the delta is calculated from */
-  accountA: Address<TAccountAccountA>;
-  /** Account B where the delta is calculated to */
-  accountB: Address<TAccountAccountB>;
-  logLevel?: AssertAccountDeltaInstructionDataArgs['logLevel'];
-  assertion: AssertAccountDeltaInstructionDataArgs['assertion'];
-};
-
-export type AssertAccountDeltaInputWithSigners<
-  TAccountAccountA extends string,
-  TAccountAccountB extends string
+  TAccountAccountA extends string = string,
+  TAccountAccountB extends string = string,
 > = {
   /** Account A where the delta is calculated from */
   accountA: Address<TAccountAccountA>;
@@ -151,101 +114,51 @@ export type AssertAccountDeltaInputWithSigners<
 export function getAssertAccountDeltaInstruction<
   TAccountAccountA extends string,
   TAccountAccountB extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
 >(
-  input: AssertAccountDeltaInputWithSigners<TAccountAccountA, TAccountAccountB>
-): AssertAccountDeltaInstructionWithSigners<
-  TProgram,
+  input: AssertAccountDeltaInput<TAccountAccountA, TAccountAccountB>
+): AssertAccountDeltaInstruction<
+  typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountAccountA,
   TAccountAccountB
->;
-export function getAssertAccountDeltaInstruction<
-  TAccountAccountA extends string,
-  TAccountAccountB extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertAccountDeltaInput<TAccountAccountA, TAccountAccountB>
-): AssertAccountDeltaInstruction<TProgram, TAccountAccountA, TAccountAccountB>;
-export function getAssertAccountDeltaInstruction<
-  TAccountAccountA extends string,
-  TAccountAccountB extends string,
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
->(
-  input: AssertAccountDeltaInput<TAccountAccountA, TAccountAccountB>
-): IInstruction {
+> {
   // Program address.
-  const programAddress =
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+  const programAddress = LIGHTHOUSE_PROGRAM_ADDRESS;
 
   // Original accounts.
-  type AccountMetas = Parameters<
-    typeof getAssertAccountDeltaInstructionRaw<
-      TProgram,
-      TAccountAccountA,
-      TAccountAccountB
-    >
-  >[0];
-  const accounts: Record<keyof AccountMetas, ResolvedAccount> = {
+  const originalAccounts = {
     accountA: { value: input.accountA ?? null, isWritable: false },
     accountB: { value: input.accountB ?? null, isWritable: false },
   };
+  const accounts = originalAccounts as Record<
+    keyof typeof originalAccounts,
+    ResolvedAccount
+  >;
 
   // Original args.
   const args = { ...input };
 
-  // Get account metas and signers.
-  const accountMetas = getAccountMetasWithSigners(
-    accounts,
-    'programId',
-    programAddress
-  );
-
-  const instruction = getAssertAccountDeltaInstructionRaw(
-    accountMetas as Record<keyof AccountMetas, IAccountMeta>,
-    args as AssertAccountDeltaInstructionDataArgs,
-    programAddress
-  );
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
+  const instruction = {
+    accounts: [
+      getAccountMeta(accounts.accountA),
+      getAccountMeta(accounts.accountB),
+    ],
+    programAddress,
+    data: getAssertAccountDeltaInstructionDataEncoder().encode(
+      args as AssertAccountDeltaInstructionDataArgs
+    ),
+  } as AssertAccountDeltaInstruction<
+    typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+    TAccountAccountA,
+    TAccountAccountB
+  >;
 
   return instruction;
 }
 
-export function getAssertAccountDeltaInstructionRaw<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountAccountA extends string | IAccountMeta<string> = string,
-  TAccountAccountB extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends Array<IAccountMeta<string>> = []
->(
-  accounts: {
-    accountA: TAccountAccountA extends string
-      ? Address<TAccountAccountA>
-      : TAccountAccountA;
-    accountB: TAccountAccountB extends string
-      ? Address<TAccountAccountB>
-      : TAccountAccountB;
-  },
-  args: AssertAccountDeltaInstructionDataArgs,
-  programAddress: Address<TProgram> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<TProgram>,
-  remainingAccounts?: TRemainingAccounts
-) {
-  return {
-    accounts: [
-      accountMetaWithDefault(accounts.accountA, AccountRole.READONLY),
-      accountMetaWithDefault(accounts.accountB, AccountRole.READONLY),
-      ...(remainingAccounts ?? []),
-    ],
-    data: getAssertAccountDeltaInstructionDataEncoder().encode(args),
-    programAddress,
-  } as AssertAccountDeltaInstruction<
-    TProgram,
-    TAccountAccountA,
-    TAccountAccountB,
-    TRemainingAccounts
-  >;
-}
-
 export type ParsedAssertAccountDeltaInstruction<
-  TProgram extends string = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[]
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -259,7 +172,7 @@ export type ParsedAssertAccountDeltaInstruction<
 
 export function parseAssertAccountDeltaInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[]
+  TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &

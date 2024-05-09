@@ -50,12 +50,12 @@ impl AssertMintAccount {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertMintAccountInstructionData {
+pub struct AssertMintAccountInstructionData {
     discriminator: u8,
 }
 
 impl AssertMintAccountInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 6 }
     }
 }
@@ -72,7 +72,7 @@ pub struct AssertMintAccountInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertMintAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
@@ -237,6 +237,7 @@ impl<'a, 'b> AssertMintAccountCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
+#[derive(Clone, Debug)]
 pub struct AssertMintAccountCpiBuilder<'a, 'b> {
     instruction: Box<AssertMintAccountCpiBuilderInstruction<'a, 'b>>,
 }
@@ -341,6 +342,7 @@ impl<'a, 'b> AssertMintAccountCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertMintAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,

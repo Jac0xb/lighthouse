@@ -70,12 +70,12 @@ impl MemoryWrite {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct MemoryWriteInstructionData {
+pub struct MemoryWriteInstructionData {
     discriminator: u8,
 }
 
 impl MemoryWriteInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 0 }
     }
 }
@@ -98,7 +98,7 @@ pub struct MemoryWriteInstructionArgs {
 ///   2. `[writable, signer]` payer
 ///   3. `[writable]` memory
 ///   4. `[]` source_account
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct MemoryWriteBuilder {
     program_id: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
@@ -354,6 +354,7 @@ impl<'a, 'b> MemoryWriteCpi<'a, 'b> {
 ///   2. `[writable, signer]` payer
 ///   3. `[writable]` memory
 ///   4. `[]` source_account
+#[derive(Clone, Debug)]
 pub struct MemoryWriteCpiBuilder<'a, 'b> {
     instruction: Box<MemoryWriteCpiBuilderInstruction<'a, 'b>>,
 }
@@ -524,6 +525,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct MemoryWriteCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     program_id: Option<&'b solana_program::account_info::AccountInfo<'a>>,

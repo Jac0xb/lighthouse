@@ -8,20 +8,18 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   Option,
   OptionOrNullable,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getAddressDecoder,
+  getAddressEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
@@ -32,7 +30,7 @@ import {
   getU8Encoder,
   getUnitDecoder,
   getUnitEncoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -87,7 +85,7 @@ export type TokenAccountAssertionArgs =
   | { __kind: 'TokenAccountOwnerIsDerived' };
 
 export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Mint',
       getStructEncoder([
@@ -149,7 +147,7 @@ export function getTokenAccountAssertionEncoder(): Encoder<TokenAccountAssertion
 }
 
 export function getTokenAccountAssertionDecoder(): Decoder<TokenAccountAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Mint',
       getStructDecoder([
@@ -223,49 +221,102 @@ export function getTokenAccountAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function tokenAccountAssertion(
   kind: 'Mint',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Mint'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'Mint'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'Mint'
+  >
+): GetDiscriminatedUnionVariant<TokenAccountAssertionArgs, '__kind', 'Mint'>;
 export function tokenAccountAssertion(
   kind: 'Owner',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Owner'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'Owner'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'Owner'
+  >
+): GetDiscriminatedUnionVariant<TokenAccountAssertionArgs, '__kind', 'Owner'>;
 export function tokenAccountAssertion(
   kind: 'Amount',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Amount'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'Amount'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'Amount'
+  >
+): GetDiscriminatedUnionVariant<TokenAccountAssertionArgs, '__kind', 'Amount'>;
 export function tokenAccountAssertion(
   kind: 'Delegate',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'Delegate'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'Delegate'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'Delegate'
+  >
+): GetDiscriminatedUnionVariant<
+  TokenAccountAssertionArgs,
+  '__kind',
+  'Delegate'
+>;
 export function tokenAccountAssertion(
   kind: 'State',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'State'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'State'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'State'
+  >
+): GetDiscriminatedUnionVariant<TokenAccountAssertionArgs, '__kind', 'State'>;
 export function tokenAccountAssertion(
   kind: 'IsNative',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'IsNative'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'IsNative'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'IsNative'
+  >
+): GetDiscriminatedUnionVariant<
+  TokenAccountAssertionArgs,
+  '__kind',
+  'IsNative'
+>;
 export function tokenAccountAssertion(
   kind: 'DelegatedAmount',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'DelegatedAmount'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'DelegatedAmount'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'DelegatedAmount'
+  >
+): GetDiscriminatedUnionVariant<
+  TokenAccountAssertionArgs,
+  '__kind',
+  'DelegatedAmount'
+>;
 export function tokenAccountAssertion(
   kind: 'CloseAuthority',
-  data: GetDataEnumKindContent<TokenAccountAssertionArgs, 'CloseAuthority'>
-): GetDataEnumKind<TokenAccountAssertionArgs, 'CloseAuthority'>;
+  data: GetDiscriminatedUnionVariantContent<
+    TokenAccountAssertionArgs,
+    '__kind',
+    'CloseAuthority'
+  >
+): GetDiscriminatedUnionVariant<
+  TokenAccountAssertionArgs,
+  '__kind',
+  'CloseAuthority'
+>;
 export function tokenAccountAssertion(
   kind: 'TokenAccountOwnerIsDerived'
-): GetDataEnumKind<TokenAccountAssertionArgs, 'TokenAccountOwnerIsDerived'>;
+): GetDiscriminatedUnionVariant<
+  TokenAccountAssertionArgs,
+  '__kind',
+  'TokenAccountOwnerIsDerived'
+>;
 export function tokenAccountAssertion<
-  K extends TokenAccountAssertionArgs['__kind']
->(kind: K, data?: any): Extract<TokenAccountAssertionArgs, { __kind: K }> {
+  K extends TokenAccountAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isTokenAccountAssertion<
-  K extends TokenAccountAssertion['__kind']
+  K extends TokenAccountAssertion['__kind'],
 >(
   kind: K,
   value: TokenAccountAssertion

@@ -12,11 +12,11 @@ devDependencies:
     specifier: ^0.12.1
     version: 0.12.1
   '@metaplex-foundation/kinobi':
-    specifier: ^0.17.9
-    version: 0.17.9(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^0.19.2
+    version: 0.19.2(fastestsmallesttextencoderdecoder@1.0.22)
   '@metaplex-foundation/shank-js':
-    specifier: ^0.1.5
-    version: 0.1.5
+    specifier: ^0.1.7
+    version: 0.1.7
 
 packages:
 
@@ -261,15 +261,16 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/kinobi@0.17.9(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-vvv/LJ/ZDdFIF9tD9yCbLtqeZ4z/ANfnFqlOfNBsddFD1iQrLPOZ8+OokDDkIpRcz4kiyEWLUgFeC5dR17bFRg==}
+  /@metaplex-foundation/kinobi@0.19.2(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-qj3Q2kHUM5K+6IugUZ3gNJ4H22AfCuoh/WcJOmi1tpMcnZacMX+JkOVLaPmGQT17r1KG5Q50COH/2BfFMUh+6A==}
     dependencies:
-      '@noble/hashes': 1.3.3
-      '@solana/codecs-strings': 2.0.0-experimental.a157265(fastestsmallesttextencoderdecoder@1.0.22)
+      '@noble/hashes': 1.4.0
+      '@prettier/sync': 0.5.2(prettier@3.2.5)
+      '@solana/codecs-strings': 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
       chalk: 4.1.2
       json-stable-stringify: 1.1.1
       nunjucks: 3.2.4
-      prettier: 2.8.8
+      prettier: 3.2.5
     transitivePeerDependencies:
       - chokidar
       - fastestsmallesttextencoderdecoder
@@ -286,8 +287,8 @@ packages:
       - supports-color
     dev: true
 
-  /@metaplex-foundation/shank-js@0.1.5:
-    resolution: {integrity: sha512-Bd7wK3ZIceOfg+JNin1QmsNV26lmGRHljbPWcFiuCuUlqKc4PsZhgw4V9e85a0zTrN7SgDI7PGfItiNtHO3nuQ==}
+  /@metaplex-foundation/shank-js@0.1.7:
+    resolution: {integrity: sha512-tSAipn8Ho1UxlMC3jwJ5Opl+Y3lRm60VTkgRDfvzydb57lXW5G+K5MrZhEmhrFUuRYziV+e34CTo+ybpMp1Eqg==}
     dependencies:
       '@metaplex-foundation/rustbin': 0.3.5
       ansi-colors: 4.1.3
@@ -307,12 +308,26 @@ packages:
     engines: {node: '>= 16'}
     dev: true
 
+  /@noble/hashes@1.4.0:
+    resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
+    engines: {node: '>= 16'}
+    dev: true
+
   /@pkgjs/parseargs@0.11.0:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
     requiresBuild: true
     dev: true
     optional: true
+
+  /@prettier/sync@0.5.2(prettier@3.2.5):
+    resolution: {integrity: sha512-Yb569su456XNx5BsH/Vyem7xD6g/y9iLmLUzRKM1a/dhU/D7HqqvkAG72znulXlMXztbV0iiu9O5AL8K98TzZQ==}
+    peerDependencies:
+      prettier: '*'
+    dependencies:
+      make-synchronized: 0.2.9
+      prettier: 3.2.5
+    dev: true
 
   /@sideway/address@4.1.5:
     resolution: {integrity: sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==}
@@ -358,24 +373,36 @@ packages:
       buffer: 6.0.3
     dev: true
 
-  /@solana/codecs-core@2.0.0-experimental.a157265:
-    resolution: {integrity: sha512-78SjZiLWWjAn5sVL92T5W+4LXYG01Vu28tVbtiCWi4QEX21794bW6lMcXbPmbivFPbD8Dje+EHAYADfxYj6RTA==}
-    dev: true
-
-  /@solana/codecs-numbers@2.0.0-experimental.a157265:
-    resolution: {integrity: sha512-Bkp7Y1KyhMsu8tHKxwHDXCnYxEawT0P4kEsIO1Fzs54pxOS1jtwJHo7e4FE8Kv8ZSajUQAnbmQqj5GaIU08h9A==}
+  /@solana/codecs-core@2.0.0-preview.3:
+    resolution: {integrity: sha512-xQz6USSBs82lUNoVa/wwnm6wa2y2eWtGwPLUwF/NOGGpR+QH9EODijXvJ8wuC9llyqerqdC+5mrmx9C8VSMNYg==}
     dependencies:
-      '@solana/codecs-core': 2.0.0-experimental.a157265
+      '@solana/errors': 2.0.0-preview.3
     dev: true
 
-  /@solana/codecs-strings@2.0.0-experimental.a157265(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-1AypxqrFipI053/EOHZnDDcfKBduLjJdrpkbcqrgWJyciv/7+fMQjkgjbG+C8Vcqx5G8weUesXCcvAhqbdRwMw==}
+  /@solana/codecs-numbers@2.0.0-preview.3:
+    resolution: {integrity: sha512-cjsHexVAj4GveDtG0+WjW121TKMbWN7AkOvGlf1qauOJgzJvX3V7KXHWuEg8wGGfRiLiXKEgh7KieQiB17EI3Q==}
+    dependencies:
+      '@solana/codecs-core': 2.0.0-preview.3
+      '@solana/errors': 2.0.0-preview.3
+    dev: true
+
+  /@solana/codecs-strings@2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-CUij3XgdoqbrEYncyy+kHCIXRHjqkcjiyJhf4hWVjMXM5nu2jreehhBiLFHFjlFw2U3vp1gig5QNxji8SjpQzw==}
     peerDependencies:
       fastestsmallesttextencoderdecoder: ^1.0.22
     dependencies:
-      '@solana/codecs-core': 2.0.0-experimental.a157265
-      '@solana/codecs-numbers': 2.0.0-experimental.a157265
+      '@solana/codecs-core': 2.0.0-preview.3
+      '@solana/codecs-numbers': 2.0.0-preview.3
+      '@solana/errors': 2.0.0-preview.3
       fastestsmallesttextencoderdecoder: 1.0.22
+    dev: true
+
+  /@solana/errors@2.0.0-preview.3:
+    resolution: {integrity: sha512-IZAUMcKaV3Hn0QTfzlGmVsDaH1mVUq0uURJi+tm8K3n37cKrvXyS2GQsHtIMRaLdOVp1IbTtIc5YF3+qATlpyw==}
+    hasBin: true
+    dependencies:
+      chalk: 5.3.0
+      commander: 12.0.0
     dev: true
 
   /@solana/spl-token-registry@0.2.4574:
@@ -768,6 +795,11 @@ packages:
       supports-color: 7.2.0
     dev: true
 
+  /chalk@5.3.0:
+    resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: true
+
   /chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
     dev: true
@@ -884,6 +916,11 @@ packages:
   /commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
+    dev: true
+
+  /commander@12.0.0:
+    resolution: {integrity: sha512-MwVNWlYjDTtOjX5PiD7o5pK0UrFU/OYgcJfjjK4RaHZETNtjJqrZa9Y9ds88+A+f+d5lv+561eZ+yCKoS3gbAA==}
+    engines: {node: '>=18'}
     dev: true
 
   /commander@2.20.3:
@@ -1751,6 +1788,10 @@ packages:
       semver: 6.3.1
     dev: true
 
+  /make-synchronized@0.2.9:
+    resolution: {integrity: sha512-4wczOs8SLuEdpEvp3vGo83wh8rjJ78UsIk7DIX5fxdfmfMJGog4bQzxfvOwq7Q3yCHLC4jp1urPHIxRS/A93gA==}
+    dev: true
+
   /map-stream@0.1.0:
     resolution: {integrity: sha512-CkYQrPYZfWnu/DAmVCpTSX/xHpKZ80eKh2lAkyA6AJTef6bW+6JpbQZN5rofum7da+SyN1bi5ctTm+lTfcCW3g==}
     dev: true
@@ -2041,9 +2082,9 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /prettier@2.8.8:
-    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
-    engines: {node: '>=10.13.0'}
+  /prettier@3.2.5:
+    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+    engines: {node: '>=14'}
     hasBin: true
     dev: true
 

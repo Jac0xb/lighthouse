@@ -10,16 +10,16 @@ import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI128Decoder,
   getI128Encoder,
   getStructDecoder,
   getStructEncoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -56,7 +56,7 @@ export type AccountInfoDeltaAssertionArgs =
     };
 
 export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Lamports',
       getStructEncoder([
@@ -83,7 +83,7 @@ export function getAccountInfoDeltaAssertionEncoder(): Encoder<AccountInfoDeltaA
 }
 
 export function getAccountInfoDeltaAssertionDecoder(): Decoder<AccountInfoDeltaAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Lamports',
       getStructDecoder([
@@ -122,30 +122,63 @@ export function getAccountInfoDeltaAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function accountInfoDeltaAssertion(
   kind: 'Lamports',
-  data: GetDataEnumKindContent<AccountInfoDeltaAssertionArgs, 'Lamports'>
-): GetDataEnumKind<AccountInfoDeltaAssertionArgs, 'Lamports'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoDeltaAssertionArgs,
+    '__kind',
+    'Lamports'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoDeltaAssertionArgs,
+  '__kind',
+  'Lamports'
+>;
 export function accountInfoDeltaAssertion(
   kind: 'DataLength',
-  data: GetDataEnumKindContent<AccountInfoDeltaAssertionArgs, 'DataLength'>
-): GetDataEnumKind<AccountInfoDeltaAssertionArgs, 'DataLength'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoDeltaAssertionArgs,
+    '__kind',
+    'DataLength'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoDeltaAssertionArgs,
+  '__kind',
+  'DataLength'
+>;
 export function accountInfoDeltaAssertion(
   kind: 'Owner',
-  data: GetDataEnumKindContent<AccountInfoDeltaAssertionArgs, 'Owner'>
-): GetDataEnumKind<AccountInfoDeltaAssertionArgs, 'Owner'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoDeltaAssertionArgs,
+    '__kind',
+    'Owner'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoDeltaAssertionArgs,
+  '__kind',
+  'Owner'
+>;
 export function accountInfoDeltaAssertion(
   kind: 'RentEpoch',
-  data: GetDataEnumKindContent<AccountInfoDeltaAssertionArgs, 'RentEpoch'>
-): GetDataEnumKind<AccountInfoDeltaAssertionArgs, 'RentEpoch'>;
+  data: GetDiscriminatedUnionVariantContent<
+    AccountInfoDeltaAssertionArgs,
+    '__kind',
+    'RentEpoch'
+  >
+): GetDiscriminatedUnionVariant<
+  AccountInfoDeltaAssertionArgs,
+  '__kind',
+  'RentEpoch'
+>;
 export function accountInfoDeltaAssertion<
-  K extends AccountInfoDeltaAssertionArgs['__kind']
->(kind: K, data?: any): Extract<AccountInfoDeltaAssertionArgs, { __kind: K }> {
+  K extends AccountInfoDeltaAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isAccountInfoDeltaAssertion<
-  K extends AccountInfoDeltaAssertion['__kind']
+  K extends AccountInfoDeltaAssertion['__kind'],
 >(
   kind: K,
   value: AccountInfoDeltaAssertion

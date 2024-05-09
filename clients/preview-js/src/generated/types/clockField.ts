@@ -11,9 +11,9 @@ import {
   Decoder,
   Encoder,
   combineCodec,
-  getScalarEnumDecoder,
-  getScalarEnumEncoder,
-} from '@solana/codecs';
+  getEnumDecoder,
+  getEnumEncoder,
+} from '@solana/web3.js';
 
 export enum ClockField {
   Slot,
@@ -26,11 +26,11 @@ export enum ClockField {
 export type ClockFieldArgs = ClockField;
 
 export function getClockFieldEncoder(): Encoder<ClockFieldArgs> {
-  return getScalarEnumEncoder(ClockField);
+  return getEnumEncoder(ClockField);
 }
 
 export function getClockFieldDecoder(): Decoder<ClockField> {
-  return getScalarEnumDecoder(ClockField);
+  return getEnumDecoder(ClockField);
 }
 
 export function getClockFieldCodec(): Codec<ClockFieldArgs, ClockField> {

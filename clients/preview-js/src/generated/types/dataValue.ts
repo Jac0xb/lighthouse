@@ -8,22 +8,23 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
+  ReadonlyUint8Array,
+  addDecoderSizePrefix,
+  addEncoderSizePrefix,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getI128Decoder,
   getI128Encoder,
   getI16Decoder,
@@ -48,40 +49,40 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 
 export type DataValue =
-  | { __kind: 'Bool'; fields: [boolean] }
-  | { __kind: 'U8'; fields: [number] }
-  | { __kind: 'I8'; fields: [number] }
-  | { __kind: 'U16'; fields: [number] }
-  | { __kind: 'I16'; fields: [number] }
-  | { __kind: 'U32'; fields: [number] }
-  | { __kind: 'I32'; fields: [number] }
-  | { __kind: 'U64'; fields: [bigint] }
-  | { __kind: 'I64'; fields: [bigint] }
-  | { __kind: 'U128'; fields: [bigint] }
-  | { __kind: 'I128'; fields: [bigint] }
-  | { __kind: 'Bytes'; fields: [Uint8Array] }
-  | { __kind: 'Pubkey'; fields: [Address] };
+  | { __kind: 'Bool'; fields: readonly [boolean] }
+  | { __kind: 'U8'; fields: readonly [number] }
+  | { __kind: 'I8'; fields: readonly [number] }
+  | { __kind: 'U16'; fields: readonly [number] }
+  | { __kind: 'I16'; fields: readonly [number] }
+  | { __kind: 'U32'; fields: readonly [number] }
+  | { __kind: 'I32'; fields: readonly [number] }
+  | { __kind: 'U64'; fields: readonly [bigint] }
+  | { __kind: 'I64'; fields: readonly [bigint] }
+  | { __kind: 'U128'; fields: readonly [bigint] }
+  | { __kind: 'I128'; fields: readonly [bigint] }
+  | { __kind: 'Bytes'; fields: readonly [ReadonlyUint8Array] }
+  | { __kind: 'Pubkey'; fields: readonly [Address] };
 
 export type DataValueArgs =
-  | { __kind: 'Bool'; fields: [boolean] }
-  | { __kind: 'U8'; fields: [number] }
-  | { __kind: 'I8'; fields: [number] }
-  | { __kind: 'U16'; fields: [number] }
-  | { __kind: 'I16'; fields: [number] }
-  | { __kind: 'U32'; fields: [number] }
-  | { __kind: 'I32'; fields: [number] }
-  | { __kind: 'U64'; fields: [number | bigint] }
-  | { __kind: 'I64'; fields: [number | bigint] }
-  | { __kind: 'U128'; fields: [number | bigint] }
-  | { __kind: 'I128'; fields: [number | bigint] }
-  | { __kind: 'Bytes'; fields: [Uint8Array] }
-  | { __kind: 'Pubkey'; fields: [Address] };
+  | { __kind: 'Bool'; fields: readonly [boolean] }
+  | { __kind: 'U8'; fields: readonly [number] }
+  | { __kind: 'I8'; fields: readonly [number] }
+  | { __kind: 'U16'; fields: readonly [number] }
+  | { __kind: 'I16'; fields: readonly [number] }
+  | { __kind: 'U32'; fields: readonly [number] }
+  | { __kind: 'I32'; fields: readonly [number] }
+  | { __kind: 'U64'; fields: readonly [number | bigint] }
+  | { __kind: 'I64'; fields: readonly [number | bigint] }
+  | { __kind: 'U128'; fields: readonly [number | bigint] }
+  | { __kind: 'I128'; fields: readonly [number | bigint] }
+  | { __kind: 'Bytes'; fields: readonly [ReadonlyUint8Array] }
+  | { __kind: 'Pubkey'; fields: readonly [Address] };
 
 export function getDataValueEncoder(): Encoder<DataValueArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'Bool',
       getStructEncoder([['fields', getTupleEncoder([getBooleanEncoder()])]]),
@@ -107,7 +108,9 @@ export function getDataValueEncoder(): Encoder<DataValueArgs> {
       getStructEncoder([
         [
           'fields',
-          getTupleEncoder([getBytesEncoder({ size: getU32Encoder() })]),
+          getTupleEncoder([
+            addEncoderSizePrefix(getBytesEncoder(), getU32Encoder()),
+          ]),
         ],
       ]),
     ],
@@ -119,7 +122,7 @@ export function getDataValueEncoder(): Encoder<DataValueArgs> {
 }
 
 export function getDataValueDecoder(): Decoder<DataValue> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'Bool',
       getStructDecoder([['fields', getTupleDecoder([getBooleanDecoder()])]]),
@@ -145,7 +148,9 @@ export function getDataValueDecoder(): Decoder<DataValue> {
       getStructDecoder([
         [
           'fields',
-          getTupleDecoder([getBytesDecoder({ size: getU32Decoder() })]),
+          getTupleDecoder([
+            addDecoderSizePrefix(getBytesDecoder(), getU32Decoder()),
+          ]),
         ],
       ]),
     ],
@@ -163,60 +168,112 @@ export function getDataValueCodec(): Codec<DataValueArgs, DataValue> {
 // Data Enum Helpers.
 export function dataValue(
   kind: 'Bool',
-  data: GetDataEnumKindContent<DataValueArgs, 'Bool'>['fields']
-): GetDataEnumKind<DataValueArgs, 'Bool'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'Bool'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'Bool'>;
 export function dataValue(
   kind: 'U8',
-  data: GetDataEnumKindContent<DataValueArgs, 'U8'>['fields']
-): GetDataEnumKind<DataValueArgs, 'U8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'U8'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'U8'>;
 export function dataValue(
   kind: 'I8',
-  data: GetDataEnumKindContent<DataValueArgs, 'I8'>['fields']
-): GetDataEnumKind<DataValueArgs, 'I8'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'I8'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'I8'>;
 export function dataValue(
   kind: 'U16',
-  data: GetDataEnumKindContent<DataValueArgs, 'U16'>['fields']
-): GetDataEnumKind<DataValueArgs, 'U16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'U16'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'U16'>;
 export function dataValue(
   kind: 'I16',
-  data: GetDataEnumKindContent<DataValueArgs, 'I16'>['fields']
-): GetDataEnumKind<DataValueArgs, 'I16'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'I16'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'I16'>;
 export function dataValue(
   kind: 'U32',
-  data: GetDataEnumKindContent<DataValueArgs, 'U32'>['fields']
-): GetDataEnumKind<DataValueArgs, 'U32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'U32'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'U32'>;
 export function dataValue(
   kind: 'I32',
-  data: GetDataEnumKindContent<DataValueArgs, 'I32'>['fields']
-): GetDataEnumKind<DataValueArgs, 'I32'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'I32'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'I32'>;
 export function dataValue(
   kind: 'U64',
-  data: GetDataEnumKindContent<DataValueArgs, 'U64'>['fields']
-): GetDataEnumKind<DataValueArgs, 'U64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'U64'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'U64'>;
 export function dataValue(
   kind: 'I64',
-  data: GetDataEnumKindContent<DataValueArgs, 'I64'>['fields']
-): GetDataEnumKind<DataValueArgs, 'I64'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'I64'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'I64'>;
 export function dataValue(
   kind: 'U128',
-  data: GetDataEnumKindContent<DataValueArgs, 'U128'>['fields']
-): GetDataEnumKind<DataValueArgs, 'U128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'U128'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'U128'>;
 export function dataValue(
   kind: 'I128',
-  data: GetDataEnumKindContent<DataValueArgs, 'I128'>['fields']
-): GetDataEnumKind<DataValueArgs, 'I128'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'I128'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'I128'>;
 export function dataValue(
   kind: 'Bytes',
-  data: GetDataEnumKindContent<DataValueArgs, 'Bytes'>['fields']
-): GetDataEnumKind<DataValueArgs, 'Bytes'>;
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'Bytes'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'Bytes'>;
 export function dataValue(
   kind: 'Pubkey',
-  data: GetDataEnumKindContent<DataValueArgs, 'Pubkey'>['fields']
-): GetDataEnumKind<DataValueArgs, 'Pubkey'>;
-export function dataValue<K extends DataValueArgs['__kind']>(
+  data: GetDiscriminatedUnionVariantContent<
+    DataValueArgs,
+    '__kind',
+    'Pubkey'
+  >['fields']
+): GetDiscriminatedUnionVariant<DataValueArgs, '__kind', 'Pubkey'>;
+export function dataValue<K extends DataValueArgs['__kind'], Data>(
   kind: K,
-  data?: any
-): Extract<DataValueArgs, { __kind: K }> {
+  data?: Data
+) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };

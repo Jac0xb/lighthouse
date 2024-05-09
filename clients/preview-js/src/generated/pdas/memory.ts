@@ -11,8 +11,9 @@ import {
   ProgramDerivedAddress,
   getAddressEncoder,
   getProgramDerivedAddress,
-} from '@solana/addresses';
-import { getStringEncoder, getU8Encoder } from '@solana/codecs';
+  getU8Encoder,
+  getUtf8Encoder,
+} from '@solana/web3.js';
 
 export type MemorySeeds = {
   payer: Address;
@@ -27,10 +28,10 @@ export async function findMemoryPda(
   const {
     programAddress = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
   } = config;
-  return getProgramDerivedAddress({
+  return await getProgramDerivedAddress({
     programAddress,
     seeds: [
-      getStringEncoder({ size: 'variable' }).encode('memory'),
+      getUtf8Encoder().encode('memory'),
       getAddressEncoder().encode(seeds.payer),
       getU8Encoder().encode(seeds.memoryId),
     ],

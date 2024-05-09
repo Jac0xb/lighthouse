@@ -65,7 +65,7 @@ export function upgradeableProgramAssertion(
   >
 ): GetDataEnumKind<UpgradeableProgramAssertionArgs, 'ProgramDataAddress'>;
 export function upgradeableProgramAssertion<
-  K extends UpgradeableProgramAssertionArgs['__kind']
+  K extends UpgradeableProgramAssertionArgs['__kind'],
 >(
   kind: K,
   data?: any
@@ -75,7 +75,7 @@ export function upgradeableProgramAssertion<
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isUpgradeableProgramAssertion<
-  K extends UpgradeableProgramAssertion['__kind']
+  K extends UpgradeableProgramAssertion['__kind'],
 >(
   kind: K,
   value: UpgradeableProgramAssertion

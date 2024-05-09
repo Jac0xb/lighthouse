@@ -50,12 +50,12 @@ impl AssertAccountInfo {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertAccountInfoInstructionData {
+pub struct AssertAccountInfoInstructionData {
     discriminator: u8,
 }
 
 impl AssertAccountInfoInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 4 }
     }
 }
@@ -72,7 +72,7 @@ pub struct AssertAccountInfoInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertAccountInfoBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
@@ -237,6 +237,7 @@ impl<'a, 'b> AssertAccountInfoCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
+#[derive(Clone, Debug)]
 pub struct AssertAccountInfoCpiBuilder<'a, 'b> {
     instruction: Box<AssertAccountInfoCpiBuilderInstruction<'a, 'b>>,
 }
@@ -341,6 +342,7 @@ impl<'a, 'b> AssertAccountInfoCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertAccountInfoCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,

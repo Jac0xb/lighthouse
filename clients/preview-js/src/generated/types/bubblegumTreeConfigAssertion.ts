@@ -8,27 +8,25 @@
 
 import {
   Address,
-  getAddressDecoder,
-  getAddressEncoder,
-} from '@solana/addresses';
-import {
   Codec,
   Decoder,
   Encoder,
-  GetDataEnumKind,
-  GetDataEnumKindContent,
+  GetDiscriminatedUnionVariant,
+  GetDiscriminatedUnionVariantContent,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
-  getDataEnumDecoder,
-  getDataEnumEncoder,
+  getDiscriminatedUnionDecoder,
+  getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
-} from '@solana/codecs';
+} from '@solana/web3.js';
 import {
   EquatableOperator,
   EquatableOperatorArgs,
@@ -69,7 +67,7 @@ export type BubblegumTreeConfigAssertionArgs =
     };
 
 export function getBubblegumTreeConfigAssertionEncoder(): Encoder<BubblegumTreeConfigAssertionArgs> {
-  return getDataEnumEncoder([
+  return getDiscriminatedUnionEncoder([
     [
       'TreeCreator',
       getStructEncoder([
@@ -116,7 +114,7 @@ export function getBubblegumTreeConfigAssertionEncoder(): Encoder<BubblegumTreeC
 }
 
 export function getBubblegumTreeConfigAssertionDecoder(): Decoder<BubblegumTreeConfigAssertion> {
-  return getDataEnumDecoder([
+  return getDiscriminatedUnionDecoder([
     [
       'TreeCreator',
       getStructDecoder([
@@ -175,47 +173,87 @@ export function getBubblegumTreeConfigAssertionCodec(): Codec<
 // Data Enum Helpers.
 export function bubblegumTreeConfigAssertion(
   kind: 'TreeCreator',
-  data: GetDataEnumKindContent<BubblegumTreeConfigAssertionArgs, 'TreeCreator'>
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'TreeCreator'>;
+  data: GetDiscriminatedUnionVariantContent<
+    BubblegumTreeConfigAssertionArgs,
+    '__kind',
+    'TreeCreator'
+  >
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'TreeCreator'
+>;
 export function bubblegumTreeConfigAssertion(
   kind: 'TreeDelegate',
-  data: GetDataEnumKindContent<BubblegumTreeConfigAssertionArgs, 'TreeDelegate'>
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'TreeDelegate'>;
+  data: GetDiscriminatedUnionVariantContent<
+    BubblegumTreeConfigAssertionArgs,
+    '__kind',
+    'TreeDelegate'
+  >
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'TreeDelegate'
+>;
 export function bubblegumTreeConfigAssertion(
   kind: 'TotalMintCapacity',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     BubblegumTreeConfigAssertionArgs,
+    '__kind',
     'TotalMintCapacity'
   >
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'TotalMintCapacity'>;
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'TotalMintCapacity'
+>;
 export function bubblegumTreeConfigAssertion(
   kind: 'NumMinted',
-  data: GetDataEnumKindContent<BubblegumTreeConfigAssertionArgs, 'NumMinted'>
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'NumMinted'>;
+  data: GetDiscriminatedUnionVariantContent<
+    BubblegumTreeConfigAssertionArgs,
+    '__kind',
+    'NumMinted'
+  >
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'NumMinted'
+>;
 export function bubblegumTreeConfigAssertion(
   kind: 'IsPublic',
-  data: GetDataEnumKindContent<BubblegumTreeConfigAssertionArgs, 'IsPublic'>
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'IsPublic'>;
+  data: GetDiscriminatedUnionVariantContent<
+    BubblegumTreeConfigAssertionArgs,
+    '__kind',
+    'IsPublic'
+  >
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'IsPublic'
+>;
 export function bubblegumTreeConfigAssertion(
   kind: 'IsDecompressible',
-  data: GetDataEnumKindContent<
+  data: GetDiscriminatedUnionVariantContent<
     BubblegumTreeConfigAssertionArgs,
+    '__kind',
     'IsDecompressible'
   >
-): GetDataEnumKind<BubblegumTreeConfigAssertionArgs, 'IsDecompressible'>;
+): GetDiscriminatedUnionVariant<
+  BubblegumTreeConfigAssertionArgs,
+  '__kind',
+  'IsDecompressible'
+>;
 export function bubblegumTreeConfigAssertion<
-  K extends BubblegumTreeConfigAssertionArgs['__kind']
->(
-  kind: K,
-  data?: any
-): Extract<BubblegumTreeConfigAssertionArgs, { __kind: K }> {
+  K extends BubblegumTreeConfigAssertionArgs['__kind'],
+  Data,
+>(kind: K, data?: Data) {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 
 export function isBubblegumTreeConfigAssertion<
-  K extends BubblegumTreeConfigAssertion['__kind']
+  K extends BubblegumTreeConfigAssertion['__kind'],
 >(
   kind: K,
   value: BubblegumTreeConfigAssertion

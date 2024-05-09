@@ -105,14 +105,14 @@ export function accountInfoDeltaAssertion(
   data: GetDataEnumKindContent<AccountInfoDeltaAssertionArgs, 'RentEpoch'>
 ): GetDataEnumKind<AccountInfoDeltaAssertionArgs, 'RentEpoch'>;
 export function accountInfoDeltaAssertion<
-  K extends AccountInfoDeltaAssertionArgs['__kind']
+  K extends AccountInfoDeltaAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<AccountInfoDeltaAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isAccountInfoDeltaAssertion<
-  K extends AccountInfoDeltaAssertion['__kind']
+  K extends AccountInfoDeltaAssertion['__kind'],
 >(
   kind: K,
   value: AccountInfoDeltaAssertion

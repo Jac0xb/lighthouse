@@ -58,14 +58,14 @@ export function upgradableBufferAssertion(
   data: GetDataEnumKindContent<UpgradableBufferAssertionArgs, 'Authority'>
 ): GetDataEnumKind<UpgradableBufferAssertionArgs, 'Authority'>;
 export function upgradableBufferAssertion<
-  K extends UpgradableBufferAssertionArgs['__kind']
+  K extends UpgradableBufferAssertionArgs['__kind'],
 >(kind: K, data?: any): Extract<UpgradableBufferAssertionArgs, { __kind: K }> {
   return Array.isArray(data)
     ? { __kind: kind, fields: data }
     : { __kind: kind, ...(data ?? {}) };
 }
 export function isUpgradableBufferAssertion<
-  K extends UpgradableBufferAssertion['__kind']
+  K extends UpgradableBufferAssertion['__kind'],
 >(
   kind: K,
   value: UpgradableBufferAssertion

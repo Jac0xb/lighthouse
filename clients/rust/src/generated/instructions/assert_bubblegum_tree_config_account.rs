@@ -50,12 +50,12 @@ impl AssertBubblegumTreeConfigAccount {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct AssertBubblegumTreeConfigAccountInstructionData {
+pub struct AssertBubblegumTreeConfigAccountInstructionData {
     discriminator: u8,
 }
 
 impl AssertBubblegumTreeConfigAccountInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 16 }
     }
 }
@@ -72,7 +72,7 @@ pub struct AssertBubblegumTreeConfigAccountInstructionArgs {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AssertBubblegumTreeConfigAccountBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
@@ -237,6 +237,7 @@ impl<'a, 'b> AssertBubblegumTreeConfigAccountCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[]` target_account
+#[derive(Clone, Debug)]
 pub struct AssertBubblegumTreeConfigAccountCpiBuilder<'a, 'b> {
     instruction: Box<AssertBubblegumTreeConfigAccountCpiBuilderInstruction<'a, 'b>>,
 }
@@ -341,6 +342,7 @@ impl<'a, 'b> AssertBubblegumTreeConfigAccountCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct AssertBubblegumTreeConfigAccountCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
