@@ -1,6 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
+use crate::types::CompactBytes;
+
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum DataValue {
     Bool(bool),
@@ -14,6 +16,6 @@ pub enum DataValue {
     I64(i64),
     U128(u128),
     I128(i128),
-    Bytes(Vec<u8>),
+    Bytes(CompactBytes),
     Pubkey(Pubkey),
 }

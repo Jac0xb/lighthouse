@@ -314,7 +314,10 @@ async fn write_account_type() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes(vec![MAX; 32].into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
@@ -589,7 +592,10 @@ async fn write_to_another_memory_index() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes((vec![MAX; 32]).into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
@@ -649,7 +655,10 @@ async fn write_to_another_bump() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes((vec![MAX; 32]).into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),

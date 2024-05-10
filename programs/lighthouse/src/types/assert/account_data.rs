@@ -2,14 +2,15 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+    types::{
+        assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+        CompactBytes,
+    },
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::{CompactU64, LEB128Vec};
+use lighthouse_common::CompactU64;
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
-
-pub type CompactBytes = LEB128Vec<u8>;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {

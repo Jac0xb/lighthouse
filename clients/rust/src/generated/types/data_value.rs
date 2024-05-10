@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::hooked::CompactBytes;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -23,7 +24,7 @@ pub enum DataValue {
     I64(i64),
     U128(u128),
     I128(i128),
-    Bytes(Vec<u8>),
+    Bytes(CompactBytes),
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")

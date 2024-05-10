@@ -118,7 +118,7 @@ pub(crate) fn memory_write(
                 err!(LighthouseError::FailedToSerialize)
             };
 
-            let bytes = match data_value {
+            let bytes: Vec<u8> = match data_value {
                 DataValue::Bool(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::U8(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::I8(value) => value.try_to_vec().map_err(err_map)?,
@@ -130,7 +130,7 @@ pub(crate) fn memory_write(
                 DataValue::I64(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::U128(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::I128(value) => value.try_to_vec().map_err(err_map)?,
-                DataValue::Bytes(value) => value.clone(),
+                DataValue::Bytes(value) => value.to_vec(),
                 DataValue::Pubkey(value) => value.to_bytes().to_vec(),
             };
 

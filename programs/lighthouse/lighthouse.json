@@ -2573,7 +2573,9 @@
           {
             "name": "Bytes",
             "fields": [
-              "bytes"
+              {
+                "defined": "CompactBytes"
+              }
             ]
           },
           {
