@@ -23,12 +23,16 @@ import {
   combineCodec,
   getStructDecoder,
   getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Decoder,
+  getCompactU64Encoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
@@ -78,14 +82,14 @@ export type MemoryWriteInstructionData = {
   discriminator: number;
   memoryId: number;
   memoryBump: number;
-  writeOffset: number;
+  writeOffset: CompactU64;
   writeType: WriteType;
 };
 
 export type MemoryWriteInstructionDataArgs = {
   memoryId?: number;
   memoryBump: number;
-  writeOffset: number;
+  writeOffset: CompactU64Args;
   writeType: WriteTypeArgs;
 };
 
@@ -95,7 +99,7 @@ export function getMemoryWriteInstructionDataEncoder(): Encoder<MemoryWriteInstr
       ['discriminator', getU8Encoder()],
       ['memoryId', getU8Encoder()],
       ['memoryBump', getU8Encoder()],
-      ['writeOffset', getU16Encoder()],
+      ['writeOffset', getCompactU64Encoder()],
       ['writeType', getWriteTypeEncoder()],
     ]),
     (value) => ({ ...value, discriminator: 0, memoryId: value.memoryId ?? 0 })
@@ -107,7 +111,7 @@ export function getMemoryWriteInstructionDataDecoder(): Decoder<MemoryWriteInstr
     ['discriminator', getU8Decoder()],
     ['memoryId', getU8Decoder()],
     ['memoryBump', getU8Decoder()],
-    ['writeOffset', getU16Decoder()],
+    ['writeOffset', getCompactU64Decoder()],
     ['writeType', getWriteTypeDecoder()],
   ]);
 }

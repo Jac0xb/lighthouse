@@ -19,12 +19,16 @@ import {
   combineCodec,
   getStructDecoder,
   getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Decoder,
+  getCompactU64Encoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
@@ -56,13 +60,13 @@ export type AssertAccountDataInstruction<
 export type AssertAccountDataInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  offset: number;
+  offset: CompactU64;
   assertion: DataValueAssertion;
 };
 
 export type AssertAccountDataInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  offset: number;
+  offset: CompactU64Args;
   assertion: DataValueAssertionArgs;
 };
 
@@ -71,7 +75,7 @@ export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAcco
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['offset', getU16Encoder()],
+      ['offset', getCompactU64Encoder()],
       ['assertion', getDataValueAssertionEncoder()],
     ]),
     (value) => ({
@@ -86,7 +90,7 @@ export function getAssertAccountDataInstructionDataDecoder(): Decoder<AssertAcco
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['offset', getU16Decoder()],
+    ['offset', getCompactU64Decoder()],
     ['assertion', getDataValueAssertionDecoder()],
   ]);
 }

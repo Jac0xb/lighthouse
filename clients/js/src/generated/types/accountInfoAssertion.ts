@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
   GetDataEnumKind,
   GetDataEnumKindContent,
@@ -14,10 +14,8 @@ import {
   bool,
   bytes,
   dataEnum,
-  option,
   publicKey as publicKeySerializer,
   struct,
-  u16,
   u64,
 } from '@metaplex-foundation/umi/serializers';
 import {
@@ -31,6 +29,11 @@ import {
   getIntegerOperatorSerializer,
   getKnownProgramSerializer,
 } from '.';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Serializer,
+} from '../../hooked';
 
 export type AccountInfoAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
@@ -44,8 +47,8 @@ export type AccountInfoAssertion =
   | {
       __kind: 'VerifyDatahash';
       expectedHash: Uint8Array;
-      start: Option<number>;
-      length: Option<number>;
+      start: CompactU64;
+      length: CompactU64;
     };
 
 export type AccountInfoAssertionArgs =
@@ -76,8 +79,8 @@ export type AccountInfoAssertionArgs =
   | {
       __kind: 'VerifyDatahash';
       expectedHash: Uint8Array;
-      start: OptionOrNullable<number>;
-      length: OptionOrNullable<number>;
+      start: CompactU64Args;
+      length: CompactU64Args;
     };
 
 export function getAccountInfoAssertionSerializer(): Serializer<
@@ -146,8 +149,8 @@ export function getAccountInfoAssertionSerializer(): Serializer<
         'VerifyDatahash',
         struct<GetDataEnumKindContent<AccountInfoAssertion, 'VerifyDatahash'>>([
           ['expectedHash', bytes({ size: 32 })],
-          ['start', option(u16())],
-          ['length', option(u16())],
+          ['start', getCompactU64Serializer()],
+          ['length', getCompactU64Serializer()],
         ]),
       ],
     ],

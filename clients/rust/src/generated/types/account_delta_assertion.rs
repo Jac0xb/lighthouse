@@ -7,6 +7,7 @@
 
 use crate::generated::types::AccountInfoDeltaAssertion;
 use crate::generated::types::DataValueDeltaAssertion;
+use crate::hooked::CompactU64;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -14,12 +15,12 @@ use borsh::BorshSerialize;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AccountDeltaAssertion {
     AccountInfo {
-        a_offset: u16,
+        a_offset: CompactU64,
         assertion: AccountInfoDeltaAssertion,
     },
     Data {
-        a_offset: u16,
-        b_offset: u16,
+        a_offset: CompactU64,
+        b_offset: CompactU64,
         assertion: DataValueDeltaAssertion,
     },
 }

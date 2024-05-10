@@ -36,7 +36,6 @@
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
-    "@solana/web3.js": "2.0.0-preview.3",
     "@solana/webcrypto-ed25519-polyfill": "2.0.0-preview.3",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
@@ -54,5 +53,10 @@
     "typedoc-plugin-missing-exports": "^2.2.0",
     "typescript": "^5.4.5"
   },
-  "packageManager": "pnpm@9.0.3"
+  "packageManager": "pnpm@9.0.3",
+  "dependencies": {
+    "@minhducsun2002/leb128": "^1.0.0",
+    "@webassemblyjs/leb128": "^1.12.1",
+    "leb": "^1.0.0"
+  }
 }

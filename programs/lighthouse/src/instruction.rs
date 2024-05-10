@@ -8,7 +8,16 @@ use crate::types::{
     write::WriteType,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::{LEB128Vec, CompactU64};
 use shank::ShankInstruction;
+
+// Shank does not support generics, so we need to define the following types for each assertion array.
+// The encoding/decoding is handled custom in the sdks
+type AccountInfoAssertions = LEB128Vec<AccountInfoAssertion>;
+type MintAccountAssertions = LEB128Vec<MintAccountAssertion>;
+type TokenAccountAssertions = LEB128Vec<TokenAccountAssertion>;
+type StakeAccountAssertions = LEB128Vec<StakeAccountAssertion>;
+type UpgradeableLoaderStateAssertions = LEB128Vec<UpgradeableLoaderStateAssertion>;
 
 #[derive(BorshSerialize, BorshDeserialize, ShankInstruction)]
 #[rustfmt::skip]
@@ -21,7 +30,7 @@ pub(crate) enum LighthouseInstruction {
     MemoryWrite { 
         memory_id: u8,
         memory_bump: u8,
-        write_offset: u16,
+        write_offset: CompactU64,
         write_type: WriteType,
     },
 
@@ -41,31 +50,31 @@ pub(crate) enum LighthouseInstruction {
     AssertAccountInfo { log_level: LogLevel, assertion: AccountInfoAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    AssertAccountInfoMulti { log_level: LogLevel, assertions: Vec<AccountInfoAssertion> },
+    AssertAccountInfoMulti { log_level: LogLevel, assertions: AccountInfoAssertions },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
     AssertMintAccount { log_level: LogLevel, assertion: MintAccountAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    AssertMintAccountMulti { log_level: LogLevel, assertions: Vec<MintAccountAssertion> },
+    AssertMintAccountMulti { log_level: LogLevel, assertions: MintAccountAssertions },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
     AssertTokenAccount { log_level: LogLevel, assertion: TokenAccountAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    AssertTokenAccountMulti { log_level: LogLevel, assertions: Vec<TokenAccountAssertion> },
+    AssertTokenAccountMulti { log_level: LogLevel, assertions: TokenAccountAssertions },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
     AssertStakeAccount { log_level: LogLevel, assertion: StakeAccountAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    AssertStakeAccountMulti { log_level: LogLevel, assertions: Vec<StakeAccountAssertion> },
+    AssertStakeAccountMulti { log_level: LogLevel, assertions: StakeAccountAssertions },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
     AssertUpgradeableLoaderAccount { log_level: LogLevel, assertion: UpgradeableLoaderStateAssertion },
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
-    AssertUpgradeableLoaderAccountMulti { log_level: LogLevel, assertions: Vec<UpgradeableLoaderStateAssertion> },
+    AssertUpgradeableLoaderAccountMulti { log_level: LogLevel, assertions: UpgradeableLoaderStateAssertions },
 
     // No accounts
     AssertSysvarClock { log_level : LogLevel, assertion: SysvarClockAssertion },

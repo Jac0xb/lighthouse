@@ -6,6 +6,7 @@
 //!
 
 use crate::generated::types::WriteType;
+use crate::hooked::CompactU64;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -85,7 +86,7 @@ impl MemoryWriteInstructionData {
 pub struct MemoryWriteInstructionArgs {
     pub memory_id: u8,
     pub memory_bump: u8,
-    pub write_offset: u16,
+    pub write_offset: CompactU64,
     pub write_type: WriteType,
 }
 
@@ -107,7 +108,7 @@ pub struct MemoryWriteBuilder {
     source_account: Option<solana_program::pubkey::Pubkey>,
     memory_id: Option<u8>,
     memory_bump: Option<u8>,
-    write_offset: Option<u16>,
+    write_offset: Option<CompactU64>,
     write_type: Option<WriteType>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
@@ -159,7 +160,7 @@ impl MemoryWriteBuilder {
         self
     }
     #[inline(always)]
-    pub fn write_offset(&mut self, write_offset: u16) -> &mut Self {
+    pub fn write_offset(&mut self, write_offset: CompactU64) -> &mut Self {
         self.write_offset = Some(write_offset);
         self
     }
@@ -430,7 +431,7 @@ impl<'a, 'b> MemoryWriteCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn write_offset(&mut self, write_offset: u16) -> &mut Self {
+    pub fn write_offset(&mut self, write_offset: CompactU64) -> &mut Self {
         self.instruction.write_offset = Some(write_offset);
         self
     }
@@ -535,7 +536,7 @@ struct MemoryWriteCpiBuilderInstruction<'a, 'b> {
     source_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     memory_id: Option<u8>,
     memory_bump: Option<u8>,
-    write_offset: Option<u16>,
+    write_offset: Option<CompactU64>,
     write_type: Option<WriteType>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(

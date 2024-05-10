@@ -53,7 +53,7 @@ pub mod memory_close {
                     .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
-                    .write_offset(0)
+                    .write_offset(0u8.into())
                     .memory_bump(memory_bump)
                     .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                     .instruction(),
@@ -104,7 +104,7 @@ pub mod memory_close {
                     .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
-                    .write_offset(0)
+                    .write_offset(0u8.into())
                     .memory_bump(memory_bump)
                     .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                     .instruction(),
@@ -142,7 +142,7 @@ pub mod memory_close {
                     .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
-                    .write_offset(0)
+                    .write_offset(0u8.into())
                     .memory_bump(memory_bump)
                     .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                     .instruction(),
@@ -186,7 +186,7 @@ pub mod memory_close {
                     .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
-                    .write_offset(0)
+                    .write_offset(0u8.into())
                     .memory_bump(memory_bump)
                     .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                     .instruction(),
@@ -231,7 +231,7 @@ pub mod memory_close {
                     .program_id(lighthouse_sdk::ID)
                     .memory(memory)
                     .memory_id(0)
-                    .write_offset(0)
+                    .write_offset(0u8.into())
                     .memory_bump(memory_bump)
                     .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                     .instruction(),
@@ -275,7 +275,7 @@ pub mod memory_close {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -454,7 +454,7 @@ pub mod memory_write {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(8)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(bad_id_memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -480,7 +480,7 @@ pub mod memory_write {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(next_memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -513,7 +513,7 @@ pub mod memory_write {
                 .program_id(Keypair::new().encodable_pubkey())
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -547,7 +547,7 @@ pub mod memory_write {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -580,7 +580,7 @@ pub mod memory_write {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(u16::MAX)
+                .write_offset(u16::MAX.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .instruction()],
@@ -612,7 +612,7 @@ pub mod memory_write {
             .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .memory_bump(memory_bump)
             .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
             .instruction();
@@ -655,7 +655,7 @@ pub mod memory_write {
             .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .memory_bump(memory_bump)
             .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
             .instruction();
@@ -699,7 +699,7 @@ pub mod memory_write {
             .program_id(lighthouse_sdk::ID)
             .memory(memory)
             .memory_id(0)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .memory_bump(memory_bump)
             .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
             .instruction();
@@ -744,7 +744,7 @@ pub mod memory_write {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountData {
                     offset: 1024,

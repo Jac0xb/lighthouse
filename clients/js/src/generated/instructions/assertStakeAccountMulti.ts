@@ -15,24 +15,21 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
-  array,
   mapSerializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  StakeAccountAssertions,
+  StakeAccountAssertionsArgs,
+  getStakeAccountAssertionsSerializer,
+} from '../../hooked';
+import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
   getAccountMetasAndSigners,
 } from '../shared';
-import {
-  LogLevel,
-  LogLevelArgs,
-  StakeAccountAssertion,
-  StakeAccountAssertionArgs,
-  getLogLevelSerializer,
-  getStakeAccountAssertionSerializer,
-} from '../types';
+import { LogLevel, LogLevelArgs, getLogLevelSerializer } from '../types';
 
 // Accounts.
 export type AssertStakeAccountMultiInstructionAccounts = {
@@ -44,12 +41,12 @@ export type AssertStakeAccountMultiInstructionAccounts = {
 export type AssertStakeAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<StakeAccountAssertion>;
+  assertions: StakeAccountAssertions;
 };
 
 export type AssertStakeAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<StakeAccountAssertionArgs>;
+  assertions: StakeAccountAssertionsArgs;
 };
 
 export function getAssertStakeAccountMultiInstructionDataSerializer(): Serializer<
@@ -65,7 +62,7 @@ export function getAssertStakeAccountMultiInstructionDataSerializer(): Serialize
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['assertions', array(getStakeAccountAssertionSerializer())],
+        ['assertions', getStakeAccountAssertionsSerializer()],
       ],
       { description: 'AssertStakeAccountMultiInstructionData' }
     ),

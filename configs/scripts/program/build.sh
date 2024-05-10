@@ -24,6 +24,8 @@ if [ ! -d ${PROGRAMS_OUTPUT_DIR} ]; then
 fi
 
 for p in ${PROGRAMS[@]}; do
+    printf "\nBuilding program: ${p}...\n"
+
     cd ${WORKING_DIR}/${p}
     cargo build-sbf --sbf-out-dir ${PROGRAMS_OUTPUT_DIR} $ARGS
 done

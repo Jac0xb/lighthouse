@@ -31,7 +31,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
     pub(crate) fn load(
         account_iter: &mut Iter<'a, AccountInfo<'info>>,
         memory_id: u8,
-        write_offset: u16,
+        write_offset: u64,
         memory_bump: u8,
         write_type: &WriteType,
     ) -> Result<Self> {
@@ -48,7 +48,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             bump: Some(memory_bump),
         });
 
-        let required_space = (write_offset as u64) + write_type.data_length();
+        let required_space = write_offset + write_type.data_length();
 
         let memory_info = next_account_info(account_iter)?;
         let memory = if memory_info.try_data_len()? < required_space as usize {
@@ -97,7 +97,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
 
 pub(crate) fn memory_write(
     ctx: &MemoryWriteContext,
-    offset: u16,
+    offset: u64,
     write_type: &WriteType,
 ) -> Result<()> {
     if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {

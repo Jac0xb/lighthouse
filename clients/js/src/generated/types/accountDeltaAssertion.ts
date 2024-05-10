@@ -12,7 +12,6 @@ import {
   Serializer,
   dataEnum,
   struct,
-  u16,
 } from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoDeltaAssertion,
@@ -22,30 +21,35 @@ import {
   getAccountInfoDeltaAssertionSerializer,
   getDataValueDeltaAssertionSerializer,
 } from '.';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Serializer,
+} from '../../hooked';
 
 export type AccountDeltaAssertion =
   | {
       __kind: 'AccountInfo';
-      aOffset: number;
+      aOffset: CompactU64;
       assertion: AccountInfoDeltaAssertion;
     }
   | {
       __kind: 'Data';
-      aOffset: number;
-      bOffset: number;
+      aOffset: CompactU64;
+      bOffset: CompactU64;
       assertion: DataValueDeltaAssertion;
     };
 
 export type AccountDeltaAssertionArgs =
   | {
       __kind: 'AccountInfo';
-      aOffset: number;
+      aOffset: CompactU64Args;
       assertion: AccountInfoDeltaAssertionArgs;
     }
   | {
       __kind: 'Data';
-      aOffset: number;
-      bOffset: number;
+      aOffset: CompactU64Args;
+      bOffset: CompactU64Args;
       assertion: DataValueDeltaAssertionArgs;
     };
 
@@ -58,15 +62,15 @@ export function getAccountDeltaAssertionSerializer(): Serializer<
       [
         'AccountInfo',
         struct<GetDataEnumKindContent<AccountDeltaAssertion, 'AccountInfo'>>([
-          ['aOffset', u16()],
+          ['aOffset', getCompactU64Serializer()],
           ['assertion', getAccountInfoDeltaAssertionSerializer()],
         ]),
       ],
       [
         'Data',
         struct<GetDataEnumKindContent<AccountDeltaAssertion, 'Data'>>([
-          ['aOffset', u16()],
-          ['bOffset', u16()],
+          ['aOffset', getCompactU64Serializer()],
+          ['bOffset', getCompactU64Serializer()],
           ['assertion', getDataValueDeltaAssertionSerializer()],
         ]),
       ],

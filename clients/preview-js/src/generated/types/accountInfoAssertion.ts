@@ -13,8 +13,6 @@ import {
   Encoder,
   GetDiscriminatedUnionVariant,
   GetDiscriminatedUnionVariantContent,
-  Option,
-  OptionOrNullable,
   ReadonlyUint8Array,
   combineCodec,
   fixDecoderSize,
@@ -27,12 +25,8 @@ import {
   getBytesEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
-  getOptionDecoder,
-  getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
   getU64Decoder,
   getU64Encoder,
 } from '@solana/web3.js';
@@ -50,6 +44,12 @@ import {
   getKnownProgramDecoder,
   getKnownProgramEncoder,
 } from '.';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Decoder,
+  getCompactU64Encoder,
+} from '../../hooked';
 
 export type AccountInfoAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }
@@ -63,8 +63,8 @@ export type AccountInfoAssertion =
   | {
       __kind: 'VerifyDatahash';
       expectedHash: ReadonlyUint8Array;
-      start: Option<number>;
-      length: Option<number>;
+      start: CompactU64;
+      length: CompactU64;
     };
 
 export type AccountInfoAssertionArgs =
@@ -95,8 +95,8 @@ export type AccountInfoAssertionArgs =
   | {
       __kind: 'VerifyDatahash';
       expectedHash: ReadonlyUint8Array;
-      start: OptionOrNullable<number>;
-      length: OptionOrNullable<number>;
+      start: CompactU64Args;
+      length: CompactU64Args;
     };
 
 export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionArgs> {
@@ -161,8 +161,8 @@ export function getAccountInfoAssertionEncoder(): Encoder<AccountInfoAssertionAr
       'VerifyDatahash',
       getStructEncoder([
         ['expectedHash', fixEncoderSize(getBytesEncoder(), 32)],
-        ['start', getOptionEncoder(getU16Encoder())],
-        ['length', getOptionEncoder(getU16Encoder())],
+        ['start', getCompactU64Encoder()],
+        ['length', getCompactU64Encoder()],
       ]),
     ],
   ]);
@@ -230,8 +230,8 @@ export function getAccountInfoAssertionDecoder(): Decoder<AccountInfoAssertion> 
       'VerifyDatahash',
       getStructDecoder([
         ['expectedHash', fixDecoderSize(getBytesDecoder(), 32)],
-        ['start', getOptionDecoder(getU16Decoder())],
-        ['length', getOptionDecoder(getU16Decoder())],
+        ['start', getCompactU64Decoder()],
+        ['length', getCompactU64Decoder()],
       ]),
     ],
   ]);

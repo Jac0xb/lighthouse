@@ -24,7 +24,7 @@ pub(crate) fn write<'info>(
         .system_program(&ctx.accounts.system_program.to_account_info())
         .source_account(&ctx.accounts.source_account.to_account_info())
         .write_type(WriteType::Clock(ClockField::UnixTimestamp))
-        .write_offset(0)
+        .write_offset(0u8.into())
         .memory_bump(memory_bump)
         .memory(&ctx.accounts.memory.to_account_info())
         .memory_id(0)

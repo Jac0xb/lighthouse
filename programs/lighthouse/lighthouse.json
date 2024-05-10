@@ -57,7 +57,9 @@
         },
         {
           "name": "writeOffset",
-          "type": "u16"
+          "type": {
+            "defined": "CompactU64"
+          }
         },
         {
           "name": "writeType",
@@ -237,9 +239,7 @@
         {
           "name": "assertions",
           "type": {
-            "vec": {
-              "defined": "AccountInfoAssertion"
-            }
+            "defined": "AccountInfoAssertions"
           }
         }
       ],
@@ -301,9 +301,7 @@
         {
           "name": "assertions",
           "type": {
-            "vec": {
-              "defined": "MintAccountAssertion"
-            }
+            "defined": "MintAccountAssertions"
           }
         }
       ],
@@ -365,9 +363,7 @@
         {
           "name": "assertions",
           "type": {
-            "vec": {
-              "defined": "TokenAccountAssertion"
-            }
+            "defined": "TokenAccountAssertions"
           }
         }
       ],
@@ -429,9 +425,7 @@
         {
           "name": "assertions",
           "type": {
-            "vec": {
-              "defined": "StakeAccountAssertion"
-            }
+            "defined": "StakeAccountAssertions"
           }
         }
       ],
@@ -493,9 +487,7 @@
         {
           "name": "assertions",
           "type": {
-            "vec": {
-              "defined": "UpgradeableLoaderStateAssertion"
-            }
+            "defined": "UpgradeableLoaderStateAssertions"
           }
         }
       ],
@@ -710,7 +702,9 @@
         "fields": [
           {
             "name": "offset",
-            "type": "u16"
+            "type": {
+              "defined": "CompactU64"
+            }
           },
           {
             "name": "assertion",
@@ -896,7 +890,9 @@
             "fields": [
               {
                 "name": "value",
-                "type": "bytes"
+                "type": {
+                  "defined": "CompactBytes"
+                }
               },
               {
                 "name": "operator",
@@ -934,7 +930,9 @@
             "fields": [
               {
                 "name": "a_offset",
-                "type": "u16"
+                "type": {
+                  "defined": "CompactU64"
+                }
               },
               {
                 "name": "assertion",
@@ -949,11 +947,15 @@
             "fields": [
               {
                 "name": "a_offset",
-                "type": "u16"
+                "type": {
+                  "defined": "CompactU64"
+                }
               },
               {
                 "name": "b_offset",
-                "type": "u16"
+                "type": {
+                  "defined": "CompactU64"
+                }
               },
               {
                 "name": "assertion",
@@ -1315,13 +1317,13 @@
               {
                 "name": "start",
                 "type": {
-                  "option": "u16"
+                  "defined": "CompactU64"
                 }
               },
               {
                 "name": "length",
                 "type": {
-                  "option": "u16"
+                  "defined": "CompactU64"
                 }
               }
             ]

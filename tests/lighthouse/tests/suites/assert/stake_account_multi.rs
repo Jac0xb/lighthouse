@@ -107,148 +107,155 @@ async fn test() {
         &[AssertStakeAccountMultiBuilder::new()
             .target_account(derived_account)
             .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-            .assertions(vec![
-                // ()
-                (StakeAccountAssertion::State {
-                    value: StakeStateType::Stake,
-                    operator: EquatableOperator::Equal,
-                }),
-                // Negation
-                (StakeAccountAssertion::State {
-                    value: StakeStateType::Initialized,
-                    operator: EquatableOperator::NotEqual,
-                }),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian {
-                    value: meta.lockup.custodian,
-                    operator: EquatableOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch {
-                    value: meta.lockup.epoch,
-                    operator: IntegerOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch {
-                    value: 69,
-                    operator: IntegerOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupUnixTimestamp {
-                    value: meta.lockup.unix_timestamp,
-                    operator: IntegerOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupUnixTimestamp {
-                    value: 69,
-                    operator: IntegerOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker {
-                    value: meta.authorized.staker,
-                    operator: EquatableOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedWithdrawer {
-                    value: meta.authorized.withdrawer,
-                    operator: EquatableOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedWithdrawer {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve {
-                    value: meta.rent_exempt_reserve,
-                    operator: IntegerOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve {
-                    value: 69,
-                    operator: IntegerOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::CreditsObserved {
-                    value: stake.credits_observed,
-                    operator: IntegerOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::CreditsObserved {
-                    value: 69,
-                    operator: IntegerOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationStake {
-                    value: stake.delegation.stake,
-                    operator: IntegerOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationStake {
-                    value: 69,
-                    operator: IntegerOperator::NotEqual,
-                })),
-                // ()
-                (StakeAccountAssertion::StakeAssertion(
-                    StakeAssertion::DelegationDeactivationEpoch {
-                        value: stake.delegation.deactivation_epoch,
+            .assertions(
+                vec![
+                    // ()
+                    (StakeAccountAssertion::State {
+                        value: StakeStateType::Stake,
+                        operator: EquatableOperator::Equal,
+                    }),
+                    // Negation
+                    (StakeAccountAssertion::State {
+                        value: StakeStateType::Initialized,
+                        operator: EquatableOperator::NotEqual,
+                    }),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian {
+                        value: meta.lockup.custodian,
+                        operator: EquatableOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupCustodian {
+                        value: Keypair::new().encodable_pubkey(),
+                        operator: EquatableOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch {
+                        value: meta.lockup.epoch,
                         operator: IntegerOperator::Equal,
-                    },
-                )),
-                // Negation
-                (StakeAccountAssertion::StakeAssertion(
-                    StakeAssertion::DelegationDeactivationEpoch {
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupEpoch {
                         value: 69,
                         operator: IntegerOperator::NotEqual,
-                    },
-                )),
-                // ()
-                (StakeAccountAssertion::StakeAssertion(
-                    StakeAssertion::DelegationActivationEpoch {
-                        value: stake.delegation.activation_epoch,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupUnixTimestamp {
+                        value: meta.lockup.unix_timestamp,
                         operator: IntegerOperator::Equal,
-                    },
-                )),
-                // Negation
-                (StakeAccountAssertion::StakeAssertion(
-                    StakeAssertion::DelegationActivationEpoch {
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::LockupUnixTimestamp {
                         value: 69,
                         operator: IntegerOperator::NotEqual,
-                    },
-                )),
-                // ()
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationVoterPubkey {
-                    value: stake.delegation.voter_pubkey,
-                    operator: EquatableOperator::Equal,
-                })),
-                // Negation
-                (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationVoterPubkey {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::NotEqual,
-                })),
-                (StakeAccountAssertion::StakeFlags {
-                    value: u8::MAX,
-                    operator: IntegerOperator::DoesNotContain,
-                }),
-                (StakeAccountAssertion::StakeFlags {
-                    value: u8::MIN,
-                    operator: IntegerOperator::Contains,
-                }),
-                (StakeAccountAssertion::StakeFlags {
-                    value: u8::MIN,
-                    operator: IntegerOperator::Equal,
-                }),
-            ])
+                    })),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker {
+                        value: meta.authorized.staker,
+                        operator: EquatableOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedStaker {
+                        value: Keypair::new().encodable_pubkey(),
+                        operator: EquatableOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedWithdrawer {
+                        value: meta.authorized.withdrawer,
+                        operator: EquatableOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::AuthorizedWithdrawer {
+                        value: Keypair::new().encodable_pubkey(),
+                        operator: EquatableOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve {
+                        value: meta.rent_exempt_reserve,
+                        operator: IntegerOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::MetaAssertion(MetaAssertion::RentExemptReserve {
+                        value: 69,
+                        operator: IntegerOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::StakeAssertion(StakeAssertion::CreditsObserved {
+                        value: stake.credits_observed,
+                        operator: IntegerOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::StakeAssertion(StakeAssertion::CreditsObserved {
+                        value: 69,
+                        operator: IntegerOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationStake {
+                        value: stake.delegation.stake,
+                        operator: IntegerOperator::Equal,
+                    })),
+                    // Negation
+                    (StakeAccountAssertion::StakeAssertion(StakeAssertion::DelegationStake {
+                        value: 69,
+                        operator: IntegerOperator::NotEqual,
+                    })),
+                    // ()
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationDeactivationEpoch {
+                            value: stake.delegation.deactivation_epoch,
+                            operator: IntegerOperator::Equal,
+                        },
+                    )),
+                    // Negation
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationDeactivationEpoch {
+                            value: 69,
+                            operator: IntegerOperator::NotEqual,
+                        },
+                    )),
+                    // ()
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationActivationEpoch {
+                            value: stake.delegation.activation_epoch,
+                            operator: IntegerOperator::Equal,
+                        },
+                    )),
+                    // Negation
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationActivationEpoch {
+                            value: 69,
+                            operator: IntegerOperator::NotEqual,
+                        },
+                    )),
+                    // ()
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationVoterPubkey {
+                            value: stake.delegation.voter_pubkey,
+                            operator: EquatableOperator::Equal,
+                        },
+                    )),
+                    // Negation
+                    (StakeAccountAssertion::StakeAssertion(
+                        StakeAssertion::DelegationVoterPubkey {
+                            value: Keypair::new().encodable_pubkey(),
+                            operator: EquatableOperator::NotEqual,
+                        },
+                    )),
+                    (StakeAccountAssertion::StakeFlags {
+                        value: u8::MAX,
+                        operator: IntegerOperator::DoesNotContain,
+                    }),
+                    (StakeAccountAssertion::StakeFlags {
+                        value: u8::MIN,
+                        operator: IntegerOperator::Contains,
+                    }),
+                    (StakeAccountAssertion::StakeFlags {
+                        value: u8::MIN,
+                        operator: IntegerOperator::Equal,
+                    }),
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -410,7 +417,7 @@ async fn test() {
             &[AssertStakeAccountMultiBuilder::new()
                 .target_account(derived_account)
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertions(assertions)
+                .assertions(assertions.into())
                 .instruction()],
             Some(&user.encodable_pubkey()),
             &[&user],

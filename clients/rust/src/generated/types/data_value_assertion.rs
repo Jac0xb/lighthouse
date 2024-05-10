@@ -7,6 +7,7 @@
 
 use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
+use crate::hooked::CompactBytes;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -59,7 +60,7 @@ pub enum DataValueAssertion {
         operator: IntegerOperator,
     },
     Bytes {
-        value: Vec<u8>,
+        value: CompactBytes,
         operator: EquatableOperator,
     },
     Pubkey {

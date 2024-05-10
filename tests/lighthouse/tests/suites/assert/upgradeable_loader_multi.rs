@@ -41,20 +41,23 @@ async fn simple() {
         &[AssertUpgradeableLoaderAccountMultiBuilder::new()
             .target_account(program_pubkey)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                UpgradeableLoaderStateAssertion::State {
-                    value: UpgradeableLoaderStateType::Buffer,
-                    operator: EquatableOperator::Equal,
-                },
-                UpgradeableLoaderStateAssertion::Buffer(UpgradableBufferAssertion::Authority {
-                    value: Some(authority_address),
-                    operator: EquatableOperator::Equal,
-                }),
-                UpgradeableLoaderStateAssertion::Buffer(UpgradableBufferAssertion::Authority {
-                    value: Some(user.encodable_pubkey()),
-                    operator: EquatableOperator::NotEqual,
-                }),
-            ])
+            .assertions(
+                vec![
+                    UpgradeableLoaderStateAssertion::State {
+                        value: UpgradeableLoaderStateType::Buffer,
+                        operator: EquatableOperator::Equal,
+                    },
+                    UpgradeableLoaderStateAssertion::Buffer(UpgradableBufferAssertion::Authority {
+                        value: Some(authority_address),
+                        operator: EquatableOperator::Equal,
+                    }),
+                    UpgradeableLoaderStateAssertion::Buffer(UpgradableBufferAssertion::Authority {
+                        value: Some(user.encodable_pubkey()),
+                        operator: EquatableOperator::NotEqual,
+                    }),
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -92,7 +95,7 @@ async fn simple() {
             &[AssertUpgradeableLoaderAccountMultiBuilder::new()
                 .target_account(program_pubkey)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
-                .assertions(assertions)
+                .assertions(assertions.into())
                 .instruction()],
             Some(&user.encodable_pubkey()),
             &[&user],

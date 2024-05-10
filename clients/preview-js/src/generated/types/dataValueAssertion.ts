@@ -13,16 +13,11 @@ import {
   Encoder,
   GetDiscriminatedUnionVariant,
   GetDiscriminatedUnionVariantContent,
-  ReadonlyUint8Array,
-  addDecoderSizePrefix,
-  addEncoderSizePrefix,
   combineCodec,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
   getI128Decoder,
@@ -58,6 +53,12 @@ import {
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
 } from '.';
+import {
+  CompactBytes,
+  CompactBytesArgs,
+  getCompactBytesDecoder,
+  getCompactBytesEncoder,
+} from '../../hooked';
 
 export type DataValueAssertion =
   | { __kind: 'Bool'; value: boolean; operator: EquatableOperator }
@@ -71,7 +72,7 @@ export type DataValueAssertion =
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; value: ReadonlyUint8Array; operator: EquatableOperator }
+  | { __kind: 'Bytes'; value: CompactBytes; operator: EquatableOperator }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
@@ -88,7 +89,7 @@ export type DataValueAssertionArgs =
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
   | {
       __kind: 'Bytes';
-      value: ReadonlyUint8Array;
+      value: CompactBytesArgs;
       operator: EquatableOperatorArgs;
     }
   | { __kind: 'Pubkey'; value: Address; operator: EquatableOperatorArgs };
@@ -175,7 +176,7 @@ export function getDataValueAssertionEncoder(): Encoder<DataValueAssertionArgs> 
     [
       'Bytes',
       getStructEncoder([
-        ['value', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+        ['value', getCompactBytesEncoder()],
         ['operator', getEquatableOperatorEncoder()],
       ]),
     ],
@@ -271,7 +272,7 @@ export function getDataValueAssertionDecoder(): Decoder<DataValueAssertion> {
     [
       'Bytes',
       getStructDecoder([
-        ['value', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+        ['value', getCompactBytesDecoder()],
         ['operator', getEquatableOperatorDecoder()],
       ]),
     ],

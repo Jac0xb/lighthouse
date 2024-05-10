@@ -8,6 +8,7 @@ use lighthouse_sdk::instructions::AssertAccountInfoBuilder;
 use lighthouse_sdk::types::{
     AccountInfoAssertion, EquatableOperator, IntegerOperator, KnownProgram,
 };
+use lighthouse_sdk::CompactU64;
 use solana_program_test::tokio;
 use solana_sdk::signer::EncodableKeypair;
 use solana_sdk::transaction::Transaction;
@@ -44,42 +45,45 @@ async fn simple() {
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(user.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-            .assertions(vec![
-                AccountInfoAssertion::Owner {
-                    value: system_program::ID,
-                    operator: EquatableOperator::Equal,
-                },
-                // Test KnownOwner
-                AccountInfoAssertion::KnownOwner {
-                    value: KnownProgram::System,
-                    operator: EquatableOperator::Equal,
-                },
-                // Test Lamports
-                AccountInfoAssertion::Lamports {
-                    value: user_balance - 5000,
-                    operator: IntegerOperator::Equal,
-                },
-                AccountInfoAssertion::DataLength {
-                    value: 0,
-                    operator: IntegerOperator::Equal,
-                },
-                AccountInfoAssertion::Executable {
-                    value: true,
-                    operator: EquatableOperator::NotEqual,
-                },
-                AccountInfoAssertion::Executable {
-                    value: false,
-                    operator: EquatableOperator::Equal,
-                },
-                AccountInfoAssertion::Executable {
-                    value: true,
-                    operator: EquatableOperator::NotEqual,
-                },
-                AccountInfoAssertion::RentEpoch {
-                    value: rent_epoch,
-                    operator: IntegerOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    AccountInfoAssertion::Owner {
+                        value: system_program::ID,
+                        operator: EquatableOperator::Equal,
+                    },
+                    // Test KnownOwner
+                    AccountInfoAssertion::KnownOwner {
+                        value: KnownProgram::System,
+                        operator: EquatableOperator::Equal,
+                    },
+                    // Test Lamports
+                    AccountInfoAssertion::Lamports {
+                        value: user_balance - 5000,
+                        operator: IntegerOperator::Equal,
+                    },
+                    AccountInfoAssertion::DataLength {
+                        value: 0,
+                        operator: IntegerOperator::Equal,
+                    },
+                    AccountInfoAssertion::Executable {
+                        value: true,
+                        operator: EquatableOperator::NotEqual,
+                    },
+                    AccountInfoAssertion::Executable {
+                        value: false,
+                        operator: EquatableOperator::Equal,
+                    },
+                    AccountInfoAssertion::Executable {
+                        value: true,
+                        operator: EquatableOperator::NotEqual,
+                    },
+                    AccountInfoAssertion::RentEpoch {
+                        value: rent_epoch,
+                        operator: IntegerOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -135,7 +139,7 @@ async fn simple() {
             &[AssertAccountInfoMultiBuilder::new()
                 .target_account(user.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertions(assertions)
+                .assertions(assertions.into())
                 .instruction()],
             Some(&user.encodable_pubkey()),
             &[&user],
@@ -156,24 +160,27 @@ async fn simple() {
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(test_account.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                AccountInfoAssertion::Lamports {
-                    value: test_balance / 2,
-                    operator: IntegerOperator::GreaterThanOrEqual,
-                },
-                AccountInfoAssertion::Lamports {
-                    value: test_balance * 2,
-                    operator: IntegerOperator::LessThanOrEqual,
-                },
-                AccountInfoAssertion::Lamports {
-                    value: test_balance,
-                    operator: IntegerOperator::Equal,
-                },
-                AccountInfoAssertion::Lamports {
-                    value: 0,
-                    operator: IntegerOperator::NotEqual,
-                },
-            ])
+            .assertions(
+                vec![
+                    AccountInfoAssertion::Lamports {
+                        value: test_balance / 2,
+                        operator: IntegerOperator::GreaterThanOrEqual,
+                    },
+                    AccountInfoAssertion::Lamports {
+                        value: test_balance * 2,
+                        operator: IntegerOperator::LessThanOrEqual,
+                    },
+                    AccountInfoAssertion::Lamports {
+                        value: test_balance,
+                        operator: IntegerOperator::Equal,
+                    },
+                    AccountInfoAssertion::Lamports {
+                        value: 0,
+                        operator: IntegerOperator::NotEqual,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -321,31 +328,34 @@ async fn verify_hash() {
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(test_account.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&test_account_data.data]).0,
-                    start: None,
-                    length: None,
-                },
-                // (none, Some)
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&test_account_data.data[0..128]]).0,
-                    start: None,
-                    length: Some(128),
-                },
-                // (Some, Some)
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&test_account_data.data[128..256]]).0,
-                    start: Some(128),
-                    length: Some(128),
-                },
-                // (Some, None)
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&test_account_data.data[128..]]).0,
-                    start: Some(128),
-                    length: None,
-                },
-            ])
+            .assertions(
+                vec![
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&test_account_data.data]).0,
+                        start: CompactU64(0),
+                        length: CompactU64(test_account_data.data.len() as u64),
+                    },
+                    // (none, Some)
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&test_account_data.data[0..128]]).0,
+                        start: CompactU64(0),
+                        length: CompactU64(128),
+                    },
+                    // (Some, Some)
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&test_account_data.data[128..256]]).0,
+                        start: CompactU64(128),
+                        length: CompactU64(128),
+                    },
+                    // (Some, None)
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&test_account_data.data[128..]]).0,
+                        start: CompactU64(128),
+                        length: CompactU64(test_account_data.data.len() as u64 - 128),
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],
@@ -359,18 +369,21 @@ async fn verify_hash() {
         &[AssertAccountInfoMultiBuilder::new()
             .target_account(user.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&[]]).0,
-                    start: None,
-                    length: None,
-                },
-                AccountInfoAssertion::VerifyDatahash {
-                    expected_hash: keccak::hashv(&[&[]]).0,
-                    start: Some(0),
-                    length: Some(0),
-                },
-            ])
+            .assertions(
+                vec![
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&[]]).0,
+                        start: CompactU64(0),
+                        length: CompactU64(0),
+                    },
+                    AccountInfoAssertion::VerifyDatahash {
+                        expected_hash: keccak::hashv(&[&[]]).0,
+                        start: CompactU64(0),
+                        length: CompactU64(0),
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.encodable_pubkey()),
         &[&user],

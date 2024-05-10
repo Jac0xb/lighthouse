@@ -17,25 +17,25 @@ import {
   IInstructionWithData,
   ReadonlyAccount,
   combineCodec,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  StakeAccountAssertions,
+  StakeAccountAssertionsArgs,
+  getStakeAccountAssertionsDecoder,
+  getStakeAccountAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
-  StakeAccountAssertion,
-  StakeAccountAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getStakeAccountAssertionDecoder,
-  getStakeAccountAssertionEncoder,
 } from '../types';
 
 export type AssertStakeAccountMultiInstruction<
@@ -56,12 +56,12 @@ export type AssertStakeAccountMultiInstruction<
 export type AssertStakeAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<StakeAccountAssertion>;
+  assertions: StakeAccountAssertions;
 };
 
 export type AssertStakeAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<StakeAccountAssertionArgs>;
+  assertions: StakeAccountAssertionsArgs;
 };
 
 export function getAssertStakeAccountMultiInstructionDataEncoder(): Encoder<AssertStakeAccountMultiInstructionDataArgs> {
@@ -69,7 +69,7 @@ export function getAssertStakeAccountMultiInstructionDataEncoder(): Encoder<Asse
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getStakeAccountAssertionEncoder())],
+      ['assertions', getStakeAccountAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -83,7 +83,7 @@ export function getAssertStakeAccountMultiInstructionDataDecoder(): Decoder<Asse
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getStakeAccountAssertionDecoder())],
+    ['assertions', getStakeAccountAssertionsDecoder()],
   ]);
 }
 

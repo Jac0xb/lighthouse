@@ -6,17 +6,18 @@ use crate::{
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::CompactU64;
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize)]
 pub enum AccountDeltaAssertion {
     AccountInfo {
-        a_offset: u16,
+        a_offset: CompactU64,
         assertion: AccountInfoDeltaAssertion,
     },
     Data {
-        a_offset: u16,
-        b_offset: u16,
+        a_offset: CompactU64,
+        b_offset: CompactU64,
         assertion: DataValueDeltaAssertion,
     },
 }
@@ -73,8 +74,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                 b_offset,
                 assertion,
             } => {
-                let a_offset = *a_offset as usize;
-                let b_offset = *b_offset as usize;
+                let a_offset = **a_offset as usize;
+                let b_offset = **b_offset as usize;
 
                 let (a_account, b_account) = accounts;
 
@@ -210,7 +211,7 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                     .try_borrow_data()
                     .map_err(LighthouseError::failed_borrow_err)?;
 
-                let a_offset = *a_offset as usize;
+                let a_offset = **a_offset as usize;
 
                 match assertion {
                     AccountInfoDeltaAssertion::Lamports { value, operator } => {
@@ -283,6 +284,7 @@ mod tests {
         },
     };
     use borsh::BorshSerialize;
+    use lighthouse_common::CompactU64;
     use solana_sdk::{
         account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
     };
@@ -303,8 +305,8 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &key, false, 0);
 
         let assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 0,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::U8 {
                 value: (u8::MAX as i16) - 1i16,
                 operator: IntegerOperator::Equal,
@@ -319,8 +321,8 @@ mod tests {
         assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 0,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::U8 {
                 value: 1i16 - (u8::MAX as i16),
                 operator: IntegerOperator::Equal,
@@ -352,8 +354,8 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &key, false, 0);
 
         let assertion = AccountDeltaAssertion::Data {
-            a_offset: 1,
-            b_offset: 0,
+            a_offset: CompactU64(1),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::I8 {
                 value: (i8::MIN as i16) - (test_account.i8 as i16),
                 operator: IntegerOperator::Equal,
@@ -368,8 +370,8 @@ mod tests {
         assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 1,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(1),
             assertion: DataValueDeltaAssertion::I8 {
                 value: (test_account.i8 as i16) - (i8::MIN as i16),
                 operator: IntegerOperator::Equal,
@@ -401,8 +403,8 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &key, false, 0);
 
         let assertion = AccountDeltaAssertion::Data {
-            a_offset: 2,
-            b_offset: 0,
+            a_offset: CompactU64(2),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::U16 {
                 value: (u16::MAX as i32) - (test_account.u16 as i32),
                 operator: IntegerOperator::Equal,
@@ -417,8 +419,8 @@ mod tests {
         assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 2,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(2),
             assertion: DataValueDeltaAssertion::U16 {
                 value: (test_account.u16 as i32) - (u16::MAX as i32),
                 operator: IntegerOperator::Equal,
@@ -450,8 +452,8 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &key, false, 0);
 
         let assertion = AccountDeltaAssertion::Data {
-            a_offset: 4,
-            b_offset: 0,
+            a_offset: CompactU64(4),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::I16 {
                 value: (i16::MIN as i32) - (test_account.i16 as i32) - 10,
                 operator: IntegerOperator::GreaterThan,
@@ -466,8 +468,8 @@ mod tests {
         assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 4,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(4),
             assertion: DataValueDeltaAssertion::I16 {
                 value: (test_account.i16 as i32) - (i16::MIN as i32) + 10,
                 operator: IntegerOperator::LessThan,
@@ -499,8 +501,8 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &key, false, 0);
 
         let assertion = AccountDeltaAssertion::Data {
-            a_offset: 0,
-            b_offset: 4,
+            a_offset: CompactU64(0),
+            b_offset: CompactU64(4),
             assertion: DataValueDeltaAssertion::Bytes {
                 operator: crate::types::assert::evaluate::EquatableOperator::Equal,
                 length: 32,
@@ -515,8 +517,8 @@ mod tests {
         assert_passed(result);
 
         let reverse_assertion = AccountDeltaAssertion::Data {
-            a_offset: 4,
-            b_offset: 0,
+            a_offset: CompactU64(4),
+            b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::Bytes {
                 operator: crate::types::assert::evaluate::EquatableOperator::Equal,
                 length: 32,
@@ -550,7 +552,7 @@ mod tests {
         drop(mut_ref);
 
         let assertion = AccountDeltaAssertion::AccountInfo {
-            a_offset: 0,
+            a_offset: CompactU64(0),
             assertion: AccountInfoDeltaAssertion::Lamports {
                 value: 100,
                 operator: IntegerOperator::Equal,
@@ -575,7 +577,7 @@ mod tests {
         drop(mut_ref);
 
         let reverse_assertion = AccountDeltaAssertion::AccountInfo {
-            a_offset: 0,
+            a_offset: CompactU64(0),
             assertion: AccountInfoDeltaAssertion::Lamports {
                 value: -100,
                 operator: IntegerOperator::Equal,
@@ -600,7 +602,7 @@ mod tests {
         drop(mut_ref);
 
         let reverse_assertion = AccountDeltaAssertion::AccountInfo {
-            a_offset: 0,
+            a_offset: CompactU64(0),
             assertion: AccountInfoDeltaAssertion::Lamports {
                 value: -150,
                 operator: IntegerOperator::GreaterThan,
@@ -633,7 +635,7 @@ mod tests {
             AccountInfo::new(&key, false, false, lamports_a, b_data, &owner, false, 0);
 
         let assertion = AccountDeltaAssertion::AccountInfo {
-            a_offset: 8,
+            a_offset: CompactU64(8),
             assertion: AccountInfoDeltaAssertion::Owner {
                 operator: EquatableOperator::Equal,
             },

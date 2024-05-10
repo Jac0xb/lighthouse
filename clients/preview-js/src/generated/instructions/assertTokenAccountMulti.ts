@@ -17,25 +17,25 @@ import {
   IInstructionWithData,
   ReadonlyAccount,
   combineCodec,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  TokenAccountAssertions,
+  TokenAccountAssertionsArgs,
+  getTokenAccountAssertionsDecoder,
+  getTokenAccountAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
-  TokenAccountAssertion,
-  TokenAccountAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getTokenAccountAssertionDecoder,
-  getTokenAccountAssertionEncoder,
 } from '../types';
 
 export type AssertTokenAccountMultiInstruction<
@@ -56,12 +56,12 @@ export type AssertTokenAccountMultiInstruction<
 export type AssertTokenAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<TokenAccountAssertion>;
+  assertions: TokenAccountAssertions;
 };
 
 export type AssertTokenAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<TokenAccountAssertionArgs>;
+  assertions: TokenAccountAssertionsArgs;
 };
 
 export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<AssertTokenAccountMultiInstructionDataArgs> {
@@ -69,7 +69,7 @@ export function getAssertTokenAccountMultiInstructionDataEncoder(): Encoder<Asse
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getTokenAccountAssertionEncoder())],
+      ['assertions', getTokenAccountAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -83,7 +83,7 @@ export function getAssertTokenAccountMultiInstructionDataDecoder(): Decoder<Asse
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getTokenAccountAssertionDecoder())],
+    ['assertions', getTokenAccountAssertionsDecoder()],
   ]);
 }
 

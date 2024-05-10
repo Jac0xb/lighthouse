@@ -17,9 +17,13 @@ import {
   Serializer,
   mapSerializer,
   struct,
-  u16,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Serializer,
+} from '../../hooked';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -44,13 +48,13 @@ export type AssertAccountDataInstructionAccounts = {
 export type AssertAccountDataInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  offset: number;
+  offset: CompactU64;
   assertion: DataValueAssertion;
 };
 
 export type AssertAccountDataInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  offset: number;
+  offset: CompactU64Args;
   assertion: DataValueAssertionArgs;
 };
 
@@ -67,7 +71,7 @@ export function getAssertAccountDataInstructionDataSerializer(): Serializer<
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['offset', u16()],
+        ['offset', getCompactU64Serializer()],
         ['assertion', getDataValueAssertionSerializer()],
       ],
       { description: 'AssertAccountDataInstructionData' }
