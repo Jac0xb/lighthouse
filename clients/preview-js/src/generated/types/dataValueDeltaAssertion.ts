@@ -31,13 +31,15 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+} from '.';
+import {
+  IntegerOperator,
+  IntegerOperatorArgs,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
-} from '.';
+} from '../../hooked';
 
 export type DataValueDeltaAssertion =
   | { __kind: 'U8'; value: number; operator: IntegerOperator }

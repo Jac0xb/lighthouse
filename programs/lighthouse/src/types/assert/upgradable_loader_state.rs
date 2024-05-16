@@ -1,10 +1,11 @@
 use super::{Assert, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::{bpf_loader_upgradeable::UpgradeableLoaderState, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy)]

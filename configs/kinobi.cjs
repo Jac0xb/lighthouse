@@ -1,9 +1,37 @@
 const path = require('path');
 const k = require('@metaplex-foundation/kinobi');
+const fs = require('fs');
 
 // Paths.
 const clientDir = path.join(__dirname, '..', 'clients');
 const programDir = path.join(__dirname, '..', 'programs', 'lighthouse');
+
+const idlPath = path.join(programDir, 'lighthouse.json');
+const idl = JSON.parse(fs.readFileSync(idlPath, 'utf8'));
+
+// Remove test struct picked up by shank in lighthouse program tests.
+idl.types = idl.types.filter((t) => t.name !== 'TestAccountV1');
+
+// Add GhostStruct to prevent destructuring of AccountDataAssertion as multiple references will generate codegen for the struct
+// rather than destructuring the struct into instruction parameters.
+if (!idl.types.find((t) => t.name === 'GhostStruct')) {
+  idl.types.push({
+    name: 'GhostStruct',
+    type: {
+      kind: 'struct',
+      fields: [
+        {
+          name: 'assertion',
+          type: {
+            defined: 'AccountDataAssertion',
+          },
+        },
+      ],
+    },
+  });
+}
+
+fs.writeFileSync(idlPath, JSON.stringify(idl, null, 2));
 
 // Instanciate Kinobi.
 const kinobi = k.createFromIdl(path.join(programDir, 'lighthouse.json'));
@@ -59,6 +87,7 @@ kinobi.update(
 kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 
 for (const definedType of [
+  'accountDataAssertions',
   'accountInfoAssertions',
   'mintAccountAssertions',
   'tokenAccountAssertions',
@@ -67,6 +96,7 @@ for (const definedType of [
   'compactU64',
   'bytes',
   'compactBytes',
+  'integerOperator',
 ]) {
   kinobi.update(
     k.bottomUpTransformerVisitor([
@@ -116,3 +146,9 @@ const rustDir = path.join(clientDir, 'rust', 'src', 'generated');
 kinobi.accept(
   k.renderRustVisitor(rustDir, { formatCode: true, crateFolder: crateDir })
 );
+
+// Remove ghost struct used to prevent destructuring of AccountDataAssertion
+
+const postIdl = JSON.parse(fs.readFileSync(idlPath, 'utf8'));
+postIdl.types = postIdl.types.filter((t) => t.name !== 'GhostStruct');
+fs.writeFileSync(idlPath, JSON.stringify(postIdl, null, 2));

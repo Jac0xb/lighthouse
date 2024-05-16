@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './accountDataAssertion';
 export * from './accountDeltaAssertion';
 export * from './accountInfoAssertion';
 export * from './accountInfoDeltaAssertion';
@@ -14,10 +15,9 @@ export * from './assertionResult';
 export * from './bubblegumTreeConfigAssertion';
 export * from './clockField';
 export * from './dataValue';
-export * from './dataValueAssertion';
 export * from './dataValueDeltaAssertion';
 export * from './equatableOperator';
-export * from './integerOperator';
+export * from './ghostStruct';
 export * from './knownProgram';
 export * from './logLevel';
 export * from './merkleTreeAssertion';

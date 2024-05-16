@@ -9,6 +9,7 @@
 import { Address, containsBytes, getU8Encoder } from '@solana/web3.js';
 import {
   ParsedAssertAccountDataInstruction,
+  ParsedAssertAccountDataMultiInstruction,
   ParsedAssertAccountDeltaInstruction,
   ParsedAssertAccountInfoInstruction,
   ParsedAssertAccountInfoMultiInstruction,
@@ -34,6 +35,7 @@ export enum LighthouseInstruction {
   MemoryWrite,
   MemoryClose,
   AssertAccountData,
+  AssertAccountDataMulti,
   AssertAccountDelta,
   AssertAccountInfo,
   AssertAccountInfoMulti,
@@ -65,45 +67,48 @@ export function identifyLighthouseInstruction(
     return LighthouseInstruction.AssertAccountData;
   }
   if (containsBytes(data, getU8Encoder().encode(3), 0)) {
-    return LighthouseInstruction.AssertAccountDelta;
+    return LighthouseInstruction.AssertAccountDataMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(4), 0)) {
-    return LighthouseInstruction.AssertAccountInfo;
+    return LighthouseInstruction.AssertAccountDelta;
   }
   if (containsBytes(data, getU8Encoder().encode(5), 0)) {
-    return LighthouseInstruction.AssertAccountInfoMulti;
+    return LighthouseInstruction.AssertAccountInfo;
   }
   if (containsBytes(data, getU8Encoder().encode(6), 0)) {
-    return LighthouseInstruction.AssertMintAccount;
+    return LighthouseInstruction.AssertAccountInfoMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(7), 0)) {
-    return LighthouseInstruction.AssertMintAccountMulti;
+    return LighthouseInstruction.AssertMintAccount;
   }
   if (containsBytes(data, getU8Encoder().encode(8), 0)) {
-    return LighthouseInstruction.AssertTokenAccount;
+    return LighthouseInstruction.AssertMintAccountMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(9), 0)) {
-    return LighthouseInstruction.AssertTokenAccountMulti;
+    return LighthouseInstruction.AssertTokenAccount;
   }
   if (containsBytes(data, getU8Encoder().encode(10), 0)) {
-    return LighthouseInstruction.AssertStakeAccount;
+    return LighthouseInstruction.AssertTokenAccountMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(11), 0)) {
-    return LighthouseInstruction.AssertStakeAccountMulti;
+    return LighthouseInstruction.AssertStakeAccount;
   }
   if (containsBytes(data, getU8Encoder().encode(12), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
+    return LighthouseInstruction.AssertStakeAccountMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(13), 0)) {
-    return LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
+    return LighthouseInstruction.AssertUpgradeableLoaderAccount;
   }
   if (containsBytes(data, getU8Encoder().encode(14), 0)) {
-    return LighthouseInstruction.AssertSysvarClock;
+    return LighthouseInstruction.AssertUpgradeableLoaderAccountMulti;
   }
   if (containsBytes(data, getU8Encoder().encode(15), 0)) {
-    return LighthouseInstruction.AssertMerkleTreeAccount;
+    return LighthouseInstruction.AssertSysvarClock;
   }
   if (containsBytes(data, getU8Encoder().encode(16), 0)) {
+    return LighthouseInstruction.AssertMerkleTreeAccount;
+  }
+  if (containsBytes(data, getU8Encoder().encode(17), 0)) {
     return LighthouseInstruction.AssertBubblegumTreeConfigAccount;
   }
   throw new Error(
@@ -123,6 +128,9 @@ export type ParsedLighthouseInstruction<
   | ({
       instructionType: LighthouseInstruction.AssertAccountData;
     } & ParsedAssertAccountDataInstruction<TProgram>)
+  | ({
+      instructionType: LighthouseInstruction.AssertAccountDataMulti;
+    } & ParsedAssertAccountDataMultiInstruction<TProgram>)
   | ({
       instructionType: LighthouseInstruction.AssertAccountDelta;
     } & ParsedAssertAccountDeltaInstruction<TProgram>)

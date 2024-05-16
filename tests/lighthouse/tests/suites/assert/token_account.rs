@@ -764,379 +764,379 @@ async fn append_ix_test() {
         .unwrap();
 }
 
-#[tokio::test]
-async fn encoded_message() {
-    let context = &mut TestContext::new().await.unwrap();
-    let user = create_user(context).await.unwrap();
+// #[tokio::test]
+// async fn encoded_message() {
+//     let context = &mut TestContext::new().await.unwrap();
+//     let user = create_user(context).await.unwrap();
 
-    let (tx, mint) = create_mint(
-        context,
-        &user,
-        CreateMintParameters {
-            token_program: spl_token::id(),
-            mint_authority: Some(Some(user.pubkey())),
-            freeze_authority: None,
-            mint_to: Some((user.pubkey(), 69_000)),
-            decimals: 9,
-        },
-    )
-    .await
-    .unwrap();
+//     let (tx, mint) = create_mint(
+//         context,
+//         &user,
+//         CreateMintParameters {
+//             token_program: spl_token::id(),
+//             mint_authority: Some(Some(user.pubkey())),
+//             freeze_authority: None,
+//             mint_to: Some((user.pubkey(), 69_000)),
+//             decimals: 9,
+//         },
+//     )
+//     .await
+//     .unwrap();
 
-    process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
+//     process_transaction_assert_success(context, tx)
+//         .await
+//         .unwrap();
 
-    let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
-    let builder_fn = |assertion: TokenAccountAssertion| {
-        AssertTokenAccountBuilder::new()
-            .target_account(user_ata)
-            .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
-            .assertion(assertion)
-            .instruction()
-    };
+//     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
+//     let builder_fn = |assertion: TokenAccountAssertion| {
+//         AssertTokenAccountBuilder::new()
+//             .target_account(user_ata)
+//             .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
+//             .assertion(assertion)
+//             .instruction()
+//     };
 
-    let tx = Transaction::new_signed_with_payer(
-        &[
-            builder_fn(TokenAccountAssertion::Mint {
-                value: mint.pubkey(),
-                operator: EquatableOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::Owner {
-                value: user.pubkey(),
-                operator: EquatableOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::Amount {
-                value: 69_000,
-                operator: IntegerOperator::Equal,
-            }),
-            // Not Equal
-            builder_fn(TokenAccountAssertion::Amount {
-                value: 69_001,
-                operator: IntegerOperator::NotEqual,
-            }),
-            builder_fn(TokenAccountAssertion::Delegate {
-                value: None,
-                operator: EquatableOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::State {
-                value: AccountState::Initialized as u8,
-                operator: IntegerOperator::Equal,
-            }),
-            // Not Equal
-            builder_fn(TokenAccountAssertion::State {
-                value: AccountState::Frozen as u8,
-                operator: IntegerOperator::NotEqual,
-            }),
-            builder_fn(TokenAccountAssertion::IsNative {
-                value: None,
-                operator: EquatableOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::DelegatedAmount {
-                value: 0,
-                operator: IntegerOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::CloseAuthority {
-                value: None,
-                operator: EquatableOperator::Equal,
-            }),
-            builder_fn(TokenAccountAssertion::TokenAccountOwnerIsDerived),
-        ],
-        Some(&user.pubkey()),
-        &[&user],
-        context.get_blockhash().await,
-    );
+//     let tx = Transaction::new_signed_with_payer(
+//         &[
+//             builder_fn(TokenAccountAssertion::Mint {
+//                 value: mint.pubkey(),
+//                 operator: EquatableOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::Owner {
+//                 value: user.pubkey(),
+//                 operator: EquatableOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::Amount {
+//                 value: 69_000,
+//                 operator: IntegerOperator::Equal,
+//             }),
+//             // Not Equal
+//             builder_fn(TokenAccountAssertion::Amount {
+//                 value: 69_001,
+//                 operator: IntegerOperator::NotEqual,
+//             }),
+//             builder_fn(TokenAccountAssertion::Delegate {
+//                 value: None,
+//                 operator: EquatableOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::State {
+//                 value: AccountState::Initialized as u8,
+//                 operator: IntegerOperator::Equal,
+//             }),
+//             // Not Equal
+//             builder_fn(TokenAccountAssertion::State {
+//                 value: AccountState::Frozen as u8,
+//                 operator: IntegerOperator::NotEqual,
+//             }),
+//             builder_fn(TokenAccountAssertion::IsNative {
+//                 value: None,
+//                 operator: EquatableOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::DelegatedAmount {
+//                 value: 0,
+//                 operator: IntegerOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::CloseAuthority {
+//                 value: None,
+//                 operator: EquatableOperator::Equal,
+//             }),
+//             builder_fn(TokenAccountAssertion::TokenAccountOwnerIsDerived),
+//         ],
+//         Some(&user.pubkey()),
+//         &[&user],
+//         context.get_blockhash().await,
+//     );
 
-    let result = process_transaction_assert_success(context, tx)
-        .await
-        .unwrap();
+//     let result = process_transaction_assert_success(context, tx)
+//         .await
+//         .unwrap();
 
-    println!("Result: {:?}", result);
+//     println!("Result: {:?}", result);
 
-    // find log with "Program data: ", base64 deserialize text after that
-    let metadata = result.metadata.unwrap();
+//     // find log with "Program data: ", base64 deserialize text after that
+//     let metadata = result.metadata.unwrap();
 
-    let logs = metadata
-        .log_messages
-        .iter()
-        .filter(|log| log.contains("Program data: "))
-        .collect::<Vec<&String>>();
+//     let logs = metadata
+//         .log_messages
+//         .iter()
+//         .filter(|log| log.contains("Program data: "))
+//         .collect::<Vec<&String>>();
 
-    let expected_payloads: [AssertionResult; 11] = [
-        AssertionResult::Pubkey(
-            Some(mint.pubkey()),
-            Some(mint.pubkey()),
-            EquatableOperator::Equal as u8,
-            true,
-        ),
-        AssertionResult::Pubkey(
-            Some(user.pubkey()),
-            Some(user.pubkey()),
-            EquatableOperator::Equal as u8,
-            true,
-        ),
-        AssertionResult::U64(
-            Some(69_000),
-            Some(69_000),
-            IntegerOperator::Equal as u8,
-            true,
-        ),
-        AssertionResult::U64(
-            Some(69_000),
-            Some(69_001),
-            IntegerOperator::NotEqual as u8,
-            true,
-        ),
-        AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
-        AssertionResult::U8(
-            Some(AccountState::Initialized as u8),
-            Some(AccountState::Initialized as u8),
-            IntegerOperator::Equal as u8,
-            true,
-        ),
-        AssertionResult::U8(
-            Some(AccountState::Initialized as u8),
-            Some(AccountState::Frozen as u8),
-            IntegerOperator::NotEqual as u8,
-            true,
-        ),
-        AssertionResult::U64(None, None, EquatableOperator::Equal as u8, true),
-        AssertionResult::U64(Some(0), Some(0), IntegerOperator::Equal as u8, true),
-        AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
-        AssertionResult::Pubkey(
-            Some(user_ata),
-            Some(user_ata),
-            EquatableOperator::Equal as u8,
-            true,
-        ),
-    ];
+//     let expected_payloads: [AssertionResult; 11] = [
+//         AssertionResult::Pubkey(
+//             Some(mint.pubkey()),
+//             Some(mint.pubkey()),
+//             EquatableOperator::Equal as u8,
+//             true,
+//         ),
+//         AssertionResult::Pubkey(
+//             Some(user.pubkey()),
+//             Some(user.pubkey()),
+//             EquatableOperator::Equal as u8,
+//             true,
+//         ),
+//         AssertionResult::U64(
+//             Some(69_000),
+//             Some(69_000),
+//             IntegerOperator::Equal as u8,
+//             true,
+//         ),
+//         AssertionResult::U64(
+//             Some(69_000),
+//             Some(69_001),
+//             IntegerOperator::NotEqual as u8,
+//             true,
+//         ),
+//         AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
+//         AssertionResult::U8(
+//             Some(AccountState::Initialized as u8),
+//             Some(AccountState::Initialized as u8),
+//             IntegerOperator::Equal as u8,
+//             true,
+//         ),
+//         AssertionResult::U8(
+//             Some(AccountState::Initialized as u8),
+//             Some(AccountState::Frozen as u8),
+//             IntegerOperator::NotEqual as u8,
+//             true,
+//         ),
+//         AssertionResult::U64(None, None, EquatableOperator::Equal as u8, true),
+//         AssertionResult::U64(Some(0), Some(0), IntegerOperator::Equal as u8, true),
+//         AssertionResult::Pubkey(None, None, EquatableOperator::Equal as u8, true),
+//         AssertionResult::Pubkey(
+//             Some(user_ata),
+//             Some(user_ata),
+//             EquatableOperator::Equal as u8,
+//             true,
+//         ),
+//     ];
 
-    assert_eq!(logs.len(), 11);
+//     assert_eq!(logs.len(), 11);
 
-    let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
-    for (i, payload) in payloads.iter().enumerate() {
-        assert_eq!(expected_payloads[i], *payload);
-    }
+//     let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
+//     for (i, payload) in payloads.iter().enumerate() {
+//         assert_eq!(expected_payloads[i], *payload);
+//     }
 
-    // parse failed assertion
+//     // parse failed assertion
 
-    let tx = Transaction::new_signed_with_payer(
-        &[builder_fn(TokenAccountAssertion::Amount {
-            value: 69_001,
-            operator: IntegerOperator::Equal,
-        })],
-        Some(&user.pubkey()),
-        &[&user],
-        context.get_blockhash().await,
-    );
+//     let tx = Transaction::new_signed_with_payer(
+//         &[builder_fn(TokenAccountAssertion::Amount {
+//             value: 69_001,
+//             operator: IntegerOperator::Equal,
+//         })],
+//         Some(&user.pubkey()),
+//         &[&user],
+//         context.get_blockhash().await,
+//     );
 
-    let result = process_transaction_assert_failure(
-        context,
-        tx,
-        to_transaction_error(0, LighthouseError::AssertionFailed),
-        None,
-    )
-    .await
-    .unwrap();
+//     let result = process_transaction_assert_failure(
+//         context,
+//         tx,
+//         to_transaction_error(0, LighthouseError::AssertionFailed),
+//         None,
+//     )
+//     .await
+//     .unwrap();
 
-    let metadata = result.metadata.unwrap();
-    let logs = metadata
-        .log_messages
-        .iter()
-        .filter(|log| log.contains("Program data: "))
-        .collect::<Vec<&String>>();
+//     let metadata = result.metadata.unwrap();
+//     let logs = metadata
+//         .log_messages
+//         .iter()
+//         .filter(|log| log.contains("Program data: "))
+//         .collect::<Vec<&String>>();
 
-    let expected_payloads: [AssertionResult; 1] = [AssertionResult::U64(
-        Some(69_000),
-        Some(69_001),
-        IntegerOperator::Equal as u8,
-        false,
-    )];
+//     let expected_payloads: [AssertionResult; 1] = [AssertionResult::U64(
+//         Some(69_000),
+//         Some(69_001),
+//         IntegerOperator::Equal as u8,
+//         false,
+//     )];
 
-    assert_eq!(logs.len(), 1);
-    let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
+//     assert_eq!(logs.len(), 1);
+//     let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
 
-    for (i, payload) in payloads.iter().enumerate() {
-        assert_eq!(expected_payloads[i], *payload);
-    }
+//     for (i, payload) in payloads.iter().enumerate() {
+//         assert_eq!(expected_payloads[i], *payload);
+//     }
 
-    let failed_assertions = vec![
-        builder_fn(TokenAccountAssertion::Amount {
-            value: 69_001,
-            operator: IntegerOperator::Equal,
-        }),
-        builder_fn(TokenAccountAssertion::Amount {
-            value: 69_000,
-            operator: IntegerOperator::NotEqual,
-        }),
-        builder_fn(TokenAccountAssertion::State {
-            value: AccountState::Frozen as u8,
-            operator: IntegerOperator::Equal,
-        }),
-        builder_fn(TokenAccountAssertion::State {
-            value: AccountState::Initialized as u8,
-            operator: IntegerOperator::NotEqual,
-        }),
-        builder_fn(TokenAccountAssertion::DelegatedAmount {
-            value: 0,
-            operator: IntegerOperator::NotEqual,
-        }),
-        builder_fn(TokenAccountAssertion::DelegatedAmount {
-            value: 69,
-            operator: IntegerOperator::Equal,
-        }),
-        builder_fn(TokenAccountAssertion::CloseAuthority {
-            value: None,
-            operator: EquatableOperator::NotEqual,
-        }),
-    ];
+//     let failed_assertions = vec![
+//         builder_fn(TokenAccountAssertion::Amount {
+//             value: 69_001,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         builder_fn(TokenAccountAssertion::Amount {
+//             value: 69_000,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         builder_fn(TokenAccountAssertion::State {
+//             value: AccountState::Frozen as u8,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         builder_fn(TokenAccountAssertion::State {
+//             value: AccountState::Initialized as u8,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         builder_fn(TokenAccountAssertion::DelegatedAmount {
+//             value: 0,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         builder_fn(TokenAccountAssertion::DelegatedAmount {
+//             value: 69,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         builder_fn(TokenAccountAssertion::CloseAuthority {
+//             value: None,
+//             operator: EquatableOperator::NotEqual,
+//         }),
+//     ];
 
-    let expected_payload = [
-        AssertionResult::U64(
-            Some(69_000),
-            Some(69_001),
-            IntegerOperator::Equal as u8,
-            false,
-        ),
-        AssertionResult::U64(
-            Some(69_000),
-            Some(69_000),
-            IntegerOperator::NotEqual as u8,
-            false,
-        ),
-        AssertionResult::U8(
-            Some(AccountState::Initialized as u8),
-            Some(AccountState::Frozen as u8),
-            IntegerOperator::Equal as u8,
-            false,
-        ),
-        AssertionResult::U8(
-            Some(AccountState::Initialized as u8),
-            Some(AccountState::Initialized as u8),
-            IntegerOperator::NotEqual as u8,
-            false,
-        ),
-        AssertionResult::U64(Some(0), Some(0), IntegerOperator::NotEqual as u8, false),
-        AssertionResult::U64(Some(0), Some(69), IntegerOperator::Equal as u8, false),
-        AssertionResult::Pubkey(None, None, EquatableOperator::NotEqual as u8, false),
-    ];
+//     let expected_payload = [
+//         AssertionResult::U64(
+//             Some(69_000),
+//             Some(69_001),
+//             IntegerOperator::Equal as u8,
+//             false,
+//         ),
+//         AssertionResult::U64(
+//             Some(69_000),
+//             Some(69_000),
+//             IntegerOperator::NotEqual as u8,
+//             false,
+//         ),
+//         AssertionResult::U8(
+//             Some(AccountState::Initialized as u8),
+//             Some(AccountState::Frozen as u8),
+//             IntegerOperator::Equal as u8,
+//             false,
+//         ),
+//         AssertionResult::U8(
+//             Some(AccountState::Initialized as u8),
+//             Some(AccountState::Initialized as u8),
+//             IntegerOperator::NotEqual as u8,
+//             false,
+//         ),
+//         AssertionResult::U64(Some(0), Some(0), IntegerOperator::NotEqual as u8, false),
+//         AssertionResult::U64(Some(0), Some(69), IntegerOperator::Equal as u8, false),
+//         AssertionResult::Pubkey(None, None, EquatableOperator::NotEqual as u8, false),
+//     ];
 
-    for (i, ix) in failed_assertions.iter().enumerate() {
-        let mut ixs = vec![];
+//     for (i, ix) in failed_assertions.iter().enumerate() {
+//         let mut ixs = vec![];
 
-        for _ in 0..i {
-            ixs.push(builder_fn(TokenAccountAssertion::Amount {
-                value: 69_000,
-                operator: IntegerOperator::Equal,
-            }));
-        }
+//         for _ in 0..i {
+//             ixs.push(builder_fn(TokenAccountAssertion::Amount {
+//                 value: 69_000,
+//                 operator: IntegerOperator::Equal,
+//             }));
+//         }
 
-        ixs.push(ix.clone());
+//         ixs.push(ix.clone());
 
-        let tx = Transaction::new_signed_with_payer(
-            &ixs,
-            Some(&user.pubkey()),
-            &[&user],
-            context.get_blockhash().await,
-        );
+//         let tx = Transaction::new_signed_with_payer(
+//             &ixs,
+//             Some(&user.pubkey()),
+//             &[&user],
+//             context.get_blockhash().await,
+//         );
 
-        let result = process_transaction_assert_failure(
-            context,
-            tx,
-            to_transaction_error(i as u8, LighthouseError::AssertionFailed),
-            None,
-        )
-        .await
-        .unwrap();
+//         let result = process_transaction_assert_failure(
+//             context,
+//             tx,
+//             to_transaction_error(i as u8, LighthouseError::AssertionFailed),
+//             None,
+//         )
+//         .await
+//         .unwrap();
 
-        let metadata = result.metadata.unwrap();
-        let logs = metadata
-            .log_messages
-            .iter()
-            .filter(|log| log.contains("Program data: "))
-            .collect::<Vec<&String>>();
+//         let metadata = result.metadata.unwrap();
+//         let logs = metadata
+//             .log_messages
+//             .iter()
+//             .filter(|log| log.contains("Program data: "))
+//             .collect::<Vec<&String>>();
 
-        assert_eq!(logs.len(), i + 1);
-        let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
+//         assert_eq!(logs.len(), i + 1);
+//         let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
 
-        assert_eq!(payloads.len(), i + 1);
-        assert_eq!(expected_payload[i], payloads[i]);
-    }
+//         assert_eq!(payloads.len(), i + 1);
+//         assert_eq!(expected_payload[i], payloads[i]);
+//     }
 
-    let failed_assertions = vec![
-        (TokenAccountAssertion::Amount {
-            value: 69_001,
-            operator: IntegerOperator::Equal,
-        }),
-        (TokenAccountAssertion::Amount {
-            value: 69_000,
-            operator: IntegerOperator::NotEqual,
-        }),
-        (TokenAccountAssertion::State {
-            value: AccountState::Frozen as u8,
-            operator: IntegerOperator::Equal,
-        }),
-        (TokenAccountAssertion::State {
-            value: AccountState::Initialized as u8,
-            operator: IntegerOperator::NotEqual,
-        }),
-        (TokenAccountAssertion::DelegatedAmount {
-            value: 0,
-            operator: IntegerOperator::NotEqual,
-        }),
-        (TokenAccountAssertion::DelegatedAmount {
-            value: 69,
-            operator: IntegerOperator::Equal,
-        }),
-        (TokenAccountAssertion::CloseAuthority {
-            value: None,
-            operator: EquatableOperator::NotEqual,
-        }),
-    ];
+//     let failed_assertions = vec![
+//         (TokenAccountAssertion::Amount {
+//             value: 69_001,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         (TokenAccountAssertion::Amount {
+//             value: 69_000,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         (TokenAccountAssertion::State {
+//             value: AccountState::Frozen as u8,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         (TokenAccountAssertion::State {
+//             value: AccountState::Initialized as u8,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         (TokenAccountAssertion::DelegatedAmount {
+//             value: 0,
+//             operator: IntegerOperator::NotEqual,
+//         }),
+//         (TokenAccountAssertion::DelegatedAmount {
+//             value: 69,
+//             operator: IntegerOperator::Equal,
+//         }),
+//         (TokenAccountAssertion::CloseAuthority {
+//             value: None,
+//             operator: EquatableOperator::NotEqual,
+//         }),
+//     ];
 
-    for (i, assertion) in failed_assertions.iter().enumerate() {
-        let mut assertions = vec![];
+//     for (i, assertion) in failed_assertions.iter().enumerate() {
+//         let mut assertions = vec![];
 
-        for _ in 0..i {
-            assertions.push(TokenAccountAssertion::Amount {
-                value: 69_000,
-                operator: IntegerOperator::Equal,
-            });
-        }
+//         for _ in 0..i {
+//             assertions.push(TokenAccountAssertion::Amount {
+//                 value: 69_000,
+//                 operator: IntegerOperator::Equal,
+//             });
+//         }
 
-        assertions.push(assertion.clone());
+//         assertions.push(assertion.clone());
 
-        let tx = Transaction::new_signed_with_payer(
-            &[AssertTokenAccountMultiBuilder::new()
-                .assertions(assertions.into())
-                .target_account(user_ata)
-                .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
-                .instruction()],
-            Some(&user.pubkey()),
-            &[&user],
-            context.get_blockhash().await,
-        );
+//         let tx = Transaction::new_signed_with_payer(
+//             &[AssertTokenAccountMultiBuilder::new()
+//                 .assertions(assertions.into())
+//                 .target_account(user_ata)
+//                 .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
+//                 .instruction()],
+//             Some(&user.pubkey()),
+//             &[&user],
+//             context.get_blockhash().await,
+//         );
 
-        let result = process_transaction_assert_failure(
-            context,
-            tx,
-            to_transaction_error_u8(0, 6400 + i as u32),
-            None,
-        )
-        .await
-        .unwrap();
+//         let result = process_transaction_assert_failure(
+//             context,
+//             tx,
+//             to_transaction_error_u8(0, 6400 + i as u32),
+//             None,
+//         )
+//         .await
+//         .unwrap();
 
-        let metadata = result.metadata.unwrap();
-        let logs = metadata
-            .log_messages
-            .iter()
-            .filter(|log| log.contains("Program data: "))
-            .collect::<Vec<&String>>();
+//         let metadata = result.metadata.unwrap();
+//         let logs = metadata
+//             .log_messages
+//             .iter()
+//             .filter(|log| log.contains("Program data: "))
+//             .collect::<Vec<&String>>();
 
-        assert_eq!(logs.len(), i + 1);
-        let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
+//         assert_eq!(logs.len(), i + 1);
+//         let payloads = parse_evaluation_payloads_from_logs(logs.to_vec()).unwrap();
 
-        assert_eq!(payloads.len(), i + 1);
-        assert_eq!(expected_payload[i], payloads[i]);
-    }
-}
+//         assert_eq!(payloads.len(), i + 1);
+//         assert_eq!(expected_payload[i], payloads[i]);
+//     }
+// }

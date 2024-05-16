@@ -6,10 +6,10 @@
 //!
 
 use crate::generated::types::EquatableOperator;
-use crate::generated::types::IntegerOperator;
 use crate::generated::types::MetaAssertion;
 use crate::generated::types::StakeAssertion;
 use crate::generated::types::StakeStateType;
+use crate::hooked::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 

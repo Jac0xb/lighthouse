@@ -21,11 +21,13 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
+  getEquatableOperatorSerializer,
+} from '.';
+import {
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorSerializer,
   getIntegerOperatorSerializer,
-} from '.';
+} from '../../hooked';
 
 export type DataValueDeltaAssertion =
   | { __kind: 'U8'; value: number; operator: IntegerOperator }

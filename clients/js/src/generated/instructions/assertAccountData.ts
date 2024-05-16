@@ -20,21 +20,16 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
-  CompactU64,
-  CompactU64Args,
-  getCompactU64Serializer,
-} from '../../hooked';
-import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
   getAccountMetasAndSigners,
 } from '../shared';
 import {
-  DataValueAssertion,
-  DataValueAssertionArgs,
+  AccountDataAssertion,
+  AccountDataAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getDataValueAssertionSerializer,
+  getAccountDataAssertionSerializer,
   getLogLevelSerializer,
 } from '../types';
 
@@ -48,14 +43,12 @@ export type AssertAccountDataInstructionAccounts = {
 export type AssertAccountDataInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  offset: CompactU64;
-  assertion: DataValueAssertion;
+  assertion: AccountDataAssertion;
 };
 
 export type AssertAccountDataInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  offset: CompactU64Args;
-  assertion: DataValueAssertionArgs;
+  assertion: AccountDataAssertionArgs;
 };
 
 export function getAssertAccountDataInstructionDataSerializer(): Serializer<
@@ -71,8 +64,7 @@ export function getAssertAccountDataInstructionDataSerializer(): Serializer<
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['offset', getCompactU64Serializer()],
-        ['assertion', getDataValueAssertionSerializer()],
+        ['assertion', getAccountDataAssertionSerializer()],
       ],
       { description: 'AssertAccountDataInstructionData' }
     ),

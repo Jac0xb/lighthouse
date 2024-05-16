@@ -23,21 +23,15 @@ import {
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
-import {
-  CompactU64,
-  CompactU64Args,
-  getCompactU64Decoder,
-  getCompactU64Encoder,
-} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
-  DataValueAssertion,
-  DataValueAssertionArgs,
+  AccountDataAssertion,
+  AccountDataAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getDataValueAssertionDecoder,
-  getDataValueAssertionEncoder,
+  getAccountDataAssertionDecoder,
+  getAccountDataAssertionEncoder,
   getLogLevelDecoder,
   getLogLevelEncoder,
 } from '../types';
@@ -60,14 +54,12 @@ export type AssertAccountDataInstruction<
 export type AssertAccountDataInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  offset: CompactU64;
-  assertion: DataValueAssertion;
+  assertion: AccountDataAssertion;
 };
 
 export type AssertAccountDataInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  offset: CompactU64Args;
-  assertion: DataValueAssertionArgs;
+  assertion: AccountDataAssertionArgs;
 };
 
 export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAccountDataInstructionDataArgs> {
@@ -75,8 +67,7 @@ export function getAssertAccountDataInstructionDataEncoder(): Encoder<AssertAcco
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['offset', getCompactU64Encoder()],
-      ['assertion', getDataValueAssertionEncoder()],
+      ['assertion', getAccountDataAssertionEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -90,8 +81,7 @@ export function getAssertAccountDataInstructionDataDecoder(): Decoder<AssertAcco
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['offset', getCompactU64Decoder()],
-    ['assertion', getDataValueAssertionDecoder()],
+    ['assertion', getAccountDataAssertionDecoder()],
   ]);
 }
 
@@ -111,7 +101,6 @@ export type AssertAccountDataInput<
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
   logLevel?: AssertAccountDataInstructionDataArgs['logLevel'];
-  offset: AssertAccountDataInstructionDataArgs['offset'];
   assertion: AssertAccountDataInstructionDataArgs['assertion'];
 };
 

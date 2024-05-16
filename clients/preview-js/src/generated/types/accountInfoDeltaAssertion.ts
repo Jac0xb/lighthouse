@@ -23,13 +23,15 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+} from '.';
+import {
+  IntegerOperator,
+  IntegerOperatorArgs,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
-} from '.';
+} from '../../hooked';
 
 export type AccountInfoDeltaAssertion =
   | { __kind: 'Lamports'; value: bigint; operator: IntegerOperator }

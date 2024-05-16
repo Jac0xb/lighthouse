@@ -6,9 +6,9 @@
 //!
 
 use crate::generated::types::EquatableOperator;
-use crate::generated::types::IntegerOperator;
 use crate::generated::types::KnownProgram;
 use crate::hooked::CompactU64;
+use crate::hooked::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;

@@ -70,7 +70,7 @@ export function getAssertBubblegumTreeConfigAccountInstructionDataSerializer(): 
     ),
     (value) => ({
       ...value,
-      discriminator: 16,
+      discriminator: 17,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<

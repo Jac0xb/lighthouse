@@ -8,11 +8,12 @@ use crate::types::{
     write::WriteType,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::{LEB128Vec, CompactU64};
+use lighthouse_common::{CompactU64, LEB128Vec};
 use shank::ShankInstruction;
 
 // Shank does not support generics, so we need to define the following types for each assertion array.
 // The encoding/decoding is handled custom in the sdks
+type AccountDataAssertions = LEB128Vec<AccountDataAssertion>;
 type AccountInfoAssertions = LEB128Vec<AccountInfoAssertion>;
 type MintAccountAssertions = LEB128Vec<MintAccountAssertion>;
 type TokenAccountAssertions = LEB128Vec<TokenAccountAssertion>;
@@ -41,6 +42,9 @@ pub(crate) enum LighthouseInstruction {
 
     #[account(0, name = "target_account", desc = "Target account to be asserted")]
     AssertAccountData { log_level: LogLevel, assertion: AccountDataAssertion },
+
+    #[account(0, name = "target_account", desc = "Target account to be asserted")]
+    AssertAccountDataMulti { log_level: LogLevel, assertions: AccountDataAssertions },
 
     #[account(0, name = "account_a", desc = "Account A where the delta is calculated from")]
     #[account(1, name = "account_b", desc = "Account B where the delta is calculated to")]
@@ -95,6 +99,7 @@ impl LighthouseInstruction {
             LighthouseInstruction::MemoryWrite { .. } => "MemoryWrite",
             LighthouseInstruction::MemoryClose { .. } => "MemoryClose",
             LighthouseInstruction::AssertAccountData { .. } => "AssertAccountData",
+            LighthouseInstruction::AssertAccountDataMulti { .. } => "AssertAccountDataMulti",
             LighthouseInstruction::AssertAccountDelta { .. } => "AssertAccountDelta",
             LighthouseInstruction::AssertAccountInfo { .. } => "AssertAccountInfo",
             LighthouseInstruction::AssertAccountInfoMulti { .. } => "AssertAccountInfoMulti",
@@ -123,6 +128,7 @@ impl LighthouseInstruction {
             LighthouseInstruction::MemoryWrite { .. } => LogLevel::Silent,
             LighthouseInstruction::MemoryClose { .. } => LogLevel::Silent,
             LighthouseInstruction::AssertAccountData { log_level, .. } => *log_level,
+            LighthouseInstruction::AssertAccountDataMulti { log_level, .. } => *log_level,
             LighthouseInstruction::AssertAccountDelta { log_level, .. } => *log_level,
             LighthouseInstruction::AssertAccountInfo { log_level, .. } => *log_level,
             LighthouseInstruction::AssertAccountInfoMulti { log_level, .. } => *log_level,

@@ -6,7 +6,10 @@ use crate::utils::{
 };
 use lighthouse_sdk::errors::LighthouseError;
 use lighthouse_sdk::instructions::AssertAccountDataBuilder;
-use lighthouse_sdk::types::{DataValueAssertion, EquatableOperator, IntegerOperator};
+use lighthouse_sdk::types::{
+    AccountDataAssertion, AccountDataAssertionWrapper, DataValueAssertion, EquatableOperator,
+    IntegerOperator,
+};
 use solana_program_test::tokio;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::EncodableKeypair;
@@ -22,195 +25,303 @@ async fn simple() {
         .unwrap();
 
     let test_account = create_test_account(context, &user, false).await.unwrap();
+    let assertion: AccountDataAssertion = AccountDataAssertionWrapper {
+        offset: 10u8.into(),
+        assertion: DataValueAssertion::U16 {
+            value: (u8::MAX as u16) + 1,
+            operator: IntegerOperator::Equal,
+        },
+    }
+    .into();
 
     let mut tx = TxBuilder {
         ixs: vec![
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U8 {
-                    value: 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(8u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 8u8.into(),
+                        assertion: DataValueAssertion::U8 {
+                            value: 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::I8 {
-                    value: -1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(9u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 9u8.into(),
+                        assertion: DataValueAssertion::I8 {
+                            value: -1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U16 {
-                    value: (u8::MAX as u16) + 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(10u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 10u8.into(),
+                        assertion: DataValueAssertion::U16 {
+                            value: (u8::MAX as u16) + 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::I16 {
-                    value: (i8::MIN as i16) - 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(12u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 12u8.into(),
+                        assertion: DataValueAssertion::I16 {
+                            value: (i8::MIN as i16) - 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U32 {
-                    value: (u16::MAX as u32) + 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(14u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 14u8.into(),
+                        assertion: DataValueAssertion::U32 {
+                            value: (u16::MAX as u32) + 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::I32 {
-                    value: (i16::MIN as i32) - 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(18u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 18u8.into(),
+                        assertion: DataValueAssertion::I32 {
+                            value: (i16::MIN as i32) - 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U64 {
-                    value: (u32::MAX as u64) + 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(22u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 22u8.into(),
+                        assertion: DataValueAssertion::U64 {
+                            value: (u32::MAX as u64) + 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::I64 {
-                    value: (i32::MIN as i64) - 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(30u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 30u8.into(),
+                        assertion: DataValueAssertion::I64 {
+                            value: (i32::MIN as i64) - 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U128 {
-                    value: (u64::MAX as u128) + 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(38u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 38u8.into(),
+                        assertion: DataValueAssertion::U128 {
+                            value: (u64::MAX as u128) + 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::I128 {
-                    value: (i64::MIN as i128) - 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(54u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 54u8.into(),
+                        assertion: DataValueAssertion::I128 {
+                            value: (i64::MIN as i128) - 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Bytes {
-                    value: vec![u8::MAX; 32].into(),
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(70u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 70u8.into(),
+                        assertion: DataValueAssertion::Bytes {
+                            value: vec![u8::MAX; 32].into(),
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Bool {
-                    value: true,
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(102u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 102u8.into(),
+                        assertion: DataValueAssertion::Bool {
+                            value: true,
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             // False represented as 0
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U8 {
-                    value: 0,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(103u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 103u8.into(),
+                        assertion: DataValueAssertion::U8 {
+                            value: 0,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             // Some in Option<u8>
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U8 {
-                    value: 1,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(104u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 104u8.into(),
+                        assertion: DataValueAssertion::U8 {
+                            value: 1,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U8 {
-                    value: u8::MAX,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(105u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 105u8.into(),
+                        assertion: DataValueAssertion::U8 {
+                            value: u8::MAX,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::U8 {
-                    value: 0,
-                    operator: IntegerOperator::Equal,
-                })
-                .offset(106u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 106u8.into(),
+                        assertion: DataValueAssertion::U8 {
+                            value: 0,
+                            operator: IntegerOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Bytes {
-                    value: vec![1, 255, 255].into(),
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(107u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 107u8.into(),
+                        assertion: DataValueAssertion::Bytes {
+                            value: vec![1, 255, 255].into(),
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Bytes {
-                    value: vec![0].into(),
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(110u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 110u8.into(),
+                        assertion: DataValueAssertion::Bytes {
+                            value: vec![0].into(),
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Pubkey {
-                    value: user.encodable_pubkey(),
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(111u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 111u8.into(),
+                        assertion: DataValueAssertion::Pubkey {
+                            value: user.encodable_pubkey(),
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-                .assertion(DataValueAssertion::Bytes {
-                    value: [32, 0, 0, 0]
-                        .iter()
-                        .cloned()
-                        .chain(vec![255; 32])
-                        .collect::<Vec<u8>>()
-                        .into(),
-                    operator: EquatableOperator::Equal,
-                })
-                .offset(143u8.into())
+                .assertion(
+                    AccountDataAssertionWrapper {
+                        offset: 143u8.into(),
+                        assertion: DataValueAssertion::Bytes {
+                            value: [32, 0, 0, 0]
+                                .iter()
+                                .cloned()
+                                .chain(vec![255; 32])
+                                .collect::<Vec<u8>>()
+                                .into(),
+                            operator: EquatableOperator::Equal,
+                        },
+                    }
+                    .into(),
+                )
                 .instruction(),
         ],
         look_up_tables: None,
@@ -240,11 +351,16 @@ async fn empty_account_fail() {
         ixs: vec![AssertAccountDataBuilder::new()
             .target_account(test_account.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-            .assertion(DataValueAssertion::U8 {
-                value: 1,
-                operator: IntegerOperator::Equal,
-            })
-            .offset(1234u16.into())
+            .assertion(
+                AccountDataAssertionWrapper {
+                    offset: 1234u16.into(),
+                    assertion: DataValueAssertion::U8 {
+                        value: 1,
+                        operator: IntegerOperator::Equal,
+                    },
+                }
+                .into(),
+            )
             .instruction()],
         look_up_tables: None,
     };
@@ -265,11 +381,16 @@ async fn empty_account_fail() {
         ixs: vec![AssertAccountDataBuilder::new()
             .target_account(user.encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-            .assertion(DataValueAssertion::U128 {
-                value: 1,
-                operator: IntegerOperator::Equal,
-            })
-            .offset(0u8.into())
+            .assertion(
+                AccountDataAssertionWrapper {
+                    offset: 0,
+                    assertion: DataValueAssertion::U128 {
+                        value: 1,
+                        operator: IntegerOperator::Equal,
+                    },
+                }
+                .into(),
+            )
             .instruction()],
         look_up_tables: None,
     };
@@ -288,11 +409,16 @@ async fn empty_account_fail() {
         ixs: vec![AssertAccountDataBuilder::new()
             .target_account(Keypair::new().encodable_pubkey())
             .log_level(lighthouse_sdk::types::LogLevel::PlaintextMessage)
-            .assertion(DataValueAssertion::U128 {
-                value: 1,
-                operator: IntegerOperator::Equal,
-            })
-            .offset(0u8.into())
+            .assertion(
+                AccountDataAssertionWrapper {
+                    offset: 0,
+                    assertion: DataValueAssertion::U128 {
+                        value: 1,
+                        operator: IntegerOperator::Equal,
+                    },
+                }
+                .into(),
+            )
             .instruction()],
         look_up_tables: None,
     };

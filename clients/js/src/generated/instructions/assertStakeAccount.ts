@@ -70,7 +70,7 @@ export function getAssertStakeAccountInstructionDataSerializer(): Serializer<
     ),
     (value) => ({
       ...value,
-      discriminator: 10,
+      discriminator: 11,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<

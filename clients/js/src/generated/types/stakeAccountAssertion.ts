@@ -18,8 +18,6 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   MetaAssertion,
   MetaAssertionArgs,
   StakeAssertion,
@@ -27,11 +25,15 @@ import {
   StakeStateType,
   StakeStateTypeArgs,
   getEquatableOperatorSerializer,
-  getIntegerOperatorSerializer,
   getMetaAssertionSerializer,
   getStakeAssertionSerializer,
   getStakeStateTypeSerializer,
 } from '.';
+import {
+  IntegerOperator,
+  IntegerOperatorArgs,
+  getIntegerOperatorSerializer,
+} from '../../hooked';
 
 export type StakeAccountAssertion =
   | { __kind: 'State'; value: StakeStateType; operator: EquatableOperator }

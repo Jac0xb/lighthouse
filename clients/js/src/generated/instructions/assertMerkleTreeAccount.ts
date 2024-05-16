@@ -74,7 +74,7 @@ export function getAssertMerkleTreeAccountInstructionDataSerializer(): Serialize
     ),
     (value) => ({
       ...value,
-      discriminator: 15,
+      discriminator: 16,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<

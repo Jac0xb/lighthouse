@@ -21,18 +21,18 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   KnownProgram,
   KnownProgramArgs,
   getEquatableOperatorSerializer,
-  getIntegerOperatorSerializer,
   getKnownProgramSerializer,
 } from '.';
 import {
   CompactU64,
   CompactU64Args,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getCompactU64Serializer,
+  getIntegerOperatorSerializer,
 } from '../../hooked';
 
 export type AccountInfoAssertion =

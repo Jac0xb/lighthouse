@@ -33,22 +33,22 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   KnownProgram,
   KnownProgramArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
   getKnownProgramDecoder,
   getKnownProgramEncoder,
 } from '.';
 import {
   CompactU64,
   CompactU64Args,
+  IntegerOperator,
+  IntegerOperatorArgs,
   getCompactU64Decoder,
   getCompactU64Encoder,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
 } from '../../hooked';
 
 export type AccountInfoAssertion =

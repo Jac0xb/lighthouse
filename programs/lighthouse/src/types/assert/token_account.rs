@@ -2,10 +2,11 @@ use super::{Assert, Evaluate, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, IntegerOperator},
+    types::assert::evaluate::EquatableOperator,
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
 use spl_token_2022::state::AccountState;
@@ -200,6 +201,7 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
+        use lighthouse_common::integer_operator::IntegerOperator;
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack, pubkey::Pubkey,
         };
@@ -210,10 +212,7 @@ mod tests {
 
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{
-                evaluate::{EquatableOperator, IntegerOperator},
-                Assert, LogLevel, TokenAccountAssertion,
-            },
+            types::assert::{evaluate::EquatableOperator, Assert, LogLevel, TokenAccountAssertion},
         };
 
         #[test]

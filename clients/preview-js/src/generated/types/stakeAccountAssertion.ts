@@ -25,8 +25,6 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   MetaAssertion,
   MetaAssertionArgs,
   StakeAssertion,
@@ -35,8 +33,6 @@ import {
   StakeStateTypeArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
-  getIntegerOperatorDecoder,
-  getIntegerOperatorEncoder,
   getMetaAssertionDecoder,
   getMetaAssertionEncoder,
   getStakeAssertionDecoder,
@@ -44,6 +40,12 @@ import {
   getStakeStateTypeDecoder,
   getStakeStateTypeEncoder,
 } from '.';
+import {
+  IntegerOperator,
+  IntegerOperatorArgs,
+  getIntegerOperatorDecoder,
+  getIntegerOperatorEncoder,
+} from '../../hooked';
 
 export type StakeAccountAssertion =
   | { __kind: 'State'; value: StakeStateType; operator: EquatableOperator }

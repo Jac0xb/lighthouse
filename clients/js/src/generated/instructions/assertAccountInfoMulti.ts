@@ -68,7 +68,7 @@ export function getAssertAccountInfoMultiInstructionDataSerializer(): Serializer
     ),
     (value) => ({
       ...value,
-      discriminator: 5,
+      discriminator: 6,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<

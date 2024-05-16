@@ -1,20 +1,15 @@
 use super::LogLevel;
-use crate::{error::LighthouseError, validation::SPL_NOOP_ID, Result};
+use crate::{err, error::LighthouseError, validation::SPL_NOOP_ID, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::assertion_settings::{AssertionSettings, DataValue};
+use lighthouse_common::integer_operator::IntegerOperator;
+use lighthouse_common::operator::{Operator, EQUAL_SYMBOL, NOT_EQUAL_SYMBOL};
+use num_traits::ToBytes;
 use solana_program::{
     instruction::Instruction, log::sol_log_data, msg, program::invoke, program_memory::sol_memcmp,
     pubkey::Pubkey,
 };
-use std::fmt::Debug;
-
-const EQUAL_SYMBOL: &str = "==";
-const NOT_EQUAL_SYMBOL: &str = "!=";
-const GREATER_THAN_SYMBOL: &str = ">";
-const LESS_THAN_SYMBOL: &str = "<";
-const GREATER_THAN_OR_EQUAL_SYMBOL: &str = ">=";
-const LESS_THAN_OR_EQUAL_SYMBOL: &str = "<=";
-const CONTAINS_SYMBOL: &str = "&";
-const DOES_NOT_CONTAIN_SYMBOL: &str = "!&";
+use std::{cmp::Ordering, fmt::Debug};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub enum AssertionResult {
@@ -56,10 +51,6 @@ impl AssertionResult {
     }
 }
 
-pub trait Operator {
-    fn format(&self) -> &str;
-}
-
 pub trait Evaluate<T: Operator> {
     fn evaluate(
         actual_value: &Self,
@@ -69,36 +60,18 @@ pub trait Evaluate<T: Operator> {
     ) -> Result<()>;
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum IntegerOperator {
-    Equal,
-    NotEqual,
-    GreaterThan,
-    LessThan,
-    GreaterThanOrEqual,
-    LessThanOrEqual,
-    Contains,
-    DoesNotContain,
-}
-
-impl Operator for IntegerOperator {
-    fn format(&self) -> &str {
-        match self {
-            IntegerOperator::Equal => EQUAL_SYMBOL,
-            IntegerOperator::NotEqual => NOT_EQUAL_SYMBOL,
-            IntegerOperator::GreaterThan => GREATER_THAN_SYMBOL,
-            IntegerOperator::LessThan => LESS_THAN_SYMBOL,
-            IntegerOperator::GreaterThanOrEqual => GREATER_THAN_OR_EQUAL_SYMBOL,
-            IntegerOperator::LessThanOrEqual => LESS_THAN_OR_EQUAL_SYMBOL,
-            IntegerOperator::Contains => CONTAINS_SYMBOL,
-            IntegerOperator::DoesNotContain => DOES_NOT_CONTAIN_SYMBOL,
-        }
-    }
+pub trait EvaluateV2<T: Operator> {
+    fn evaluate(
+        actual_value: &Self,
+        assertion_value: &Self,
+        assertion_settings: &AssertionSettings,
+        operator: &T,
+        log_level: LogLevel,
+    ) -> Result<()>;
 }
 
 #[macro_export]
-macro_rules! impl_integer_evaluate {
+macro_rules! impl_uint_evaluate {
     ($(($type:ty, $payload_variant:ident)),*) => {
         $(
             impl Evaluate<IntegerOperator> for $type {
@@ -108,68 +81,52 @@ macro_rules! impl_integer_evaluate {
                     operator: &IntegerOperator,
                     log_level: LogLevel,
                 ) -> Result<()> {
-                    let passed = match operator {
-                        IntegerOperator::Equal => actual_value == assertion_value,
-                        IntegerOperator::NotEqual => actual_value != assertion_value,
-                        IntegerOperator::GreaterThan => actual_value > assertion_value,
-                        IntegerOperator::LessThan => actual_value < assertion_value,
-                        IntegerOperator::GreaterThanOrEqual => actual_value >= assertion_value,
-                        IntegerOperator::LessThanOrEqual => actual_value <= assertion_value,
-                        IntegerOperator::Contains => actual_value & assertion_value == *assertion_value,
-                        IntegerOperator::DoesNotContain => actual_value & assertion_value == 0,
-                    };
-
-                    match log_level {
-                        LogLevel::PlaintextMessage => {
-                            msg!(
-                                "Result: {} {} {}",
-                                actual_value,
-                                operator.format(),
-                                assertion_value
-                            );
-                        }
-                        LogLevel::Silent => {}
-                        LogLevel::EncodedMessage => {
-                            AssertionResult::$payload_variant(
-                                Some(*actual_value),
-                                Some(*assertion_value),
-                                *operator as u8,
-                                passed,
-                            ).log_data()?;
-                        }
-                        LogLevel::EncodedNoop => {
-                            AssertionResult::$payload_variant(
-                                Some(*actual_value),
-                                Some(*assertion_value),
-                                *operator as u8,
-                                passed,
-                            ).log_noop()?;
-                        }
-                    }
-
-                    if passed {
-                        Ok(())
-                    } else {
-                        Err(LighthouseError::AssertionFailed.into())
-                    }
+                    evaluate_bytes(
+                        &actual_value.to_le_bytes(),
+                        &assertion_value.to_le_bytes(),
+                        &AssertionSettings {
+                            is_big_endian: false,
+                            operator: *operator,
+                            data_value: DataValue::Number,
+                        },
+                        log_level,
+                    )
                 }
             }
         )*
     };
 }
 
-impl_integer_evaluate!(
-    (u8, U8),
-    (u16, U16),
-    (u32, U32),
-    (u64, U64),
-    (u128, U128),
-    (i8, I8),
-    (i16, I16),
-    (i32, I32),
-    (i64, I64),
-    (i128, I128)
-);
+impl_uint_evaluate!((u8, U8), (u16, U16), (u32, U32), (u64, U64), (u128, U128));
+
+#[macro_export]
+macro_rules! impl_int_evaluate {
+    ($(($type:ty, $payload_variant:ident)),*) => {
+        $(
+            impl Evaluate<IntegerOperator> for $type {
+                fn evaluate(
+                    actual_value: &Self,
+                    assertion_value: &Self,
+                    operator: &IntegerOperator,
+                    log_level: LogLevel,
+                ) -> Result<()> {
+                    evaluate_bytes(
+                        &actual_value.to_le_bytes(),
+                        &assertion_value.to_le_bytes(),
+                        &AssertionSettings {
+                            is_big_endian: false,
+                            operator: *operator,
+                            data_value: DataValue::SignedNumber,
+                        },
+                        log_level,
+                    )
+                }
+            }
+        )*
+    };
+}
+
+impl_int_evaluate!((i8, I8), (i16, I16), (i32, I32), (i64, I64), (i128, I128));
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Copy, Clone)]
 #[repr(u8)]
@@ -271,6 +228,17 @@ macro_rules! impl_evaluate_for_option_type {
                         EquatableOperator::NotEqual => actual_value != assertion_value,
                     };
 
+                    // evaluate_bytes(
+                    //     &actual_value.unwrap_or_default().to_le_bytes(),
+                    //     &assertion_value.unwrap_or_default().to_le_bytes(),
+                    //     &AssertionSettings {
+                    //         is_big_endian: false,
+                    //         operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                    //         data_value: DataValue::Number,
+                    //     },
+                    //     log_level,
+                    // )
+
                     match log_level {
                         LogLevel::PlaintextMessage => {
                             msg!(
@@ -331,50 +299,61 @@ impl Evaluate<EquatableOperator> for Pubkey {
         operator: &EquatableOperator,
         log_level: LogLevel,
     ) -> Result<()> {
-        let passed = match operator {
-            EquatableOperator::Equal => actual_value == assertion_value,
-            EquatableOperator::NotEqual => actual_value != assertion_value,
-        };
+        // let passed = match operator {
+        //     EquatableOperator::Equal => actual_value == assertion_value,
+        //     EquatableOperator::NotEqual => actual_value != assertion_value,
+        // };
 
-        match log_level {
-            LogLevel::PlaintextMessage => {
-                msg!("Result: ");
-                actual_value.log();
-                msg!(operator.format());
-                assertion_value.log();
-            }
-            LogLevel::EncodedMessage => {
-                let payload = AssertionResult::Pubkey(
-                    Some(*actual_value),
-                    Some(*assertion_value),
-                    *operator as u8,
-                    passed,
-                )
-                .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+        evaluate_bytes(
+            &actual_value.to_bytes(),
+            &assertion_value.to_bytes(),
+            &AssertionSettings {
+                is_big_endian: false,
+                operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                data_value: DataValue::Pubkey,
+            },
+            log_level,
+        )
 
-                sol_log_data(&[payload.as_slice()]);
-            }
-            LogLevel::EncodedNoop => {
-                let payload = AssertionResult::Pubkey(
-                    Some(*actual_value),
-                    Some(*assertion_value),
-                    *operator as u8,
-                    passed,
-                )
-                .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+        // match log_level {
+        //     LogLevel::PlaintextMessage => {
+        //         msg!("Result: ");
+        //         actual_value.log();
+        //         msg!(operator.format());
+        //         assertion_value.log();
+        //     }
+        //     LogLevel::EncodedMessage => {
+        //         let payload = AssertionResult::Pubkey(
+        //             Some(*actual_value),
+        //             Some(*assertion_value),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .try_to_vec()
+        //         .map_err(LighthouseError::serialize_err)?;
 
-                sol_log_data(&[payload.as_slice()]);
-            }
-            LogLevel::Silent => {}
-        }
+        //         sol_log_data(&[payload.as_slice()]);
+        //     }
+        //     LogLevel::EncodedNoop => {
+        //         let payload = AssertionResult::Pubkey(
+        //             Some(*actual_value),
+        //             Some(*assertion_value),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .try_to_vec()
+        //         .map_err(LighthouseError::serialize_err)?;
 
-        if passed {
-            Ok(())
-        } else {
-            Err(LighthouseError::AssertionFailed.into())
-        }
+        //         sol_log_data(&[payload.as_slice()]);
+        //     }
+        //     LogLevel::Silent => {}
+        // }
+
+        // if passed {
+        //     Ok(())
+        // } else {
+        //     Err(LighthouseError::AssertionFailed.into())
+        // }
     }
 }
 
@@ -385,67 +364,78 @@ impl Evaluate<EquatableOperator> for Option<&Pubkey> {
         operator: &EquatableOperator,
         log_level: LogLevel,
     ) -> Result<()> {
-        let passed = match operator {
-            EquatableOperator::Equal => actual_value == assertion_value,
-            EquatableOperator::NotEqual => actual_value != assertion_value,
-        };
+        // let passed = match operator {
+        //     EquatableOperator::Equal => actual_value == assertion_value,
+        //     EquatableOperator::NotEqual => actual_value != assertion_value,
+        // };
 
-        match log_level {
-            LogLevel::PlaintextMessage => match (actual_value, assertion_value) {
-                (Some(actual_value), Some(assertion_value)) => {
-                    msg!("Result: ");
-                    actual_value.log();
-                    msg!(operator.format());
-                    assertion_value.log();
-                }
-                (None, Some(assertion_value)) => {
-                    msg!("Result: ");
-                    msg!("None");
-                    msg!(operator.format());
-                    assertion_value.log();
-                }
-                (Some(actual_value), None) => {
-                    msg!("Result: ");
-                    actual_value.log();
-                    msg!(operator.format());
-                    msg!("None");
-                }
-                (None, None) => {
-                    msg!("Result: None {} None", operator.format());
-                }
+        evaluate_bytes(
+            &actual_value.unwrap_or(&Pubkey::default()).to_bytes(),
+            &assertion_value.unwrap_or(&Pubkey::default()).to_bytes(),
+            &AssertionSettings {
+                is_big_endian: false,
+                operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                data_value: DataValue::Pubkey,
             },
-            LogLevel::EncodedMessage => {
-                let payload = AssertionResult::Pubkey(
-                    actual_value.copied(),
-                    assertion_value.copied(),
-                    *operator as u8,
-                    passed,
-                )
-                .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+            log_level,
+        )
 
-                sol_log_data(&[payload.as_slice()]);
-            }
-            LogLevel::EncodedNoop => {
-                let payload = AssertionResult::Pubkey(
-                    actual_value.copied(),
-                    assertion_value.copied(),
-                    *operator as u8,
-                    passed,
-                )
-                .try_to_vec()
-                .map_err(LighthouseError::serialize_err)?;
+        // match log_level {
+        //     LogLevel::PlaintextMessage => match (actual_value, assertion_value) {
+        //         (Some(actual_value), Some(assertion_value)) => {
+        //             msg!("Result: ");
+        //             actual_value.log();
+        //             msg!(operator.format());
+        //             assertion_value.log();
+        //         }
+        //         (None, Some(assertion_value)) => {
+        //             msg!("Result: ");
+        //             msg!("None");
+        //             msg!(operator.format());
+        //             assertion_value.log();
+        //         }
+        //         (Some(actual_value), None) => {
+        //             msg!("Result: ");
+        //             actual_value.log();
+        //             msg!(operator.format());
+        //             msg!("None");
+        //         }
+        //         (None, None) => {
+        //             msg!("Result: None {} None", operator.format());
+        //         }
+        //     },
+        //     LogLevel::EncodedMessage => {
+        //         let payload = AssertionResult::Pubkey(
+        //             actual_value.copied(),
+        //             assertion_value.copied(),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .try_to_vec()
+        //         .map_err(LighthouseError::serialize_err)?;
 
-                sol_log_data(&[payload.as_slice()]);
-            }
-            LogLevel::Silent => {}
-        }
+        //         sol_log_data(&[payload.as_slice()]);
+        //     }
+        //     LogLevel::EncodedNoop => {
+        //         let payload = AssertionResult::Pubkey(
+        //             actual_value.copied(),
+        //             assertion_value.copied(),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .try_to_vec()
+        //         .map_err(LighthouseError::serialize_err)?;
 
-        if passed {
-            Ok(())
-        } else {
-            Err(LighthouseError::AssertionFailed.into())
-        }
+        //         sol_log_data(&[payload.as_slice()]);
+        //     }
+        //     LogLevel::Silent => {}
+        // }
+
+        // if passed {
+        //     Ok(())
+        // } else {
+        //     Err(LighthouseError::AssertionFailed.into())
+        // }
     }
 }
 
@@ -456,57 +446,236 @@ impl Evaluate<EquatableOperator> for [u8] {
         operator: &EquatableOperator,
         log_level: LogLevel,
     ) -> Result<()> {
-        let passed = match operator {
-            EquatableOperator::Equal => {
-                if actual_value.len() == assertion_value.len() {
-                    sol_memcmp(actual_value, assertion_value, assertion_value.len()) == 0
-                } else {
-                    false
+        // let passed = match operator {
+        //     EquatableOperator::Equal => {
+        //         if actual_value.len() == assertion_value.len() {
+        //             sol_memcmp(actual_value, assertion_value, assertion_value.len()) == 0
+        //         } else {
+        //             false
+        //         }
+        //     }
+        //     EquatableOperator::NotEqual => {
+        //         if actual_value.len() == assertion_value.len() {
+        //             sol_memcmp(actual_value, assertion_value, assertion_value.len()) != 0
+        //         } else {
+        //             true
+        //         }
+        //     }
+        // };
+
+        evaluate_bytes(
+            actual_value,
+            assertion_value,
+            &AssertionSettings {
+                is_big_endian: false,
+                operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                data_value: DataValue::Bytes,
+            },
+            log_level,
+        )
+
+        // match log_level {
+        //     LogLevel::PlaintextMessage => {
+        //         msg!(
+        //             "Result: {:?} {} {:?}",
+        //             actual_value,
+        //             operator.format(),
+        //             assertion_value
+        //         );
+        //     }
+        //     LogLevel::EncodedMessage => {
+        //         AssertionResult::Bytes(
+        //             actual_value.to_vec(),
+        //             assertion_value.to_vec(),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .log_data()?;
+        //     }
+        //     LogLevel::EncodedNoop => {
+        //         AssertionResult::Bytes(
+        //             actual_value.to_vec(),
+        //             assertion_value.to_vec(),
+        //             *operator as u8,
+        //             passed,
+        //         )
+        //         .log_noop()?;
+        //     }
+        //     LogLevel::Silent => {}
+        // }
+
+        // if passed {
+        //     Ok(())
+        // } else {
+        //     Err(LighthouseError::AssertionFailed.into())
+        // }
+    }
+}
+
+pub fn evaluate_bytes(
+    actual_value: &[u8],
+    assertion_value: &[u8],
+    assertion_settings: &AssertionSettings,
+    log_level: LogLevel,
+) -> Result<()> {
+    msg!("actual_value: {:?}", actual_value);
+    msg!("assertion_value: {:?}", assertion_value);
+    msg!("assertion settings: {:?}", assertion_settings);
+
+    if actual_value.len() != assertion_value.len() {
+        panic!("Evaluation bytes are not equal")
+    }
+
+    let passed = match assertion_settings.operator {
+        IntegerOperator::Equal => {
+            sol_memcmp(actual_value, assertion_value, assertion_value.len()) == 0
+        }
+        IntegerOperator::NotEqual => {
+            sol_memcmp(actual_value, assertion_value, assertion_value.len()) != 0
+        }
+        IntegerOperator::GreaterThan => {
+            if assertion_settings.data_value == DataValue::SignedNumber {
+                compare_signed_bytes(actual_value, assertion_value) == Ordering::Greater
+            } else {
+                compare_unsigned_bytes(actual_value, assertion_value) == Ordering::Greater
+            }
+        }
+        IntegerOperator::LessThan => {
+            if assertion_settings.data_value == DataValue::SignedNumber {
+                compare_signed_bytes(actual_value, assertion_value) == Ordering::Less
+            } else {
+                compare_unsigned_bytes(actual_value, assertion_value) == Ordering::Less
+            }
+        }
+        IntegerOperator::GreaterThanOrEqual => {
+            if assertion_settings.data_value == DataValue::SignedNumber {
+                compare_signed_bytes(actual_value, assertion_value) != Ordering::Less
+            } else {
+                compare_unsigned_bytes(actual_value, assertion_value) != Ordering::Less
+            }
+        }
+        IntegerOperator::LessThanOrEqual => {
+            if assertion_settings.data_value == DataValue::SignedNumber {
+                compare_signed_bytes(actual_value, assertion_value) != Ordering::Greater
+            } else {
+                compare_unsigned_bytes(actual_value, assertion_value) != Ordering::Greater
+            }
+        }
+        IntegerOperator::Contains => {
+            let mut contains = true;
+            for i in 0..actual_value.len() {
+                if actual_value[i] & assertion_value[i] != assertion_value[i] {
+                    contains = false;
+                    break;
                 }
             }
-            EquatableOperator::NotEqual => {
-                if actual_value.len() == assertion_value.len() {
-                    sol_memcmp(actual_value, assertion_value, assertion_value.len()) != 0
-                } else {
-                    true
+
+            contains
+        }
+        IntegerOperator::DoesNotContain => {
+            let mut contains = true;
+            for i in 0..actual_value.len() {
+                if actual_value[i] & assertion_value[i] != 0 {
+                    contains = false;
+                    break;
                 }
             }
-        };
 
-        match log_level {
-            LogLevel::PlaintextMessage => {
-                msg!(
-                    "Result: {:?} {} {:?}",
-                    actual_value,
-                    operator.format(),
-                    assertion_value
-                );
-            }
-            LogLevel::EncodedMessage => {
-                AssertionResult::Bytes(
-                    actual_value.to_vec(),
-                    assertion_value.to_vec(),
-                    *operator as u8,
-                    passed,
-                )
-                .log_data()?;
-            }
-            LogLevel::EncodedNoop => {
-                AssertionResult::Bytes(
-                    actual_value.to_vec(),
-                    assertion_value.to_vec(),
-                    *operator as u8,
-                    passed,
-                )
-                .log_noop()?;
-            }
-            LogLevel::Silent => {}
+            contains
         }
+    };
 
-        if passed {
-            Ok(())
-        } else {
-            Err(LighthouseError::AssertionFailed.into())
+    // match log_level {
+    // LogLevel::PlaintextMessage => {
+    //     msg!(
+    //         "Result: {:?} {} {:?}",
+    //         actual_value,
+    //         assertion_settings.operator.format(),
+    //         assertion_value
+    //     );
+    // }
+    // LogLevel::EncodedMessage => {
+    //     AssertionResult::Bytes(
+    //         actual_value.to_vec(),
+    //         assertion_value.to_vec(),
+    //         *assertion_settings.operator,
+    //         passed,
+    //     )
+    //     .log_data()?;
+    // }
+    // LogLevel::EncodedNoop => {
+    //     AssertionResult::Bytes(
+    //         actual_value.to_vec(),
+    //         assertion_value.to_vec(),
+    //         *assertion_settings.operator,
+    //         passed,
+    //     )
+    //     .log_noop()?;
+    // }
+    // LogLevel::PlaintextMessage | LogLevel::EncodedNoop | LogLevel::EncodedMessage => {
+    //     let result = match assertion_settings.data_value {
+    //         DataValue::Number => {
+    //             match actual_value.len() {
+    //                 1 => {
+    //                     let actual_value = actual_value[0];
+    //                     let assertion_value = assertion_value[0];
+    //                     AssertionResult::U8(
+    //                         Some(actual_value),
+    //                         Some(assertion_value),
+    //                         assertion_settings.operator as u8,
+    //                         passed,
+    //                     )
+    //                 }
+    //                 2 => {
+    //                     let actual_value =
+    //         }
+    //         DataValue::SignedNumber => {}
+    //     };
+
+    // AssertionResult::Bytes(
+    //     actual_value.to_vec(),
+    //     assertion_value.to_vec(),
+    //     assertion_settings.operator as u8,
+    //     passed,
+    // )
+    // .log_noop()?;
+    //     }
+    //     LogLevel::Silent => {}
+    // }
+
+    if passed {
+        Ok(())
+    } else {
+        Err(LighthouseError::AssertionFailed.into())
+    }
+}
+
+fn compare_signed_bytes(v1: &[u8], v2: &[u8]) -> Ordering {
+    let negative1 = v1.last().map_or(false, |&b| b & 0x80 != 0);
+    let negative2 = v2.last().map_or(false, |&b| b & 0x80 != 0);
+
+    match (negative1, negative2) {
+        (true, false) => Ordering::Less,
+        (false, true) => Ordering::Greater,
+        _ => {
+            // Both numbers have the same sign
+            if v1.len() == v2.len() {
+                v1.iter().rev().cmp(v2.iter().rev())
+            } else if negative1 {
+                // Both are negative, longer means more magnitude (more negative)
+                v2.len().cmp(&v1.len())
+            } else {
+                // Both are positive, longer means more magnitude (more positive)
+                v1.len().cmp(&v2.len())
+            }
         }
+    }
+}
+
+fn compare_unsigned_bytes(v1: &[u8], v2: &[u8]) -> Ordering {
+    if v1.len() == v2.len() {
+        v1.iter().rev().cmp(v2.iter().rev())
+    } else {
+        v1.len().cmp(&v2.len())
     }
 }

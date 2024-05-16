@@ -5,7 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::IntegerOperator;
+use crate::hooked::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 

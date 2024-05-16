@@ -148,6 +148,37 @@
       }
     },
     {
+      "name": "AssertAccountDataMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "defined": "AccountDataAssertions"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
       "name": "AssertAccountDelta",
       "accounts": [
         {
@@ -183,7 +214,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 3
+        "value": 4
       }
     },
     {
@@ -214,7 +245,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 4
+        "value": 5
       }
     },
     {
@@ -245,7 +276,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 6
       }
     },
     {
@@ -276,7 +307,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 7
       }
     },
     {
@@ -307,7 +338,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 8
       }
     },
     {
@@ -338,7 +369,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 8
+        "value": 9
       }
     },
     {
@@ -369,7 +400,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 9
+        "value": 10
       }
     },
     {
@@ -400,7 +431,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 11
       }
     },
     {
@@ -431,7 +462,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 11
+        "value": 12
       }
     },
     {
@@ -462,7 +493,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 12
+        "value": 13
       }
     },
     {
@@ -493,7 +524,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 13
+        "value": 14
       }
     },
     {
@@ -515,7 +546,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 14
+        "value": 15
       }
     },
     {
@@ -562,7 +593,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 15
+        "value": 16
       }
     },
     {
@@ -593,108 +624,11 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 16
+        "value": 17
       }
     }
   ],
   "types": [
-    {
-      "name": "TestAccountV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "u8",
-            "type": "u8"
-          },
-          {
-            "name": "i8",
-            "type": "i8"
-          },
-          {
-            "name": "u16",
-            "type": "u16"
-          },
-          {
-            "name": "i16",
-            "type": "i16"
-          },
-          {
-            "name": "u32",
-            "type": "u32"
-          },
-          {
-            "name": "i32",
-            "type": "i32"
-          },
-          {
-            "name": "u64",
-            "type": "u64"
-          },
-          {
-            "name": "i64",
-            "type": "i64"
-          },
-          {
-            "name": "u128",
-            "type": "u128"
-          },
-          {
-            "name": "i128",
-            "type": "i128"
-          },
-          {
-            "name": "bytes",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "trueField",
-            "type": "bool"
-          },
-          {
-            "name": "falseField",
-            "type": "bool"
-          },
-          {
-            "name": "optionU8",
-            "type": {
-              "option": "u8"
-            }
-          },
-          {
-            "name": "optionU8None",
-            "type": {
-              "option": "u8"
-            }
-          },
-          {
-            "name": "optionU16",
-            "type": {
-              "option": "u16"
-            }
-          },
-          {
-            "name": "optionU16None",
-            "type": {
-              "option": "u16"
-            }
-          },
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "vec",
-            "type": "bytes"
-          }
-        ]
-      }
-    },
     {
       "name": "AccountDataAssertion",
       "type": {
@@ -707,215 +641,14 @@
             }
           },
           {
-            "name": "assertion",
+            "name": "bytes",
             "type": {
-              "defined": "DataValueAssertion"
+              "defined": "CompactBytes"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "DataValueAssertion",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Bool",
-            "fields": [
-              {
-                "name": "value",
-                "type": "bool"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
           },
           {
-            "name": "U8",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u8"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I8",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i8"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U16",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u16"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I16",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i16"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u32"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I32",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i32"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I64",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i64"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "U128",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u128"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "I128",
-            "fields": [
-              {
-                "name": "value",
-                "type": "i128"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "IntegerOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Bytes",
-            "fields": [
-              {
-                "name": "value",
-                "type": {
-                  "defined": "CompactBytes"
-                }
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
-          },
-          {
-            "name": "Pubkey",
-            "fields": [
-              {
-                "name": "value",
-                "type": "publicKey"
-              },
-              {
-                "name": "operator",
-                "type": {
-                  "defined": "EquatableOperator"
-                }
-              }
-            ]
+            "name": "compactAssertionSettings",
+            "type": "u8"
           }
         ]
       }
@@ -1681,38 +1414,6 @@
               "u8",
               "bool"
             ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "IntegerOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          },
-          {
-            "name": "Contains"
-          },
-          {
-            "name": "DoesNotContain"
           }
         ]
       }

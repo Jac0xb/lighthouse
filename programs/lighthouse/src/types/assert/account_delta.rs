@@ -1,4 +1,4 @@
-use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
+use super::{Assert, EquatableOperator, LogLevel};
 use crate::{
     err,
     error::LighthouseError,
@@ -6,7 +6,7 @@ use crate::{
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::CompactU64;
+use lighthouse_common::{integer_operator::IntegerOperator, CompactU64};
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -280,11 +280,11 @@ mod tests {
         test_utils::{assert_passed, create_test_account},
         types::assert::{
             AccountDeltaAssertion, AccountInfoDeltaAssertion, Assert, DataValueDeltaAssertion,
-            EquatableOperator, IntegerOperator, LogLevel,
+            EquatableOperator, LogLevel,
         },
     };
     use borsh::BorshSerialize;
-    use lighthouse_common::CompactU64;
+    use lighthouse_common::{integer_operator::IntegerOperator, CompactU64};
     use solana_sdk::{
         account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
     };

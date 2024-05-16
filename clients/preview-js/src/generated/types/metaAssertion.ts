@@ -28,13 +28,15 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
-  IntegerOperator,
-  IntegerOperatorArgs,
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
+} from '.';
+import {
+  IntegerOperator,
+  IntegerOperatorArgs,
   getIntegerOperatorDecoder,
   getIntegerOperatorEncoder,
-} from '.';
+} from '../../hooked';
 
 export type MetaAssertion =
   | { __kind: 'RentExemptReserve'; value: bigint; operator: IntegerOperator }

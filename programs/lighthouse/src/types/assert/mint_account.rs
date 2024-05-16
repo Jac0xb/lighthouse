@@ -1,11 +1,12 @@
 use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate},
     utils::{keys_equal, Result},
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
@@ -123,6 +124,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
 #[cfg(test)]
 mod tests {
     mod evaluate {
+        use lighthouse_common::integer_operator::IntegerOperator;
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack,
         };
@@ -132,10 +134,7 @@ mod tests {
 
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{
-                evaluate::{EquatableOperator, IntegerOperator},
-                Assert, LogLevel, MintAccountAssertion,
-            },
+            types::assert::{evaluate::EquatableOperator, Assert, LogLevel, MintAccountAssertion},
         };
 
         #[test]

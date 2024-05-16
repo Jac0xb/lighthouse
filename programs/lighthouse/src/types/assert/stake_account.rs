@@ -1,8 +1,9 @@
 use super::{Assert, LogLevel};
-use crate::types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator};
+use crate::types::assert::evaluate::{EquatableOperator, Evaluate};
 use crate::utils::Result;
 use crate::{err, err_msg, error::LighthouseError};
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::msg;
 use solana_program::{
     pubkey::Pubkey,

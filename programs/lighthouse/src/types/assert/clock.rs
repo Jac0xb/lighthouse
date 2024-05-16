@@ -1,9 +1,7 @@
 use super::{Assert, LogLevel};
-use crate::{
-    types::assert::evaluate::{Evaluate, IntegerOperator},
-    utils::Result,
-};
+use crate::{types::assert::evaluate::Evaluate, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::{clock::Clock, sysvar::Sysvar};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
@@ -94,8 +92,9 @@ mod tests {
     mod evaluate {
         use crate::{
             test_utils::{assert_failed, assert_passed},
-            types::assert::{Assert, IntegerOperator, LogLevel, SysvarClockAssertion},
+            types::assert::{Assert, LogLevel, SysvarClockAssertion},
         };
+        use lighthouse_common::integer_operator::IntegerOperator;
         use solana_sdk::{
             clock::Clock,
             program_stubs::{set_syscall_stubs, SyscallStubs},

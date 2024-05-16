@@ -82,6 +82,13 @@ pub mod lighthouse {
                 let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account(ctx, &assertion, log_level)?;
             }
+            LighthouseInstruction::AssertAccountDataMulti {
+                log_level,
+                assertions,
+            } => {
+                let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
+                processor::assert_target_account_multi(ctx, &assertions, log_level)?;
+            }
             LighthouseInstruction::AssertAccountDelta {
                 log_level,
                 assertion,

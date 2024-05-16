@@ -21,11 +21,13 @@ import {
 import {
   EquatableOperator,
   EquatableOperatorArgs,
+  getEquatableOperatorSerializer,
+} from '.';
+import {
   IntegerOperator,
   IntegerOperatorArgs,
-  getEquatableOperatorSerializer,
   getIntegerOperatorSerializer,
-} from '.';
+} from '../../hooked';
 
 export type BubblegumTreeConfigAssertion =
   | { __kind: 'TreeCreator'; value: PublicKey; operator: EquatableOperator }

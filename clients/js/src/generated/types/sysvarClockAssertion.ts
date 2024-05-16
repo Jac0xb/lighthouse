@@ -19,7 +19,7 @@ import {
   IntegerOperator,
   IntegerOperatorArgs,
   getIntegerOperatorSerializer,
-} from '.';
+} from '../../hooked';
 
 export type SysvarClockAssertion =
   | { __kind: 'Slot'; value: bigint; operator: IntegerOperator }

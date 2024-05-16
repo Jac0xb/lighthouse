@@ -1,6 +1,7 @@
-use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
+use super::{Assert, EquatableOperator, Evaluate, LogLevel};
 use crate::{err, err_msg, error::LighthouseError, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::integer_operator::IntegerOperator;
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]

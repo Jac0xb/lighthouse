@@ -73,7 +73,7 @@ export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<Asser
     ]),
     (value) => ({
       ...value,
-      discriminator: 7,
+      discriminator: 8,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

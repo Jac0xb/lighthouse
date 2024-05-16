@@ -1,11 +1,11 @@
 use super::{Assert, KnownProgram, LogLevel};
 use crate::{
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+    types::assert::evaluate::{EquatableOperator, Evaluate},
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::CompactU64;
+use lighthouse_common::{integer_operator::IntegerOperator, CompactU64};
 use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]

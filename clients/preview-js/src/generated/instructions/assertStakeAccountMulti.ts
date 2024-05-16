@@ -73,7 +73,7 @@ export function getAssertStakeAccountMultiInstructionDataEncoder(): Encoder<Asse
     ]),
     (value) => ({
       ...value,
-      discriminator: 11,
+      discriminator: 12,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );
