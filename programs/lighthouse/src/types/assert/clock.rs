@@ -37,7 +37,6 @@ impl Assert<()> for SysvarClockAssertion {
                 operator,
             } => {
                 let actual_slot = clock.slot;
-
                 u64::evaluate(&actual_slot, assertion_value, operator, log_level)
             }
             SysvarClockAssertion::EpochStartTimestamp {
@@ -45,7 +44,6 @@ impl Assert<()> for SysvarClockAssertion {
                 operator,
             } => {
                 let actual_epoch_start_timestamp = clock.epoch_start_timestamp;
-
                 i64::evaluate(
                     &actual_epoch_start_timestamp,
                     assertion_value,
@@ -58,7 +56,6 @@ impl Assert<()> for SysvarClockAssertion {
                 operator,
             } => {
                 let actual_epoch = clock.epoch;
-
                 u64::evaluate(&actual_epoch, assertion_value, operator, log_level)
             }
             SysvarClockAssertion::LeaderScheduleEpoch {
@@ -66,7 +63,6 @@ impl Assert<()> for SysvarClockAssertion {
                 operator,
             } => {
                 let actual_leader_schedule_epoch = clock.leader_schedule_epoch;
-
                 u64::evaluate(
                     &actual_leader_schedule_epoch,
                     assertion_value,
@@ -79,7 +75,6 @@ impl Assert<()> for SysvarClockAssertion {
                 operator,
             } => {
                 let actual_unix_timestamp = clock.unix_timestamp;
-
                 i64::evaluate(&actual_unix_timestamp, assertion_value, operator, log_level)
             }
         }

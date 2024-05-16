@@ -219,13 +219,15 @@ async fn simple() {
 
     let blockhash = context.get_blockhash().await;
 
-    process_transaction_assert_success(
+    let result = process_transaction_assert_success(
         context,
         tx.to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
             .unwrap(),
     )
     .await
     .unwrap();
+
+    assert!(result.metadata.unwrap().compute_units_consumed < 16350);
 }
 
 #[tokio::test]

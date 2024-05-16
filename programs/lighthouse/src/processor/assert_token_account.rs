@@ -15,13 +15,13 @@ impl<'a, 'info> AssertTokenAccountContext<'a, 'info> {
     pub(crate) fn load(account_iter: &mut Iter<'a, AccountInfo<'info>>) -> Result<Self> {
         let token_account = next_account_info(account_iter)?;
 
-        if !keys_equal(token_account.owner, &spl_token::ID)
-            && !keys_equal(token_account.owner, &spl_token_2022::ID)
+        if keys_equal(token_account.owner, &spl_token::ID)
+            || keys_equal(token_account.owner, &spl_token_2022::ID)
         {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
+            Ok(Self { token_account })
+        } else {
+            Err(LighthouseError::AccountOwnerMismatch.into())
         }
-
-        Ok(Self { token_account })
     }
 }
 

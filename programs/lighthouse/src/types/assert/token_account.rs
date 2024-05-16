@@ -140,7 +140,6 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
                 let mint = try_from_slice_pubkey(&data, 0)?;
                 let owner = try_from_slice_pubkey(&data, 32)?;
-
                 let expected_ata =
                     get_associated_token_address_with_program_id(owner, mint, account.owner);
 

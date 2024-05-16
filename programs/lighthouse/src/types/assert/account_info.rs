@@ -1,8 +1,11 @@
 use super::{Assert, EquatableOperator, IntegerOperator, KnownProgram, LogLevel};
-use crate::{error::LighthouseError, types::assert::evaluate::Evaluate, utils::Result};
+use crate::{
+    types::assert::evaluate::Evaluate,
+    utils::{checked_get_slice, Result},
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_common::CompactU64;
-use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, keccak, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum AccountInfoAssertion {
@@ -78,19 +81,8 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
                 length,
             } => {
                 let account_data = account.try_borrow_data()?;
-
-                let start = **start;
-                let length = **length;
-
-                let hash_range = start as usize..(start + length) as usize;
-                let account_data = &account_data.get(hash_range.clone()).ok_or_else(|| {
-                    msg!(
-                        "Failed to verify hash data, range {:?} was out of bounds",
-                        hash_range
-                    );
-
-                    LighthouseError::RangeOutOfBounds
-                })?;
+                let account_data =
+                    checked_get_slice(&account_data, **start as usize, **length as usize)?;
                 let actual_hash = keccak::hashv(&[&account_data]).0;
 
                 <[u8]>::evaluate(

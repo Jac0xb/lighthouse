@@ -2,7 +2,7 @@ use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{error::LighthouseError, utils::unpack_coption_key};
 use crate::{
     types::assert::evaluate::Evaluate,
-    utils::{keys_equal, try_from_slice, Result},
+    utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -33,12 +33,6 @@ pub enum MintAccountAssertion {
 
 impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if !keys_equal(account.owner, &spl_token::ID)
-            && !keys_equal(account.owner, &spl_token_2022::ID)
-        {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
-        }
-
         let data = account
             .try_borrow_mut_data()
             .map_err(LighthouseError::failed_borrow_err)?;

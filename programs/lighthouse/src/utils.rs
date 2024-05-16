@@ -18,6 +18,12 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
+pub fn checked_get_slice(data: &[u8], offset: usize, length: usize) -> Result<&[u8]> {
+    let end = offset + length;
+    data.get(offset..end)
+        .ok_or_else(|| LighthouseError::oob_err(offset..end))
+}
+
 pub fn unpack_coption_key(src: &[u8], offset: usize) -> Result<Option<&Pubkey>> {
     let start = offset;
     let tag = src.get(start..start + 4).ok_or_else(|| {
