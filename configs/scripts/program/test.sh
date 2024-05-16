@@ -28,5 +28,13 @@ cd ${WORKING_DIR}/programs/lighthouse
 echo "Running solana test-sbf for ${p}..."
 RUST_LOG=error RUST_BACKTRACE=1 BPF_OUT_DIR=${WORKING_DIR}/configs/.programs cargo test 2>&1
 
+for p in ${TEST_PROGRAMS[@]}; do
+    printf "\nBuilding program: ${p}...\n"
+
+    cd ${WORKING_DIR}/${p}
+    cargo build-sbf --sbf-out-dir ${PROGRAMS_OUTPUT_DIR} $ARGS
+done
+
+
 cd ${WORKING_DIR}/tests/lighthouse/
 RUST_LOG=error RUST_BACKTRACE=1 cargo test 2>&1
