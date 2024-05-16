@@ -105,20 +105,7 @@ macro_rules! impl_evaluate {
     };
 }
 
-impl_evaluate!(
-    (u8, U8),
-    (u16, U16),
-    (u32, U32),
-    (u64, U64),
-    (u128, U128),
-    (i8, I8),
-    (i16, I16),
-    (i32, I32),
-    (i64, I64),
-    (i128, I128),
-    (bool, Bool),
-    (Pubkey, Pubkey)
-);
+impl_evaluate!((u8, U8), (bool, Bool), (Pubkey, Pubkey));
 
 #[macro_export]
 macro_rules! impl_evaluate_option {
