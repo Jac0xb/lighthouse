@@ -1,4 +1,4 @@
-use super::{Assert, Evaluate, LogLevel};
+use super::{evaluate_bytes, Assert, Evaluate, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
@@ -6,7 +6,10 @@ use crate::{
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::integer_operator::IntegerOperator;
+use lighthouse_common::{
+    assertion_settings::{AssertionSettings, DataValue},
+    integer_operator::IntegerOperator,
+};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
 use spl_token_2022::state::AccountState;
@@ -118,12 +121,36 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(72..108))?;
                 let delegate = unpack_coption_key(data_slice)?;
 
-                <Option<&Pubkey>>::evaluate(
-                    &delegate,
-                    &assertion_value.as_ref(),
-                    operator,
+                let some_bytes = [1u8, 0, 0, 0];
+                let none_bytes = [0u8, 0, 0, 0];
+
+                evaluate_bytes(
+                    &data_slice[0..4],
+                    if delegate.is_some() {
+                        &some_bytes
+                    } else {
+                        &none_bytes
+                    },
+                    &AssertionSettings {
+                        is_big_endian: true,
+                        operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                        data_value: DataValue::Bytes,
+                    },
                     log_level,
                 )
+
+                evaluate_bytes(&data_slice[5..37], &assertion_value.as_ref().to_bytes(), &AssertionSettings {
+                    is_big_endian: false,
+                    operator: IntegerOperator::Equal,
+                    data_value: DataValue::Bytes,
+                }, log_level)
+
+                // <Option<&Pubkey>>::evaluate(
+                //     &delegate,
+                //     &assertion_value.as_ref(),
+                //     operator,
+                //     log_level,
+                // )
             }
             TokenAccountAssertion::State {
                 value: assertion_value,
@@ -171,7 +198,25 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(129..165))?;
                 let close_authority = unpack_coption_key(data_slice)?;
 
-                <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
+                let some_bytes = [1u8, 0, 0, 0];
+                let none_bytes = [0u8, 0, 0, 0];
+
+                evaluate_bytes(
+                    &data_slice[0..4],
+                    if close_authority.is_some() {
+                        &some_bytes
+                    } else {
+                        &none_bytes
+                    },
+                    &AssertionSettings {
+                        is_big_endian: true,
+                        operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                        data_value: DataValue::Bytes,
+                    },
+                    log_level,
+                )
+
+                // <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
             }
             TokenAccountAssertion::TokenAccountOwnerIsDerived => {
                 let mint_data = data

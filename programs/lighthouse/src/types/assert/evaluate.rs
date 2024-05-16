@@ -1,5 +1,5 @@
 use super::LogLevel;
-use crate::{err, error::LighthouseError, validation::SPL_NOOP_ID, Result};
+use crate::{error::LighthouseError, validation::SPL_NOOP_ID, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_common::assertion_settings::{AssertionSettings, DataValue};
 use lighthouse_common::integer_operator::IntegerOperator;
@@ -23,12 +23,176 @@ pub enum AssertionResult {
     I32(Option<i32>, Option<i32>, u8, bool),
     I64(Option<i64>, Option<i64>, u8, bool),
     I128(Option<i128>, Option<i128>, u8, bool),
-    Pubkey(Option<Pubkey>, Option<Pubkey>, u8, bool),
+    Pubkey(Pubkey, Pubkey, u8, bool),
     Bytes(Vec<u8>, Vec<u8>, u8, bool),
     Bool(Option<bool>, Option<bool>, u8, bool),
 }
 
 impl AssertionResult {
+    pub fn data_value_to_result(
+        actual_slice: &[u8],
+        assertion_slice: &[u8],
+        assertion_settings: &AssertionSettings,
+        passed: bool,
+    ) -> Result<Self> {
+        match assertion_settings.data_value {
+            DataValue::Bool => {
+                let actual_value = actual_slice[0] != 0;
+                let assertion_value = assertion_slice[0] != 0;
+
+                Ok(AssertionResult::Bool(
+                    Some(actual_value),
+                    Some(assertion_value),
+                    assertion_settings.operator as u8,
+                    passed,
+                ))
+            }
+            DataValue::Number => match actual_slice.len() {
+                1 => {
+                    let actual_value = u8::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = u8::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::U8(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                2 => {
+                    let actual_value = u16::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = u16::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::U16(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                4 => {
+                    let actual_value = u32::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = u32::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::U32(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                8 => {
+                    let actual_value = u64::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = u64::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::U64(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                16 => {
+                    let actual_value = u128::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = u128::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::U128(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                _ => Ok(AssertionResult::Bytes(
+                    actual_slice.to_vec(),
+                    assertion_slice.to_vec(),
+                    assertion_settings.operator as u8,
+                    passed,
+                )),
+            },
+            DataValue::SignedNumber => match actual_slice.len() {
+                1 => {
+                    let actual_value = i8::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = i8::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::I8(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                2 => {
+                    let actual_value = i16::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = i16::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::I16(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                4 => {
+                    let actual_value = i32::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = i32::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::I32(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                8 => {
+                    let actual_value = i64::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = i64::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::I64(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                16 => {
+                    let actual_value = i128::from_le_bytes(actual_slice.try_into().unwrap());
+                    let assertion_value = i128::from_le_bytes(assertion_slice.try_into().unwrap());
+
+                    Ok(AssertionResult::I128(
+                        Some(actual_value),
+                        Some(assertion_value),
+                        assertion_settings.operator as u8,
+                        passed,
+                    ))
+                }
+                _ => Ok(AssertionResult::Bytes(
+                    actual_slice.to_vec(),
+                    assertion_slice.to_vec(),
+                    assertion_settings.operator as u8,
+                    passed,
+                )),
+            },
+            DataValue::Pubkey => {
+                let actual_value = Pubkey::try_from(actual_slice).unwrap();
+                let assertion_value = Pubkey::try_from(assertion_slice).unwrap();
+
+                Ok(AssertionResult::Pubkey(
+                    actual_value,
+                    assertion_value,
+                    assertion_settings.operator as u8,
+                    passed,
+                ))
+            }
+            DataValue::Bytes => Ok(AssertionResult::Bytes(
+                actual_slice.to_vec(),
+                assertion_slice.to_vec(),
+                assertion_settings.operator as u8,
+                passed,
+            )),
+        }
+    }
+
     pub fn log_data(&self) -> Result<()> {
         let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
 
@@ -48,6 +212,10 @@ impl AssertionResult {
             },
             &[],
         )
+    }
+
+    pub fn log_msg(&self) {
+        msg!("Result: {:?}", self);
     }
 }
 
@@ -357,87 +525,26 @@ impl Evaluate<EquatableOperator> for Pubkey {
     }
 }
 
-impl Evaluate<EquatableOperator> for Option<&Pubkey> {
-    fn evaluate(
-        actual_value: &Self,
-        assertion_value: &Self,
-        operator: &EquatableOperator,
-        log_level: LogLevel,
-    ) -> Result<()> {
-        // let passed = match operator {
-        //     EquatableOperator::Equal => actual_value == assertion_value,
-        //     EquatableOperator::NotEqual => actual_value != assertion_value,
-        // };
+// impl Evaluate<EquatableOperator> for Option<&Pubkey> {
+//     fn evaluate(
+//         actual_value: &Self,
+//         assertion_value: &Self,
+//         operator: &EquatableOperator,
+//         log_level: LogLevel,
+//     ) -> Result<()> {
 
-        evaluate_bytes(
-            &actual_value.unwrap_or(&Pubkey::default()).to_bytes(),
-            &assertion_value.unwrap_or(&Pubkey::default()).to_bytes(),
-            &AssertionSettings {
-                is_big_endian: false,
-                operator: IntegerOperator::try_from(*operator as u8).unwrap(),
-                data_value: DataValue::Pubkey,
-            },
-            log_level,
-        )
-
-        // match log_level {
-        //     LogLevel::PlaintextMessage => match (actual_value, assertion_value) {
-        //         (Some(actual_value), Some(assertion_value)) => {
-        //             msg!("Result: ");
-        //             actual_value.log();
-        //             msg!(operator.format());
-        //             assertion_value.log();
-        //         }
-        //         (None, Some(assertion_value)) => {
-        //             msg!("Result: ");
-        //             msg!("None");
-        //             msg!(operator.format());
-        //             assertion_value.log();
-        //         }
-        //         (Some(actual_value), None) => {
-        //             msg!("Result: ");
-        //             actual_value.log();
-        //             msg!(operator.format());
-        //             msg!("None");
-        //         }
-        //         (None, None) => {
-        //             msg!("Result: None {} None", operator.format());
-        //         }
-        //     },
-        //     LogLevel::EncodedMessage => {
-        //         let payload = AssertionResult::Pubkey(
-        //             actual_value.copied(),
-        //             assertion_value.copied(),
-        //             *operator as u8,
-        //             passed,
-        //         )
-        //         .try_to_vec()
-        //         .map_err(LighthouseError::serialize_err)?;
-
-        //         sol_log_data(&[payload.as_slice()]);
-        //     }
-        //     LogLevel::EncodedNoop => {
-        //         let payload = AssertionResult::Pubkey(
-        //             actual_value.copied(),
-        //             assertion_value.copied(),
-        //             *operator as u8,
-        //             passed,
-        //         )
-        //         .try_to_vec()
-        //         .map_err(LighthouseError::serialize_err)?;
-
-        //         sol_log_data(&[payload.as_slice()]);
-        //     }
-        //     LogLevel::Silent => {}
-        // }
-
-        // if passed {
-        //     Ok(())
-        // } else {
-        //     Err(LighthouseError::AssertionFailed.into())
-        // }
-    }
-}
+//         evaluate_bytes(
+//             &actual_value.unwrap_or(&Pubkey::default()).to_bytes(),
+//             &assertion_value.unwrap_or(&Pubkey::default()).to_bytes(),
+//             &AssertionSettings {
+//                 is_big_endian: false,
+//                 operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+//                 data_value: DataValue::Pubkey,
+//             },
+//             log_level,
+//         )
+//     }
+// }
 
 impl Evaluate<EquatableOperator> for [u8] {
     fn evaluate(
@@ -518,9 +625,9 @@ pub fn evaluate_bytes(
     assertion_settings: &AssertionSettings,
     log_level: LogLevel,
 ) -> Result<()> {
-    msg!("actual_value: {:?}", actual_value);
-    msg!("assertion_value: {:?}", assertion_value);
-    msg!("assertion settings: {:?}", assertion_settings);
+    // msg!("actual_value: {:?}", actual_value);
+    // msg!("assertion_value: {:?}", assertion_value);
+    // msg!("assertion settings: {:?}", assertion_settings);
 
     if actual_value.len() != assertion_value.len() {
         panic!("Evaluation bytes are not equal")
@@ -585,63 +692,30 @@ pub fn evaluate_bytes(
         }
     };
 
-    // match log_level {
-    // LogLevel::PlaintextMessage => {
-    //     msg!(
-    //         "Result: {:?} {} {:?}",
-    //         actual_value,
-    //         assertion_settings.operator.format(),
-    //         assertion_value
-    //     );
-    // }
-    // LogLevel::EncodedMessage => {
-    //     AssertionResult::Bytes(
-    //         actual_value.to_vec(),
-    //         assertion_value.to_vec(),
-    //         *assertion_settings.operator,
-    //         passed,
-    //     )
-    //     .log_data()?;
-    // }
-    // LogLevel::EncodedNoop => {
-    //     AssertionResult::Bytes(
-    //         actual_value.to_vec(),
-    //         assertion_value.to_vec(),
-    //         *assertion_settings.operator,
-    //         passed,
-    //     )
-    //     .log_noop()?;
-    // }
-    // LogLevel::PlaintextMessage | LogLevel::EncodedNoop | LogLevel::EncodedMessage => {
-    //     let result = match assertion_settings.data_value {
-    //         DataValue::Number => {
-    //             match actual_value.len() {
-    //                 1 => {
-    //                     let actual_value = actual_value[0];
-    //                     let assertion_value = assertion_value[0];
-    //                     AssertionResult::U8(
-    //                         Some(actual_value),
-    //                         Some(assertion_value),
-    //                         assertion_settings.operator as u8,
-    //                         passed,
-    //                     )
-    //                 }
-    //                 2 => {
-    //                     let actual_value =
-    //         }
-    //         DataValue::SignedNumber => {}
-    //     };
-
-    // AssertionResult::Bytes(
-    //     actual_value.to_vec(),
-    //     assertion_value.to_vec(),
-    //     assertion_settings.operator as u8,
-    //     passed,
-    // )
-    // .log_noop()?;
-    //     }
-    //     LogLevel::Silent => {}
-    // }
+    match log_level {
+        LogLevel::EncodedMessage => AssertionResult::data_value_to_result(
+            actual_value,
+            assertion_value,
+            assertion_settings,
+            passed,
+        )?
+        .log_data()?,
+        LogLevel::EncodedNoop => AssertionResult::data_value_to_result(
+            actual_value,
+            assertion_value,
+            assertion_settings,
+            passed,
+        )?
+        .log_noop()?,
+        LogLevel::PlaintextMessage => AssertionResult::data_value_to_result(
+            actual_value,
+            assertion_value,
+            assertion_settings,
+            passed,
+        )?
+        .log_msg(),
+        LogLevel::Silent => {}
+    }
 
     if passed {
         Ok(())

@@ -1,4 +1,4 @@
-use super::{Assert, LogLevel};
+use super::{evaluate_bytes, Assert, LogLevel};
 use crate::{
     err, err_msg,
     types::assert::evaluate::{EquatableOperator, Evaluate},
@@ -6,7 +6,10 @@ use crate::{
 };
 use crate::{error::LighthouseError, utils::unpack_coption_key};
 use borsh::{BorshDeserialize, BorshSerialize};
-use lighthouse_common::integer_operator::IntegerOperator;
+use lighthouse_common::{
+    assertion_settings::{AssertionSettings, DataValue},
+    integer_operator::IntegerOperator,
+};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
@@ -55,12 +58,30 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(0..36))?;
                 let mint_authority = unpack_coption_key(data_slice)?;
 
-                <Option<&Pubkey>>::evaluate(
-                    &mint_authority,
-                    &assertion_value.as_ref(),
-                    operator,
+                let some_bytes = [1u8, 0, 0, 0];
+                let none_bytes = [0u8, 0, 0, 0];
+
+                evaluate_bytes(
+                    &data_slice[0..4],
+                    if mint_authority.is_some() {
+                        &some_bytes
+                    } else {
+                        &none_bytes
+                    },
+                    &AssertionSettings {
+                        is_big_endian: true,
+                        operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                        data_value: DataValue::Bytes,
+                    },
                     log_level,
                 )
+
+                // <Option<&Pubkey>>::evaluate(
+                //     &mint_authority,
+                //     &assertion_value.as_ref(),
+                //     operator,
+                //     log_level,
+                // )
             }
             MintAccountAssertion::Supply {
                 value: assertion_value,
@@ -110,12 +131,30 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                     .ok_or_else(|| LighthouseError::oob_err(46..82))?;
                 let freeze_authority = unpack_coption_key(data_slice)?;
 
-                <Option<&Pubkey>>::evaluate(
-                    &freeze_authority,
-                    &assertion_value.as_ref(),
-                    operator,
+                let some_bytes = [1u8, 0, 0, 0];
+                let none_bytes = [0u8, 0, 0, 0];
+
+                evaluate_bytes(
+                    &data_slice[0..4],
+                    if freeze_authority.is_some() {
+                        &some_bytes
+                    } else {
+                        &none_bytes
+                    },
+                    &AssertionSettings {
+                        is_big_endian: true,
+                        operator: IntegerOperator::try_from(*operator as u8).unwrap(),
+                        data_value: DataValue::Bytes,
+                    },
                     log_level,
                 )
+
+                // <Option<&Pubkey>>::evaluate(
+                //     &freeze_authority,
+                //     &assertion_value.as_ref(),
+                //     operator,
+                //     log_level,
+                // )
             }
         }
     }
