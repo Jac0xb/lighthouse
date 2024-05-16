@@ -1,8 +1,5 @@
-use super::{Assert, LogLevel};
-use crate::{
-    types::assert::evaluate::{Evaluate, IntegerOperator},
-    utils::Result,
-};
+use super::{Assert, IntegerOperator, LogLevel};
+use crate::{types::assert::evaluate::Evaluate, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{clock::Clock, sysvar::Sysvar};
 

@@ -1,11 +1,8 @@
-use super::{Assert, LogLevel};
+use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{
-        assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
-        CompactBytes,
-    },
+    types::{assert::evaluate::Evaluate, CompactBytes},
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -206,8 +203,7 @@ mod tests {
         error::LighthouseError,
         test_utils::{assert_failed, assert_passed, create_test_account},
         types::assert::{
-            evaluate::{EquatableOperator, IntegerOperator},
-            AccountDataAssertion, Assert, LogLevel,
+            AccountDataAssertion, Assert, EquatableOperator, IntegerOperator, LogLevel,
         },
     };
     use borsh::BorshSerialize;

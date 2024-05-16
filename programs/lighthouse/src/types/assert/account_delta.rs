@@ -504,7 +504,7 @@ mod tests {
             a_offset: CompactU64(0),
             b_offset: CompactU64(4),
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::evaluate::EquatableOperator::Equal,
+                operator: EquatableOperator::Equal,
                 length: 32,
             },
         };
@@ -520,7 +520,7 @@ mod tests {
             a_offset: CompactU64(4),
             b_offset: CompactU64(0),
             assertion: DataValueDeltaAssertion::Bytes {
-                operator: crate::types::assert::evaluate::EquatableOperator::Equal,
+                operator: EquatableOperator::Equal,
                 length: 32,
             },
         };

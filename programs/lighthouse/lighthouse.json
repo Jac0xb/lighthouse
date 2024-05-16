@@ -1332,6 +1332,179 @@
       }
     },
     {
+      "name": "AssertionResult",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "U8",
+            "fields": [
+              {
+                "option": "u8"
+              },
+              {
+                "option": "u8"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "U16",
+            "fields": [
+              {
+                "option": "u16"
+              },
+              {
+                "option": "u16"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "U32",
+            "fields": [
+              {
+                "option": "u32"
+              },
+              {
+                "option": "u32"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "U64",
+            "fields": [
+              {
+                "option": "u64"
+              },
+              {
+                "option": "u64"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "U128",
+            "fields": [
+              {
+                "option": "u128"
+              },
+              {
+                "option": "u128"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "I8",
+            "fields": [
+              {
+                "option": "i8"
+              },
+              {
+                "option": "i8"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "I16",
+            "fields": [
+              {
+                "option": "i16"
+              },
+              {
+                "option": "i16"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "I32",
+            "fields": [
+              {
+                "option": "i32"
+              },
+              {
+                "option": "i32"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "I64",
+            "fields": [
+              {
+                "option": "i64"
+              },
+              {
+                "option": "i64"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "I128",
+            "fields": [
+              {
+                "option": "i128"
+              },
+              {
+                "option": "i128"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "Pubkey",
+            "fields": [
+              {
+                "option": "publicKey"
+              },
+              {
+                "option": "publicKey"
+              },
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "Bytes",
+            "fields": [
+              "bytes",
+              "bytes",
+              "u8",
+              "bool"
+            ]
+          },
+          {
+            "name": "Bool",
+            "fields": [
+              {
+                "option": "bool"
+              },
+              {
+                "option": "bool"
+              },
+              "u8",
+              "bool"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "BubblegumTreeConfigAssertion",
       "type": {
         "kind": "enum",
@@ -1513,225 +1686,6 @@
       }
     },
     {
-      "name": "AssertionResult",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "U8",
-            "fields": [
-              {
-                "option": "u8"
-              },
-              {
-                "option": "u8"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "U16",
-            "fields": [
-              {
-                "option": "u16"
-              },
-              {
-                "option": "u16"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              {
-                "option": "u32"
-              },
-              {
-                "option": "u32"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              {
-                "option": "u64"
-              },
-              {
-                "option": "u64"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "U128",
-            "fields": [
-              {
-                "option": "u128"
-              },
-              {
-                "option": "u128"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "I8",
-            "fields": [
-              {
-                "option": "i8"
-              },
-              {
-                "option": "i8"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "I16",
-            "fields": [
-              {
-                "option": "i16"
-              },
-              {
-                "option": "i16"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "I32",
-            "fields": [
-              {
-                "option": "i32"
-              },
-              {
-                "option": "i32"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "I64",
-            "fields": [
-              {
-                "option": "i64"
-              },
-              {
-                "option": "i64"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "I128",
-            "fields": [
-              {
-                "option": "i128"
-              },
-              {
-                "option": "i128"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "Pubkey",
-            "fields": [
-              {
-                "option": "publicKey"
-              },
-              {
-                "option": "publicKey"
-              },
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "Bytes",
-            "fields": [
-              "bytes",
-              "bytes",
-              "u8",
-              "bool"
-            ]
-          },
-          {
-            "name": "Bool",
-            "fields": [
-              {
-                "option": "bool"
-              },
-              {
-                "option": "bool"
-              },
-              "u8",
-              "bool"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "IntegerOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          },
-          {
-            "name": "GreaterThan"
-          },
-          {
-            "name": "LessThan"
-          },
-          {
-            "name": "GreaterThanOrEqual"
-          },
-          {
-            "name": "LessThanOrEqual"
-          },
-          {
-            "name": "Contains"
-          },
-          {
-            "name": "DoesNotContain"
-          }
-        ]
-      }
-    },
-    {
-      "name": "EquatableOperator",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Equal"
-          },
-          {
-            "name": "NotEqual"
-          }
-        ]
-      }
-    },
-    {
       "name": "KnownProgram",
       "type": {
         "kind": "enum",
@@ -1895,6 +1849,52 @@
                 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "IntegerOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
+          },
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "GreaterThanOrEqual"
+          },
+          {
+            "name": "LessThanOrEqual"
+          },
+          {
+            "name": "Contains"
+          },
+          {
+            "name": "DoesNotContain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquatableOperator",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "NotEqual"
           }
         ]
       }

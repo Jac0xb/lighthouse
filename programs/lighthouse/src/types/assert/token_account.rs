@@ -1,8 +1,7 @@
-use super::{Assert, Evaluate, LogLevel};
+use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, IntegerOperator},
     utils::{unpack_coption_key, unpack_coption_u64, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -141,7 +140,12 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
 
                 let actual_is_native = unpack_coption_u64(data_slice)?;
 
-                <Option<u64>>::evaluate(&actual_is_native, value, operator, log_level)
+                <Option<&u64>>::evaluate(
+                    &actual_is_native.as_ref(),
+                    &value.as_ref(),
+                    operator,
+                    log_level,
+                )
             }
             TokenAccountAssertion::DelegatedAmount {
                 value: assertion_value,
@@ -211,8 +215,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                evaluate::{EquatableOperator, IntegerOperator},
-                Assert, LogLevel, TokenAccountAssertion,
+                Assert, EquatableOperator, IntegerOperator, LogLevel, TokenAccountAssertion,
             },
         };
 

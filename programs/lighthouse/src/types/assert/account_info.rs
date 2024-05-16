@@ -1,9 +1,5 @@
-use super::{Assert, KnownProgram, LogLevel};
-use crate::{
-    error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
-    utils::Result,
-};
+use super::{Assert, EquatableOperator, IntegerOperator, KnownProgram, LogLevel};
+use crate::{error::LighthouseError, types::assert::evaluate::Evaluate, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_common::CompactU64;
 use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
