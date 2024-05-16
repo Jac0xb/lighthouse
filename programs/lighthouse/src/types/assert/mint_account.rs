@@ -1,10 +1,9 @@
 use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
-use crate::{
-    err, err_msg,
-    types::assert::evaluate::Evaluate,
-    utils::{keys_equal, Result},
-};
 use crate::{error::LighthouseError, utils::unpack_coption_key};
+use crate::{
+    types::assert::evaluate::Evaluate,
+    utils::{keys_equal, try_from_slice, Result},
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
@@ -49,11 +48,7 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data
-                    .get(0..36)
-                    .ok_or_else(|| LighthouseError::oob_err(0..36))?;
-                let mint_authority = unpack_coption_key(data_slice)?;
-
+                let mint_authority = unpack_coption_key(&data, 0)?;
                 <Option<&Pubkey>>::evaluate(
                     &mint_authority,
                     &assertion_value.as_ref(),
@@ -65,50 +60,28 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data
-                    .get(36..44)
-                    .ok_or_else(|| LighthouseError::oob_err(36..44))?;
-                let actual_supply = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
-                    err_msg!("Failed to deserialize supply from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?);
-
+                let actual_supply = try_from_slice(&data, 36, None)?;
                 u64::evaluate(&actual_supply, assertion_value, operator, log_level)
             }
             MintAccountAssertion::Decimals {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data
-                    .get(44..45)
-                    .ok_or_else(|| LighthouseError::oob_err(44..45))?;
-                let actual_decimals = u8::from_le_bytes(data_slice.try_into().map_err(|e| {
-                    err_msg!("Failed to deserialize decimals from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?);
-
+                let actual_decimals = try_from_slice(&data, 44, None)?;
                 u8::evaluate(&actual_decimals, assertion_value, operator, log_level)
             }
             MintAccountAssertion::IsInitialized {
                 value: assertion_value,
                 operator,
             } => {
-                let actual_value = data
-                    .get(45)
-                    .ok_or_else(|| LighthouseError::oob_err(45..46))?;
-                let actual_value = *actual_value != 0;
-
+                let actual_value = try_from_slice(&data, 45, None)?;
                 bool::evaluate(&actual_value, assertion_value, operator, log_level)
             }
             MintAccountAssertion::FreezeAuthority {
                 value: assertion_value,
                 operator,
             } => {
-                let data_slice = data
-                    .get(46..82)
-                    .ok_or_else(|| LighthouseError::oob_err(46..82))?;
-                let freeze_authority = unpack_coption_key(data_slice)?;
-
+                let freeze_authority = unpack_coption_key(&data, 46)?;
                 <Option<&Pubkey>>::evaluate(
                     &freeze_authority,
                     &assertion_value.as_ref(),
