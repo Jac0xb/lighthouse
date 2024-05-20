@@ -10,9 +10,9 @@ const LESS_THAN_SYMBOL: &str = "<";
 const GREATER_THAN_OR_EQUAL_SYMBOL: &str = ">=";
 const LESS_THAN_OR_EQUAL_SYMBOL: &str = "<=";
 const CONTAINS_SYMBOL: &str = "&";
-const DOES_NOT_CONTAIN_SYMBOL: &str = "!&";
+const DOES_NOT_CONTAIN_SYMBOL: &str = "|";
 
-pub trait Operator {
+pub trait Operator: Sized {
     fn format(&self) -> &str;
 }
 

@@ -1,9 +1,8 @@
 use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
 use crate::{
     error::LighthouseError,
-    utils::{
-        try_from_slice, try_from_slice_pubkey, unpack_coption_key, unpack_coption_u64, Result,
-    },
+    generate_asserts_c,
+    utils::{try_from_slice_pubkey, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -71,86 +70,35 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             .try_borrow_data()
             .map_err(LighthouseError::failed_borrow_err)?;
 
-        match self {
-            TokenAccountAssertion::Mint {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_mint = try_from_slice_pubkey(&data, 0)?;
-                Pubkey::evaluate(actual_mint, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Owner {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_owner = try_from_slice_pubkey(&data, 32)?;
-                Pubkey::evaluate(actual_owner, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Amount {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_amount = try_from_slice(&data, 64, None)?;
-                u64::evaluate(&actual_amount, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Delegate {
-                value: assertion_value,
-                operator,
-            } => {
-                let delegate = unpack_coption_key(&data, 72)?;
-                <Option<&Pubkey>>::evaluate(
-                    &delegate,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-            TokenAccountAssertion::State {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_state: u8 = try_from_slice(&data, 108, None)?;
-                u8::evaluate(&actual_state, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::IsNative { value, operator } => {
-                let actual_is_native = unpack_coption_u64(&data, 109)?;
-                <Option<&u64>>::evaluate(
-                    &actual_is_native.as_ref(),
-                    &value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-            TokenAccountAssertion::DelegatedAmount {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_delegated_amount = try_from_slice(&data, 121, None)?;
-                u64::evaluate(
-                    &actual_delegated_amount,
-                    assertion_value,
-                    operator,
-                    log_level,
-                )
-            }
-            TokenAccountAssertion::CloseAuthority { value, operator } => {
-                let close_authority = unpack_coption_key(&data, 129)?;
-                <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
-            }
-            TokenAccountAssertion::TokenAccountOwnerIsDerived => {
-                let mint = try_from_slice_pubkey(&data, 0)?;
-                let owner = try_from_slice_pubkey(&data, 32)?;
-                let expected_ata =
-                    get_associated_token_address_with_program_id(owner, mint, account.owner);
+        generate_asserts_c!(
+            self,
+            TokenAccountAssertion,
+            data,
+            log_level,
+            (Mint, (Pubkey), 0),
+            (Owner, (Pubkey), 32),
+            (Amount, u64, 64),
+            (Delegate, (Option<Pubkey>), 72),
+            (State, u8, 108),
+            (IsNative, (Option<u64>), 109),
+            (DelegatedAmount, u64, 121),
+            (CloseAuthority, (Option<Pubkey>), 129)
+            (custom, TokenAccountOwnerIsDerived,
+                {
+                    let mint = try_from_slice_pubkey(&data, 0)?;
+                    let owner = try_from_slice_pubkey(&data, 32)?;
+                    let expected_ata =
+                        get_associated_token_address_with_program_id(owner, mint, account.owner);
 
-                Pubkey::evaluate(
-                    account.key,
-                    &expected_ata,
-                    &EquatableOperator::Equal,
-                    log_level,
-                )
-            }
-        }
+                    Pubkey::evaluate(
+                        account.key,
+                        &expected_ata,
+                        &EquatableOperator::Equal,
+                        log_level,
+                    )
+                }
+            )
+        )
     }
 }
 

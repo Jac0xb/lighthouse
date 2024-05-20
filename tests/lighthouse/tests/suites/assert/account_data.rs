@@ -227,7 +227,11 @@ async fn simple() {
     .await
     .unwrap();
 
-    assert!(result.metadata.unwrap().compute_units_consumed < 16350);
+    assert!(
+        result.metadata.as_ref().unwrap().compute_units_consumed < 16350,
+        "{:?}",
+        result.metadata.unwrap().compute_units_consumed
+    );
 }
 
 #[tokio::test]

@@ -1,4 +1,4 @@
-use super::{EquatableOperator, LogLevel};
+use super::{EquatableOperator, IntegerOperator, LogLevel};
 use crate::{error::LighthouseError, types::assert::Operator, validation::SPL_NOOP_ID, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -6,15 +6,51 @@ use solana_program::{
 };
 use std::fmt::Debug;
 
-macro_rules! log_case {
-    ($variant:ident, $actual:ident, $assertion:ident, $operator:ident, $passed:ident) => {
-        msg!(
-            "Result ({}): {:?} {} {:?}",
-            if *$passed { "Passed" } else { "Failed" },
-            $actual,
-            $operator,
-            $assertion,
-        );
+macro_rules! log_cases {
+    ($self:ident, $($type:ident),+) => {
+        match $self {
+            $(
+                AssertionResult::$type(actual, assertion, operator, passed) => {
+                    let operator = IntegerOperator::try_from(*operator).unwrap();
+
+                    msg!(
+                        "Result ({}): {:?} {} {:?}",
+                        if *passed { "Passed" } else { "Failed" },
+                        actual,
+                        operator.format(),
+                        assertion,
+                    );
+                }
+            )+
+            // You can include special cases directly within the macro or outside as needed
+            AssertionResult::Pubkey(actual, assertion, operator, passed) => {
+                let operator = EquatableOperator::try_from(*operator).unwrap();
+
+                match (actual, assertion) {
+                    (Some(actual_value), Some(assertion_value)) => {
+                        msg!("Result: ");
+                        actual_value.log();
+                        msg!(operator.format());
+                        assertion_value.log();
+                    }
+                    (None, Some(assertion_value)) => {
+                        msg!("Result: ");
+                        msg!("None");
+                        msg!(operator.format());
+                        assertion_value.log();
+                    }
+                    (Some(actual_value), None) => {
+                        msg!("Result ({}): ", if *passed { "Passed" } else { "Failed" });
+                        actual_value.log();
+                        msg!(operator.format());
+                        msg!("None");
+                    }
+                    (None, None) => {
+                        msg!("Result: None {} None", operator.format());
+                    }
+                }
+            },
+        }
     };
 }
 
@@ -75,70 +111,6 @@ impl AssertionResult {
     }
 
     pub fn log_msg(&self) {
-        match self {
-            AssertionResult::U8(actual, assertion, operator, passed) => {
-                log_case!(U8, actual, assertion, operator, passed);
-            }
-            AssertionResult::U16(actual, assertion, operator, passed) => {
-                log_case!(U16, actual, assertion, operator, passed);
-            }
-            AssertionResult::U32(actual, assertion, operator, passed) => {
-                log_case!(U32, actual, assertion, operator, passed);
-            }
-            AssertionResult::U64(actual, assertion, operator, passed) => {
-                log_case!(U64, actual, assertion, operator, passed);
-            }
-            AssertionResult::U128(actual, assertion, operator, passed) => {
-                log_case!(U128, actual, assertion, operator, passed);
-            }
-            AssertionResult::I8(actual, assertion, operator, passed) => {
-                log_case!(I8, actual, assertion, operator, passed);
-            }
-            AssertionResult::I16(actual, assertion, operator, passed) => {
-                log_case!(I16, actual, assertion, operator, passed);
-            }
-            AssertionResult::I32(actual, assertion, operator, passed) => {
-                log_case!(I32, actual, assertion, operator, passed);
-            }
-            AssertionResult::I64(actual, assertion, operator, passed) => {
-                log_case!(I64, actual, assertion, operator, passed);
-            }
-            AssertionResult::I128(actual, assertion, operator, passed) => {
-                log_case!(I128, actual, assertion, operator, passed);
-            }
-            AssertionResult::Pubkey(actual, assertion, operator, passed) => {
-                let operator = EquatableOperator::try_from(*operator).unwrap();
-
-                match (actual, assertion) {
-                    (Some(actual_value), Some(assertion_value)) => {
-                        msg!("Result: ");
-                        actual_value.log();
-                        msg!(operator.format());
-                        assertion_value.log();
-                    }
-                    (None, Some(assertion_value)) => {
-                        msg!("Result: ");
-                        msg!("None");
-                        msg!(operator.format());
-                        assertion_value.log();
-                    }
-                    (Some(actual_value), None) => {
-                        msg!("Result ({}): ", if *passed { "Passed" } else { "Failed" });
-                        actual_value.log();
-                        msg!(operator.format());
-                        msg!("None");
-                    }
-                    (None, None) => {
-                        msg!("Result: None {} None", operator.format());
-                    }
-                }
-            }
-            AssertionResult::Bytes(actual, assertion, operator, passed) => {
-                log_case!(Bytes, actual, assertion, operator, passed);
-            }
-            AssertionResult::Bool(actual, assertion, operator, passed) => {
-                log_case!(Bool, actual, assertion, operator, passed);
-            }
-        }
+        log_cases!(self, U8, U16, U32, U64, U128, I8, I16, I32, I64, I128, Bool, Bytes);
     }
 }

@@ -1,9 +1,7 @@
-use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
-use crate::{error::LighthouseError, utils::unpack_coption_key};
-use crate::{
-    types::assert::evaluate::Evaluate,
-    utils::{try_from_slice, Result},
-};
+use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
+use crate::error::LighthouseError;
+use crate::generate_asserts_c;
+use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
@@ -37,53 +35,17 @@ impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
             .try_borrow_mut_data()
             .map_err(LighthouseError::failed_borrow_err)?;
 
-        match self {
-            MintAccountAssertion::MintAuthority {
-                value: assertion_value,
-                operator,
-            } => {
-                let mint_authority = unpack_coption_key(&data, 0)?;
-                <Option<&Pubkey>>::evaluate(
-                    &mint_authority,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-            MintAccountAssertion::Supply {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_supply = try_from_slice(&data, 36, None)?;
-                u64::evaluate(&actual_supply, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::Decimals {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_decimals = try_from_slice(&data, 44, None)?;
-                u8::evaluate(&actual_decimals, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::IsInitialized {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice(&data, 45, None)?;
-                bool::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::FreezeAuthority {
-                value: assertion_value,
-                operator,
-            } => {
-                let freeze_authority = unpack_coption_key(&data, 46)?;
-                <Option<&Pubkey>>::evaluate(
-                    &freeze_authority,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-        }
+        generate_asserts_c!(
+            self,
+            MintAccountAssertion,
+            data,
+            log_level,
+            (MintAuthority, (Option<Pubkey>), 0),
+            (Supply, u64, 36),
+            (Decimals, u8, 44),
+            (IsInitialized, bool, 45),
+            (FreezeAuthority, (Option<Pubkey>), 46)
+        )
     }
 }
 

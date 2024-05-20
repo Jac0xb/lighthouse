@@ -1,7 +1,8 @@
-use std::any::type_name;
+use std::{any::type_name, mem::size_of};
 
 use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
+use bytemuck::AnyBitPattern;
 use sha2_const_stable::Sha256;
 use solana_program::{
     account_info::AccountInfo,
@@ -24,17 +25,19 @@ pub fn checked_get_slice(data: &[u8], offset: usize, length: usize) -> Result<&[
         .ok_or_else(|| LighthouseError::oob_err(offset..end))
 }
 
-pub fn unpack_coption_key(src: &[u8], offset: usize) -> Result<Option<&Pubkey>> {
+pub fn unpack_coption<T: AnyBitPattern>(src: &[u8], offset: usize) -> Result<Option<&T>> {
     let start = offset;
     let tag = src.get(start..start + 4).ok_or_else(|| {
         msg!("Failed to deserialize COption<Pubkey> tag: {:?}", src);
         LighthouseError::FailedToDeserialize
     })?;
 
-    let body = src.get(start + 4..start + 36).ok_or_else(|| {
-        msg!("Failed to deserialize COption<Pubkey> body: {:?}", src);
-        LighthouseError::FailedToDeserialize
-    })?;
+    let body = src
+        .get(start + 4..start + 4 + size_of::<T>())
+        .ok_or_else(|| {
+            msg!("Failed to deserialize COption<Pubkey> body: {:?}", src);
+            LighthouseError::FailedToDeserialize
+        })?;
 
     match *tag {
         [0, 0, 0, 0] => Ok(Option::None),
@@ -67,14 +70,9 @@ pub fn unpack_coption_u64(src: &[u8], offset: usize) -> Result<Option<u64>> {
     }
 }
 
-pub fn try_from_slice<T: BorshDeserialize + Sized>(
-    data: &[u8],
-    offset: usize,
-    length: Option<usize>,
-) -> Result<T> {
-    let data_length = length.unwrap_or(std::mem::size_of::<T>());
+pub fn try_from_slice<T: BorshDeserialize + Sized>(data: &[u8], offset: usize) -> Result<T> {
     let start = offset;
-    let end = offset + data_length;
+    let end = offset + std::mem::size_of::<T>();
 
     let slice = data.get(start..end).ok_or_else(|| {
         msg!(

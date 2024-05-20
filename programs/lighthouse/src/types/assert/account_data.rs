@@ -2,8 +2,9 @@ use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
+    generate_asserts_borsh,
     types::{assert::evaluate::Evaluate, CompactBytes},
-    utils::{try_from_slice, Result},
+    utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_common::CompactU64;
@@ -85,114 +86,36 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        match assertion {
-            DataValueAssertion::Bool {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<bool>(&data, offset, None)?;
-                bool::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U8 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u8>(&data, offset, None)?;
-                u8::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I8 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i8>(&data, offset, None)?;
-                i8::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U16 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u16>(&data, offset, None)?;
-                u16::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I16 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i16>(&data, offset, None)?;
-                i16::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U32 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u32>(&data, offset, None)?;
-                u32::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I32 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i32>(&data, offset, None)?;
-                i32::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U64 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u64>(&data, offset, None)?;
-                u64::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I64 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i64>(&data, offset, None)?;
-                i64::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U128 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u128>(&data, offset, None)?;
-                u128::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I128 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i128>(&data, offset, None)?;
-                i128::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::Bytes {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = data
-                    .get(offset..offset + assertion_value.len())
-                    .ok_or_else(|| {
-                        msg!("Data range out of bounds");
-                        err!(LighthouseError::RangeOutOfBounds)
-                    })?;
+        generate_asserts_borsh!(
+            assertion,
+            DataValueAssertion,
+            data,
+            log_level,
+            standard_cases: [
+                (Bool, bool, offset),
+                (U8, u8, offset),
+                (I8, i8, offset),
+                (U16, u16, offset),
+                (I16, i16, offset),
+                (U32, u32, offset),
+                (I32, i32, offset),
+                (U64, u64, offset),
+                (I64, i64, offset),
+                (U128, u128, offset),
+                (I128, i128, offset),
+                (Pubkey, (Pubkey), offset)
+            ],
+            custom_cases: [
+                (Bytes, |value: &CompactBytes, operator: &EquatableOperator| {
+                        let actual_value = data.get(offset..offset + value.len()).ok_or_else(|| {
+                            msg!("Data range out of bounds");
+                            err!(LighthouseError::RangeOutOfBounds)
+                        })?;
 
-                <[u8]>::evaluate(actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::Pubkey {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data.get(offset..offset + 32).ok_or_else(|| {
-                    msg!(
-                        "Failed to deserialized Pubkey range {:?} was out of bounds",
-                        offset..offset + 32
-                    );
-
-                    LighthouseError::RangeOutOfBounds
-                })?;
-                let actual_value = bytemuck::from_bytes::<Pubkey>(data_slice);
-
-                Pubkey::evaluate(actual_value, assertion_value, operator, log_level)
-            }
-        }
+                        <[u8]>::evaluate(actual_value, actual_value, operator, log_level)
+                })
+            ]
+        )
     }
 }
 

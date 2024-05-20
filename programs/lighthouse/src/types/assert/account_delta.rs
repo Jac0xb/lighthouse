@@ -94,8 +94,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<u8>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<u8>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<u8>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<u8>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i16 - a_value as i16;
 
                         i16::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -104,8 +104,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<i8>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<i8>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<i8>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<i8>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i16 - a_value as i16;
 
                         i16::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -114,8 +114,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<u16>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<u16>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<u16>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<u16>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i32 - a_value as i32;
 
                         i32::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -124,8 +124,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<i16>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<i16>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<i16>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<i16>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i32 - a_value as i32;
 
                         i32::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -134,8 +134,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<u32>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<u32>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<u32>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<u32>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i64 - a_value as i64;
 
                         i64::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -144,8 +144,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<i32>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<i32>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<i32>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<i32>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i64 - a_value as i64;
 
                         i64::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -154,8 +154,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<u64>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<u64>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<u64>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i128 - a_value as i128;
 
                         i128::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -164,8 +164,8 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
                         value: assertion_value,
                         operator,
                     } => {
-                        let a_value = try_from_slice::<i64>(&a_account_data, a_offset, None)?;
-                        let b_value = try_from_slice::<i64>(&b_account_data, b_offset, None)?;
+                        let a_value = try_from_slice::<i64>(&a_account_data, a_offset)?;
+                        let b_value = try_from_slice::<i64>(&b_account_data, b_offset)?;
                         let diff_value = b_value as i128 - a_value as i128;
 
                         i128::evaluate(&diff_value, assertion_value, operator, log_level)
@@ -199,26 +199,26 @@ impl<'a, 'info> Assert<(&'a AccountInfo<'info>, &'a AccountInfo<'info>)> for Acc
 
                 match assertion {
                     AccountInfoDeltaAssertion::Lamports { value, operator } => {
-                        let a_lamports = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
+                        let a_lamports = try_from_slice::<u64>(&a_account_data, a_offset)?;
                         let b_lamports = b_account.lamports();
                         let diff_value = b_lamports as i128 - a_lamports as i128;
 
                         i128::evaluate(&diff_value, value, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::DataLength { value, operator } => {
-                        let a_data_len = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
+                        let a_data_len = try_from_slice::<u64>(&a_account_data, a_offset)?;
                         let b_data_len = b_account.data_len() as i128;
                         let diff_value = b_data_len - a_data_len as i128;
 
                         i128::evaluate(&diff_value, value, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::Owner { operator } => {
-                        let a_owner = try_from_slice::<Pubkey>(&a_account_data, a_offset, None)?;
+                        let a_owner = try_from_slice::<Pubkey>(&a_account_data, a_offset)?;
 
                         Pubkey::evaluate(&a_owner, b_account.owner, operator, log_level)
                     }
                     AccountInfoDeltaAssertion::RentEpoch { value, operator } => {
-                        let a_rent_epoch = try_from_slice::<u64>(&a_account_data, a_offset, None)?;
+                        let a_rent_epoch = try_from_slice::<u64>(&a_account_data, a_offset)?;
                         let b_rent_epoch = b_account.rent_epoch;
                         let diff_value = b_rent_epoch as i128 - a_rent_epoch as i128;
 
