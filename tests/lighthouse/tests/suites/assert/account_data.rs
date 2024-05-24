@@ -228,8 +228,8 @@ async fn simple() {
     .unwrap();
 
     assert!(
-        result.metadata.as_ref().unwrap().compute_units_consumed < 16350,
-        "{:?}",
+        result.metadata.as_ref().unwrap().compute_units_consumed < 16150,
+        "Exceeded expected CU 16150 was {:?}",
         result.metadata.unwrap().compute_units_consumed
     );
 }

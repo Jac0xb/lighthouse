@@ -19,6 +19,7 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
+#[inline(always)]
 pub fn checked_get_slice(data: &[u8], offset: usize, length: usize) -> Result<&[u8]> {
     let end = offset + length;
     data.get(offset..end)
@@ -70,6 +71,7 @@ pub fn unpack_coption_u64(src: &[u8], offset: usize) -> Result<Option<u64>> {
     }
 }
 
+#[inline(always)]
 pub fn try_from_slice<T: BorshDeserialize + Sized>(data: &[u8], offset: usize) -> Result<T> {
     let start = offset;
     let end = offset + std::mem::size_of::<T>();
@@ -85,22 +87,6 @@ pub fn try_from_slice<T: BorshDeserialize + Sized>(data: &[u8], offset: usize) -
     })?;
 
     Ok(T::try_from_slice(slice)?)
-}
-
-pub fn try_from_slice_pubkey(data: &[u8], offset: usize) -> Result<&Pubkey> {
-    let start = offset;
-    let end = offset + PUBKEY_BYTES;
-
-    let slice = data.get(start..end).ok_or_else(|| {
-        msg!(
-            "Failed to deserialized pubkey range {:?} was out of bounds",
-            start..end
-        );
-
-        LighthouseError::RangeOutOfBounds
-    })?;
-
-    Ok(bytemuck::from_bytes(slice))
 }
 
 pub fn create_account<'a, 'info>(
@@ -176,14 +162,17 @@ pub fn close<'info>(info: &AccountInfo<'info>, sol_destination: &AccountInfo<'in
     info.realloc(0, false).map_err(Into::into)
 }
 
+#[inline(always)]
 pub fn is_closed(info: &AccountInfo) -> bool {
     keys_equal(info.owner, &system_program::id()) && info.data_is_empty()
 }
 
+#[inline(always)]
 pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
     sol_memcmp(key_a.as_ref(), key_b.as_ref(), PUBKEY_BYTES) == 0
 }
 
+#[inline(always)]
 pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
     keys.iter().any(|k| keys_equal(k, key))
 }

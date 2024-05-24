@@ -1,6 +1,6 @@
 use anchor_lang::{self, InstructionData, ToAccountMetas};
 use solana_program::pubkey::Pubkey;
-use solana_program_test::BanksClient;
+use solana_program_test::{BanksClient, BanksTransactionResultWithMetadata};
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     signature::Keypair,
@@ -37,7 +37,7 @@ where
         &mut self,
         additional_instructions: &[Instruction],
         additonal_signers: &[Keypair],
-    ) -> Result<()>
+    ) -> Result<BanksTransactionResultWithMetadata>
     where
         Self: OnSuccessfulTxExec,
     {
@@ -105,7 +105,9 @@ where
         self.on_successful_execute()?;
 
         // Check the expected tree root matches on-chain state post tx.
-        self.tree.check_expected_root().await
+        self.tree.check_expected_root().await?;
+
+        Ok(tx_metadata)
     }
 
     // Returning `&mut Self` to allow method chaining.

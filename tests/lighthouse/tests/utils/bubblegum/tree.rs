@@ -20,7 +20,7 @@ use solana_program::{
     rent::Rent,
     system_instruction, system_program,
 };
-use solana_program_test::BanksClient;
+use solana_program_test::{BanksClient, BanksTransactionResultWithMetadata};
 use solana_sdk::{
     account::Account,
     signature::{Keypair, Signer},
@@ -209,11 +209,14 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         self.tx_builder(accounts, data, None, (), payer.pubkey(), &[payer])
     }
 
-    pub async fn create(&mut self, payer: &Keypair) -> Result<()> {
+    pub async fn create(&mut self, payer: &Keypair) -> Result<BanksTransactionResultWithMetadata> {
         self.create_tree_tx(payer, false).execute(&[], &[]).await
     }
 
-    pub async fn create_public(&mut self, payer: &Keypair) -> Result<()> {
+    pub async fn create_public(
+        &mut self,
+        payer: &Keypair,
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.create_tree_tx(payer, true).execute(&[], &[]).await
     }
 
@@ -250,7 +253,11 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         )
     }
 
-    pub async fn mint_v1(&mut self, tree_delegate: &Keypair, args: &mut LeafArgs) -> Result<()> {
+    pub async fn mint_v1(
+        &mut self,
+        tree_delegate: &Keypair,
+        args: &mut LeafArgs,
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.mint_v1_tx(tree_delegate, args).execute(&[], &[]).await
     }
 
@@ -423,7 +430,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         collection_mint: Pubkey,
         collection_metadata: Pubkey,
         edition_account: Pubkey,
-    ) -> Result<()> {
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.verify_collection_tx(
             args,
             collection_authority,
@@ -445,7 +452,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         collection_metadata: Pubkey,
         edition_account: Pubkey,
         collection_record: Pubkey,
-    ) -> Result<()> {
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.verify_collection_tx(
             args,
             collection_authority,
@@ -501,7 +508,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         new_owner: &Keypair,
         additonal_instructions: &[Instruction],
         additional_signers: &[Keypair],
-    ) -> Result<()> {
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.transfer_tx(args, new_owner)
             .await?
             .execute(additonal_instructions, additional_signers)
@@ -546,7 +553,11 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
     }
 
     // Does the prev delegate need to sign as well?
-    pub async fn delegate(&mut self, args: &mut LeafArgs, new_delegate: &Keypair) -> Result<()> {
+    pub async fn delegate(
+        &mut self,
+        args: &mut LeafArgs,
+        new_delegate: &Keypair,
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.delegate_tx(args, new_delegate)
             .await?
             .execute(&[], &[])
@@ -589,7 +600,7 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         ))
     }
 
-    pub async fn redeem(&mut self, args: &LeafArgs) -> Result<()> {
+    pub async fn redeem(&mut self, args: &LeafArgs) -> Result<BanksTransactionResultWithMetadata> {
         self.redeem_tx(args).await?.execute(&[], &[]).await
     }
 
@@ -621,7 +632,10 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         ))
     }
 
-    pub async fn cancel_redeem(&mut self, args: &LeafArgs) -> Result<()> {
+    pub async fn cancel_redeem(
+        &mut self,
+        args: &LeafArgs,
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.cancel_redeem_tx(args).await?.execute(&[], &[]).await
     }
 
@@ -650,7 +664,10 @@ impl<const MAX_DEPTH: usize, const MAX_BUFFER_SIZE: usize> Tree<MAX_DEPTH, MAX_B
         )
     }
 
-    pub async fn set_tree_delegate(&mut self, new_tree_delegate: &Keypair) -> Result<()> {
+    pub async fn set_tree_delegate(
+        &mut self,
+        new_tree_delegate: &Keypair,
+    ) -> Result<BanksTransactionResultWithMetadata> {
         self.set_tree_delegate_tx(new_tree_delegate)
             .execute(&[], &[])
             .await

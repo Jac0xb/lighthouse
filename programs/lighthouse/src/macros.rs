@@ -6,7 +6,7 @@ macro_rules! generate_asserts_borsh {
         match $assertion {
             $(
                 $enum::$variant { value, operator } => {
-                    let actual_value = generate_asserts_borsh!(@unpack $type, $data, $offset);
+                    let actual_value = generate_asserts_borsh!(@unpack $type, $data, $offset, value);
                     generate_asserts_borsh!(@evaluate $type, actual_value, value, operator, $log_level)
                 }
             )*
@@ -17,10 +17,14 @@ macro_rules! generate_asserts_borsh {
             )*
         }
     };
-    (@unpack (Pubkey), $data:ident, $offset:expr) => {
-        $crate::utils::try_from_slice_pubkey(&$data, $offset)?
+
+    (@unpack (Pubkey), $data:ident, $offset:expr, $value:ident) => {
+        bytemuck::from_bytes::<Pubkey>($crate::utils::checked_get_slice(&$data, $offset, 32)?)
     };
-    (@unpack $type:tt, $data:ident, $offset:expr) => {
+    (@unpack ([u8]), $data:ident, $offset:expr, $value:ident) => {
+        $crate::utils::checked_get_slice(&$data, $offset, $value.len())?
+    };
+    (@unpack $type:tt, $data:ident, $offset:expr, $value:ident) => {
         $crate::utils::try_from_slice::<$type>(&$data, $offset)?
     };
 
@@ -65,7 +69,7 @@ macro_rules! generate_asserts_c {
         $crate::utils::unpack_coption_u64(&$data, $offset)?
     };
     (@unpack (Pubkey), $data:ident, $offset:expr) => {
-        $crate::utils::try_from_slice_pubkey(&$data, $offset)?
+        bytemuck::from_bytes::<Pubkey>($crate::utils::checked_get_slice(&$data, $offset, 32)?)
     };
     (@unpack $type:tt, $data:ident, $offset:expr) => {
         $crate::utils::try_from_slice::<$type>(&$data, $offset)?
