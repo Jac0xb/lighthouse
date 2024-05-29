@@ -19,7 +19,7 @@ sdk = ["dep:solana-sdk"]
 default = []
 
 [dependencies]
-borsh = "^0.10"
+borsh = "=0.10.3"
 num-derive = "^0.3"
 num-traits = "^0.2"
 serde = { version = "^1.0", features = ["derive"], optional = true }
@@ -28,6 +28,7 @@ solana-program = "1.17.23"
 solana-sdk = { version = "1.17.23", optional = true }
 thiserror = "^1.0"
 base64 = "0.22.0"
+lighthouse-common = { path = "../../lighthouse-common", features = ["serde"]}
 
 [dev-dependencies]
 assert_matches = "1.5.0"

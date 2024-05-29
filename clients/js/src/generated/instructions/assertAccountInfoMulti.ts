@@ -15,24 +15,21 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
-  array,
   mapSerializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  AccountInfoAssertions,
+  AccountInfoAssertionsArgs,
+  getAccountInfoAssertionsSerializer,
+} from '../../hooked';
+import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
   getAccountMetasAndSigners,
 } from '../shared';
-import {
-  AccountInfoAssertion,
-  AccountInfoAssertionArgs,
-  LogLevel,
-  LogLevelArgs,
-  getAccountInfoAssertionSerializer,
-  getLogLevelSerializer,
-} from '../types';
+import { LogLevel, LogLevelArgs, getLogLevelSerializer } from '../types';
 
 // Accounts.
 export type AssertAccountInfoMultiInstructionAccounts = {
@@ -44,12 +41,12 @@ export type AssertAccountInfoMultiInstructionAccounts = {
 export type AssertAccountInfoMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<AccountInfoAssertion>;
+  assertions: AccountInfoAssertions;
 };
 
 export type AssertAccountInfoMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<AccountInfoAssertionArgs>;
+  assertions: AccountInfoAssertionsArgs;
 };
 
 export function getAssertAccountInfoMultiInstructionDataSerializer(): Serializer<
@@ -65,7 +62,7 @@ export function getAssertAccountInfoMultiInstructionDataSerializer(): Serializer
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['assertions', array(getAccountInfoAssertionSerializer())],
+        ['assertions', getAccountInfoAssertionsSerializer()],
       ],
       { description: 'AssertAccountInfoMultiInstructionData' }
     ),

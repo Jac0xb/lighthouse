@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
+  extends: ['prettier'],
   plugins: ['prettier'],
   overrides: [],
   parserOptions: {
@@ -19,6 +19,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'func-names': 'off',
     'prefer-destructuring': 'off',
+    'import/no-extraneous-dependencies': 'off',
   },
   ignorePatterns: ['dist/**', '.eslintrc.js', 'tsup.config.ts', 'env-shim.ts'],
 };

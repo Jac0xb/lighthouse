@@ -1,12 +1,14 @@
 #[allow(unused)]
 #[allow(clippy::identity_op)]
 mod generated;
+mod hooked;
 
 pub use generated::programs::LIGHTHOUSE_ID;
 pub use generated::programs::LIGHTHOUSE_ID as ID;
 use solana_program::pubkey::{Pubkey, PubkeyError};
 
 pub use generated::types;
+pub use lighthouse_common::{CompactU64, LEB128Vec};
 
 pub mod instructions {
     pub use crate::generated::instructions::{

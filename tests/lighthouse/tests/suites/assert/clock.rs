@@ -33,7 +33,7 @@ async fn simple() {
             .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
             .source_account(lighthouse_sdk::ID)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .write_type(WriteType::Clock(ClockField::Epoch))
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -104,7 +104,7 @@ async fn simple() {
             .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
             .source_account(lighthouse_sdk::ID)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .write_type(WriteType::Clock(ClockField::Slot))
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -175,7 +175,7 @@ async fn simple() {
             .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
             .source_account(lighthouse_sdk::ID)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .write_type(WriteType::Clock(ClockField::UnixTimestamp))
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -246,7 +246,7 @@ async fn simple() {
             .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
             .source_account(lighthouse_sdk::ID)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .write_type(WriteType::Clock(ClockField::LeaderScheduleEpoch))
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -317,7 +317,7 @@ async fn simple() {
             .program_id(lighthouse_sdk::ID)
             .payer(user.encodable_pubkey())
             .source_account(lighthouse_sdk::ID)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .write_type(WriteType::Clock(ClockField::EpochStartTimestamp))
             .instruction()],
         Some(&user.encodable_pubkey()),

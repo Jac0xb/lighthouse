@@ -45,7 +45,7 @@ async fn slippage_check() {
                 .program_id(lighthouse_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(bump)
                 .instruction(),
             AssertAccountDeltaBuilder::new()
@@ -53,7 +53,7 @@ async fn slippage_check() {
                 .account_a(memory)
                 .account_b(user.encodable_pubkey())
                 .assertion(AccountDeltaAssertion::AccountInfo {
-                    a_offset: 0,
+                    a_offset: 0u8.into(),
                     assertion: AccountInfoDeltaAssertion::Lamports {
                         value: 0,
                         operator: IntegerOperator::Equal,
@@ -79,7 +79,7 @@ async fn slippage_check() {
                 .program_id(lighthouse_sdk::ID)
                 .write_type(WriteType::AccountInfoField(AccountInfoField::Lamports))
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(bump)
                 .instruction(),
             system_instruction::transfer(
@@ -92,7 +92,7 @@ async fn slippage_check() {
                 .account_a(memory)
                 .account_b(user.encodable_pubkey())
                 .assertion(AccountDeltaAssertion::AccountInfo {
-                    a_offset: 0,
+                    a_offset: 0u8.into(),
                     assertion: AccountInfoDeltaAssertion::Lamports {
                         value: -1e9 as i128,
                         operator: IntegerOperator::Equal,
@@ -161,8 +161,8 @@ async fn test_data_delta() {
             .account_a(test_account_a)
             .account_b(test_account_b)
             .assertion(AccountDeltaAssertion::Data {
-                a_offset: offset,
-                b_offset: offset,
+                a_offset: offset.into(),
+                b_offset: offset.into(),
                 assertion,
             })
             .instruction()
@@ -278,8 +278,8 @@ async fn test_data_delta() {
             .account_a(test_account_empty)
             .account_b(test_account_b)
             .assertion(AccountDeltaAssertion::Data {
-                a_offset: offset,
-                b_offset: offset,
+                a_offset: offset.into(),
+                b_offset: offset.into(),
                 assertion,
             })
             .instruction()
@@ -374,7 +374,7 @@ async fn test_account_info_delta() {
             .account_a(test_account)
             .account_b(user.encodable_pubkey())
             .assertion(AccountDeltaAssertion::AccountInfo {
-                a_offset: offset,
+                a_offset: offset.into(),
                 assertion,
             })
             .instruction()
@@ -638,7 +638,7 @@ async fn out_of_bounds_account_info_delta() {
             .account_a(test_account)
             .account_b(user.encodable_pubkey())
             .assertion(AccountDeltaAssertion::AccountInfo {
-                a_offset: offset,
+                a_offset: offset.into(),
                 assertion,
             })
             .instruction()
@@ -754,7 +754,7 @@ async fn account_empty() {
             .account_a(test_account)
             .account_b(user.encodable_pubkey())
             .assertion(AccountDeltaAssertion::AccountInfo {
-                a_offset: 0,
+                a_offset: 0u8.into(),
                 assertion: AccountInfoDeltaAssertion::Lamports {
                     value: 0,
                     operator: IntegerOperator::Equal,

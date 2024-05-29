@@ -55,7 +55,7 @@ async fn write_account_data() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
-            .write_offset(0)
+            .write_offset(0u8.into())
             .system_program(system_program::id())
             .write_type(WriteType::AccountData {
                 offset: 8,
@@ -86,7 +86,7 @@ async fn write_account_data() {
                     value: 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -95,7 +95,7 @@ async fn write_account_data() {
                     value: -1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(1)
+                .offset(1u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -104,7 +104,7 @@ async fn write_account_data() {
                     value: (u8::MAX as u16) + 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(2)
+                .offset(2u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -113,7 +113,7 @@ async fn write_account_data() {
                     value: (i8::MIN as i16) - 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(4)
+                .offset(4u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -122,7 +122,7 @@ async fn write_account_data() {
                     value: (u16::MAX as u32) + 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(6)
+                .offset(6u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -131,7 +131,7 @@ async fn write_account_data() {
                     value: (i16::MIN as i32) - 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(10)
+                .offset(10u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -140,7 +140,7 @@ async fn write_account_data() {
                     value: (u32::MAX as u64) + 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(14)
+                .offset(14u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -149,7 +149,7 @@ async fn write_account_data() {
                     value: (i32::MIN as i64) - 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(22)
+                .offset(22u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -158,7 +158,7 @@ async fn write_account_data() {
                     value: (u64::MAX as u128) + 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(30)
+                .offset(30u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -167,16 +167,16 @@ async fn write_account_data() {
                     value: (i64::MIN as i128) - 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(46)
+                .offset(46u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: vec![u8::MAX; 32],
+                    value: vec![u8::MAX; 32].into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(62)
+                .offset(62u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -185,7 +185,7 @@ async fn write_account_data() {
                     value: true,
                     operator: EquatableOperator::Equal,
                 })
-                .offset(94)
+                .offset(94u8.into())
                 .instruction(),
             // False represented as 0
             AssertAccountDataBuilder::new()
@@ -195,7 +195,7 @@ async fn write_account_data() {
                     value: 0,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(95)
+                .offset(95u8.into())
                 .instruction(),
             // Some in Option<u8>
             AssertAccountDataBuilder::new()
@@ -205,7 +205,7 @@ async fn write_account_data() {
                     value: 1,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(96)
+                .offset(96u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -214,7 +214,7 @@ async fn write_account_data() {
                     value: u8::MAX,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(97)
+                .offset(97u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -223,25 +223,25 @@ async fn write_account_data() {
                     value: 0,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(98)
+                .offset(98u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: [1, 255, 255].to_vec(),
+                    value: vec![1, 255, 255].into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(99)
+                .offset(99u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: [0].to_vec(),
+                    value: vec![0].into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(102)
+                .offset(102u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -250,7 +250,7 @@ async fn write_account_data() {
                     value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(103)
+                .offset(103u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -260,10 +260,11 @@ async fn write_account_data() {
                         .iter()
                         .cloned()
                         .chain(vec![255; 32])
-                        .collect::<Vec<u8>>(),
+                        .collect::<Vec<u8>>()
+                        .into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(135)
+                .offset(135u8.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -290,7 +291,7 @@ async fn write_account_type() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
-            .write_offset(offset)
+            .write_offset(offset.into())
             .system_program(system_program::id())
             .write_type(write_type)
             .instruction()
@@ -313,7 +314,10 @@ async fn write_account_type() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes(vec![MAX; 32].into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
@@ -324,10 +328,10 @@ async fn write_account_type() {
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: expected_blob.clone(),
+                    value: expected_blob.clone().into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -362,7 +366,7 @@ async fn write_reallocation() {
                 .memory(memory)
                 .program_id(lighthouse_sdk::ID)
                 .memory_bump(memory_bump)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_id(0)
                 .system_program(system_program::id())
                 .write_type(WriteType::DataValue(DataValue::U64(u64::MAX / 2)))
@@ -374,7 +378,7 @@ async fn write_reallocation() {
                     value: u64::MAX / 2,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -397,7 +401,7 @@ async fn write_reallocation() {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
-                .write_offset(512)
+                .write_offset(512u16.into())
                 .memory_id(0)
                 .system_program(system_program::id())
                 .write_type(WriteType::DataValue(DataValue::U128(u128::MAX)))
@@ -408,7 +412,7 @@ async fn write_reallocation() {
                 .program_id(lighthouse_sdk::ID)
                 .memory(memory)
                 .memory_bump(memory_bump)
-                .write_offset(128)
+                .write_offset(128u16.into())
                 .memory_id(0)
                 .system_program(system_program::id())
                 .write_type(WriteType::DataValue(DataValue::Pubkey(
@@ -422,7 +426,7 @@ async fn write_reallocation() {
                     value: u64::MAX / 2,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -431,7 +435,7 @@ async fn write_reallocation() {
                     value: random_keypair.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(128)
+                .offset(128u8.into())
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(memory)
@@ -440,7 +444,7 @@ async fn write_reallocation() {
                     value: u128::MAX,
                     operator: IntegerOperator::Equal,
                 })
-                .offset(512)
+                .offset(512u16.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -490,7 +494,7 @@ async fn token_transfer() {
         .program_id(lighthouse_sdk::ID)
         .memory(memory)
         .memory_id(0)
-        .write_offset(0)
+        .write_offset(0u8.into())
         .memory_bump(memory_bump)
         .write_type(WriteType::AccountData {
             offset: 0,
@@ -513,8 +517,8 @@ async fn token_transfer() {
             .account_a(memory)
             .account_b(token_account)
             .assertion(AccountDeltaAssertion::Data {
-                a_offset: 0,
-                b_offset: 0,
+                a_offset: 0u8.into(),
+                b_offset: 0u8.into(),
                 assertion: DataValueDeltaAssertion::Bytes {
                     operator: EquatableOperator::Equal,
                     length: 64,
@@ -526,8 +530,8 @@ async fn token_transfer() {
             .account_a(memory)
             .account_b(token_account)
             .assertion(AccountDeltaAssertion::Data {
-                a_offset: 64,
-                b_offset: 64,
+                a_offset: 64u8.into(),
+                b_offset: 64u8.into(),
                 assertion: DataValueDeltaAssertion::U64 {
                     value: -70,
                     operator: IntegerOperator::GreaterThan,
@@ -570,7 +574,7 @@ async fn write_to_another_memory_index() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(8)
             .memory_bump(memory_bump)
-            .write_offset(offset)
+            .write_offset(offset.into())
             .system_program(system_program::id())
             .write_type(write_type)
             .instruction()
@@ -588,7 +592,10 @@ async fn write_to_another_memory_index() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes((vec![MAX; 32]).into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
@@ -599,10 +606,10 @@ async fn write_to_another_memory_index() {
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: vec![MAX; 94],
+                    value: vec![MAX; 94].into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -630,7 +637,7 @@ async fn write_to_another_bump() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(4)
             .memory_bump(memory_bump)
-            .write_offset(offset)
+            .write_offset(offset.into())
             .system_program(system_program::id())
             .write_type(write_type)
             .instruction()
@@ -648,7 +655,10 @@ async fn write_to_another_bump() {
             build_memory(22, WriteType::DataValue(DataValue::I64(-1))),
             build_memory(30, WriteType::DataValue(DataValue::U128(u128::MAX))),
             build_memory(46, WriteType::DataValue(DataValue::I128(-1))),
-            build_memory(62, WriteType::DataValue(DataValue::Bytes(vec![MAX; 32]))),
+            build_memory(
+                62,
+                WriteType::DataValue(DataValue::Bytes((vec![MAX; 32]).into())),
+            ),
             build_memory(
                 94,
                 WriteType::DataValue(DataValue::Pubkey(user.encodable_pubkey())),
@@ -659,10 +669,10 @@ async fn write_to_another_bump() {
                 .target_account(memory)
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)
                 .assertion(DataValueAssertion::Bytes {
-                    value: vec![MAX; 94],
+                    value: vec![MAX; 94].into(),
                     operator: EquatableOperator::Equal,
                 })
-                .offset(0)
+                .offset(0u8.into())
                 .instruction(),
         ],
         Some(&user.encodable_pubkey()),
@@ -735,7 +745,7 @@ async fn account_info() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
-            .write_offset(offset)
+            .write_offset(offset.into())
             .system_program(system_program::id())
             .write_type(write_type)
             .instruction()
@@ -803,7 +813,7 @@ async fn account_info_program() {
             .program_id(lighthouse_sdk::ID)
             .memory_id(0)
             .memory_bump(memory_bump)
-            .write_offset(offset)
+            .write_offset(offset.into())
             .system_program(system_program::id())
             .write_type(write_type)
             .instruction()

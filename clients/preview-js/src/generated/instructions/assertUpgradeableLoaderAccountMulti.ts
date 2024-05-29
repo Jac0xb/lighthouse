@@ -17,25 +17,25 @@ import {
   IInstructionWithData,
   ReadonlyAccount,
   combineCodec,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  UpgradeableLoaderStateAssertions,
+  UpgradeableLoaderStateAssertionsArgs,
+  getUpgradeableLoaderStateAssertionsDecoder,
+  getUpgradeableLoaderStateAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
-  UpgradeableLoaderStateAssertion,
-  UpgradeableLoaderStateAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getUpgradeableLoaderStateAssertionDecoder,
-  getUpgradeableLoaderStateAssertionEncoder,
 } from '../types';
 
 export type AssertUpgradeableLoaderAccountMultiInstruction<
@@ -56,12 +56,12 @@ export type AssertUpgradeableLoaderAccountMultiInstruction<
 export type AssertUpgradeableLoaderAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<UpgradeableLoaderStateAssertion>;
+  assertions: UpgradeableLoaderStateAssertions;
 };
 
 export type AssertUpgradeableLoaderAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<UpgradeableLoaderStateAssertionArgs>;
+  assertions: UpgradeableLoaderStateAssertionsArgs;
 };
 
 export function getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(): Encoder<AssertUpgradeableLoaderAccountMultiInstructionDataArgs> {
@@ -69,10 +69,7 @@ export function getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(): 
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      [
-        'assertions',
-        getArrayEncoder(getUpgradeableLoaderStateAssertionEncoder()),
-      ],
+      ['assertions', getUpgradeableLoaderStateAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -86,10 +83,7 @@ export function getAssertUpgradeableLoaderAccountMultiInstructionDataDecoder(): 
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    [
-      'assertions',
-      getArrayDecoder(getUpgradeableLoaderStateAssertionDecoder()),
-    ],
+    ['assertions', getUpgradeableLoaderStateAssertionsDecoder()],
   ]);
 }
 

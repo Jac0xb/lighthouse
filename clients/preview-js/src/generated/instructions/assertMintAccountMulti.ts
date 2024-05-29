@@ -17,25 +17,25 @@ import {
   IInstructionWithData,
   ReadonlyAccount,
   combineCodec,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  MintAccountAssertions,
+  MintAccountAssertionsArgs,
+  getMintAccountAssertionsDecoder,
+  getMintAccountAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
   LogLevel,
   LogLevelArgs,
-  MintAccountAssertion,
-  MintAccountAssertionArgs,
   getLogLevelDecoder,
   getLogLevelEncoder,
-  getMintAccountAssertionDecoder,
-  getMintAccountAssertionEncoder,
 } from '../types';
 
 export type AssertMintAccountMultiInstruction<
@@ -56,12 +56,12 @@ export type AssertMintAccountMultiInstruction<
 export type AssertMintAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<MintAccountAssertion>;
+  assertions: MintAccountAssertions;
 };
 
 export type AssertMintAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<MintAccountAssertionArgs>;
+  assertions: MintAccountAssertionsArgs;
 };
 
 export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<AssertMintAccountMultiInstructionDataArgs> {
@@ -69,7 +69,7 @@ export function getAssertMintAccountMultiInstructionDataEncoder(): Encoder<Asser
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getMintAccountAssertionEncoder())],
+      ['assertions', getMintAccountAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -83,7 +83,7 @@ export function getAssertMintAccountMultiInstructionDataDecoder(): Decoder<Asser
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getMintAccountAssertionDecoder())],
+    ['assertions', getMintAccountAssertionsDecoder()],
   ]);
 }
 

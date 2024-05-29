@@ -10,10 +10,11 @@ use lighthouse_sdk::instructions::AssertAccountInfoBuilder;
 use lighthouse_sdk::types::{
     AccountInfoAssertion, EquatableOperator, IntegerOperator, KnownProgram,
 };
+use lighthouse_sdk::CompactU64;
 use solana_program_test::tokio;
 use solana_sdk::signer::{EncodableKeypair, Signer};
 use solana_sdk::transaction::Transaction;
-use solana_sdk::{bpf_loader_upgradeable, keccak, system_program};
+use solana_sdk::{keccak, system_program};
 use spl_associated_token_account::get_associated_token_address;
 
 #[tokio::test]
@@ -133,8 +134,8 @@ async fn data_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
-                start: None,
-                length: None,
+                start: CompactU64(0),
+                length: CompactU64(test_account_data.data.len() as u64),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -177,8 +178,8 @@ async fn data_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
-                start: None,
-                length: None,
+                start: CompactU64(0),
+                length: CompactU64(token_account_data.data.len() as u64),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -196,8 +197,8 @@ async fn data_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
-                start: Some(30),
-                length: None,
+                start: CompactU64(30),
+                length: CompactU64(token_account_data.data.len() as u64 - 30),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -215,8 +216,8 @@ async fn data_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: account_hash,
-                start: Some(30),
-                length: None,
+                start: CompactU64(30),
+                length: CompactU64(token_account_data.data.len() as u64 - 30),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -786,8 +787,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: None,
-                length: None,
+                start: CompactU64(0),
+                length: CompactU64(test_account_data.data.len() as u64),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -807,8 +808,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: None,
-                length: Some(128),
+                start: CompactU64(0),
+                length: CompactU64(128),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -828,8 +829,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(128),
-                length: Some(128),
+                start: CompactU64(128),
+                length: CompactU64(128),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -849,8 +850,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(128),
-                length: None,
+                start: CompactU64(128),
+                length: CompactU64(test_account_data.data.len() as u64 - 128),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -870,8 +871,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(128),
-                length: Some(64),
+                start: CompactU64(128),
+                length: CompactU64(64),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -898,8 +899,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(128),
-                length: None,
+                start: CompactU64(128),
+                length: CompactU64(1),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -926,8 +927,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: None,
-                length: Some(128),
+                start: CompactU64(0),
+                length: CompactU64(128),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -954,8 +955,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: None,
-                length: None,
+                start: CompactU64(0),
+                length: CompactU64(test_account_data.data.len() as u64),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -982,8 +983,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(128),
-                length: Some(1024),
+                start: CompactU64(128),
+                length: CompactU64(1024),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -1010,8 +1011,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(1024),
-                length: None,
+                start: CompactU64(1024),
+                length: CompactU64(1),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -1038,8 +1039,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(1024),
-                length: Some(1024),
+                start: CompactU64(1024),
+                length: CompactU64(1024),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -1066,8 +1067,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: None,
-                length: None,
+                start: CompactU64(0),
+                length: CompactU64(0),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),
@@ -1087,8 +1088,8 @@ async fn verify_hash() {
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
             .assertion(AccountInfoAssertion::VerifyDatahash {
                 expected_hash: hash,
-                start: Some(0),
-                length: Some(0),
+                start: CompactU64(0),
+                length: CompactU64(0),
             })
             .instruction()],
         Some(&user.encodable_pubkey()),

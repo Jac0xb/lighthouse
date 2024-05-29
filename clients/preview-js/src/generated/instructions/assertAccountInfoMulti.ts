@@ -17,23 +17,23 @@ import {
   IInstructionWithData,
   ReadonlyAccount,
   combineCodec,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  AccountInfoAssertions,
+  AccountInfoAssertionsArgs,
+  getAccountInfoAssertionsDecoder,
+  getAccountInfoAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
-  AccountInfoAssertion,
-  AccountInfoAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getAccountInfoAssertionDecoder,
-  getAccountInfoAssertionEncoder,
   getLogLevelDecoder,
   getLogLevelEncoder,
 } from '../types';
@@ -56,12 +56,12 @@ export type AssertAccountInfoMultiInstruction<
 export type AssertAccountInfoMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<AccountInfoAssertion>;
+  assertions: AccountInfoAssertions;
 };
 
 export type AssertAccountInfoMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<AccountInfoAssertionArgs>;
+  assertions: AccountInfoAssertionsArgs;
 };
 
 export function getAssertAccountInfoMultiInstructionDataEncoder(): Encoder<AssertAccountInfoMultiInstructionDataArgs> {
@@ -69,7 +69,7 @@ export function getAssertAccountInfoMultiInstructionDataEncoder(): Encoder<Asser
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertions', getArrayEncoder(getAccountInfoAssertionEncoder())],
+      ['assertions', getAccountInfoAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
@@ -83,7 +83,7 @@ export function getAssertAccountInfoMultiInstructionDataDecoder(): Decoder<Asser
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertions', getArrayDecoder(getAccountInfoAssertionDecoder())],
+    ['assertions', getAccountInfoAssertionsDecoder()],
   ]);
 }
 

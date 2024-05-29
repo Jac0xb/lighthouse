@@ -8,31 +8,22 @@ importers:
 
   .:
     dependencies:
-      '@solana/accounts':
+      '@minhducsun2002/leb128':
+        specifier: ^1.0.0
+        version: 1.0.0
+      '@solana/web3.js':
         specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
-      '@solana/addresses':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
-      '@solana/codecs':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
-      '@solana/instructions':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3
-      '@solana/programs':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
-      '@solana/signers':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)
+        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)(ws@8.14.2)
+      '@webassemblyjs/leb128':
+        specifier: ^1.12.1
+        version: 1.12.1
+      leb:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@ava/typescript':
         specifier: ^4.1.0
         version: 4.1.0
-      '@solana/web3.js':
-        specifier: 2.0.0-preview.3
-        version: 2.0.0-preview.3(fastestsmallesttextencoderdecoder@1.0.22)(ws@8.14.2)
       '@solana/webcrypto-ed25519-polyfill':
         specifier: 2.0.0-preview.3
         version: 2.0.0-preview.3
@@ -284,6 +275,9 @@ packages:
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
     hasBin: true
+
+  '@minhducsun2002/leb128@1.0.0':
+    resolution: {integrity: sha512-eFrYUPDVHeuwWHluTG1kwNQUEUcFjVKYwPkU8z9DR1JH3AW7JtJsG9cRVGmwz809kKtGfwGJj58juCZxEvnI/g==}
 
   '@noble/ed25519@2.1.0':
     resolution: {integrity: sha512-KM4qTyXPinyCgMzeYJH/UudpdL+paJXtY3CHtHYZQtBkS8MZoPr4rOikZllIutJe0d06QDQKisyn02gxZ8TcQA==}
@@ -573,6 +567,12 @@ packages:
     resolution: {integrity: sha512-j4jCOOXke2t8cHZCIxu1dzKLHLcFmYzC3yqAK6MfZznOL1QIJKd0xcFsXK3zcqzU7ScsE2zWkiMMNHGMHgp+FA==}
     engines: {node: '>=16'}
     hasBin: true
+
+  '@webassemblyjs/leb128@1.12.1':
+    resolution: {integrity: sha512-jOU6pTFNf7aGm46NCrEU7Gj6cVuP55T7+kyo5TU/rCduZ5EdwMPBZwSwwzjPZ3eFXYFCmC5wZdPZN0ZWio6n4Q==}
+
+  '@xtuc/long@4.2.2':
+    resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -1444,6 +1444,9 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+
+  leb@1.0.0:
+    resolution: {integrity: sha512-Y3c3QZfvKWHX60BVOQPhLCvVGmDYWyJEiINE3drOog6KCyN2AOwvuQQzlS3uJg1J85kzpILXIUwRXULWavir+w==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -2344,6 +2347,8 @@ snapshots:
       - encoding
       - supports-color
 
+  '@minhducsun2002/leb128@1.0.0': {}
+
   '@noble/ed25519@2.1.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -2805,6 +2810,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@webassemblyjs/leb128@1.12.1':
+    dependencies:
+      '@xtuc/long': 4.2.2
+
+  '@xtuc/long@4.2.2': {}
 
   abbrev@1.1.1: {}
 
@@ -3812,6 +3823,8 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  leb@1.0.0: {}
 
   levn@0.4.1:
     dependencies:

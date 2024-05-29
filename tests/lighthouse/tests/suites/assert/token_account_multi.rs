@@ -38,41 +38,44 @@ async fn test_basic() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                TokenAccountAssertion::Mint {
-                    value: mint.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Owner {
-                    value: user.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Amount {
-                    value: 100,
-                    operator: IntegerOperator::Equal,
-                },
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::State {
-                    value: TokenAccountState::Frozen as u8,
-                    operator: IntegerOperator::NotEqual,
-                },
-                TokenAccountAssertion::IsNative {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::DelegatedAmount {
-                    value: 0,
-                    operator: IntegerOperator::LessThanOrEqual,
-                },
-                TokenAccountAssertion::CloseAuthority {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::TokenAccountOwnerIsDerived,
-            ])
+            .assertions(
+                vec![
+                    TokenAccountAssertion::Mint {
+                        value: mint.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Amount {
+                        value: 100,
+                        operator: IntegerOperator::Equal,
+                    },
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::State {
+                        value: TokenAccountState::Frozen as u8,
+                        operator: IntegerOperator::NotEqual,
+                    },
+                    TokenAccountAssertion::IsNative {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::DelegatedAmount {
+                        value: 0,
+                        operator: IntegerOperator::LessThanOrEqual,
+                    },
+                    TokenAccountAssertion::CloseAuthority {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::TokenAccountOwnerIsDerived,
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -111,24 +114,27 @@ async fn prod_test() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                TokenAccountAssertion::Mint {
-                    value: mint.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Owner {
-                    value: user.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Amount {
-                    value: 90,
-                    operator: IntegerOperator::GreaterThanOrEqual,
-                },
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    TokenAccountAssertion::Mint {
+                        value: mint.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Amount {
+                        value: 90,
+                        operator: IntegerOperator::GreaterThanOrEqual,
+                    },
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -167,25 +173,28 @@ async fn multi_errors() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                // Fail
-                TokenAccountAssertion::Mint {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Owner {
-                    value: user.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Amount {
-                    value: 90,
-                    operator: IntegerOperator::GreaterThanOrEqual,
-                },
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    // Fail
+                    TokenAccountAssertion::Mint {
+                        value: Keypair::new().encodable_pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Amount {
+                        value: 90,
+                        operator: IntegerOperator::GreaterThanOrEqual,
+                    },
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -205,25 +214,28 @@ async fn multi_errors() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                TokenAccountAssertion::Mint {
-                    value: mint.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                // Fail
-                TokenAccountAssertion::Owner {
-                    value: Keypair::new().encodable_pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Amount {
-                    value: 90,
-                    operator: IntegerOperator::GreaterThanOrEqual,
-                },
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    TokenAccountAssertion::Mint {
+                        value: mint.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    // Fail
+                    TokenAccountAssertion::Owner {
+                        value: Keypair::new().encodable_pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Amount {
+                        value: 90,
+                        operator: IntegerOperator::GreaterThanOrEqual,
+                    },
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -243,25 +255,28 @@ async fn multi_errors() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                TokenAccountAssertion::Mint {
-                    value: mint.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Owner {
-                    value: user.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                // Fail
-                TokenAccountAssertion::Amount {
-                    value: 100,
-                    operator: IntegerOperator::GreaterThan,
-                },
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    TokenAccountAssertion::Mint {
+                        value: mint.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    // Fail
+                    TokenAccountAssertion::Amount {
+                        value: 100,
+                        operator: IntegerOperator::GreaterThan,
+                    },
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -281,25 +296,28 @@ async fn multi_errors() {
         &[AssertTokenAccountMultiBuilder::new()
             .target_account(token_account)
             .log_level(lighthouse_sdk::types::LogLevel::Silent)
-            .assertions(vec![
-                TokenAccountAssertion::Mint {
-                    value: mint.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Owner {
-                    value: user.pubkey(),
-                    operator: EquatableOperator::Equal,
-                },
-                TokenAccountAssertion::Amount {
-                    value: 90,
-                    operator: IntegerOperator::GreaterThanOrEqual,
-                },
-                // Fail
-                TokenAccountAssertion::Delegate {
-                    value: None,
-                    operator: EquatableOperator::NotEqual,
-                },
-            ])
+            .assertions(
+                vec![
+                    TokenAccountAssertion::Mint {
+                        value: mint.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Owner {
+                        value: user.pubkey(),
+                        operator: EquatableOperator::Equal,
+                    },
+                    TokenAccountAssertion::Amount {
+                        value: 90,
+                        operator: IntegerOperator::GreaterThanOrEqual,
+                    },
+                    // Fail
+                    TokenAccountAssertion::Delegate {
+                        value: None,
+                        operator: EquatableOperator::NotEqual,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],

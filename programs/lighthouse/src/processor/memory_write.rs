@@ -31,7 +31,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
     pub(crate) fn load(
         account_iter: &mut Iter<'a, AccountInfo<'info>>,
         memory_id: u8,
-        write_offset: u16,
+        write_offset: u64,
         memory_bump: u8,
         write_type: &WriteType,
     ) -> Result<Self> {
@@ -48,7 +48,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
             bump: Some(memory_bump),
         });
 
-        let required_space = (write_offset as u64) + write_type.data_length();
+        let required_space = write_offset + write_type.data_length();
 
         let memory_info = next_account_info(account_iter)?;
         let memory = if memory_info.try_data_len()? < required_space as usize {
@@ -97,7 +97,7 @@ impl<'a, 'info> MemoryWriteContext<'a, 'info> {
 
 pub(crate) fn memory_write(
     ctx: &MemoryWriteContext,
-    offset: u16,
+    offset: u64,
     write_type: &WriteType,
 ) -> Result<()> {
     if get_stack_height() > TRANSACTION_LEVEL_STACK_HEIGHT {
@@ -118,7 +118,7 @@ pub(crate) fn memory_write(
                 err!(LighthouseError::FailedToSerialize)
             };
 
-            let bytes = match data_value {
+            let bytes: Vec<u8> = match data_value {
                 DataValue::Bool(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::U8(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::I8(value) => value.try_to_vec().map_err(err_map)?,
@@ -130,7 +130,7 @@ pub(crate) fn memory_write(
                 DataValue::I64(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::U128(value) => value.try_to_vec().map_err(err_map)?,
                 DataValue::I128(value) => value.try_to_vec().map_err(err_map)?,
-                DataValue::Bytes(value) => value.clone(),
+                DataValue::Bytes(value) => value.to_vec(),
                 DataValue::Pubkey(value) => value.to_bytes().to_vec(),
             };
 

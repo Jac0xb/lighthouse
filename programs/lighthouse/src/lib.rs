@@ -57,6 +57,8 @@ pub mod lighthouse {
                 write_offset,
                 write_type,
             } => {
+                let write_offset = *write_offset;
+
                 let ctx = MemoryWriteContext::load(
                     &mut accounts.iter(),
                     memory_id,

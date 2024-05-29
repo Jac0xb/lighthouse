@@ -21,9 +21,7 @@ kinobi.update(
   })
 );
 
-//c
 // How to set a default value for an account in an instruction.
-//
 kinobi.update(
   k.updateInstructionsVisitor({
     memoryWrite: {
@@ -60,9 +58,29 @@ kinobi.update(
 
 kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 
-//
-// How to long the kinobi tree
-//
+for (const definedType of [
+  'accountInfoAssertions',
+  'mintAccountAssertions',
+  'tokenAccountAssertions',
+  'stakeAccountAssertions',
+  'upgradeableLoaderStateAssertions',
+  'compactU64',
+  'bytes',
+  'compactBytes',
+]) {
+  kinobi.update(
+    k.bottomUpTransformerVisitor([
+      {
+        select: ['[definedTypeLinkNode]', definedType],
+        transform: (node) => {
+          return k.definedTypeLinkNode(node.name, 'hooked');
+        },
+      },
+    ])
+  );
+}
+
+// How to log the kinobi tree
 // kinobi.accept(k.consoleLogVisitor(k.getDebugStringVisitor({ indent: true })));
 
 //

@@ -109,32 +109,35 @@ async fn simple() {
     let tx = Transaction::new_signed_with_payer(
         &[AssertMintAccountMultiBuilder::new()
             .target_account(mint.encodable_pubkey())
-            .assertions(vec![
-                MintAccountAssertion::FreezeAuthority {
-                    value: Some(freezer.pubkey()),
-                    operator: EquatableOperator::Equal,
-                },
-                MintAccountAssertion::FreezeAuthority {
-                    value: Some(user.pubkey()),
-                    operator: EquatableOperator::NotEqual,
-                },
-                MintAccountAssertion::Supply {
-                    value: 69_000,
-                    operator: IntegerOperator::Equal,
-                },
-                MintAccountAssertion::Decimals {
-                    value: 9,
-                    operator: IntegerOperator::Equal,
-                },
-                MintAccountAssertion::IsInitialized {
-                    value: true,
-                    operator: EquatableOperator::Equal,
-                },
-                MintAccountAssertion::MintAuthority {
-                    value: Some(mint_authority.pubkey()),
-                    operator: EquatableOperator::Equal,
-                },
-            ])
+            .assertions(
+                vec![
+                    MintAccountAssertion::FreezeAuthority {
+                        value: Some(freezer.pubkey()),
+                        operator: EquatableOperator::Equal,
+                    },
+                    MintAccountAssertion::FreezeAuthority {
+                        value: Some(user.pubkey()),
+                        operator: EquatableOperator::NotEqual,
+                    },
+                    MintAccountAssertion::Supply {
+                        value: 69_000,
+                        operator: IntegerOperator::Equal,
+                    },
+                    MintAccountAssertion::Decimals {
+                        value: 9,
+                        operator: IntegerOperator::Equal,
+                    },
+                    MintAccountAssertion::IsInitialized {
+                        value: true,
+                        operator: EquatableOperator::Equal,
+                    },
+                    MintAccountAssertion::MintAuthority {
+                        value: Some(mint_authority.pubkey()),
+                        operator: EquatableOperator::Equal,
+                    },
+                ]
+                .into(),
+            )
             .instruction()],
         Some(&user.pubkey()),
         &[&user],
@@ -184,7 +187,7 @@ async fn simple() {
         let tx = Transaction::new_signed_with_payer(
             &[AssertMintAccountMultiBuilder::new()
                 .target_account(mint.encodable_pubkey())
-                .assertions(bad_assertions)
+                .assertions(bad_assertions.into())
                 .instruction()],
             Some(&user.pubkey()),
             &[&user],

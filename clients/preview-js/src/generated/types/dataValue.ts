@@ -13,16 +13,11 @@ import {
   Encoder,
   GetDiscriminatedUnionVariant,
   GetDiscriminatedUnionVariantContent,
-  ReadonlyUint8Array,
-  addDecoderSizePrefix,
-  addEncoderSizePrefix,
   combineCodec,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
-  getBytesDecoder,
-  getBytesEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
   getI128Decoder,
@@ -50,6 +45,12 @@ import {
   getU8Decoder,
   getU8Encoder,
 } from '@solana/web3.js';
+import {
+  CompactBytes,
+  CompactBytesArgs,
+  getCompactBytesDecoder,
+  getCompactBytesEncoder,
+} from '../../hooked';
 
 export type DataValue =
   | { __kind: 'Bool'; fields: readonly [boolean] }
@@ -63,7 +64,7 @@ export type DataValue =
   | { __kind: 'I64'; fields: readonly [bigint] }
   | { __kind: 'U128'; fields: readonly [bigint] }
   | { __kind: 'I128'; fields: readonly [bigint] }
-  | { __kind: 'Bytes'; fields: readonly [ReadonlyUint8Array] }
+  | { __kind: 'Bytes'; fields: readonly [CompactBytes] }
   | { __kind: 'Pubkey'; fields: readonly [Address] };
 
 export type DataValueArgs =
@@ -78,7 +79,7 @@ export type DataValueArgs =
   | { __kind: 'I64'; fields: readonly [number | bigint] }
   | { __kind: 'U128'; fields: readonly [number | bigint] }
   | { __kind: 'I128'; fields: readonly [number | bigint] }
-  | { __kind: 'Bytes'; fields: readonly [ReadonlyUint8Array] }
+  | { __kind: 'Bytes'; fields: readonly [CompactBytesArgs] }
   | { __kind: 'Pubkey'; fields: readonly [Address] };
 
 export function getDataValueEncoder(): Encoder<DataValueArgs> {
@@ -106,12 +107,7 @@ export function getDataValueEncoder(): Encoder<DataValueArgs> {
     [
       'Bytes',
       getStructEncoder([
-        [
-          'fields',
-          getTupleEncoder([
-            addEncoderSizePrefix(getBytesEncoder(), getU32Encoder()),
-          ]),
-        ],
+        ['fields', getTupleEncoder([getCompactBytesEncoder()])],
       ]),
     ],
     [
@@ -146,12 +142,7 @@ export function getDataValueDecoder(): Decoder<DataValue> {
     [
       'Bytes',
       getStructDecoder([
-        [
-          'fields',
-          getTupleDecoder([
-            addDecoderSizePrefix(getBytesDecoder(), getU32Decoder()),
-          ]),
-        ],
+        ['fields', getTupleDecoder([getCompactBytesDecoder()])],
       ]),
     ],
     [

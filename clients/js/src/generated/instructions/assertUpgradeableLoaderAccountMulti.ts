@@ -15,24 +15,21 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
-  array,
   mapSerializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  UpgradeableLoaderStateAssertions,
+  UpgradeableLoaderStateAssertionsArgs,
+  getUpgradeableLoaderStateAssertionsSerializer,
+} from '../../hooked';
+import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
   getAccountMetasAndSigners,
 } from '../shared';
-import {
-  LogLevel,
-  LogLevelArgs,
-  UpgradeableLoaderStateAssertion,
-  UpgradeableLoaderStateAssertionArgs,
-  getLogLevelSerializer,
-  getUpgradeableLoaderStateAssertionSerializer,
-} from '../types';
+import { LogLevel, LogLevelArgs, getLogLevelSerializer } from '../types';
 
 // Accounts.
 export type AssertUpgradeableLoaderAccountMultiInstructionAccounts = {
@@ -44,12 +41,12 @@ export type AssertUpgradeableLoaderAccountMultiInstructionAccounts = {
 export type AssertUpgradeableLoaderAccountMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: Array<UpgradeableLoaderStateAssertion>;
+  assertions: UpgradeableLoaderStateAssertions;
 };
 
 export type AssertUpgradeableLoaderAccountMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: Array<UpgradeableLoaderStateAssertionArgs>;
+  assertions: UpgradeableLoaderStateAssertionsArgs;
 };
 
 export function getAssertUpgradeableLoaderAccountMultiInstructionDataSerializer(): Serializer<
@@ -65,7 +62,7 @@ export function getAssertUpgradeableLoaderAccountMultiInstructionDataSerializer(
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['assertions', array(getUpgradeableLoaderStateAssertionSerializer())],
+        ['assertions', getUpgradeableLoaderStateAssertionsSerializer()],
       ],
       { description: 'AssertUpgradeableLoaderAccountMultiInstructionData' }
     ),

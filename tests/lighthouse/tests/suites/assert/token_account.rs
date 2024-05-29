@@ -1108,7 +1108,7 @@ async fn encoded_message() {
 
         let tx = Transaction::new_signed_with_payer(
             &[AssertTokenAccountMultiBuilder::new()
-                .assertions(assertions)
+                .assertions(assertions.into())
                 .target_account(user_ata)
                 .log_level(lighthouse_sdk::types::LogLevel::EncodedMessage)
                 .instruction()],

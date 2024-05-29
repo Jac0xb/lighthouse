@@ -239,7 +239,7 @@ fn build_safe_send_token_transaction(
                 .source_account(token_account)
                 .memory(memory)
                 .memory_id(0)
-                .write_offset(0)
+                .write_offset(0u8.into())
                 .memory_bump(memory_bump)
                 .write_type(WriteType::AccountData {
                     offset: 0,
@@ -259,8 +259,8 @@ fn build_safe_send_token_transaction(
                 .account_a(memory)
                 .account_b(token_account)
                 .assertion(AccountDeltaAssertion::Data {
-                    a_offset: 0,
-                    b_offset: 0,
+                    a_offset: 0u8.into(),
+                    b_offset: 0u8.into(),
                     assertion: DataValueDeltaAssertion::Bytes {
                         operator: EquatableOperator::Equal,
                         length: 64,
@@ -272,8 +272,8 @@ fn build_safe_send_token_transaction(
                 .account_a(memory)
                 .account_b(token_account)
                 .assertion(AccountDeltaAssertion::Data {
-                    a_offset: 64,
-                    b_offset: 64,
+                    a_offset: 64u8.into(),
+                    b_offset: 64u8.into(),
                     assertion: DataValueDeltaAssertion::U64 {
                         value: -100,
                         operator: IntegerOperator::GreaterThan,

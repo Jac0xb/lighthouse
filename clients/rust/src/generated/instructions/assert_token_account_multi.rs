@@ -6,7 +6,7 @@
 //!
 
 use crate::generated::types::LogLevel;
-use crate::generated::types::TokenAccountAssertion;
+use crate::hooked::TokenAccountAssertions;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -64,7 +64,7 @@ impl AssertTokenAccountMultiInstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertTokenAccountMultiInstructionArgs {
     pub log_level: LogLevel,
-    pub assertions: Vec<TokenAccountAssertion>,
+    pub assertions: TokenAccountAssertions,
 }
 
 /// Instruction builder for `AssertTokenAccountMulti`.
@@ -76,7 +76,7 @@ pub struct AssertTokenAccountMultiInstructionArgs {
 pub struct AssertTokenAccountMultiBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
-    assertions: Option<Vec<TokenAccountAssertion>>,
+    assertions: Option<TokenAccountAssertions>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -97,7 +97,7 @@ impl AssertTokenAccountMultiBuilder {
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
+    pub fn assertions(&mut self, assertions: TokenAccountAssertions) -> &mut Self {
         self.assertions = Some(assertions);
         self
     }
@@ -269,7 +269,7 @@ impl<'a, 'b> AssertTokenAccountMultiCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<TokenAccountAssertion>) -> &mut Self {
+    pub fn assertions(&mut self, assertions: TokenAccountAssertions) -> &mut Self {
         self.instruction.assertions = Some(assertions);
         self
     }
@@ -347,7 +347,7 @@ struct AssertTokenAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
-    assertions: Option<Vec<TokenAccountAssertion>>,
+    assertions: Option<TokenAccountAssertions>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

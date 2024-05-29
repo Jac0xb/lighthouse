@@ -8,6 +8,7 @@
 use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use crate::generated::types::KnownProgram;
+use crate::hooked::CompactU64;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 use solana_program::pubkey::Pubkey;
@@ -53,7 +54,7 @@ pub enum AccountInfoAssertion {
     },
     VerifyDatahash {
         expected_hash: [u8; 32],
-        start: Option<u16>,
-        length: Option<u16>,
+        start: CompactU64,
+        length: CompactU64,
     },
 }

@@ -5,6 +5,7 @@ use crate::{
     utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::CompactU64;
 use solana_program::{account_info::AccountInfo, keccak, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
@@ -43,8 +44,8 @@ pub enum AccountInfoAssertion {
     },
     VerifyDatahash {
         expected_hash: [u8; 32],
-        start: Option<u16>,
-        length: Option<u16>,
+        start: CompactU64,
+        length: CompactU64,
     },
 }
 
@@ -82,13 +83,8 @@ impl Assert<&AccountInfo<'_>> for AccountInfoAssertion {
             } => {
                 let account_data = account.try_borrow_data()?;
 
-                let start = start.unwrap_or(0);
-                let length = length.unwrap_or(
-                    account_data
-                        .len()
-                        .checked_sub(start as usize)
-                        .ok_or(LighthouseError::RangeOutOfBounds)? as u16,
-                );
+                let start = **start;
+                let length = **length;
 
                 let hash_range = start as usize..(start + length) as usize;
                 let account_data = &account_data.get(hash_range.clone()).ok_or_else(|| {

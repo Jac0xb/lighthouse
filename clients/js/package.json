@@ -32,8 +32,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@solana/web3.js": "1.91.7",
-    "@metaplex-foundation/umi": "^0.9.1"
+    "@metaplex-foundation/umi": "^0.9.1",
+    "@metaplex-foundation/umi-serializers-core": "^0.8.9",
+    "@minhducsun2002/leb128": "^1.0.0",
+    "@solana/web3.js": "1.91.7"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",

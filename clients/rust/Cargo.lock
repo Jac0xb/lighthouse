@@ -952,6 +952,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
+name = "leb128"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "884e2677b40cc8c339eaefcb701c32ef1fd2493d71118dc0ca4b6a736c93bd67"
+
+[[package]]
 name = "libc"
 version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1018,12 +1024,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "lighthouse-common"
+version = "0.1.0"
+dependencies = [
+ "borsh 0.10.3",
+ "leb128",
+ "serde",
+ "serde_with 3.6.1",
+]
+
+[[package]]
 name = "lighthouse-sdk"
 version = "0.1.0"
 dependencies = [
  "assert_matches",
  "base64 0.22.0",
  "borsh 0.10.3",
+ "lighthouse-common",
  "num-derive",
  "num-traits",
  "serde",

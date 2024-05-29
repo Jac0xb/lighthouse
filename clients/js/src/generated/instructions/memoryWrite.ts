@@ -18,9 +18,13 @@ import {
   Serializer,
   mapSerializer,
   struct,
-  u16,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Serializer,
+} from '../../hooked';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -47,14 +51,14 @@ export type MemoryWriteInstructionData = {
   discriminator: number;
   memoryId: number;
   memoryBump: number;
-  writeOffset: number;
+  writeOffset: CompactU64;
   writeType: WriteType;
 };
 
 export type MemoryWriteInstructionDataArgs = {
   memoryId?: number;
   memoryBump: number;
-  writeOffset: number;
+  writeOffset: CompactU64Args;
   writeType: WriteTypeArgs;
 };
 
@@ -72,7 +76,7 @@ export function getMemoryWriteInstructionDataSerializer(): Serializer<
         ['discriminator', u8()],
         ['memoryId', u8()],
         ['memoryBump', u8()],
-        ['writeOffset', u16()],
+        ['writeOffset', getCompactU64Serializer()],
         ['writeType', getWriteTypeSerializer()],
       ],
       { description: 'MemoryWriteInstructionData' }

@@ -6,7 +6,7 @@
 //!
 
 use crate::generated::types::LogLevel;
-use crate::generated::types::UpgradeableLoaderStateAssertion;
+use crate::hooked::UpgradeableLoaderStateAssertions;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
@@ -64,7 +64,7 @@ impl AssertUpgradeableLoaderAccountMultiInstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertUpgradeableLoaderAccountMultiInstructionArgs {
     pub log_level: LogLevel,
-    pub assertions: Vec<UpgradeableLoaderStateAssertion>,
+    pub assertions: UpgradeableLoaderStateAssertions,
 }
 
 /// Instruction builder for `AssertUpgradeableLoaderAccountMulti`.
@@ -76,7 +76,7 @@ pub struct AssertUpgradeableLoaderAccountMultiInstructionArgs {
 pub struct AssertUpgradeableLoaderAccountMultiBuilder {
     target_account: Option<solana_program::pubkey::Pubkey>,
     log_level: Option<LogLevel>,
-    assertions: Option<Vec<UpgradeableLoaderStateAssertion>>,
+    assertions: Option<UpgradeableLoaderStateAssertions>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -97,7 +97,7 @@ impl AssertUpgradeableLoaderAccountMultiBuilder {
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<UpgradeableLoaderStateAssertion>) -> &mut Self {
+    pub fn assertions(&mut self, assertions: UpgradeableLoaderStateAssertions) -> &mut Self {
         self.assertions = Some(assertions);
         self
     }
@@ -269,7 +269,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn assertions(&mut self, assertions: Vec<UpgradeableLoaderStateAssertion>) -> &mut Self {
+    pub fn assertions(&mut self, assertions: UpgradeableLoaderStateAssertions) -> &mut Self {
         self.instruction.assertions = Some(assertions);
         self
     }
@@ -347,7 +347,7 @@ struct AssertUpgradeableLoaderAccountMultiCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
-    assertions: Option<Vec<UpgradeableLoaderStateAssertion>>,
+    assertions: Option<UpgradeableLoaderStateAssertions>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

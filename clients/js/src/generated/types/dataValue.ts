@@ -12,7 +12,6 @@ import {
   GetDataEnumKindContent,
   Serializer,
   bool,
-  bytes,
   dataEnum,
   i128,
   i16,
@@ -28,6 +27,11 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  CompactBytes,
+  CompactBytesArgs,
+  getCompactBytesSerializer,
+} from '../../hooked';
 
 export type DataValue =
   | { __kind: 'Bool'; fields: [boolean] }
@@ -41,7 +45,7 @@ export type DataValue =
   | { __kind: 'I64'; fields: [bigint] }
   | { __kind: 'U128'; fields: [bigint] }
   | { __kind: 'I128'; fields: [bigint] }
-  | { __kind: 'Bytes'; fields: [Uint8Array] }
+  | { __kind: 'Bytes'; fields: [CompactBytes] }
   | { __kind: 'Pubkey'; fields: [PublicKey] };
 
 export type DataValueArgs =
@@ -56,7 +60,7 @@ export type DataValueArgs =
   | { __kind: 'I64'; fields: [number | bigint] }
   | { __kind: 'U128'; fields: [number | bigint] }
   | { __kind: 'I128'; fields: [number | bigint] }
-  | { __kind: 'Bytes'; fields: [Uint8Array] }
+  | { __kind: 'Bytes'; fields: [CompactBytesArgs] }
   | { __kind: 'Pubkey'; fields: [PublicKey] };
 
 export function getDataValueSerializer(): Serializer<DataValueArgs, DataValue> {
@@ -131,7 +135,7 @@ export function getDataValueSerializer(): Serializer<DataValueArgs, DataValue> {
       [
         'Bytes',
         struct<GetDataEnumKindContent<DataValue, 'Bytes'>>([
-          ['fields', tuple([bytes({ size: u32() })])],
+          ['fields', tuple([getCompactBytesSerializer()])],
         ]),
       ],
       [

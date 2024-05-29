@@ -12,7 +12,6 @@ import {
   GetDataEnumKindContent,
   Serializer,
   bool,
-  bytes,
   dataEnum,
   i128,
   i16,
@@ -35,6 +34,11 @@ import {
   getEquatableOperatorSerializer,
   getIntegerOperatorSerializer,
 } from '.';
+import {
+  CompactBytes,
+  CompactBytesArgs,
+  getCompactBytesSerializer,
+} from '../../hooked';
 
 export type DataValueAssertion =
   | { __kind: 'Bool'; value: boolean; operator: EquatableOperator }
@@ -48,7 +52,7 @@ export type DataValueAssertion =
   | { __kind: 'I64'; value: bigint; operator: IntegerOperator }
   | { __kind: 'U128'; value: bigint; operator: IntegerOperator }
   | { __kind: 'I128'; value: bigint; operator: IntegerOperator }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperator }
+  | { __kind: 'Bytes'; value: CompactBytes; operator: EquatableOperator }
   | { __kind: 'Pubkey'; value: PublicKey; operator: EquatableOperator };
 
 export type DataValueAssertionArgs =
@@ -63,7 +67,11 @@ export type DataValueAssertionArgs =
   | { __kind: 'I64'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'U128'; value: number | bigint; operator: IntegerOperatorArgs }
   | { __kind: 'I128'; value: number | bigint; operator: IntegerOperatorArgs }
-  | { __kind: 'Bytes'; value: Uint8Array; operator: EquatableOperatorArgs }
+  | {
+      __kind: 'Bytes';
+      value: CompactBytesArgs;
+      operator: EquatableOperatorArgs;
+    }
   | { __kind: 'Pubkey'; value: PublicKey; operator: EquatableOperatorArgs };
 
 export function getDataValueAssertionSerializer(): Serializer<
@@ -152,7 +160,7 @@ export function getDataValueAssertionSerializer(): Serializer<
       [
         'Bytes',
         struct<GetDataEnumKindContent<DataValueAssertion, 'Bytes'>>([
-          ['value', bytes({ size: u32() })],
+          ['value', getCompactBytesSerializer()],
           ['operator', getEquatableOperatorSerializer()],
         ]),
       ],

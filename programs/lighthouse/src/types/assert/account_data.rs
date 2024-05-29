@@ -2,15 +2,19 @@ use super::{Assert, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+    types::{
+        assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
+        CompactBytes,
+    },
     utils::{try_from_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use lighthouse_common::CompactU64;
 use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {
-    pub offset: u16,
+    pub offset: CompactU64,
     pub assertion: DataValueAssertion,
 }
 
@@ -61,7 +65,7 @@ pub enum DataValueAssertion {
         operator: IntegerOperator,
     },
     Bytes {
-        value: Vec<u8>,
+        value: CompactBytes,
         operator: EquatableOperator,
     },
     Pubkey {
@@ -72,7 +76,7 @@ pub enum DataValueAssertion {
 
 impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        let offset = self.offset as usize;
+        let offset = *self.offset as usize;
         let assertion = &self.assertion;
 
         let data = account.try_borrow_data().map_err(|e| {
@@ -268,7 +272,7 @@ mod tests {
 
         for (assertion, should_pass) in assertions {
             let assertion = AccountDataAssertion {
-                offset: 0,
+                offset: 0u8.into(),
                 assertion,
             };
 
@@ -328,7 +332,7 @@ mod tests {
 
         for (assertion, should_pass) in assertions {
             let assertion = AccountDataAssertion {
-                offset: 1,
+                offset: 1u8.into(),
                 assertion,
             };
 
@@ -374,7 +378,7 @@ mod tests {
 
         for (assertion, should_pass) in assertions {
             let assertion = AccountDataAssertion {
-                offset: 103,
+                offset: 103u8.into(),
                 assertion,
             };
 
@@ -399,7 +403,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U8 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -418,7 +422,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::I8 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -437,7 +441,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U16 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -457,7 +461,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::I16 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -479,7 +483,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U32 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -501,7 +505,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::I32 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -523,7 +527,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U64 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -545,7 +549,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::I64 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -567,7 +571,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U128 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -589,7 +593,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::I128 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -611,7 +615,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::Pubkey {
                 value: Keypair::new().encodable_pubkey(),
                 operator: EquatableOperator::Equal,
@@ -633,7 +637,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::Bool {
                 value: true,
                 operator: EquatableOperator::Equal,
@@ -655,9 +659,9 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::Bytes {
-                value: vec![u8::MAX; 33],
+                value: vec![u8::MAX; 33].into(),
                 operator: EquatableOperator::Equal,
             },
         };
@@ -680,7 +684,7 @@ mod tests {
         let data: &mut [u8] = &mut [0u8; 8];
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
         let assertion = AccountDataAssertion {
-            offset: 7,
+            offset: 7u8.into(),
             assertion: DataValueAssertion::U16 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -697,7 +701,7 @@ mod tests {
         let data: &mut [u8] = &mut [0u8; 16];
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
         let assertion = AccountDataAssertion {
-            offset: 9,
+            offset: 9u8.into(),
             assertion: DataValueAssertion::I128 {
                 value: 1,
                 operator: IntegerOperator::Equal,
@@ -716,9 +720,9 @@ mod tests {
         let data: &mut [u8] = &mut [0u8; 32];
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
         let assertion = AccountDataAssertion {
-            offset: 17,
+            offset: 17u8.into(),
             assertion: DataValueAssertion::Bytes {
-                value: vec![u8::MAX; 16],
+                value: vec![u8::MAX; 16].into(),
                 operator: EquatableOperator::Equal,
             },
         };
@@ -740,7 +744,7 @@ mod tests {
         let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
 
         let assertion = AccountDataAssertion {
-            offset: 0,
+            offset: 0u8.into(),
             assertion: DataValueAssertion::U8 {
                 value: 1,
                 operator: IntegerOperator::Equal,

@@ -1,0 +1,23 @@
+[package]
+name = "lighthouse-common"
+version = "0.1.0"
+edition = "2021"
+readme = "README.md"
+license-file = "../../LICENSE"
+description = "Shared common library used in lighthouse protocol and sdk"
+repository = "https://github.com/Jac0xb/lighthouse"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+serde = ["dep:serde", "dep:serde_with"]
+
+default = []
+
+[dependencies]
+borsh = "=0.10.3"
+serde = { version = "^1.0", features = ["derive"], optional = true }
+serde_with = { version = "^3.0", optional = true }
+leb128 = "0.2.5"

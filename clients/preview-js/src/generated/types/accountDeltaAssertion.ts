@@ -17,8 +17,6 @@ import {
   getDiscriminatedUnionEncoder,
   getStructDecoder,
   getStructEncoder,
-  getU16Decoder,
-  getU16Encoder,
 } from '@solana/web3.js';
 import {
   AccountInfoDeltaAssertion,
@@ -30,30 +28,36 @@ import {
   getDataValueDeltaAssertionDecoder,
   getDataValueDeltaAssertionEncoder,
 } from '.';
+import {
+  CompactU64,
+  CompactU64Args,
+  getCompactU64Decoder,
+  getCompactU64Encoder,
+} from '../../hooked';
 
 export type AccountDeltaAssertion =
   | {
       __kind: 'AccountInfo';
-      aOffset: number;
+      aOffset: CompactU64;
       assertion: AccountInfoDeltaAssertion;
     }
   | {
       __kind: 'Data';
-      aOffset: number;
-      bOffset: number;
+      aOffset: CompactU64;
+      bOffset: CompactU64;
       assertion: DataValueDeltaAssertion;
     };
 
 export type AccountDeltaAssertionArgs =
   | {
       __kind: 'AccountInfo';
-      aOffset: number;
+      aOffset: CompactU64Args;
       assertion: AccountInfoDeltaAssertionArgs;
     }
   | {
       __kind: 'Data';
-      aOffset: number;
-      bOffset: number;
+      aOffset: CompactU64Args;
+      bOffset: CompactU64Args;
       assertion: DataValueDeltaAssertionArgs;
     };
 
@@ -62,15 +66,15 @@ export function getAccountDeltaAssertionEncoder(): Encoder<AccountDeltaAssertion
     [
       'AccountInfo',
       getStructEncoder([
-        ['aOffset', getU16Encoder()],
+        ['aOffset', getCompactU64Encoder()],
         ['assertion', getAccountInfoDeltaAssertionEncoder()],
       ]),
     ],
     [
       'Data',
       getStructEncoder([
-        ['aOffset', getU16Encoder()],
-        ['bOffset', getU16Encoder()],
+        ['aOffset', getCompactU64Encoder()],
+        ['bOffset', getCompactU64Encoder()],
         ['assertion', getDataValueDeltaAssertionEncoder()],
       ]),
     ],
@@ -82,15 +86,15 @@ export function getAccountDeltaAssertionDecoder(): Decoder<AccountDeltaAssertion
     [
       'AccountInfo',
       getStructDecoder([
-        ['aOffset', getU16Decoder()],
+        ['aOffset', getCompactU64Decoder()],
         ['assertion', getAccountInfoDeltaAssertionDecoder()],
       ]),
     ],
     [
       'Data',
       getStructDecoder([
-        ['aOffset', getU16Decoder()],
-        ['bOffset', getU16Decoder()],
+        ['aOffset', getCompactU64Decoder()],
+        ['bOffset', getCompactU64Decoder()],
         ['assertion', getDataValueDeltaAssertionDecoder()],
       ]),
     ],
