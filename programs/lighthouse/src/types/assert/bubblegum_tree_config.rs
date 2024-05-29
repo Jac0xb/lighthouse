@@ -1,4 +1,5 @@
 use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
+use crate::generate_asserts_borsh;
 use crate::{err, err_msg, error::LighthouseError, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -38,66 +39,20 @@ impl<'info> Assert<&AccountInfo<'info>> for BubblegumTreeConfigAssertion {
             err!(LighthouseError::AccountBorrowFailed)
         })?;
 
-        match self {
-            BubblegumTreeConfigAssertion::TreeCreator { value, operator } => {
-                let data_slice = data
-                    .get(8..40)
-                    .ok_or_else(|| LighthouseError::oob_err(8..40))?;
-                let actual_tree_creator = bytemuck::from_bytes::<Pubkey>(data_slice);
-
-                Pubkey::evaluate(actual_tree_creator, value, operator, log_level)
-            }
-            BubblegumTreeConfigAssertion::TreeDelegate { value, operator } => {
-                let data_slice = data
-                    .get(40..72)
-                    .ok_or_else(|| LighthouseError::oob_err(40..72))?;
-                let actual_tree_delegate = bytemuck::from_bytes::<Pubkey>(data_slice);
-
-                Pubkey::evaluate(actual_tree_delegate, value, operator, log_level)
-            }
-            BubblegumTreeConfigAssertion::TotalMintCapacity { value, operator } => {
-                let data_slice = data
-                    .get(72..80)
-                    .ok_or_else(|| LighthouseError::oob_err(72..80))?;
-
-                let actual_total_mint_capacity = u64::try_from_slice(data_slice).map_err(|e| {
-                    err_msg!("Failed to deserialize mint from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
-
-                u64::evaluate(&actual_total_mint_capacity, value, operator, log_level)
-            }
-            BubblegumTreeConfigAssertion::NumMinted { value, operator } => {
-                let data_slice = data
-                    .get(80..88)
-                    .ok_or_else(|| LighthouseError::oob_err(80..88))?;
-
-                let actual_num_minted = u64::try_from_slice(data_slice).map_err(|e| {
-                    err_msg!("Failed to deserialize mint from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
-
-                u64::evaluate(&actual_num_minted, value, operator, log_level)
-            }
-            BubblegumTreeConfigAssertion::IsPublic { value, operator } => {
-                let data_slice = data
-                    .get(88..89)
-                    .ok_or_else(|| LighthouseError::oob_err(88..89))?;
-
-                let actual_is_public = bool::try_from_slice(data_slice).map_err(|e| {
-                    err_msg!("Failed to deserialize mint from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?;
-
-                bool::evaluate(&actual_is_public, value, operator, log_level)
-            }
-            BubblegumTreeConfigAssertion::IsDecompressible { value, operator } => {
-                let actual_is_decompressible = data
-                    .get(89)
-                    .ok_or_else(|| LighthouseError::oob_err(89..90))?;
-
-                u8::evaluate(actual_is_decompressible, value, operator, log_level)
-            }
-        }
+        generate_asserts_borsh!(
+            self,
+            BubblegumTreeConfigAssertion,
+            data,
+            log_level,
+            standard_cases: [
+                (TreeCreator, (Pubkey), 8),
+                (TreeDelegate, (Pubkey), 40),
+                (TotalMintCapacity, u64, 72),
+                (NumMinted, u64, 80),
+                (IsPublic, bool, 88),
+                (IsDecompressible, u8, 89)
+            ],
+            custom_cases: []
+        )
     }
 }

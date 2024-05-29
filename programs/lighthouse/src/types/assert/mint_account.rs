@@ -1,10 +1,7 @@
-use super::{Assert, LogLevel};
-use crate::{
-    err, err_msg,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
-    utils::{keys_equal, Result},
-};
-use crate::{error::LighthouseError, utils::unpack_coption_key};
+use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
+use crate::error::LighthouseError;
+use crate::generate_asserts_c;
+use crate::utils::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
@@ -34,89 +31,21 @@ pub enum MintAccountAssertion {
 
 impl Assert<&AccountInfo<'_>> for MintAccountAssertion {
     fn evaluate(&self, account: &AccountInfo<'_>, log_level: LogLevel) -> Result<()> {
-        if !keys_equal(account.owner, &spl_token::ID)
-            && !keys_equal(account.owner, &spl_token_2022::ID)
-        {
-            return Err(LighthouseError::AccountOwnerMismatch.into());
-        }
-
         let data = account
             .try_borrow_mut_data()
             .map_err(LighthouseError::failed_borrow_err)?;
 
-        match self {
-            MintAccountAssertion::MintAuthority {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(0..36)
-                    .ok_or_else(|| LighthouseError::oob_err(0..36))?;
-                let mint_authority = unpack_coption_key(data_slice)?;
-
-                <Option<&Pubkey>>::evaluate(
-                    &mint_authority,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-            MintAccountAssertion::Supply {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(36..44)
-                    .ok_or_else(|| LighthouseError::oob_err(36..44))?;
-                let actual_supply = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
-                    err_msg!("Failed to deserialize supply from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?);
-
-                u64::evaluate(&actual_supply, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::Decimals {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(44..45)
-                    .ok_or_else(|| LighthouseError::oob_err(44..45))?;
-                let actual_decimals = u8::from_le_bytes(data_slice.try_into().map_err(|e| {
-                    err_msg!("Failed to deserialize decimals from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?);
-
-                u8::evaluate(&actual_decimals, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::IsInitialized {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = data
-                    .get(45)
-                    .ok_or_else(|| LighthouseError::oob_err(45..46))?;
-                let actual_value = *actual_value != 0;
-
-                bool::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            MintAccountAssertion::FreezeAuthority {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(46..82)
-                    .ok_or_else(|| LighthouseError::oob_err(46..82))?;
-                let freeze_authority = unpack_coption_key(data_slice)?;
-
-                <Option<&Pubkey>>::evaluate(
-                    &freeze_authority,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-        }
+        generate_asserts_c!(
+            self,
+            MintAccountAssertion,
+            data,
+            log_level,
+            (MintAuthority, (Option<Pubkey>), 0),
+            (Supply, u64, 36),
+            (Decimals, u8, 44),
+            (IsInitialized, bool, 45),
+            (FreezeAuthority, (Option<Pubkey>), 46)
+        )
     }
 }
 
@@ -126,15 +55,14 @@ mod tests {
         use solana_program::{
             account_info::AccountInfo, program_option::COption, program_pack::Pack,
         };
-        use solana_sdk::{signature::Keypair, signer::EncodableKeypair};
+        use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::EncodableKeypair};
         use spl_token::state::Mint;
         use std::{cell::RefCell, rc::Rc};
 
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                evaluate::{EquatableOperator, IntegerOperator},
-                Assert, LogLevel, MintAccountAssertion,
+                Assert, EquatableOperator, IntegerOperator, LogLevel, MintAccountAssertion,
             },
         };
 
@@ -339,6 +267,191 @@ mod tests {
             .evaluate(&account_info, LogLevel::PlaintextMessage);
 
             assert_failed(result);
+        }
+
+        #[test]
+        fn negative_testing() {
+            let pubkey = Pubkey::new_from_array([255; 32]);
+
+            // Test mint authority
+            let serialized_mint_account: &mut [u8; Mint::LEN] = &mut [0u8; Mint::LEN];
+            let mint = Mint {
+                mint_authority: COption::Some(Pubkey::new_from_array([255; 32])),
+                ..Mint::default()
+            };
+            Mint::pack(mint, serialized_mint_account).unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_mint_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                MintAccountAssertion::MintAuthority {
+                    value: Some(Pubkey::new_from_array([255; 32])),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            assert_failed(
+                MintAccountAssertion::MintAuthority {
+                    value: Some(Pubkey::new_from_array([0; 32])),
+                    operator: EquatableOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test supply
+            let serialized_mint_account: &mut [u8; Mint::LEN] = &mut [0u8; Mint::LEN];
+            let mint = Mint {
+                supply: u64::MAX,
+                ..Mint::default()
+            };
+            Mint::pack(mint, serialized_mint_account).unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_mint_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                MintAccountAssertion::Supply {
+                    value: u64::MAX,
+                    operator: IntegerOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            assert_failed(
+                MintAccountAssertion::Supply {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test decimals
+            let serialized_mint_account: &mut [u8; Mint::LEN] = &mut [0u8; Mint::LEN];
+            let mint = Mint {
+                decimals: 255,
+                ..Mint::default()
+            };
+            Mint::pack(mint, serialized_mint_account).unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_mint_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                MintAccountAssertion::Decimals {
+                    value: 255,
+                    operator: IntegerOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            assert_failed(
+                MintAccountAssertion::Decimals {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test is_initialized
+            let serialized_mint_account: &mut [u8; Mint::LEN] = &mut [0u8; Mint::LEN];
+            let mint = Mint {
+                is_initialized: true,
+                ..Mint::default()
+            };
+            Mint::pack(mint, serialized_mint_account).unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_mint_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                MintAccountAssertion::IsInitialized {
+                    value: true,
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            assert_failed(
+                MintAccountAssertion::IsInitialized {
+                    value: false,
+                    operator: EquatableOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test freeze_authority
+            let serialized_mint_account: &mut [u8; Mint::LEN] = &mut [0u8; Mint::LEN];
+            let mint = Mint {
+                freeze_authority: COption::Some(Pubkey::new_from_array([255; 32])),
+                ..Mint::default()
+            };
+            Mint::pack(mint, serialized_mint_account).unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_mint_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                MintAccountAssertion::FreezeAuthority {
+                    value: Some(Pubkey::new_from_array([255; 32])),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            assert_failed(
+                MintAccountAssertion::FreezeAuthority {
+                    value: Some(Pubkey::new_from_array([0; 32])),
+                    operator: EquatableOperator::Equal,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
         }
     }
 }

@@ -1,16 +1,14 @@
-use super::{Assert, LogLevel};
+use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
 use crate::{
     err, err_msg,
     error::LighthouseError,
-    types::{
-        assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
-        CompactBytes,
-    },
-    utils::{try_from_slice, Result},
+    generate_asserts_borsh,
+    types::{assert::evaluate::Evaluate, CompactBytes},
+    utils::Result,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use lighthouse_common::CompactU64;
-use solana_program::{account_info::AccountInfo, msg, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct AccountDataAssertion {
@@ -88,114 +86,28 @@ impl Assert<&AccountInfo<'_>> for AccountDataAssertion {
             return Err(LighthouseError::AccountNotInitialized.into());
         }
 
-        match assertion {
-            DataValueAssertion::Bool {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<bool>(&data, offset, None)?;
-                bool::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U8 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u8>(&data, offset, None)?;
-                u8::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I8 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i8>(&data, offset, None)?;
-                i8::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U16 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u16>(&data, offset, None)?;
-                u16::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I16 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i16>(&data, offset, None)?;
-                i16::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U32 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u32>(&data, offset, None)?;
-                u32::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I32 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i32>(&data, offset, None)?;
-                i32::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U64 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u64>(&data, offset, None)?;
-                u64::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I64 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i64>(&data, offset, None)?;
-                i64::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::U128 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<u128>(&data, offset, None)?;
-                u128::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::I128 {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = try_from_slice::<i128>(&data, offset, None)?;
-                i128::evaluate(&actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::Bytes {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_value = data
-                    .get(offset..offset + assertion_value.len())
-                    .ok_or_else(|| {
-                        msg!("Data range out of bounds");
-                        err!(LighthouseError::RangeOutOfBounds)
-                    })?;
-
-                <[u8]>::evaluate(actual_value, assertion_value, operator, log_level)
-            }
-            DataValueAssertion::Pubkey {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data.get(offset..offset + 32).ok_or_else(|| {
-                    msg!(
-                        "Failed to deserialized Pubkey range {:?} was out of bounds",
-                        offset..offset + 32
-                    );
-
-                    LighthouseError::RangeOutOfBounds
-                })?;
-                let actual_value = bytemuck::from_bytes::<Pubkey>(data_slice);
-
-                Pubkey::evaluate(actual_value, assertion_value, operator, log_level)
-            }
-        }
+        generate_asserts_borsh!(
+            assertion,
+            DataValueAssertion,
+            data,
+            log_level,
+            standard_cases: [
+                (Bool, bool, offset),
+                (U8, u8, offset),
+                (I8, i8, offset),
+                (U16, u16, offset),
+                (I16, i16, offset),
+                (U32, u32, offset),
+                (I32, i32, offset),
+                (U64, u64, offset),
+                (I64, i64, offset),
+                (U128, u128, offset),
+                (I128, i128, offset),
+                (Pubkey, (Pubkey), offset),
+                (Bytes, ([u8]), offset)
+            ],
+            custom_cases: []
+        )
     }
 }
 
@@ -206,13 +118,13 @@ mod tests {
         error::LighthouseError,
         test_utils::{assert_failed, assert_passed, create_test_account},
         types::assert::{
-            evaluate::{EquatableOperator, IntegerOperator},
-            AccountDataAssertion, Assert, LogLevel,
+            AccountDataAssertion, Assert, EquatableOperator, IntegerOperator, LogLevel,
         },
     };
     use borsh::BorshSerialize;
     use solana_sdk::{
-        account_info::AccountInfo, signature::Keypair, signer::EncodableKeypair, system_program,
+        account_info::AccountInfo, pubkey::Pubkey, signature::Keypair, signer::EncodableKeypair,
+        system_program,
     };
 
     #[test]
@@ -390,6 +302,31 @@ mod tests {
                 assert_failed(result);
             }
         }
+
+        // Test bytes, and negative case.
+        let data = &mut [0u8; 64];
+        let account_info = AccountInfo::new(&key, false, false, lamports, data, &key, false, 0);
+
+        AccountDataAssertion {
+            offset: 0u8.into(),
+            assertion: DataValueAssertion::Bytes {
+                value: vec![0u8; 64].into(),
+                operator: EquatableOperator::Equal,
+            },
+        }
+        .evaluate(&account_info, LogLevel::PlaintextMessage)
+        .unwrap();
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 0u8.into(),
+                assertion: DataValueAssertion::Bytes {
+                    value: vec![255u8; 64].into(),
+                    operator: EquatableOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
     }
 
     #[test]
@@ -762,5 +699,368 @@ mod tests {
         }
 
         drop(data);
+    }
+
+    #[test]
+    fn negative_testing() {
+        let pubkey = Pubkey::new_from_array([255; 32]);
+
+        // Test bool
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32] = 1;
+
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::Bool {
+                    value: true,
+                    operator: EquatableOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::Bool {
+                    value: false,
+                    operator: EquatableOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test u8
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32] = u8::MAX;
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U8 {
+                    value: u8::MAX,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test i8
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32] = u8::MAX;
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I8 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I8 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test u16
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..34].copy_from_slice(&u16::MAX.to_le_bytes());
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U16 {
+                    value: u16::MAX,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U16 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test i16
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..34].copy_from_slice(&(-1_i16).to_le_bytes());
+
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I16 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I16 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test u32
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..36].copy_from_slice(&u32::MAX.to_le_bytes());
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U32 {
+                    value: u32::MAX,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U32 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test i32
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..36].copy_from_slice(&(-1_i32).to_le_bytes());
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I32 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I32 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test u64
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..40].copy_from_slice(&u64::MAX.to_le_bytes());
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U64 {
+                    value: u64::MAX,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U64 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test i64
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..40].copy_from_slice(&(-1_i64).to_le_bytes());
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I64 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I64 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test u128
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..48].copy_from_slice(&u128::MAX.to_le_bytes());
+
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U128 {
+                    value: u128::MAX,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::U128 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test i128
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..48].copy_from_slice(&(-1_i128).to_le_bytes());
+
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I128 {
+                    value: -1,
+                    operator: IntegerOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::I128 {
+                    value: 0,
+                    operator: IntegerOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        // Test bytes
+
+        let lamports = &mut 0;
+        let data: &mut [u8] = &mut [0u8; 128];
+        data[32..32 + 15].copy_from_slice(&[u8::MAX; 15]);
+
+        let account_info =
+            AccountInfo::new(&pubkey, false, false, lamports, data, &pubkey, false, 0);
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::Bytes {
+                    value: vec![u8::MAX; 15].into(),
+                    operator: EquatableOperator::NotEqual,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
+
+        assert_failed(
+            AccountDataAssertion {
+                offset: 32u8.into(),
+                assertion: DataValueAssertion::Bytes {
+                    value: vec![0; 15].into(),
+                    operator: EquatableOperator::Equal,
+                },
+            }
+            .evaluate(&account_info, LogLevel::PlaintextMessage),
+        );
     }
 }

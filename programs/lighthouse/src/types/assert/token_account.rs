@@ -1,9 +1,8 @@
-use super::{Assert, Evaluate, LogLevel};
+use super::{Assert, EquatableOperator, Evaluate, IntegerOperator, LogLevel};
 use crate::{
-    err, err_msg,
     error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, IntegerOperator},
-    utils::{unpack_coption_key, unpack_coption_u64, Result},
+    generate_asserts_c,
+    utils::{checked_get_slice, Result},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
@@ -71,129 +70,35 @@ impl Assert<&AccountInfo<'_>> for TokenAccountAssertion {
             .try_borrow_data()
             .map_err(LighthouseError::failed_borrow_err)?;
 
-        match self {
-            TokenAccountAssertion::Mint {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(0..32)
-                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
-                let actual_mint = bytemuck::from_bytes::<Pubkey>(data_slice);
+        generate_asserts_c!(
+            self,
+            TokenAccountAssertion,
+            data,
+            log_level,
+            (Mint, (Pubkey), 0),
+            (Owner, (Pubkey), 32),
+            (Amount, u64, 64),
+            (Delegate, (Option<Pubkey>), 72),
+            (State, u8, 108),
+            (IsNative, (Option<u64>), 109),
+            (DelegatedAmount, u64, 121),
+            (CloseAuthority, (Option<Pubkey>), 129)
+            (custom, TokenAccountOwnerIsDerived,
+                {
+                    let mint = bytemuck::from_bytes::<Pubkey>(checked_get_slice(&data, 0, 32)?);
+                    let owner = bytemuck::from_bytes::<Pubkey>(checked_get_slice(&data, 32, 32)?);
+                    let expected_ata =
+                        get_associated_token_address_with_program_id(owner, mint, account.owner);
 
-                Pubkey::evaluate(actual_mint, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Owner {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(32..64)
-                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
-                let actual_owner = bytemuck::from_bytes::<Pubkey>(data_slice);
-
-                Pubkey::evaluate(actual_owner, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Amount {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(64..72)
-                    .ok_or_else(|| LighthouseError::oob_err(64..72))?;
-                let actual_amount = u64::from_le_bytes(data_slice.try_into().map_err(|e| {
-                    err_msg!("Failed to deserialize amount from account data", e);
-                    err!(LighthouseError::FailedToDeserialize)
-                })?);
-
-                u64::evaluate(&actual_amount, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::Delegate {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(72..108)
-                    .ok_or_else(|| LighthouseError::oob_err(72..108))?;
-                let delegate = unpack_coption_key(data_slice)?;
-
-                <Option<&Pubkey>>::evaluate(
-                    &delegate,
-                    &assertion_value.as_ref(),
-                    operator,
-                    log_level,
-                )
-            }
-            TokenAccountAssertion::State {
-                value: assertion_value,
-                operator,
-            } => {
-                let actual_state = data
-                    .get(108)
-                    .ok_or_else(|| LighthouseError::oob_err(108..109))?;
-
-                u8::evaluate(actual_state, assertion_value, operator, log_level)
-            }
-            TokenAccountAssertion::IsNative { value, operator } => {
-                let data_slice = data
-                    .get(109..121)
-                    .ok_or_else(|| LighthouseError::oob_err(109..121))?;
-
-                let actual_is_native = unpack_coption_u64(data_slice)?;
-
-                <Option<u64>>::evaluate(&actual_is_native, value, operator, log_level)
-            }
-            TokenAccountAssertion::DelegatedAmount {
-                value: assertion_value,
-                operator,
-            } => {
-                let data_slice = data
-                    .get(121..129)
-                    .ok_or_else(|| LighthouseError::oob_err(121..129))?;
-
-                let actual_delegated_amount =
-                    u64::from_le_bytes(data_slice.try_into().map_err(|e| {
-                        err_msg!("Failed to deserialize delegatedamount from account data", e);
-                        err!(LighthouseError::FailedToDeserialize)
-                    })?);
-
-                u64::evaluate(
-                    &actual_delegated_amount,
-                    assertion_value,
-                    operator,
-                    log_level,
-                )
-            }
-            TokenAccountAssertion::CloseAuthority { value, operator } => {
-                let data_slice = data
-                    .get(129..165)
-                    .ok_or_else(|| LighthouseError::oob_err(129..165))?;
-                let close_authority = unpack_coption_key(data_slice)?;
-
-                <Option<&Pubkey>>::evaluate(&close_authority, &value.as_ref(), operator, log_level)
-            }
-            TokenAccountAssertion::TokenAccountOwnerIsDerived => {
-                let mint_data = data
-                    .get(0..32)
-                    .ok_or_else(|| LighthouseError::oob_err(0..32))?;
-                let mint = bytemuck::from_bytes::<Pubkey>(mint_data);
-
-                let owner_data = data
-                    .get(32..64)
-                    .ok_or_else(|| LighthouseError::oob_err(32..64))?;
-                let owner = bytemuck::from_bytes::<Pubkey>(owner_data);
-
-                let expected_ata =
-                    get_associated_token_address_with_program_id(owner, mint, account.owner);
-
-                Pubkey::evaluate(
-                    account.key,
-                    &expected_ata,
-                    &EquatableOperator::Equal,
-                    log_level,
-                )
-            }
-        }
+                    Pubkey::evaluate(
+                        account.key,
+                        &expected_ata,
+                        &EquatableOperator::Equal,
+                        log_level,
+                    )
+                }
+            )
+        )
     }
 }
 
@@ -211,8 +116,7 @@ mod tests {
         use crate::{
             test_utils::{assert_failed, assert_passed},
             types::assert::{
-                evaluate::{EquatableOperator, IntegerOperator},
-                Assert, LogLevel, TokenAccountAssertion,
+                Assert, EquatableOperator, IntegerOperator, LogLevel, TokenAccountAssertion,
             },
         };
 
@@ -610,6 +514,261 @@ mod tests {
 
                 assert_failed(result.evaluate(&account_info, LogLevel::PlaintextMessage));
             }
+        }
+
+        #[test]
+        fn negative_testing() {
+            let pubkey = Pubkey::new_from_array([255; 32]);
+
+            // Test mint
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    mint: Pubkey::new_from_array([255; 32]),
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::Mint {
+                    value: Pubkey::new_from_array([255; 32]),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test owner
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    owner: Pubkey::new_from_array([255; 32]),
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::Owner {
+                    value: Pubkey::new_from_array([255; 32]),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test amount
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    amount: u64::MAX,
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::Amount {
+                    value: u64::MAX,
+                    operator: IntegerOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test delegate
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    delegate: COption::Some(Pubkey::new_from_array([255; 32])),
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::Delegate {
+                    value: Some(Pubkey::new_from_array([255; 32])),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test state
+
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    state: AccountState::Frozen,
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::State {
+                    value: AccountState::Frozen as u8,
+                    operator: IntegerOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test is_native
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+
+            Account::pack(
+                Account {
+                    is_native: COption::Some(u64::MAX),
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::IsNative {
+                    value: Some(u64::MAX),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test delegated_amount
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    delegated_amount: u64::MAX,
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::DelegatedAmount {
+                    value: u64::MAX,
+                    operator: IntegerOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
+
+            // Test close_authority
+            let serialized_token_account: &mut [u8; Account::LEN] = &mut [0u8; Account::LEN];
+            Account::pack(
+                Account {
+                    close_authority: COption::Some(Pubkey::new_from_array([255; 32])),
+                    ..Account::default()
+                },
+                serialized_token_account,
+            )
+            .unwrap();
+
+            let lamports_data: &mut u64 = &mut 0;
+            let account_info = AccountInfo::new(
+                &pubkey,
+                false,
+                false,
+                lamports_data,
+                serialized_token_account,
+                &spl_token_2022::ID,
+                false,
+                0,
+            );
+
+            assert_failed(
+                TokenAccountAssertion::CloseAuthority {
+                    value: Some(Pubkey::new_from_array([255; 32])),
+                    operator: EquatableOperator::NotEqual,
+                }
+                .evaluate(&account_info, LogLevel::PlaintextMessage),
+            );
         }
     }
 }

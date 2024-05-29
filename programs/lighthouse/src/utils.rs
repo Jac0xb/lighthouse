@@ -1,7 +1,8 @@
-use std::any::type_name;
+use std::{any::type_name, mem::size_of};
 
 use crate::error::LighthouseError;
 use borsh::BorshDeserialize;
+use bytemuck::AnyBitPattern;
 use sha2_const_stable::Sha256;
 use solana_program::{
     account_info::AccountInfo,
@@ -18,9 +19,26 @@ use solana_program::{
 
 pub type Result<T> = std::result::Result<T, ProgramError>;
 
-pub fn unpack_coption_key(src: &[u8]) -> Result<Option<&Pubkey>> {
-    let tag = &src[0..4];
-    let body = &src[4..36];
+#[inline(always)]
+pub fn checked_get_slice(data: &[u8], offset: usize, length: usize) -> Result<&[u8]> {
+    let end = offset + length;
+    data.get(offset..end)
+        .ok_or_else(|| LighthouseError::oob_err(offset..end))
+}
+
+pub fn unpack_coption<T: AnyBitPattern>(src: &[u8], offset: usize) -> Result<Option<&T>> {
+    let start = offset;
+    let tag = src.get(start..start + 4).ok_or_else(|| {
+        msg!("Failed to deserialize COption<Pubkey> tag: {:?}", src);
+        LighthouseError::FailedToDeserialize
+    })?;
+
+    let body = src
+        .get(start + 4..start + 4 + size_of::<T>())
+        .ok_or_else(|| {
+            msg!("Failed to deserialize COption<Pubkey> body: {:?}", src);
+            LighthouseError::FailedToDeserialize
+        })?;
 
     match *tag {
         [0, 0, 0, 0] => Ok(Option::None),
@@ -32,28 +50,31 @@ pub fn unpack_coption_key(src: &[u8]) -> Result<Option<&Pubkey>> {
     }
 }
 
-pub fn unpack_coption_u64(src: &[u8]) -> Result<Option<u64>> {
-    let tag = &src[0..4];
-    let body = &src[4..12];
+pub fn unpack_coption_u64(src: &[u8], offset: usize) -> Result<Option<u64>> {
+    let start = offset;
+    let tag = src.get(start..start + 4).ok_or_else(|| {
+        msg!("Failed to deserialize COption<u64> tag: {:?}", src);
+        LighthouseError::FailedToDeserialize
+    })?;
+    let body = src.get(start + 4..start + 12).ok_or_else(|| {
+        msg!("Failed to deserialize COption<u64> body: {:?}", src);
+        LighthouseError::FailedToDeserialize
+    })?;
 
     match *tag {
         [0, 0, 0, 0] => Ok(Option::None),
         [1, 0, 0, 0] => Ok(Option::Some(u64::from_le_bytes(body.try_into().unwrap()))),
         _ => {
-            msg!("Failed to deserialize COption<u64> src: {:?}", src);
+            msg!("Failed to deserialize COption<u64>: {:?}", src);
             Err(LighthouseError::FailedToDeserialize.into())
         }
     }
 }
 
-pub fn try_from_slice<T: BorshDeserialize + Sized>(
-    data: &[u8],
-    offset: usize,
-    length: Option<usize>,
-) -> Result<T> {
-    let data_length = length.unwrap_or(std::mem::size_of::<T>());
+#[inline(always)]
+pub fn try_from_slice<T: BorshDeserialize + Sized>(data: &[u8], offset: usize) -> Result<T> {
     let start = offset;
-    let end = offset + data_length;
+    let end = offset + std::mem::size_of::<T>();
 
     let slice = data.get(start..end).ok_or_else(|| {
         msg!(
@@ -141,14 +162,17 @@ pub fn close<'info>(info: &AccountInfo<'info>, sol_destination: &AccountInfo<'in
     info.realloc(0, false).map_err(Into::into)
 }
 
+#[inline(always)]
 pub fn is_closed(info: &AccountInfo) -> bool {
     keys_equal(info.owner, &system_program::id()) && info.data_is_empty()
 }
 
+#[inline(always)]
 pub fn keys_equal(key_a: &Pubkey, key_b: &Pubkey) -> bool {
     sol_memcmp(key_a.as_ref(), key_b.as_ref(), PUBKEY_BYTES) == 0
 }
 
+#[inline(always)]
 pub fn contains_key(key: &Pubkey, keys: &[&Pubkey]) -> bool {
     keys.iter().any(|k| keys_equal(k, key))
 }

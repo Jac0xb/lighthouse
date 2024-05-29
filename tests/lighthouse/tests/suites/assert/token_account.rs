@@ -461,8 +461,27 @@ async fn simple() {
                 value: None,
                 operator: EquatableOperator::Equal,
             }),
-            builder_fn(TokenAccountAssertion::TokenAccountOwnerIsDerived),
         ],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
+
+    let result = process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
+
+    assert!(
+        result.metadata.as_ref().unwrap().compute_units_consumed < 6620,
+        "Exceeded expected CU 6620 was {:?}",
+        result.metadata.unwrap().compute_units_consumed
+    );
+
+    // This has non-deterministic compute units.
+    let tx = Transaction::new_signed_with_payer(
+        &[builder_fn(
+            TokenAccountAssertion::TokenAccountOwnerIsDerived,
+        )],
         Some(&user.pubkey()),
         &[&user],
         context.get_blockhash().await,

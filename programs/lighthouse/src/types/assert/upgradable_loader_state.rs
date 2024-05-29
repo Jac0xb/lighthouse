@@ -1,9 +1,5 @@
-use super::{Assert, LogLevel};
-use crate::{
-    error::LighthouseError,
-    types::assert::evaluate::{EquatableOperator, Evaluate, IntegerOperator},
-    utils::Result,
-};
+use super::{Assert, EquatableOperator, IntegerOperator, LogLevel};
+use crate::{error::LighthouseError, types::assert::evaluate::Evaluate, utils::Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{bpf_loader_upgradeable::UpgradeableLoaderState, msg, pubkey::Pubkey};
 

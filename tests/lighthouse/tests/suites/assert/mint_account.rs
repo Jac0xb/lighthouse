@@ -82,9 +82,15 @@ async fn simple() {
         context.get_blockhash().await,
     );
 
-    process_transaction_assert_success(context, tx)
+    let result = process_transaction_assert_success(context, tx)
         .await
         .unwrap();
+
+    assert!(
+        result.metadata.as_ref().unwrap().compute_units_consumed < 3790,
+        "Exceeded expected CU 3790 was {:?}",
+        result.metadata.unwrap().compute_units_consumed
+    );
 
     // Mint with freeze authority
 
