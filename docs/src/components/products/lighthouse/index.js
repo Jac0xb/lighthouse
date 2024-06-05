@@ -66,9 +66,19 @@ export const lighthouse = {
         },
         {
           title: 'Memory',
+          links: [{ title: 'Memory Write', href: '/memory/write' }],
+        },
+        {
+          title: 'Use Cases - Wallet Guard',
           links: [
-            { title: 'Memory Write', href: '/memory/write' },
-            // { title: 'Memory Close', href: '/memory/close' },
+            {
+              title: 'Simulation Analysis',
+              href: '/wallet-guard/simulation-analysis',
+            },
+            {
+              title: 'Preventing Common Attacks',
+              href: '/wallet-guard/preventing-common-attacks',
+            },
           ],
         },
       ],
