@@ -59,6 +59,7 @@ kinobi.update(
 kinobi.update(k.deleteNodesVisitor(['testAccountV1']));
 
 for (const definedType of [
+  'accountDataAssertions',
   'accountInfoAssertions',
   'mintAccountAssertions',
   'tokenAccountAssertions',

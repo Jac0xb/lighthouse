@@ -1,4 +1,6 @@
 import {
+  Decoder,
+  Encoder,
   Offset,
   ReadonlyUint8Array,
   VariableSizeDecoder,
@@ -7,18 +9,26 @@ import {
   createEncoder,
   getArrayDecoder,
   getArrayEncoder,
+  getStructDecoder,
+  getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  transformEncoder,
 } from '@solana/web3.js';
 import { LEB128, UnsignedLEB128 } from '@minhducsun2002/leb128';
 import {
   AccountInfoAssertion,
+  AssertAccountDataInstructionData,
+  DataValueAssertion,
+  DataValueAssertionArgs,
   MintAccountAssertion,
   StakeAccountAssertion,
   TokenAccountAssertion,
   UpgradeableLoaderStateAssertion,
   getAccountInfoAssertionDecoder,
   getAccountInfoAssertionEncoder,
+  getDataValueAssertionDecoder,
+  getDataValueAssertionEncoder,
   getMintAccountAssertionDecoder,
   getMintAccountAssertionEncoder,
   getStakeAccountAssertionDecoder,
@@ -131,6 +141,51 @@ export function getUpgradeableLoaderStateAssertionsEncoder() {
 
 export function getUpgradeableLoaderStateAssertionsDecoder() {
   return getArrayDecoder(getUpgradeableLoaderStateAssertionDecoder(), {
+    size: getCompactU64Decoder(),
+  });
+}
+
+export type AccountDataAssertion = {
+  offset: CompactU64;
+  assertion: DataValueAssertion;
+};
+
+export type AccountDataAssertionArgs = {
+  offset: CompactU64Args;
+  assertion: DataValueAssertionArgs;
+};
+
+export function getAccountDataAssertionEncoder(): Encoder<AccountDataAssertionArgs> {
+  return transformEncoder(
+    getStructEncoder([
+      ['offset', getCompactU64Encoder()],
+      ['assertion', getDataValueAssertionEncoder()],
+    ]),
+    (value) => ({
+      ...value,
+      discriminator: 2,
+    })
+  );
+}
+
+export function getAccountDataAssertionDecoder(): Decoder<AccountDataAssertion> {
+  return getStructDecoder([
+    ['offset', getCompactU64Decoder()],
+    ['assertion', getDataValueAssertionDecoder()],
+  ]);
+}
+
+export type AccountDataAssertions = Array<AccountDataAssertion>;
+export type AccountDataAssertionsArgs = Array<AccountDataAssertion>;
+
+export function getAccountDataAssertionsEncoder() {
+  return getArrayEncoder(getAccountDataAssertionEncoder(), {
+    size: getCompactU64Encoder(),
+  });
+}
+
+export function getAccountDataAssertionsDecoder() {
+  return getArrayDecoder(getAccountDataAssertionDecoder(), {
     size: getCompactU64Decoder(),
   });
 }

@@ -73,7 +73,7 @@ export function getAssertUpgradeableLoaderAccountMultiInstructionDataEncoder(): 
     ]),
     (value) => ({
       ...value,
-      discriminator: 13,
+      discriminator: 14,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

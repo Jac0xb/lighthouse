@@ -1,7 +1,106 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations": []
+  "configurations": [
+    {
+      "name": "Run Lighthouse Tests",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/lighthouse/target/debug/deps/${input:latestTestBinary}",
+      "args": [],
+      "cwd": "${workspaceFolder}/tests/lighthouse",
+      "env": {
+        "RUST_LOG": "error",
+        "RUST_BACKTRACE": "1",
+        "SBF_OUT_DIR": "${workspaceFolder}/configs/.programs"
+      },
+      "preLaunchTask": "find-test-binary",
+      "sourceLanguages": ["rust"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "latestTestBinary",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.tmp/lighthouse_test_binary.txt",
+        "key": "KEY",
+        "debug": true
+      }
+    }
+  ]
 }
+
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Run Lighthouse Tests",
+//       "type": "lldb",
+//       "request": "launch",
+//       "relativePathBase": "${workspaceFolder}/tests/lighthouse",
+//       // "cargo": {
+//       //   "args": [
+//       //     "test",
+//       //     "--no-run",
+//       //     "--lib",
+//       //     // "--package=lighthouse_tests",
+//       //     "--manifest-path",
+//       //     "${workspaceFolder}/tests/lighthouse/Cargo.toml"
+//       //     // "--message-format=human"
+//       //   ],
+//       //   "problemMatcher": "$rustc",
+//       //   "filter": {
+//       //     "name": "tests-lib",
+//       //     "kind": "exe"
+//       //   }
+//       // },
+//       "program": "${workspaceFolder}/tests/lighthouse/target/debug/deps/tests_lib-26ba9f221a9f4534",
+//       "args": [],
+//       "cwd": "${workspaceFolder}/tests/lighthouse",
+//       "env": {
+//         "RUST_LOG": "error",
+//         "RUST_BACKTRACE": "1",
+//         "SBF_OUT_DIR": "${workspaceFolder}/configs/.programs"
+//       },
+//       // "stdio": [null, null, "debugConsole"],
+//       "sourceLanguages": ["rust"]
+//     }
+//   ]
+// }
+
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Run Lighthouse Tests",
+//       "type": "lldb",
+//       "request": "launch",
+//       // "program": "${workspaceFolder}/tests/lighthouse/target/debug",
+//       "cargo": {
+//         "args": [
+//           "test",
+//           "--no-run",
+// "--manifest-path",
+// "${workspaceFolder}/tests/lighthouse/Cargo.toml",
+//           "--bin=lighthouse_tests",
+//           "--package=lighthouse_tests"
+//         ]
+//         // "filter": {
+//         //   "name": "lighthouse_tests",
+//         //   "kind": "lib"
+//         // }
+//       },
+//       "args": [],
+//       "cwd": "${workspaceFolder}/tests/lighthouse",
+//       "env": {
+//         "RUST_LOG": "error",
+//         "RUST_BACKTRACE": "1",
+//         "SBF_OUT_DIR": "${workspaceFolder}/configs/.programs"
+//       },
+//       // "preLaunchTask": "cargo test",
+//       "stdio": [null, null, "debugConsole"],
+//       "sourceLanguages": ["rust"]
+//     }
+//   ]
+// }

@@ -73,44 +73,52 @@ pub enum AssertionResult {
 
 impl AssertionResult {
     pub fn log(&self, log_level: LogLevel) -> Result<()> {
+        if self.passed() && log_level.ignore_success() {
+            return Ok(());
+        }
+
         match log_level {
             LogLevel::Silent => {}
-            LogLevel::PlaintextMessage => {
-                self.log_msg();
+            LogLevel::PlaintextMessage | LogLevel::FailedPlaintextMessage => {
+                log_cases!(self, U8, U16, U32, U64, U128, I8, I16, I32, I64, I128, Bool, Bytes);
             }
-            LogLevel::EncodedMessage => {
-                self.log_data()?;
+            LogLevel::EncodedMessage | LogLevel::FailedEncodedMessage => {
+                let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
+                sol_log_data(&[&data]);
             }
-            LogLevel::EncodedNoop => {
-                self.log_noop()?;
+            LogLevel::EncodedNoop | LogLevel::FailedEncodedNoop => {
+                let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
+
+                invoke(
+                    &Instruction {
+                        program_id: SPL_NOOP_ID,
+                        accounts: vec![],
+                        data,
+                    },
+                    &[],
+                )?;
             }
         }
 
         Ok(())
     }
 
-    pub fn log_data(&self) -> Result<()> {
-        let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
-
-        sol_log_data(&[&data]);
-
-        Ok(())
-    }
-
-    pub fn log_noop(&self) -> Result<()> {
-        let data = self.try_to_vec().map_err(LighthouseError::serialize_err)?;
-
-        invoke(
-            &Instruction {
-                program_id: SPL_NOOP_ID,
-                accounts: vec![],
-                data,
-            },
-            &[],
-        )
-    }
-
-    pub fn log_msg(&self) {
-        log_cases!(self, U8, U16, U32, U64, U128, I8, I16, I32, I64, I128, Bool, Bytes);
+    #[inline(always)]
+    pub fn passed(&self) -> bool {
+        match self {
+            AssertionResult::U8(_, _, _, passed)
+            | AssertionResult::U16(_, _, _, passed)
+            | AssertionResult::U32(_, _, _, passed)
+            | AssertionResult::U64(_, _, _, passed)
+            | AssertionResult::U128(_, _, _, passed)
+            | AssertionResult::I8(_, _, _, passed)
+            | AssertionResult::I16(_, _, _, passed)
+            | AssertionResult::I32(_, _, _, passed)
+            | AssertionResult::I64(_, _, _, passed)
+            | AssertionResult::I128(_, _, _, passed)
+            | AssertionResult::Pubkey(_, _, _, passed)
+            | AssertionResult::Bytes(_, _, _, passed)
+            | AssertionResult::Bool(_, _, _, passed) => *passed,
+        }
     }
 }

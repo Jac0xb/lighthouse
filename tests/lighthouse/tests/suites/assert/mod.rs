@@ -4,6 +4,7 @@ pub mod account_info;
 pub mod account_info_multi;
 pub mod bubblegum_tree_config;
 pub mod clock;
+pub mod logs;
 pub mod merkle_tree;
 pub mod mint_account;
 pub mod mint_account_multi;

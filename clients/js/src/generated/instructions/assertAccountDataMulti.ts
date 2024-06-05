@@ -20,9 +20,9 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
-  UpgradeableLoaderStateAssertions,
-  UpgradeableLoaderStateAssertionsArgs,
-  getUpgradeableLoaderStateAssertionsSerializer,
+  AccountDataAssertions,
+  AccountDataAssertionsArgs,
+  getAccountDataAssertionsSerializer,
 } from '../../hooked';
 import {
   ResolvedAccount,
@@ -32,60 +32,60 @@ import {
 import { LogLevel, LogLevelArgs, getLogLevelSerializer } from '../types';
 
 // Accounts.
-export type AssertUpgradeableLoaderAccountMultiInstructionAccounts = {
+export type AssertAccountDataMultiInstructionAccounts = {
   /** Target account to be asserted */
   targetAccount: PublicKey | Pda;
 };
 
 // Data.
-export type AssertUpgradeableLoaderAccountMultiInstructionData = {
+export type AssertAccountDataMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertions: UpgradeableLoaderStateAssertions;
+  assertions: AccountDataAssertions;
 };
 
-export type AssertUpgradeableLoaderAccountMultiInstructionDataArgs = {
+export type AssertAccountDataMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertions: UpgradeableLoaderStateAssertionsArgs;
+  assertions: AccountDataAssertionsArgs;
 };
 
-export function getAssertUpgradeableLoaderAccountMultiInstructionDataSerializer(): Serializer<
-  AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
-  AssertUpgradeableLoaderAccountMultiInstructionData
+export function getAssertAccountDataMultiInstructionDataSerializer(): Serializer<
+  AssertAccountDataMultiInstructionDataArgs,
+  AssertAccountDataMultiInstructionData
 > {
   return mapSerializer<
-    AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
+    AssertAccountDataMultiInstructionDataArgs,
     any,
-    AssertUpgradeableLoaderAccountMultiInstructionData
+    AssertAccountDataMultiInstructionData
   >(
-    struct<AssertUpgradeableLoaderAccountMultiInstructionData>(
+    struct<AssertAccountDataMultiInstructionData>(
       [
         ['discriminator', u8()],
         ['logLevel', getLogLevelSerializer()],
-        ['assertions', getUpgradeableLoaderStateAssertionsSerializer()],
+        ['assertions', getAccountDataAssertionsSerializer()],
       ],
-      { description: 'AssertUpgradeableLoaderAccountMultiInstructionData' }
+      { description: 'AssertAccountDataMultiInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: 14,
+      discriminator: 3,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<
-    AssertUpgradeableLoaderAccountMultiInstructionDataArgs,
-    AssertUpgradeableLoaderAccountMultiInstructionData
+    AssertAccountDataMultiInstructionDataArgs,
+    AssertAccountDataMultiInstructionData
   >;
 }
 
 // Args.
-export type AssertUpgradeableLoaderAccountMultiInstructionArgs =
-  AssertUpgradeableLoaderAccountMultiInstructionDataArgs;
+export type AssertAccountDataMultiInstructionArgs =
+  AssertAccountDataMultiInstructionDataArgs;
 
 // Instruction.
-export function assertUpgradeableLoaderAccountMulti(
+export function assertAccountDataMulti(
   context: Pick<Context, 'programs'>,
-  input: AssertUpgradeableLoaderAccountMultiInstructionAccounts &
-    AssertUpgradeableLoaderAccountMultiInstructionArgs
+  input: AssertAccountDataMultiInstructionAccounts &
+    AssertAccountDataMultiInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -103,9 +103,7 @@ export function assertUpgradeableLoaderAccountMulti(
   } satisfies ResolvedAccountsWithIndices;
 
   // Arguments.
-  const resolvedArgs: AssertUpgradeableLoaderAccountMultiInstructionArgs = {
-    ...input,
-  };
+  const resolvedArgs: AssertAccountDataMultiInstructionArgs = { ...input };
 
   // Accounts in order.
   const orderedAccounts: ResolvedAccount[] = Object.values(
@@ -120,10 +118,9 @@ export function assertUpgradeableLoaderAccountMulti(
   );
 
   // Data.
-  const data =
-    getAssertUpgradeableLoaderAccountMultiInstructionDataSerializer().serialize(
-      resolvedArgs as AssertUpgradeableLoaderAccountMultiInstructionDataArgs
-    );
+  const data = getAssertAccountDataMultiInstructionDataSerializer().serialize(
+    resolvedArgs as AssertAccountDataMultiInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

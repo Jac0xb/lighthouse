@@ -71,7 +71,7 @@ export function getAssertTokenAccountInstructionDataEncoder(): Encoder<AssertTok
     ]),
     (value) => ({
       ...value,
-      discriminator: 8,
+      discriminator: 9,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

@@ -6,6 +6,7 @@
 //!
 
 pub(crate) mod r#assert_account_data;
+pub(crate) mod r#assert_account_data_multi;
 pub(crate) mod r#assert_account_delta;
 pub(crate) mod r#assert_account_info;
 pub(crate) mod r#assert_account_info_multi;
@@ -24,6 +25,7 @@ pub(crate) mod r#memory_close;
 pub(crate) mod r#memory_write;
 
 pub use self::r#assert_account_data::*;
+pub use self::r#assert_account_data_multi::*;
 pub use self::r#assert_account_delta::*;
 pub use self::r#assert_account_info::*;
 pub use self::r#assert_account_info_multi::*;

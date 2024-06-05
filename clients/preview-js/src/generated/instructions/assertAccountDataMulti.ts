@@ -23,20 +23,22 @@ import {
   getU8Encoder,
   transformEncoder,
 } from '@solana/web3.js';
+import {
+  AccountDataAssertions,
+  AccountDataAssertionsArgs,
+  getAccountDataAssertionsDecoder,
+  getAccountDataAssertionsEncoder,
+} from '../../hooked';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import { ResolvedAccount, getAccountMetaFactory } from '../shared';
 import {
-  AccountInfoAssertion,
-  AccountInfoAssertionArgs,
   LogLevel,
   LogLevelArgs,
-  getAccountInfoAssertionDecoder,
-  getAccountInfoAssertionEncoder,
   getLogLevelDecoder,
   getLogLevelEncoder,
 } from '../types';
 
-export type AssertAccountInfoInstruction<
+export type AssertAccountDataMultiInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountTargetAccount extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
@@ -51,64 +53,64 @@ export type AssertAccountInfoInstruction<
     ]
   >;
 
-export type AssertAccountInfoInstructionData = {
+export type AssertAccountDataMultiInstructionData = {
   discriminator: number;
   logLevel: LogLevel;
-  assertion: AccountInfoAssertion;
+  assertions: AccountDataAssertions;
 };
 
-export type AssertAccountInfoInstructionDataArgs = {
+export type AssertAccountDataMultiInstructionDataArgs = {
   logLevel?: LogLevelArgs;
-  assertion: AccountInfoAssertionArgs;
+  assertions: AccountDataAssertionsArgs;
 };
 
-export function getAssertAccountInfoInstructionDataEncoder(): Encoder<AssertAccountInfoInstructionDataArgs> {
+export function getAssertAccountDataMultiInstructionDataEncoder(): Encoder<AssertAccountDataMultiInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', getU8Encoder()],
       ['logLevel', getLogLevelEncoder()],
-      ['assertion', getAccountInfoAssertionEncoder()],
+      ['assertions', getAccountDataAssertionsEncoder()],
     ]),
     (value) => ({
       ...value,
-      discriminator: 5,
+      discriminator: 3,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );
 }
 
-export function getAssertAccountInfoInstructionDataDecoder(): Decoder<AssertAccountInfoInstructionData> {
+export function getAssertAccountDataMultiInstructionDataDecoder(): Decoder<AssertAccountDataMultiInstructionData> {
   return getStructDecoder([
     ['discriminator', getU8Decoder()],
     ['logLevel', getLogLevelDecoder()],
-    ['assertion', getAccountInfoAssertionDecoder()],
+    ['assertions', getAccountDataAssertionsDecoder()],
   ]);
 }
 
-export function getAssertAccountInfoInstructionDataCodec(): Codec<
-  AssertAccountInfoInstructionDataArgs,
-  AssertAccountInfoInstructionData
+export function getAssertAccountDataMultiInstructionDataCodec(): Codec<
+  AssertAccountDataMultiInstructionDataArgs,
+  AssertAccountDataMultiInstructionData
 > {
   return combineCodec(
-    getAssertAccountInfoInstructionDataEncoder(),
-    getAssertAccountInfoInstructionDataDecoder()
+    getAssertAccountDataMultiInstructionDataEncoder(),
+    getAssertAccountDataMultiInstructionDataDecoder()
   );
 }
 
-export type AssertAccountInfoInput<
+export type AssertAccountDataMultiInput<
   TAccountTargetAccount extends string = string,
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
-  logLevel?: AssertAccountInfoInstructionDataArgs['logLevel'];
-  assertion: AssertAccountInfoInstructionDataArgs['assertion'];
+  logLevel?: AssertAccountDataMultiInstructionDataArgs['logLevel'];
+  assertions: AssertAccountDataMultiInstructionDataArgs['assertions'];
 };
 
-export function getAssertAccountInfoInstruction<
+export function getAssertAccountDataMultiInstruction<
   TAccountTargetAccount extends string,
 >(
-  input: AssertAccountInfoInput<TAccountTargetAccount>
-): AssertAccountInfoInstruction<
+  input: AssertAccountDataMultiInput<TAccountTargetAccount>
+): AssertAccountDataMultiInstruction<
   typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountTargetAccount
 > {
@@ -131,10 +133,10 @@ export function getAssertAccountInfoInstruction<
   const instruction = {
     accounts: [getAccountMeta(accounts.targetAccount)],
     programAddress,
-    data: getAssertAccountInfoInstructionDataEncoder().encode(
-      args as AssertAccountInfoInstructionDataArgs
+    data: getAssertAccountDataMultiInstructionDataEncoder().encode(
+      args as AssertAccountDataMultiInstructionDataArgs
     ),
-  } as AssertAccountInfoInstruction<
+  } as AssertAccountDataMultiInstruction<
     typeof LIGHTHOUSE_PROGRAM_ADDRESS,
     TAccountTargetAccount
   >;
@@ -142,7 +144,7 @@ export function getAssertAccountInfoInstruction<
   return instruction;
 }
 
-export type ParsedAssertAccountInfoInstruction<
+export type ParsedAssertAccountDataMultiInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
@@ -151,17 +153,17 @@ export type ParsedAssertAccountInfoInstruction<
     /** Target account to be asserted */
     targetAccount: TAccountMetas[0];
   };
-  data: AssertAccountInfoInstructionData;
+  data: AssertAccountDataMultiInstructionData;
 };
 
-export function parseAssertAccountInfoInstruction<
+export function parseAssertAccountDataMultiInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>
-): ParsedAssertAccountInfoInstruction<TProgram, TAccountMetas> {
+): ParsedAssertAccountDataMultiInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 1) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
@@ -177,6 +179,8 @@ export function parseAssertAccountInfoInstruction<
     accounts: {
       targetAccount: getNextAccount(),
     },
-    data: getAssertAccountInfoInstructionDataDecoder().decode(instruction.data),
+    data: getAssertAccountDataMultiInstructionDataDecoder().decode(
+      instruction.data
+    ),
   };
 }

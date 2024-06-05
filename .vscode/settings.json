@@ -7,5 +7,6 @@
     "./tests/test-client/Cargo.toml",
     "./clients/rust/Cargo.toml",
     "./lighthouse-common/Cargo.toml"
-  ]
+  ],
+  "lldb.launch.terminal": "integrated"
 }

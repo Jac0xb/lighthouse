@@ -26,7 +26,7 @@ export async function findMemoryPda(
   config: { programAddress?: Address | undefined } = {}
 ): Promise<ProgramDerivedAddress> {
   const {
-    programAddress = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as Address<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>,
+    programAddress = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95' as Address<'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'>,
   } = config;
   return await getProgramDerivedAddress({
     programAddress,

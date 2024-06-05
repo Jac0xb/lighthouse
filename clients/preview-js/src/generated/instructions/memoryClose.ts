@@ -34,7 +34,7 @@ export type MemoryCloseInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountProgramId extends
     | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+    | IAccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountMemory extends string | IAccountMeta<string> = string,
   TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
