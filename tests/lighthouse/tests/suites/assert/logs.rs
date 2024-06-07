@@ -39,7 +39,7 @@ async fn encoded_message() {
         .await
         .unwrap();
 
-    let randomUser = Keypair::new().pubkey();
+    let random_user = Keypair::new().pubkey();
     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
@@ -60,7 +60,7 @@ async fn encoded_message() {
                 operator: EquatableOperator::Equal,
             }),
             builder_fn(TokenAccountAssertion::Owner {
-                value: randomUser,
+                value: random_user,
                 operator: EquatableOperator::NotEqual,
             }),
             builder_fn(TokenAccountAssertion::Amount {
@@ -103,7 +103,7 @@ async fn encoded_message() {
         ),
         AssertionResult::Pubkey(
             Some(user.pubkey()),
-            Some(randomUser),
+            Some(random_user),
             EquatableOperator::NotEqual as u8,
             true,
         ),
@@ -388,7 +388,7 @@ async fn plaintext_message() {
         .await
         .unwrap();
 
-    let randomUser = Keypair::new().pubkey();
+    let random_user = Keypair::new().pubkey();
     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
@@ -405,7 +405,7 @@ async fn plaintext_message() {
                 operator: EquatableOperator::Equal,
             }),
             builder_fn(TokenAccountAssertion::Owner {
-                value: randomUser,
+                value: random_user,
                 operator: EquatableOperator::NotEqual,
             }),
             builder_fn(TokenAccountAssertion::Amount {
@@ -441,7 +441,7 @@ async fn plaintext_message() {
         "Program log: Result: ".to_string(),
         format!("Program log: {:?}", user.pubkey()).to_string(),
         "Program log: !=".to_string(),
-        format!("Program log: {:?}", randomUser).to_string(),
+        format!("Program log: {:?}", random_user).to_string(),
         "Program log: Result (Passed): Some(69000) == Some(69000)".to_string(),
         "Program log: Result (Passed): Some(0) < Some(10)".to_string(),
     ];
@@ -495,7 +495,7 @@ async fn plaintext_message_fail_only() {
         .await
         .unwrap();
 
-    let randomUser = Keypair::new().pubkey();
+    let random_user = Keypair::new().pubkey();
     let user_ata = get_associated_token_address(&user.pubkey(), &mint.pubkey());
     let builder_fn = |assertion: TokenAccountAssertion| {
         AssertTokenAccountBuilder::new()
@@ -512,7 +512,7 @@ async fn plaintext_message_fail_only() {
                 operator: EquatableOperator::Equal,
             }),
             builder_fn(TokenAccountAssertion::Owner {
-                value: randomUser,
+                value: random_user,
                 operator: EquatableOperator::NotEqual,
             }),
             builder_fn(TokenAccountAssertion::Amount {

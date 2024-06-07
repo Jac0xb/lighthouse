@@ -8,9 +8,9 @@ use crate::utils::{
 };
 use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token_2022;
-use lighthouse_sdk::cpi::AssertTokenAccountMultiBuilder;
 use lighthouse_sdk::errors::LighthouseError;
 use lighthouse_sdk::instructions::AssertTokenAccountBuilder;
+use lighthouse_sdk::instructions::AssertTokenAccountMultiBuilder;
 use lighthouse_sdk::types::{
     AssertionResult, EquatableOperator, IntegerOperator, TokenAccountAssertion,
 };

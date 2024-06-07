@@ -2,13 +2,11 @@ pub mod error;
 pub mod instruction;
 pub mod macros;
 pub mod processor;
+#[cfg(test)]
+pub mod test_utils;
 pub mod types;
 pub mod utils;
 pub mod validation;
-
-#[cfg(test)]
-pub mod test_utils;
-
 use solana_program::declare_id;
 pub use utils::Result;
 

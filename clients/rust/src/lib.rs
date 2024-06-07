@@ -2,6 +2,7 @@
 #[allow(clippy::identity_op)]
 mod generated;
 mod hooked;
+pub mod registry;
 
 pub use generated::programs::LIGHTHOUSE_ID;
 pub use generated::programs::LIGHTHOUSE_ID as ID;
@@ -13,23 +14,26 @@ pub use lighthouse_common::{CompactU64, LEB128Vec};
 pub mod instructions {
     pub use crate::generated::instructions::{
         AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertBubblegumTreeConfigAccountBuilder, AssertMerkleTreeAccountBuilder,
-        AssertMintAccountBuilder, AssertMintAccountMultiBuilder, AssertStakeAccountBuilder,
-        AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder, AssertTokenAccountBuilder,
-        AssertTokenAccountMultiBuilder, AssertUpgradeableLoaderAccountBuilder,
-        AssertUpgradeableLoaderAccountMultiBuilder, MemoryCloseBuilder, MemoryWriteBuilder,
+        AssertAccountInfoMultiBuilder, AssertBubblegumTreeConfigAccountBuilder,
+        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
+        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
+        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
+        AssertUpgradeableLoaderAccountBuilder, AssertUpgradeableLoaderAccountMultiBuilder,
+        MemoryCloseBuilder, MemoryWriteBuilder,
     };
 }
 
 #[cfg(feature = "cpi")]
 pub mod cpi {
     pub use crate::generated::instructions::{
-        AssertAccountDataBuilder, AssertAccountDeltaBuilder, AssertAccountInfoBuilder,
-        AssertAccountInfoMultiBuilder, AssertBubblegumTreeConfigAccountCpiBuilder,
-        AssertMerkleTreeAccountBuilder, AssertMintAccountBuilder, AssertMintAccountMultiBuilder,
-        AssertStakeAccountBuilder, AssertStakeAccountMultiBuilder, AssertSysvarClockBuilder,
-        AssertTokenAccountBuilder, AssertTokenAccountMultiBuilder,
-        AssertUpgradeableLoaderAccountBuilder, MemoryCloseCpiBuilder, MemoryWriteCpiBuilder,
+        AssertAccountDataCpiBuilder, AssertAccountDeltaCpiBuilder, AssertAccountInfoCpiBuilder,
+        AssertAccountInfoMultiCpiBuilder, AssertBubblegumTreeConfigAccountCpiBuilder,
+        AssertMerkleTreeAccountCpiBuilder, AssertMintAccountCpiBuilder,
+        AssertMintAccountMultiCpiBuilder, AssertStakeAccountCpiBuilder,
+        AssertStakeAccountMultiCpiBuilder, AssertSysvarClockCpiBuilder,
+        AssertTokenAccountCpiBuilder, AssertTokenAccountMultiCpiBuilder,
+        AssertUpgradeableLoaderAccountCpiBuilder, AssertUpgradeableLoaderAccountMultiCpiBuilder,
+        MemoryCloseCpiBuilder, MemoryWriteCpiBuilder,
     };
 }
 
