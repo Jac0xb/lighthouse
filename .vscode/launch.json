@@ -15,6 +15,13 @@
       },
       "preLaunchTask": "find-test-binary",
       "sourceLanguages": ["rust"]
+    },
+    {
+      "type": "node-terminal",
+      "name": "Debug Current TS File (ts-node)",
+      "request": "launch",
+      "command": "ts-node -- ${fileBasenameNoExtension}",
+      "cwd": "${fileDirname}"
     }
   ],
   "inputs": [

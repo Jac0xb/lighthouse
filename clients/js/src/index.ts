@@ -1,7 +1,8 @@
 export * from './generated';
+export * from './registry';
 
 import { PublicKey } from '@solana/web3.js';
-import { LIGHTHOUSE_PROGRAM_ID } from './generated';
+import { LIGHTHOUSE_PROGRAM_ID, assertAccountDataMulti } from './generated';
 
 export type MemorySeeds = {
   payer: PublicKey;
