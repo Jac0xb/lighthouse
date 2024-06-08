@@ -8,4 +8,4 @@
 use solana_program::{pubkey, pubkey::Pubkey};
 
 /// `lighthouse` program ID.
-pub const LIGHTHOUSE_ID: Pubkey = pubkey!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
+pub const LIGHTHOUSE_ID: Pubkey = pubkey!("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");

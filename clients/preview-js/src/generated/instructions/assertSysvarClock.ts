@@ -61,7 +61,7 @@ export function getAssertSysvarClockInstructionDataEncoder(): Encoder<AssertSysv
     ]),
     (value) => ({
       ...value,
-      discriminator: 14,
+      discriminator: 15,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

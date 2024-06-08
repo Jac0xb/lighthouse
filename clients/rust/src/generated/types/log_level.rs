@@ -18,4 +18,7 @@ pub enum LogLevel {
     PlaintextMessage,
     EncodedMessage,
     EncodedNoop,
+    FailedPlaintextMessage,
+    FailedEncodedMessage,
+    FailedEncodedNoop,
 }

@@ -26,11 +26,11 @@ mpl-bubblegum-sdk = { git = "https://github.com/Jac0xb/mpl-bubblegum.git", rev =
 mpl-token-metadata = "3.2.3"
 rand = "0.8.4"
 regex = "1.5.4"
-solana-banks-interface = "1.14.10"
+solana-banks-interface = "1.18.8"
 solana-client = "1.18.8"
 solana-loader-v4-program = "1.18.8"
 solana-program = "1.18.8"
-solana-program-test = "1.18.8"
+solana-program-test =  "1.18.8"
 solana-sdk = "1.18.8"
 solana-vote-program = "1.18.8"
 spl-account-compression = { version = "0.3.0", features = ["cpi"] }

@@ -18,7 +18,7 @@ import {
 } from '../errors';
 
 export const LIGHTHOUSE_PROGRAM_ID =
-  'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK' as PublicKey<'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'>;
+  'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95' as PublicKey<'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'>;
 
 export function createLighthouseProgram(): Program {
   return {

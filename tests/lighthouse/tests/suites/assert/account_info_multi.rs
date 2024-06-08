@@ -3,8 +3,8 @@ use crate::utils::{create_test_account, create_user};
 use crate::utils::{
     process_transaction_assert_failure, process_transaction_assert_success, to_transaction_error_u8,
 };
-use lighthouse_sdk::cpi::AssertAccountInfoMultiBuilder;
 use lighthouse_sdk::instructions::AssertAccountInfoBuilder;
+use lighthouse_sdk::instructions::AssertAccountInfoMultiBuilder;
 use lighthouse_sdk::types::{
     AccountInfoAssertion, EquatableOperator, IntegerOperator, KnownProgram,
 };

@@ -49,7 +49,7 @@ pub struct AssertSysvarClockInstructionData {
 
 impl AssertSysvarClockInstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 14 }
+        Self { discriminator: 15 }
     }
 }
 

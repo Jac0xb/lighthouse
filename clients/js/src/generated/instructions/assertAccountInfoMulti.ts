@@ -68,7 +68,7 @@ export function getAssertAccountInfoMultiInstructionDataSerializer(): Serializer
     ),
     (value) => ({
       ...value,
-      discriminator: 5,
+      discriminator: 6,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   ) as Serializer<
@@ -90,7 +90,7 @@ export function assertAccountInfoMulti(
   // Program ID.
   const programId = context.programs.getPublicKey(
     'lighthouse',
-    'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK'
+    'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'
   );
 
   // Accounts.

@@ -1,0 +1,20 @@
+{
+  "name": "post-kinobi-gen",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "generate": "ts-node src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node": "^20.14.2",
+    "app-root-path": "^3.1.0",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.1",
+    "prettier-plugin-rust": "^0.1.9"
+  }
+}

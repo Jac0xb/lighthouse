@@ -1,13 +1,23 @@
-import { Serializer } from '@metaplex-foundation/umi-serializers-core';
+import {
+  Serializer,
+  mapSerializer,
+} from '@metaplex-foundation/umi-serializers-core';
 import { LEB128 } from '@minhducsun2002/leb128';
-import { array, u8 } from '@metaplex-foundation/umi/serializers';
+import { array, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoAssertion,
+  AccountInfoAssertionArgs,
+  DataValueAssertion,
   MintAccountAssertion,
+  MintAccountAssertionArgs,
   StakeAccountAssertion,
+  StakeAccountAssertionArgs,
   TokenAccountAssertion,
+  TokenAccountAssertionArgs,
   UpgradeableLoaderStateAssertion,
+  UpgradeableLoaderStateAssertionArgs,
   getAccountInfoAssertionSerializer,
+  getDataValueAssertionSerializer,
   getMintAccountAssertionSerializer,
   getStakeAccountAssertionSerializer,
   getTokenAccountAssertionSerializer,
@@ -30,7 +40,7 @@ export const getCompactU64Serializer = (): Serializer<number> => ({
 });
 
 export type AccountInfoAssertions = Array<AccountInfoAssertion>;
-export type AccountInfoAssertionsArgs = Array<AccountInfoAssertion>;
+export type AccountInfoAssertionsArgs = Array<AccountInfoAssertionArgs>;
 
 export function getAccountInfoAssertionsSerializer() {
   return array(getAccountInfoAssertionSerializer(), {
@@ -39,7 +49,7 @@ export function getAccountInfoAssertionsSerializer() {
 }
 
 export type MintAccountAssertions = Array<MintAccountAssertion>;
-export type MintAccountAssertionsArgs = Array<MintAccountAssertion>;
+export type MintAccountAssertionsArgs = Array<MintAccountAssertionArgs>;
 
 export function getMintAccountAssertionsSerializer() {
   return array(getMintAccountAssertionSerializer(), {
@@ -48,7 +58,7 @@ export function getMintAccountAssertionsSerializer() {
 }
 
 export type StakeAccountAssertions = Array<StakeAccountAssertion>;
-export type StakeAccountAssertionsArgs = Array<StakeAccountAssertion>;
+export type StakeAccountAssertionsArgs = Array<StakeAccountAssertionArgs>;
 
 export function getStakeAccountAssertionsSerializer() {
   return array(getStakeAccountAssertionSerializer(), {
@@ -57,7 +67,7 @@ export function getStakeAccountAssertionsSerializer() {
 }
 
 export type TokenAccountAssertions = Array<TokenAccountAssertion>;
-export type TokenAccountAssertionsArgs = Array<TokenAccountAssertion>;
+export type TokenAccountAssertionsArgs = Array<TokenAccountAssertionArgs>;
 
 export function getTokenAccountAssertionsSerializer() {
   return array(getTokenAccountAssertionSerializer(), {
@@ -68,10 +78,45 @@ export function getTokenAccountAssertionsSerializer() {
 export type UpgradeableLoaderStateAssertions =
   Array<UpgradeableLoaderStateAssertion>;
 export type UpgradeableLoaderStateAssertionsArgs =
-  Array<UpgradeableLoaderStateAssertion>;
+  Array<UpgradeableLoaderStateAssertionArgs>;
 
 export function getUpgradeableLoaderStateAssertionsSerializer() {
   return array(getUpgradeableLoaderStateAssertionSerializer(), {
+    size: getCompactU64Serializer(),
+  });
+}
+
+export type AccountDataAssertion = {
+  offset: number;
+  assertion: DataValueAssertion;
+};
+
+export type AccountDataAssertionArgs = {
+  offset: number;
+  assertion: DataValueAssertion;
+};
+
+export function getAccountDataAssertionSerializer(): Serializer<
+  AccountDataAssertionArgs,
+  AccountDataAssertion
+> {
+  return mapSerializer<AccountDataAssertionArgs, any, AccountDataAssertion>(
+    struct<AccountDataAssertion>(
+      [
+        ['offset', getCompactU64Serializer()],
+        ['assertion', getDataValueAssertionSerializer()],
+      ],
+      { description: 'AccountDataAssertion' }
+    ),
+    (value) => value
+  ) as Serializer<AccountDataAssertionArgs, AccountDataAssertion>;
+}
+
+export type AccountDataAssertions = Array<AccountDataAssertion>;
+export type AccountDataAssertionsArgs = Array<AccountDataAssertionArgs>;
+
+export function getAccountDataAssertionsSerializer() {
+  return array(getAccountDataAssertionSerializer(), {
     size: getCompactU64Serializer(),
   });
 }

@@ -20,6 +20,9 @@ export enum LogLevel {
   PlaintextMessage,
   EncodedMessage,
   EncodedNoop,
+  FailedPlaintextMessage,
+  FailedEncodedMessage,
+  FailedEncodedNoop,
 }
 
 export type LogLevelArgs = LogLevel;

@@ -46,7 +46,7 @@ export type MemoryWriteInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountProgramId extends
     | string
-    | IAccountMeta<string> = 'L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK',
+    | IAccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
   TAccountSystemProgram extends
     | string
     | IAccountMeta<string> = '11111111111111111111111111111111',

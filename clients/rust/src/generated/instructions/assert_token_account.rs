@@ -56,7 +56,7 @@ pub struct AssertTokenAccountInstructionData {
 
 impl AssertTokenAccountInstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 8 }
+        Self { discriminator: 9 }
     }
 }
 

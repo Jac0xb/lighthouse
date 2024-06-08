@@ -56,7 +56,7 @@ pub struct AssertBubblegumTreeConfigAccountInstructionData {
 
 impl AssertBubblegumTreeConfigAccountInstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 16 }
+        Self { discriminator: 17 }
     }
 }
 

@@ -71,7 +71,7 @@ export function getAssertStakeAccountInstructionDataEncoder(): Encoder<AssertSta
     ]),
     (value) => ({
       ...value,
-      discriminator: 10,
+      discriminator: 11,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

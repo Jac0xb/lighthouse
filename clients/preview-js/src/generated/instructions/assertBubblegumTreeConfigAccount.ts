@@ -71,7 +71,7 @@ export function getAssertBubblegumTreeConfigAccountInstructionDataEncoder(): Enc
     ]),
     (value) => ({
       ...value,
-      discriminator: 16,
+      discriminator: 17,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

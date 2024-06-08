@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "echo FileContent",
+      "type": "shell",
+      "command": "echo",
+      "args": ["${input:fileContent}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Compile Cargo Tests",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "test",
+        "--manifest-path",
+        "${workspaceFolder}/tests/lighthouse/Cargo.toml",
+        "--no-run"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": ["$rustc"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "find-test-binary",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/find_test_binary.sh",
+      "args": [
+        "${workspaceFolder}/tests/lighthouse",
+        "${workspaceFolder}/.tmp"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "dependsOn": "Compile Cargo Tests"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fileContent",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.tmp/lighthouse_test_binary.txt"
+      }
+    }
+  ]
+}

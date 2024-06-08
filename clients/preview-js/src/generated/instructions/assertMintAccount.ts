@@ -71,7 +71,7 @@ export function getAssertMintAccountInstructionDataEncoder(): Encoder<AssertMint
     ]),
     (value) => ({
       ...value,
-      discriminator: 6,
+      discriminator: 7,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

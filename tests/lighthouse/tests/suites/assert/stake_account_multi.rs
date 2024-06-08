@@ -2,7 +2,7 @@ use crate::utils::context::TestContext;
 use crate::utils::{create_user_with_balance, set_account_from_refs, to_transaction_error_u8};
 use crate::utils::{process_transaction_assert_failure, process_transaction_assert_success};
 use borsh::BorshDeserialize;
-use lighthouse_sdk::cpi::AssertStakeAccountMultiBuilder;
+use lighthouse_sdk::instructions::AssertStakeAccountMultiBuilder;
 use lighthouse_sdk::types::{
     EquatableOperator, IntegerOperator, MetaAssertion, StakeAccountAssertion, StakeAssertion,
     StakeStateType,

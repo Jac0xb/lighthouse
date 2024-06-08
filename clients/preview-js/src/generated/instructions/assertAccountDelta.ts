@@ -75,7 +75,7 @@ export function getAssertAccountDeltaInstructionDataEncoder(): Encoder<AssertAcc
     ]),
     (value) => ({
       ...value,
-      discriminator: 3,
+      discriminator: 4,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

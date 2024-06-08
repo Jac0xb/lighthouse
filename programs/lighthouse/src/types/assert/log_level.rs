@@ -7,14 +7,14 @@ pub enum LogLevel {
     PlaintextMessage = 1,
     EncodedMessage = 2,
     EncodedNoop = 3,
+    FailedPlaintextMessage = 0x10,
+    FailedEncodedMessage = 0x11,
+    FailedEncodedNoop = 0x12,
 }
 
 impl LogLevel {
-    pub fn is_silent(&self) -> bool {
-        self == &LogLevel::Silent
-    }
-
-    pub fn is_plaintext_message(&self) -> bool {
-        self == &LogLevel::PlaintextMessage
+    #[inline(always)]
+    pub fn ignore_success(&self) -> bool {
+        *self as u8 & 0x10 != 0
     }
 }

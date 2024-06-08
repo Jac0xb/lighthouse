@@ -1,7 +1,39 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations": []
+  "configurations": [
+    {
+      "name": "Run - Lighthouse Tests",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/lighthouse/target/debug/deps/${input:latestTestBinary}",
+      "args": [],
+      "cwd": "${workspaceFolder}/tests/lighthouse",
+      "env": {
+        "RUST_LOG": "error",
+        "RUST_BACKTRACE": "1",
+        "SBF_OUT_DIR": "${workspaceFolder}/configs/.programs"
+      },
+      "preLaunchTask": "find-test-binary",
+      "sourceLanguages": ["rust"]
+    },
+    {
+      "type": "node-terminal",
+      "name": "Run - Current Typescript File",
+      "request": "launch",
+      "command": "ts-node -- ${fileBasenameNoExtension}",
+      "cwd": "${fileDirname}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "latestTestBinary",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.tmp/lighthouse_test_binary.txt",
+        "key": "KEY",
+        "debug": true
+      }
+    }
+  ]
 }

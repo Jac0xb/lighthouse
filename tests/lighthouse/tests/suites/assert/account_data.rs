@@ -16,6 +16,11 @@ use solana_sdk::signer::EncodableKeypair;
 ///
 #[tokio::test]
 async fn simple() {
+    // print all env vars
+    for (key, value) in std::env::vars() {
+        println!("{}:  {}", key, value);
+    }
+
     let context = &mut TestContext::new().await.unwrap();
     let user = create_user_with_balance(context, 10e9 as u64)
         .await
