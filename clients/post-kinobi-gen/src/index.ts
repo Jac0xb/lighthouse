@@ -63,7 +63,7 @@ const assertions: AssertionTemplateArgs = {
     switch (language) {
       case 'typescript':
         code = CompiledTypescriptAssertionTemplate(assertions);
-        // code = await tsPrettier(code);
+        code = await tsPrettier(code);
 
         fs.writeFileSync(
           appRoot.resolve(
@@ -79,7 +79,7 @@ const assertions: AssertionTemplateArgs = {
         break;
       case 'typescript-preview':
         code = CompiledTypescriptPreviewAssertionTemplate(assertions);
-        // code = await tsPrettier(code);
+        code = await tsPrettier(code);
 
         fs.writeFileSync(
           appRoot.resolve(

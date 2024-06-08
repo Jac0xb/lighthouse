@@ -10,7 +10,6 @@ dist
 test-programs
 programs/.bin
 configs/.programs
-
 /.env-local
 /.local
 pkg

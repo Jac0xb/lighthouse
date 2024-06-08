@@ -108,10 +108,7 @@ export function getAccountDataAssertionSerializer(): Serializer<
       ],
       { description: 'AccountDataAssertion' }
     ),
-    (value) => ({
-      ...value,
-      discriminator: 2,
-    })
+    (value) => value
   ) as Serializer<AccountDataAssertionArgs, AccountDataAssertion>;
 }
 

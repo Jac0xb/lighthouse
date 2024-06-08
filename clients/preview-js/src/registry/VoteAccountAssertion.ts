@@ -1,4 +1,3 @@
-
 import { Address } from '@solana/web3.js';
 import {
   EquatableOperator,
@@ -9,11 +8,10 @@ import {
 } from '../generated';
 import { AccountDataAssertion } from '../hooked';
 
-export type VoteAccountAssertionArgs = 
-  | {
-    __kind: 'AuthorizedWithdrawer';
-    value: Address<string>;
-    operator: EquatableOperator;
+export type VoteAccountAssertionArgs = {
+  __kind: 'AuthorizedWithdrawer';
+  value: Address<string>;
+  operator: EquatableOperator;
 };
 
 export type AssertAccountDataMultiInstructionDataArgs = {
@@ -35,7 +33,7 @@ export function getAssertVoteAccountInstruction(
 ) {
   let assertions: AccountDataAssertion[] = [];
 
-   {
+  {
     assertions = [
       {
         offset: 0,
@@ -52,7 +50,7 @@ export function getAssertVoteAccountInstruction(
         }),
       },
     ];
-  } 
+  }
 
   return getAssertAccountDataMultiInstruction({
     targetAccount: input.targetAccount,

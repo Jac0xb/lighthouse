@@ -161,10 +161,7 @@ export function getAccountDataAssertionEncoder(): Encoder<AccountDataAssertionAr
       ['offset', getCompactU64Encoder()],
       ['assertion', getDataValueAssertionEncoder()],
     ]),
-    (value) => ({
-      ...value,
-      discriminator: 2,
-    })
+    (value) => value
   );
 }
 
