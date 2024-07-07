@@ -1,44 +1,15 @@
 import fs from 'fs';
 import prettier from 'prettier';
-import {
-  AssertionTemplateArgs,
-  IntegerOperator,
-} from './renderer/assertionTemplate/args';
+import { AssertionTemplateArgs } from './renderer/assertionTemplate/args';
 import { CompiledTypescriptAssertionTemplate } from './renderer/assertionTemplate/typescriptTemplate';
 import { CompiledRustAssertionTemplate } from './renderer/assertionTemplate/rustTemplate';
 import appRoot from 'app-root-path';
-import {
-  DefaultValueFn,
-  DefaultValueOperatorFn,
-} from './renderer/assertionTemplate/valueRenderer';
 import { LanguageOutput } from './renderer';
 import { CompiledTypescriptPreviewAssertionTemplate } from './renderer/assertionTemplate/typescriptPreviewTemplate';
+import { to_snake_case } from './utils';
+import { voteAccountTemplateArgs } from './registry/spl';
 
-const assertions: AssertionTemplateArgs = {
-  assertionName: 'VoteAccount',
-  variants: [
-    {
-      name: 'AuthorizedWithdrawer',
-      kind: 'Pubkey',
-      assertions: [
-        {
-          kind: 'U8',
-          value: 2,
-          valueOperator: { type: 'Integer', enum: IntegerOperator.Equal },
-          offset: 0,
-        },
-        {
-          kind: 'Pubkey',
-          value: DefaultValueFn,
-          valueOperator: DefaultValueOperatorFn,
-          offset: 36,
-        },
-      ],
-    },
-  ],
-};
-
-(async () => {
+async function generateAssertionFilesFromTemplate(args: AssertionTemplateArgs) {
   const langauges: LanguageOutput[] = [
     'typescript',
     'typescript-preview',
@@ -62,34 +33,34 @@ const assertions: AssertionTemplateArgs = {
 
     switch (language) {
       case 'typescript':
-        code = CompiledTypescriptAssertionTemplate(assertions);
+        code = CompiledTypescriptAssertionTemplate(args);
         code = await tsPrettier(code);
 
         fs.writeFileSync(
           appRoot.resolve(
-            `../js/src/registry/${assertions.assertionName}Assertion.ts`
+            `../js/src/registry/${args.assertionName}Assertion.ts`
           ),
           code
         );
 
         console.log(
-          `Generated ${assertions.assertionName}Assertion.ts for ${language}`
+          `Generated ${args.assertionName}Assertion.ts for ${language}`
         );
 
         break;
       case 'typescript-preview':
-        code = CompiledTypescriptPreviewAssertionTemplate(assertions);
+        code = CompiledTypescriptPreviewAssertionTemplate(args);
         code = await tsPrettier(code);
 
         fs.writeFileSync(
           appRoot.resolve(
-            `../preview-js/src/registry/${assertions.assertionName}Assertion.ts`
+            `../preview-js/src/registry/${args.assertionName}Assertion.ts`
           ),
           code
         );
 
         console.log(
-          `Generated ${assertions.assertionName}Assertion.ts for ${language}`
+          `Generated ${args.assertionName}Assertion.ts for ${language}`
         );
 
         break;
@@ -97,21 +68,17 @@ const assertions: AssertionTemplateArgs = {
         fs.writeFileSync(
           appRoot.resolve(
             `../rust/src/registry/${to_snake_case(
-              assertions.assertionName
+              args.assertionName
             )}_assertion.rs`
           ),
-          CompiledRustAssertionTemplate(assertions)
+          CompiledRustAssertionTemplate(args)
         );
         console.log(
-          `Generated ${to_snake_case(assertions.assertionName)}_assertion.rs for ${language}`
+          `Generated ${to_snake_case(args.assertionName)}_assertion.rs for ${language}`
         );
         break;
     }
   }
-})();
-
-function to_snake_case(str: string) {
-  return str
-    .replace(/([A-Z])/g, (match) => `_${match.toLowerCase()}`)
-    .replace(/^_/, '');
 }
+
+generateAssertionFilesFromTemplate(voteAccountTemplateArgs);
