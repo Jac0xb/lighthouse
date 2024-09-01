@@ -79,7 +79,7 @@ export function getAssertMerkleTreeAccountInstructionDataEncoder(): Encoder<Asse
     ]),
     (value) => ({
       ...value,
-      discriminator: 15,
+      discriminator: 16,
       logLevel: value.logLevel ?? LogLevel.Silent,
     })
   );

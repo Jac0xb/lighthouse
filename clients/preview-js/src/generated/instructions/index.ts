@@ -7,6 +7,7 @@
  */
 
 export * from './assertAccountData';
+export * from './assertAccountDataMulti';
 export * from './assertAccountDelta';
 export * from './assertAccountInfo';
 export * from './assertAccountInfoMulti';

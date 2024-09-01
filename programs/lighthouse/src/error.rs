@@ -1,6 +1,6 @@
 use std::{io, ops::Range};
 
-use solana_program::{msg, program_error::ProgramError};
+use solana_program::{instruction::InstructionError, msg, program_error::ProgramError};
 use thiserror::Error;
 
 #[macro_export]
@@ -83,6 +83,11 @@ impl LighthouseError {
     }
 
     pub fn stake_deser_err(e: io::Error) -> ProgramError {
+        err_msg!("Failed to deserialize stake account state", e);
+        err!(LighthouseError::FailedToDeserialize)
+    }
+
+    pub fn vote_deser_err(e: InstructionError) -> ProgramError {
         err_msg!("Failed to deserialize stake account state", e);
         err!(LighthouseError::FailedToDeserialize)
     }

@@ -1,11 +1,12 @@
 {
   "rust-analyzer.linkedProjects": [
-    "./programs/blackhat/Cargo.toml",
-    "./programs/lighthouse/Cargo.toml",
-    "./programs/test-program/Cargo.toml",
-    "./tests/lighthouse/Cargo.toml",
-    "./tests/test-client/Cargo.toml",
-    "./clients/rust/Cargo.toml",
-    "./lighthouse-common/Cargo.toml"
-  ]
+    "${workspaceFolder}/programs/blackhat/Cargo.toml",
+    "${workspaceFolder}/programs/lighthouse/Cargo.toml",
+    "${workspaceFolder}/programs/test-program/Cargo.toml",
+    "${workspaceFolder}/tests/lighthouse/Cargo.toml",
+    "${workspaceFolder}/tests/test-client/Cargo.toml",
+    "${workspaceFolder}/clients/rust/Cargo.toml",
+    "${workspaceFolder}/lighthouse-common/Cargo.toml"
+  ],
+  "lldb.launch.terminal": "integrated"
 }

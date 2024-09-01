@@ -2,13 +2,11 @@ pub mod error;
 pub mod instruction;
 pub mod macros;
 pub mod processor;
+#[cfg(test)]
+pub mod test_utils;
 pub mod types;
 pub mod utils;
 pub mod validation;
-
-#[cfg(test)]
-pub mod test_utils;
-
 use solana_program::declare_id;
 pub use utils::Result;
 
@@ -24,7 +22,7 @@ pub mod security {
     }
 }
 
-declare_id!("L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK");
+declare_id!("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");
 pub mod lighthouse {
     use crate::processor;
     use crate::processor::*;
@@ -82,6 +80,13 @@ pub mod lighthouse {
             } => {
                 let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
                 processor::assert_target_account(ctx, &assertion, log_level)?;
+            }
+            LighthouseInstruction::AssertAccountDataMulti {
+                log_level,
+                assertions,
+            } => {
+                let ctx = AssertTargetAccountContext::load(&mut accounts.iter())?;
+                processor::assert_target_account_multi(ctx, &assertions, log_level)?;
             }
             LighthouseInstruction::AssertAccountDelta {
                 log_level,

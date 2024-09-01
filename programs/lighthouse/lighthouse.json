@@ -148,6 +148,37 @@
       }
     },
     {
+      "name": "AssertAccountDataMulti",
+      "accounts": [
+        {
+          "name": "targetAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Target account to be asserted"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "logLevel",
+          "type": {
+            "defined": "LogLevel"
+          }
+        },
+        {
+          "name": "assertions",
+          "type": {
+            "defined": "AccountDataAssertions"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
       "name": "AssertAccountDelta",
       "accounts": [
         {
@@ -183,7 +214,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 3
+        "value": 4
       }
     },
     {
@@ -214,7 +245,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 4
+        "value": 5
       }
     },
     {
@@ -245,7 +276,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 6
       }
     },
     {
@@ -276,7 +307,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 7
       }
     },
     {
@@ -307,7 +338,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 8
       }
     },
     {
@@ -338,7 +369,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 8
+        "value": 9
       }
     },
     {
@@ -369,7 +400,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 9
+        "value": 10
       }
     },
     {
@@ -400,7 +431,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 10
+        "value": 11
       }
     },
     {
@@ -431,7 +462,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 11
+        "value": 12
       }
     },
     {
@@ -462,7 +493,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 12
+        "value": 13
       }
     },
     {
@@ -493,7 +524,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 13
+        "value": 14
       }
     },
     {
@@ -515,7 +546,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 14
+        "value": 15
       }
     },
     {
@@ -562,7 +593,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 15
+        "value": 16
       }
     },
     {
@@ -593,7 +624,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 16
+        "value": 17
       }
     }
   ],
@@ -1736,6 +1767,15 @@
           },
           {
             "name": "EncodedNoop"
+          },
+          {
+            "name": "FailedPlaintextMessage"
+          },
+          {
+            "name": "FailedEncodedMessage"
+          },
+          {
+            "name": "FailedEncodedNoop"
           }
         ]
       }
@@ -2722,7 +2762,7 @@
   ],
   "metadata": {
     "origin": "shank",
-    "address": "L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK",
+    "address": "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95",
     "binaryVersion": "0.3.0",
     "libVersion": "=0.3.0"
   }
