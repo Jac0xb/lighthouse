@@ -16,7 +16,7 @@ pub mod security {
     security_txt! {
         name: "Lighthouse Protocol",
         project_url: "https://github.com/Jac0xb/lighthouse",
-        contacts: "email:jacob@rektdefi.net",
+        contacts: "email:security@rektdefi.net",
         policy: "https://github.com/Jac0xb/lighthouse/blob/main/SECURITY.md",
         preferred_languages: "en",
         source_code: "https://github.com/Jac0xb/lighthouse"
