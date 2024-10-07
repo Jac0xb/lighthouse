@@ -287,7 +287,7 @@ checksum = "ae743338b92ff9146ce83992f766a31066a91a8c84a45e0e9f21e7cf6de6d346"
 
 [[package]]
 name = "lighthouse-common"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "borsh",
  "leb128",

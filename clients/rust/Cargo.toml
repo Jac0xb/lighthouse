@@ -1,6 +1,6 @@
 [package]
 name = "lighthouse-sdk"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2021"
 readme = "README.md"
 license-file = "../../LICENSE"
@@ -28,7 +28,7 @@ solana-program = "1.17.23"
 solana-sdk = { version = "1.17.23", optional = true }
 thiserror = "^1.0"
 base64 = "0.22.0"
-lighthouse-common = { path = "../../lighthouse-common", features = ["serde"]}
+lighthouse-common = { path = "../../lighthouse-common", version = "2.0.0", features = ["serde"]}
 
 [dev-dependencies]
 assert_matches = "1.5.0"
