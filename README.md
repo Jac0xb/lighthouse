@@ -99,6 +99,13 @@ TODO
 
 4. Building/deploying a verify program:
 
+   Requirements:
+
+   - solana-verify (https://github.com/Ellipsis-Labs/solana-verifiable-build)
+   - solana cli 1.18.8
+   - docker
+     - Make sure docker has permissions to access the lighthouse repo (enable in docker settings + system settings)
+
    ```bash
    $ cd programs/lighthouse
    $ solana-verify build
