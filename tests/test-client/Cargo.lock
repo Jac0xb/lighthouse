@@ -2161,6 +2161,7 @@ dependencies = [
  "serde_json",
  "solana-client",
  "solana-program",
+ "solana-rpc-client-api",
  "solana-sdk",
  "spl-associated-token-account",
  "spl-token",

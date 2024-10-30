@@ -1,4 +1,7 @@
 
 Run CLI
 
-cargo run -- --keypair <keypair_path> safe-send
+
+cargo run -- --keypair <JSON_KEYPAIR_PATH> safe-send-sol <address> <amount>
+cargo run -- --keypair <JSON_KEYPAIR_PATH> mint-token <DECIMALS> <MINT_TO> <MINT_TO_AMOUNT> [MINT_AUTHORITY] [FREEZE_AUTHORITY]
+lighthouse-test-client --keypair <FILE> safe-send-token <MINT> <TO_PUBKEY> <AMOUNT>

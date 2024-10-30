@@ -1,6 +1,6 @@
 {
   "name": "lighthouse-sdk-legacy",
-  "version": "0.1.3",
+  "version": "2.0.0",
   "description": "Legacy web3.js client for Lighthouse",
   "sideEffects": false,
   "module": "dist/src/index.mjs",
