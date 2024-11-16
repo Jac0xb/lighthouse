@@ -12,6 +12,8 @@ pub struct EnableBitflip<'info> {
         init,
         space = 8,
         payer=signer,
+        seeds = [pda_bytes.as_ref()],
+        bump
     )]
     pub bit_fipper: Account<'info, BitFlipper>,
 
