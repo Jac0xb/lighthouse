@@ -8,15 +8,7 @@ import {
   publicKeyTypeNode,
   numberTypeNode,
   bottomUpTransformerVisitor,
-  definedTypeLinkNode,
-  fillDefaultPdaSeedValuesVisitor,
   updateInstructionsVisitor,
-  publicKeyValueNode,
-  pdaValueNode,
-  setInstructionAccountDefaultValuesVisitor,
-  updateAccountsVisitor,
-  pdaLinkNode,
-  structTypeNode,
   numberValueNode,
   instructionArgumentNode,
   enumValueNode,
@@ -30,14 +22,17 @@ import {
   renderRustVisitor,
 } from '@codama/renderers';
 
-// Paths.
+// Paths to clients and lighthouse program directory.
 const clientDir = path.join(__dirname, '..', 'clients');
 const programDir = path.join(__dirname, '..', 'programs', 'lighthouse');
 
+// Load Lighthouse IDL.
 const lighthouseIdl = require(path.join(programDir, 'lighthouse.json'));
+
+// Create Codama root node from Lighthouse IDL.
 const codama = createFromRoot(rootNodeFromAnchor(lighthouseIdl));
 
-// Memory account PDA
+// Add memory account PDA visitor (this will derive the PDA address using nodes in the instruction).
 codama.update(
   addPdasVisitor({
     lighthouse: [
@@ -53,7 +48,7 @@ codama.update(
   })
 );
 
-// How to set a default value for an account in an instruction.
+// Default memoryId to 0 for MemoryWrite instruction.
 codama.update(
   updateInstructionsVisitor({
     memoryWrite: {
@@ -66,6 +61,7 @@ codama.update(
   })
 );
 
+// Default logLevel to Silent for Log instruction.
 codama.update(
   bottomUpTransformerVisitor([
     {
@@ -80,8 +76,10 @@ codama.update(
   ])
 );
 
+// Delete testAccountV1 type. This is used in testing but picked up by shank.
 codama.update(deleteNodesVisitor(['testAccountV1']));
 
+// Link overrides for hooked types. The hooked types are then defined in the hooked.(ts/rs) file.
 const linkOverrides = {
   definedTypes: {
     accountDataAssertions: 'hooked',
@@ -96,7 +94,7 @@ const linkOverrides = {
   },
 };
 
-// Render preview JavaScript.
+// Render JavaScript SDK (web3.js v2.x.x).
 const previewJsDir = path.join(clientDir, 'preview-js', 'src', 'generated');
 const previewPrettier = require(
   path.join(clientDir, 'preview-js', '.prettierrc.json')
@@ -108,7 +106,7 @@ codama.accept(
   })
 );
 
-// Render JavaScript umi.
+// Render JavaScript umi SDK.
 const jsDir = path.join(clientDir, 'js', 'src', 'generated');
 const prettier = require(path.join(clientDir, 'js', '.prettierrc.json'));
 codama.accept(
@@ -118,7 +116,7 @@ codama.accept(
   })
 );
 
-// Render Rust.
+// Render Rust SDK.
 const crateDir = path.join(clientDir, 'rust');
 const rustDir = path.join(clientDir, 'rust', 'src', 'generated');
 codama.accept(
