@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone)]
 pub enum VoteAccountAssertion {
     AuthorizedWithdrawer {
@@ -20,23 +19,26 @@ impl AssertVoteAccountBuilder {
     pub fn assertion(&mut self, assertion: VoteAccountAssertion) -> &mut Self {
         match assertion {
             VoteAccountAssertion::AuthorizedWithdrawer { value, operator } => {
-                self.0.assertions(vec![
-                    crate::hooked::AccountDataAssertion {
-                        offset: crate::CompactU64(0),
-                        assertion: crate::generated::types::DataValueAssertion::U8 {
-                            value: 2,
-                            operator: crate::types::IntegerOperator::Equal,
+                self.0.assertions(
+                    vec![
+                        crate::hooked::AccountDataAssertion {
+                            offset: crate::CompactU64(0),
+                            assertion: crate::generated::types::DataValueAssertion::U8 {
+                                value: 2,
+                                operator: crate::types::IntegerOperator::Equal,
+                            },
                         },
-                    },
-                    crate::hooked::AccountDataAssertion {
-                        offset: crate::CompactU64(36),
-                        assertion: crate::generated::types::DataValueAssertion::Pubkey {
-                            value: value,
-                            operator: operator,
+                        crate::hooked::AccountDataAssertion {
+                            offset: crate::CompactU64(36),
+                            assertion: crate::generated::types::DataValueAssertion::Pubkey {
+                                value: value,
+                                operator: operator,
+                            },
                         },
-                    },
-                ].into());
-            },
+                    ]
+                    .into(),
+                );
+            }
         }
         self
     }

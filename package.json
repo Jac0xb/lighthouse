@@ -7,9 +7,9 @@
     "programs:clean": "bash configs/scripts/env-run.sh ./configs/scripts/program/clean.sh",
     "clients:rust:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-rust.sh",
     "clients:js:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-js.sh",
-    "generate": "pnpm run generate:shank && pnpm run generate:kinobi && pnpm run generate:registry",
+    "generate": "pnpm run generate:shank && pnpm run generate:codama",
     "generate:shank": "bash configs/scripts/env-run.sh node ./configs/shank.cjs",
-    "generate:kinobi": "bash configs/scripts/env-run.sh node ./configs/kinobi.cjs",
+    "generate:codama": "bash configs/scripts/env-run.sh ts-node ./configs/codama",
     "generate:registry": "bash configs/scripts/env-run.sh ./configs/scripts/generate-registry.sh",
     "validator": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
     "validator:debug": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
@@ -19,8 +19,14 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^0.20.2",
     "@metaplex-foundation/amman": "^0.12.1",
-    "@metaplex-foundation/kinobi": "^0.19.2",
-    "@metaplex-foundation/shank-js": "^0.1.7"
+    "@metaplex-foundation/shank-js": "^0.1.7",
+    "@types/node": "^22.7.5"
   },
-  "packageManager": "pnpm@8.15.5+sha1.a58c038faac410c947dbdb93eb30994037d0fce2"
+  "packageManager": "pnpm@8.15.5+sha1.a58c038faac410c947dbdb93eb30994037d0fce2",
+  "dependencies": {
+    "@codama/nodes-from-anchor": "^1.0.1",
+    "@codama/renderers": "^1.0.4",
+    "codama": "^1.1.0",
+    "ts-node": "^10.9.2"
+  }
 }

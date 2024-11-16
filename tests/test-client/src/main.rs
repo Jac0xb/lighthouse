@@ -8,11 +8,13 @@ use lighthouse_sdk::instructions::{
 };
 use lighthouse_sdk::types::{
     AccountDeltaAssertion, AccountInfoAssertion, DataValueDeltaAssertion, EquatableOperator,
-    IntegerOperator, KnownProgram, LogLevel, MetaAssertion, StakeAccountAssertion, StakeStateType,
-    WriteType,
+    IntegerOperator, KnownProgram, LogLevel, MetaAssertion, MintAccountAssertion,
+    StakeAccountAssertion, StakeStateType, WriteType,
 };
+use solana_client::client_error::ClientErrorKind;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
+use solana_client::rpc_request::RpcError;
 use solana_program::system_instruction;
 use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::program_pack::Pack;
@@ -44,20 +46,22 @@ enum Commands {
     /// does testing things
     SafeSendSol {
         to_pubkey: String,
+        amount: u64,
     },
     SafeSendToken {
         mint: String,
         to_pubkey: String,
+        amount: u64,
     },
     AssertStake {
         stake_pubkey: String,
     },
     MintToken {
-        mint_authority: Option<String>,
-        freeze_authority: Option<String>,
         decimals: u8,
         mint_to: String,
         mint_to_amount: u64,
+        mint_authority: Option<String>,
+        freeze_authority: Option<String>,
     },
 }
 
@@ -73,16 +77,26 @@ fn main() {
     let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
 
     let tx = match &cli.command {
-        Some(Commands::SafeSendSol { to_pubkey }) => {
+        Some(Commands::SafeSendSol { to_pubkey, amount }) => {
             let to_pubkey = solana_sdk::pubkey::Pubkey::from_str(to_pubkey).unwrap();
 
-            build_safe_send_transaction(&connection, &wallet_keypair, &to_pubkey, 1_000_000)
+            build_safe_send_transaction(&connection, &wallet_keypair, &to_pubkey, *amount)
         }
-        Some(Commands::SafeSendToken { mint, to_pubkey }) => {
+        Some(Commands::SafeSendToken {
+            mint,
+            to_pubkey,
+            amount,
+        }) => {
             let mint = solana_sdk::pubkey::Pubkey::from_str(mint).unwrap();
             let to_pubkey = solana_sdk::pubkey::Pubkey::from_str(to_pubkey).unwrap();
 
-            build_safe_send_token_transaction(&connection, &wallet_keypair, &mint, &to_pubkey)
+            build_safe_send_token_transaction(
+                &connection,
+                &wallet_keypair,
+                &mint,
+                &to_pubkey,
+                *amount,
+            )
         }
         Some(Commands::AssertStake { stake_pubkey }) => {
             let stake_pubkey = solana_sdk::pubkey::Pubkey::from_str(stake_pubkey).unwrap();
@@ -198,6 +212,12 @@ pub fn build_safe_send_transaction(
 
     let ix = system_instruction::transfer(&from_keypair.pubkey(), to_pubkey, amount);
 
+    let mut amount: i64 = amount as i64 + 5000;
+
+    if from_keypair.pubkey() == *to_pubkey {
+        amount = 5000;
+    }
+
     Transaction::new_signed_with_payer(
         &[
             ix,
@@ -207,13 +227,15 @@ pub fn build_safe_send_transaction(
                     value: KnownProgram::System,
                     operator: EquatableOperator::Equal,
                 })
+                .log_level(LogLevel::FailedPlaintextMessage)
                 .instruction(),
             AssertAccountInfoBuilder::new()
                 .target_account(from_keypair.pubkey())
                 .assertion(AccountInfoAssertion::Lamports {
-                    value: balance - amount - 5000,
+                    value: balance - amount as u64,
                     operator: IntegerOperator::Equal,
                 })
+                .log_level(LogLevel::FailedPlaintextMessage)
                 .instruction(),
         ],
         Some(&from_keypair.pubkey()),
@@ -227,67 +249,95 @@ fn build_safe_send_token_transaction(
     wallet_keypair: &Keypair,
     mint: &Pubkey,
     destination_user: &Pubkey,
+    amount: u64,
 ) -> Transaction {
     let token_account = get_associated_token_address(&wallet_keypair.pubkey(), mint);
     let (memory, memory_bump) = find_memory_pda(wallet_keypair.pubkey(), 0);
     let dest_token_account = get_associated_token_address(destination_user, mint);
+    let mut ixs = vec![
+        MemoryWriteBuilder::new()
+            .payer(wallet_keypair.pubkey())
+            .source_account(token_account)
+            .program_id(lighthouse_sdk::ID)
+            .memory(memory)
+            .memory_id(0)
+            .write_offset(0u8.into())
+            .memory_bump(memory_bump)
+            .write_type(WriteType::AccountData {
+                offset: 0,
+                data_length: 72,
+            })
+            .instruction(),
+        spl_token::instruction::transfer(
+            &spl_token::id(),
+            &token_account,
+            &dest_token_account,
+            &wallet_keypair.pubkey(),
+            &[],
+            amount,
+        )
+        .unwrap(),
+        AssertAccountDeltaBuilder::new()
+            .account_a(memory)
+            .account_b(token_account)
+            .assertion(AccountDeltaAssertion::Data {
+                a_offset: 0u8.into(),
+                b_offset: 0u8.into(),
+                assertion: DataValueDeltaAssertion::Bytes {
+                    operator: EquatableOperator::Equal,
+                    length: 64,
+                },
+            })
+            .log_level(LogLevel::Silent)
+            .instruction(),
+        AssertAccountDeltaBuilder::new()
+            .account_a(memory)
+            .account_b(token_account)
+            .assertion(AccountDeltaAssertion::Data {
+                a_offset: 64u8.into(),
+                b_offset: 64u8.into(),
+                assertion: DataValueDeltaAssertion::U64 {
+                    value: -(amount as i128) - 1,
+                    operator: IntegerOperator::GreaterThan,
+                },
+            })
+            .log_level(LogLevel::PlaintextMessage)
+            .instruction(),
+        MemoryCloseBuilder::new()
+            .payer(wallet_keypair.pubkey())
+            .program_id(lighthouse_sdk::ID)
+            .memory(memory)
+            .memory_bump(memory_bump)
+            .memory_id(0)
+            .instruction(),
+    ];
+
+    let dest_token_account = connection.get_account(&dest_token_account);
+
+    match dest_token_account {
+        Ok(_account) => {}
+        Err(e) => match e.kind {
+            ClientErrorKind::RpcError(RpcError::ForUser(message)) => {
+                if message.contains("AccountNotFound") {
+                    ixs.insert(
+                        1,
+                        spl_associated_token_account::instruction::create_associated_token_account(
+                            &wallet_keypair.pubkey(),
+                            destination_user,
+                            mint,
+                            &spl_token::id(),
+                        ),
+                    );
+                }
+            }
+            _ => {
+                panic!("Failed to get destination token account: {:?}", e);
+            }
+        },
+    }
 
     let tx = Transaction::new_signed_with_payer(
-        &[
-            MemoryWriteBuilder::new()
-                .payer(wallet_keypair.pubkey())
-                .source_account(token_account)
-                .memory(memory)
-                .memory_id(0)
-                .write_offset(0u8.into())
-                .memory_bump(memory_bump)
-                .write_type(WriteType::AccountData {
-                    offset: 0,
-                    data_length: 72,
-                })
-                .instruction(),
-            spl_token::instruction::transfer(
-                &spl_token::id(),
-                &token_account,
-                &dest_token_account,
-                &wallet_keypair.pubkey(),
-                &[],
-                69,
-            )
-            .unwrap(),
-            AssertAccountDeltaBuilder::new()
-                .account_a(memory)
-                .account_b(token_account)
-                .assertion(AccountDeltaAssertion::Data {
-                    a_offset: 0u8.into(),
-                    b_offset: 0u8.into(),
-                    assertion: DataValueDeltaAssertion::Bytes {
-                        operator: EquatableOperator::Equal,
-                        length: 64,
-                    },
-                })
-                .log_level(LogLevel::Silent)
-                .instruction(),
-            AssertAccountDeltaBuilder::new()
-                .account_a(memory)
-                .account_b(token_account)
-                .assertion(AccountDeltaAssertion::Data {
-                    a_offset: 64u8.into(),
-                    b_offset: 64u8.into(),
-                    assertion: DataValueDeltaAssertion::U64 {
-                        value: -100,
-                        operator: IntegerOperator::GreaterThan,
-                    },
-                })
-                .log_level(LogLevel::PlaintextMessage)
-                .instruction(),
-            MemoryCloseBuilder::new()
-                .payer(wallet_keypair.pubkey())
-                .memory(memory)
-                .memory_bump(memory_bump)
-                .memory_id(0)
-                .instruction(),
-        ],
+        &ixs,
         Some(&wallet_keypair.pubkey()),
         &[&wallet_keypair],
         connection.get_latest_blockhash().unwrap(),
@@ -471,6 +521,20 @@ pub fn create_mint(
     let mint_rent = Rent::default().minimum_balance(Mint::LEN);
 
     let mut ixs = Vec::new();
+    let mut mint_assertions: Vec<MintAccountAssertion> = vec![
+        MintAccountAssertion::Decimals {
+            value: parameters.decimals,
+            operator: IntegerOperator::Equal,
+        },
+        MintAccountAssertion::IsInitialized {
+            value: true,
+            operator: EquatableOperator::Equal,
+        },
+        MintAccountAssertion::FreezeAuthority {
+            value: parameters.freeze_authority,
+            operator: EquatableOperator::Equal,
+        },
+    ];
 
     let create_ix = system_instruction::create_account(
         &payer.pubkey(),
@@ -513,6 +577,10 @@ pub fn create_mint(
 
         ixs.push(create_account_ix);
         ixs.push(mint_to_ix);
+        mint_assertions.push(MintAccountAssertion::Supply {
+            value: amount,
+            operator: IntegerOperator::Equal,
+        });
     }
 
     if let Some(mint_authority) = parameters.mint_authority {
@@ -526,7 +594,24 @@ pub fn create_mint(
         )
         .unwrap();
         ixs.push(set_authority_ix);
+        mint_assertions.push(MintAccountAssertion::MintAuthority {
+            value: mint_authority,
+            operator: EquatableOperator::Equal,
+        });
+    } else {
+        mint_assertions.push(MintAccountAssertion::MintAuthority {
+            value: Some(payer.pubkey()),
+            operator: EquatableOperator::Equal,
+        });
     }
+
+    ixs.push(
+        lighthouse_sdk::instructions::AssertMintAccountMultiBuilder::new()
+            .target_account(mint.pubkey())
+            .assertions(mint_assertions.into())
+            .log_level(LogLevel::PlaintextMessage)
+            .instruction(),
+    );
 
     let mut tx = Transaction::new_with_payer(&ixs, Some(&payer.pubkey()));
     let signers: &[Keypair; 2] = &[payer.insecure_clone(), mint.insecure_clone()];

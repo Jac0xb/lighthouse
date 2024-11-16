@@ -111,16 +111,19 @@ TODO
    $ solana-verify build
    $ solana-verify get-executable-hash target/deploy/lighthouse.so
    $ solana program deploy programs/lighthouse/target/deploy/lighthouse.so --with-compute-unit-price 500000
-   $ solana-verify verify-from-repo -um --program-id L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse
+   # Normal verification
+   $ solana-verify verify-from-repo -um --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse
+   # To have ottersec verify the program.
+   $ solana-verify verify-from-repo -um --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse --remote
    ```
 
 ## Usage
 
 For experimental use only, program has yet to receive an audit.
 
-devnet - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
+devnet - `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
 
-mainnet-beta - `L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK`
+mainnet-beta - `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
 
 ## Contributing
 
