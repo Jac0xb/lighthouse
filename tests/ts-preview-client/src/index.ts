@@ -6,7 +6,6 @@ import {
 } from '@solana/instructions';
 
 import fs from 'fs';
-import * as all from 'lighthouse-sdk';
 
 import {
   SYSTEM_PROGRAM_ADDRESS,
@@ -46,8 +45,20 @@ import {
   createMint,
 } from '@solana/spl-token';
 
+import crypto from 'crypto';
+import {
+  EquatableOperator,
+  getAssertAccountDataInstruction,
+  getAssertAccountInfoInstruction,
+  getAssertAccountInfoMultiInstruction,
+  IntegerOperator,
+} from 'lighthouse-sdk';
+
 (async () => {
-  const keypairPath = '';
+  const keypairPath =
+    '/Users/jacob/Desktop/W1ckNjLqZ2UoijogQj9rMCacdFtn6KJm3Caxs1oPgdx.json';
+
+  console.log(globalThis.crypto);
 
   const array = JSON.parse(fs.readFileSync(keypairPath).toString());
   const signer = await createKeyPairSignerFromBytes(Uint8Array.from(array));
@@ -73,6 +84,8 @@ import {
   //   encoding: 'base64',
   // };
 
+  const destination = await generateKeyPairSigner();
+
   const tx = await buildTransaction(
     rpc,
     [
@@ -83,8 +96,38 @@ import {
       }),
       getTransferSolInstruction({
         source: signer,
-        destination: (await generateKeyPairSigner()).address,
+        destination: destination.address,
         amount: 0.001e9,
+      }),
+      getAssertAccountInfoMultiInstruction({
+        targetAccount: destination.address,
+        assertions: [
+          {
+            __kind: 'Lamports',
+            value: BigInt(0.001e9),
+            operator: IntegerOperator.Equal,
+          },
+          {
+            __kind: 'Lamports',
+            value: BigInt(0.001e9),
+            operator: IntegerOperator.Equal,
+          },
+          {
+            __kind: 'Lamports',
+            value: BigInt(0.001e9),
+            operator: IntegerOperator.Equal,
+          },
+          {
+            __kind: 'Lamports',
+            value: BigInt(0.001e9),
+            operator: IntegerOperator.Equal,
+          },
+          {
+            __kind: 'Lamports',
+            value: BigInt(0.001e9),
+            operator: IntegerOperator.Equal,
+          },
+        ],
       }),
     ],
     [signer]
@@ -101,19 +144,19 @@ import {
     .getMultipleAccounts(writeableAccounts)
     .send();
 
-  // const result = await rpc
-  //   .simulateTransaction(getBase64EncodedWireTransaction(tx), {
-  //     replaceRecentBlockhash: true,
-  //     sigVerify: false,
-  //     accounts: {
-  //       addresses: [signer.address],
-  //       encoding: 'base64',
-  //     },
-  //     encoding: 'base64',
-  //   })
-  //   .send();
+  const result = await rpc
+    .simulateTransaction(getBase64EncodedWireTransaction(tx), {
+      replaceRecentBlockhash: true,
+      sigVerify: false,
+      accounts: {
+        addresses: [signer.address],
+        encoding: 'base64',
+      },
+      encoding: 'base64',
+    })
+    .send();
 
-  // console.log(JSON.stringify(result, undefined, 2));
+  console.log(JSON.stringify(result, undefined, 2));
 })();
 
 async function buildTransaction(

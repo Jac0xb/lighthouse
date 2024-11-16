@@ -8,6 +8,7 @@
   "types": "dist/types/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
+    "start": "ts-node src/index.ts",
     "build:docs": "typedoc",
     "test": "ava",
     "lint": "eslint --ext js,ts,tsx src",
@@ -21,7 +22,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@solana-program/system": "^0.2.0",
+    "@solana-program/system": "^0.6.2",
     "@solana/accounts": "^2",
     "@solana/addresses": "^2",
     "@solana/codecs": "^2",
@@ -31,7 +32,6 @@
     "@solana/spl-token": "^0.4.6",
     "@solana/transactions": "^2",
     "@solana/web3.js": "^2",
-    "lighthouse-sdk-legacy": "0.1.2",
     "legacy-web3.js": "npm:@solana/web3.js@1.91.7",
     "js-sha3": "^0.9.3",
     "lighthouse-sdk": "2.0.1"

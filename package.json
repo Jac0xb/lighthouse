@@ -26,6 +26,7 @@
   "dependencies": {
     "@codama/nodes-from-anchor": "^1.0.1",
     "@codama/renderers": "^1.0.4",
-    "codama": "^1.1.0"
+    "codama": "^1.1.0",
+    "ts-node": "^10.9.2"
   }
 }
