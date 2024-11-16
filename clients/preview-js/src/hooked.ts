@@ -42,13 +42,25 @@ import {
 export type CompactU64 = number;
 export type CompactU64Args = number;
 
-export function getCompactU64Encoder(): VariableSizeEncoder<number> {
+export function getCompactU64Encoder(): VariableSizeEncoder<bigint | number> {
   return createEncoder({
-    getSizeFromValue: (value: number): number => {
-      return LEB128.encode(value).length;
+    getSizeFromValue: (value: bigint | number): number => {
+      if (typeof value === 'bigint' && value > Number.MAX_SAFE_INTEGER) {
+        throw new Error('CompactU64 value is too large');
+      }
+
+      return LEB128.encode(Number(value)).length;
     },
-    write: (value: number, bytes: Uint8Array, offset: Offset): Offset => {
-      const encodedNumber = UnsignedLEB128.encode(value);
+    write: (
+      value: bigint | number,
+      bytes: Uint8Array,
+      offset: Offset
+    ): Offset => {
+      if (typeof value === 'bigint' && value > Number.MAX_SAFE_INTEGER) {
+        throw new Error('CompactU64 value is too large');
+      }
+
+      const encodedNumber = UnsignedLEB128.encode(Number(value));
       bytes.set(encodedNumber, offset);
 
       return offset + encodedNumber.length;

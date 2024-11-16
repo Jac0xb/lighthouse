@@ -22,19 +22,19 @@
   "license": "MIT",
   "dependencies": {
     "@solana-program/system": "^0.2.0",
-    "@solana/accounts": "2.0.0-preview.3",
-    "@solana/addresses": "2.0.0-preview.3",
-    "@solana/codecs": "2.0.0-preview.3",
-    "@solana/instructions": "2.0.0-preview.3",
-    "@solana/programs": "2.0.0-preview.3",
-    "@solana/signers": "2.0.0-preview.3",
+    "@solana/accounts": "^2",
+    "@solana/addresses": "^2",
+    "@solana/codecs": "^2",
+    "@solana/instructions": "^2",
+    "@solana/programs": "^2",
+    "@solana/signers": "^2",
     "@solana/spl-token": "^0.4.6",
-    "@solana/transactions": "2.0.0-preview.3",
-    "@solana/web3.js": "2.0.0-preview.3",
+    "@solana/transactions": "^2",
+    "@solana/web3.js": "^2",
     "lighthouse-sdk-legacy": "0.1.2",
     "legacy-web3.js": "npm:@solana/web3.js@1.91.7",
     "js-sha3": "^0.9.3",
-    "lighthouse-sdk": "0.1.6"
+    "lighthouse-sdk": "2.0.1"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
