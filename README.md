@@ -1,20 +1,42 @@
 # Lighthouse - The Assertion Solana Program
 
-![0_0](https://github.com/Jac0xb/lighthouse/assets/5273873/d5bb94be-a994-424f-88e0-32a917f07129)
+![Lighthouse Logo](https://github.com/Jac0xb/lighthouse/assets/5273873/d5bb94be-a994-424f-88e0-32a917f07129)
 
-### [Lighthouse Documentation](https://lighthouse.voyage/)
+[**Documentation at lighthouse.voyage**](https://lighthouse.voyage/)
 
-## Overview
+## Table of Contents
 
-Lighthouse is a Solana program that provides assertion instructions that can be added to transactions. If a bad actor spoofs simulation results, there is overspending during the transaction, or an oracle account is in an undesired state, the assertion will fail, and the transaction will also fail. Lighthouse makes it simple to append assertion instructions to existing transactions without needing to write new Solana programs.
+- [Introduction](#introduction)
+- [Features](#features)
+- [Use Cases](#use-cases)
+  - [Guardrail Example](#guardrail-example)
+  - [Additional Examples](#additional-examples)
+- [Addresses](#addresses)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Building and Deploying a Verifiable Program](#building-and-deploying-a-verifiable-program)
+- [Contributing](#contributing)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
-Lighthouse is an open source, public utility Solana program with an emphasis on security (multisig, verifiable build, non-upgradable releases, etc _coming soon_), composability (program-agnostic use cases), and community (open source, assist in integration with open source projects, incentivize contributions).
+## Introduction
 
-## Example Usecases
+Lighthouse is an open-source Solana program that provides assertion instructions to enhance transaction security. By appending assertion instructions to transactions, Lighthouse ensures that if a bad actor spoofs simulation results, there's overspending during the transaction, or an oracle account is in an undesired state, the assertion will fail, causing the entire transaction to fail. This eliminates the need to write new Solana programs for adding assertions to existing transactions.
 
-Solana at its core is a decentralized database (accounts) and assertion/mutation of that permissioned data (programs). Programs generally make assertions about account state before allowing data to be mutated, one of Anchor's innovations for preventing "footguns and attacks" was that it has common account state assertions baked into the framework. Currently performing even trivial assertions such as account balance checks requires one to deploy a Solana program. Lighthouse at a high-level seeks to be an composable way to make assertions on onchain state and the instruction-level delta of these state changes without the need to deploy additional Solana programs.
+Lighthouse emphasizes security (with upcoming features like multisig, verifiable build, non-upgradable releases), composability (program-agnostic use cases), and community involvement (open source contributions and integration support).
 
-**Guardrail Example**: A wallet simulates that a token account changes balance from `100` to `90` for a transaction. It appends a Lighthouse assertion instruction to the transaction which says the token account balance must be 90 at the end of the transaction (the assertion instruction is placed at the end of the transaction).
+## Features
+
+- **Assertion Instructions**: Primary instructions that allow transaction builders to assert on data accessed at runtime during the assertion instruction.
+- **Write Instructions**: Secondary instructions to write account data, account info, and other runtime data into memory accounts, enabling assertion of inter-transaction state changes.
+- **Memory Accounts**: Program Derived Accounts (PDAs) used to store runtime data, facilitating assertions on changes between instructions.
+
+## Use Cases
+
+### Guardrail Example
+
+A wallet simulates that a token account balance changes from `100` to `90` during a transaction. It appends a Lighthouse assertion instruction to the transaction, asserting that the token account balance must be `90` at the end of the transaction. The assertion instruction is placed at the end of the transaction.
 
 ```rust
 let tx = Transaction::new_signed_with_payer(
@@ -47,92 +69,115 @@ let tx = Transaction::new_signed_with_payer(
 );
 ```
 
-(From the testing library, blackhat program is a test program designed to emulate existing drainer programs)
+_(From the testing library; `blackhat_program` is a test program designed to emulate existing drainer programs.)_
 
-The transaction is then sent to the Solana blockchain. The assertion fails because the token balance is found to be `0` instead of `90` during assertion instruction. Having failed the assertion, the Lighthouse program then fails the transaction.
+The transaction is then sent to the Solana blockchain. The assertion fails because the token balance is found to be `0` instead of `90` during the assertion instruction. Having failed the assertion, the Lighthouse program then fails the transaction.
 
-**Guardrail Example**: A transaction builder puts a Lighthouse assertion instruction that consists of checking a BONK USD price oracle account and asserts that it needs to be above a certain value or the transaction will fail.
+### Additional Examples
 
-**Whitehat Example**: The game SVBonk involves sending 1000 BONK to their program, if one minute elapses the first user to interact with SVBonk wins the jackpot. Lighthouse could be used to demonstrate to the creators of SVBonk about a potential exploit (that has now been patched). The exploit involves failing the transaction if the transaction builder made a state assertion which checked that they were the winner of the game at the end of the transaction, if they weren't the transaction would fail, thus exploiting the game by spamming transactions which will either succeed (win the game) or fail (no BONK sent). Lighthouse can be seen as a new useful tool for Solana smart contract developers to reason about and test state change exploitable edge cases in their smart contract.
+- **Oracle Price Check**: A transaction builder includes a Lighthouse assertion to check a BONK USD price oracle account, asserting that the price must be above a certain value, or the transaction will fail.
+- **Whitehat Exploit Demonstration**: In the game SVBonk, users send 1000 BONK to participate. Lighthouse can be used to demonstrate potential exploits by asserting the state after a transaction, helping developers identify and patch vulnerabilities.
+- **Jito Bundle Guardrail**: A wallet provider builds a bundle of transactions that includes a Lighthouse assertion transaction built from expected simulation changes. The assertion transaction fails if unexpected state changes are detected, preventing bad actors from executing malicious transactions.
 
-**Jito Bundle Guardrail Example**: A bad actor cosigns a drainer transaction so it cannot be altered. A wallet provider builds a bundle of transactions consisting of 1) the bad actor's transaction 2) a lighthouse assertion transaction built from the expected simulation changes. The lighthouse assertion transaction fails after catching the bad actor's unexpected state changes.
+## Addresses
 
-## Features
-
-**Assertion Instructions (Primary)** - instructions which allow transaction builders to assert on data accessed at runtime during the assertion instruction.
-
-**Write Instructions (Secondary)** - write account data, account info, and other data available at runtime into memory accounts to allow for assertion of inter-transaction state changes rather than just instruction data and data accessed at runtime during assertion instruction.
-
-**Memory Account** - PDA with seeds `[b"memory".as_ref(), signer.key.as_ref(), &[memory_idx]]`. The memory account is used to store runtime data into memory accounts derived by the signer. Useful for asserting on the difference of changes between instructions.
+- **Devnet**: `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
+- **Mainnet Beta**: `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
 
 ## Getting Started
 
-TODO
-
 ### Prerequisites
 
-- Install pnpm (https://pnpm.io/7.x/installation or npm install -g pnpm)
+- **pnpm**: Install via [pnpm installation guide](https://pnpm.io/7.x/installation) or use `npm install -g pnpm`.
+- **Solana CLI**: Install version `1.18.8` from the [Solana documentation](https://docs.solana.com/cli/install-solana-cli-tools).
 
 ### Installation
 
-- install solana cli 1.18.8
-
-- pnpm install
-
-1. Compile the program:
+1. **Clone the Repository**
 
    ```bash
-   $ pnpm run programs:build
+   git clone https://github.com/Jac0xb/lighthouse.git
+   cd lighthouse
    ```
 
-2. Run the tests:
+2. **Compile the Program**
 
    ```bash
-   $ pnpm run programs:test
+   pnpm run programs:build
    ```
 
-3. Generate shank and kinobi clients:
+3. **Run Tests**
 
    ```bash
-   $ pnpm run generate
+   pnpm run programs:test
    ```
 
-4. Building/deploying a verify program:
-
-   Requirements:
-
-   - solana-verify (https://github.com/Ellipsis-Labs/solana-verifiable-build)
-   - solana cli 1.18.8
-   - docker
-     - Make sure docker has permissions to access the lighthouse repo (enable in docker settings + system settings)
+4. **Generate Shank and Kinobi Clients**
 
    ```bash
-   $ cd programs/lighthouse
-   $ solana-verify build
-   $ solana-verify get-executable-hash target/deploy/lighthouse.so
-   $ solana program deploy programs/lighthouse/target/deploy/lighthouse.so --with-compute-unit-price 500000
-   # Normal verification
-   $ solana-verify verify-from-repo -um --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse
-   # To have ottersec verify the program.
-   $ solana-verify verify-from-repo -um --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 https://github.com/jac0xb/lighthouse --mount-path programs/lighthouse --library-name lighthouse --remote
+   pnpm run generate
    ```
 
-## Usage
+### Building and Deploying a Verifiable Program
 
-For experimental use only, program has yet to receive an audit.
+#### Requirements
 
-devnet - `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
+- **Solana Verify**: Install from [Solana Verifiable Build](https://github.com/Ellipsis-Labs/solana-verifiable-build).
+- **Docker**: Install from [Docker's official site](https://www.docker.com/).
+  - Ensure Docker has file system permissions to access the Lighthouse repository (enable in Docker settings and system settings).
 
-mainnet-beta - `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95`
+#### Steps
+
+1. **Build with Solana Verify**
+
+   ```bash
+   cd programs/lighthouse
+   solana-verify build
+   ```
+
+2. **Get Executable Hash**
+
+   ```bash
+   solana-verify get-executable-hash target/deploy/lighthouse.so
+   ```
+
+3. **Deploy Program**
+
+   ```bash
+   solana program deploy target/deploy/lighthouse.so --with-compute-unit-price 500000
+   ```
+
+4. **Verify the Program**
+
+   - **Normal Verification**
+
+     ```bash
+     solana-verify verify-from-repo -um \
+     --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 \
+     https://github.com/jac0xb/lighthouse \
+     --mount-path programs/lighthouse \
+     --library-name lighthouse
+     ```
+
+   - **OtterSec Verification**
+
+     ```bash
+     solana-verify verify-from-repo -um \
+     --program-id L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95 \
+     https://github.com/jac0xb/lighthouse \
+     --mount-path programs/lighthouse \
+     --library-name lighthouse \
+     --remote
+     ```
 
 ## Contributing
 
-Your contributions are highly appreciated. For contributing guidelines, please refer to [Contributing to Lighthouse](CONTRIBUTING.md).
+Contributions are highly appreciated! Please refer to the [Contributing Guidelines](CONTRIBUTING.md) for details on how to contribute to Lighthouse.
 
 ## License
 
-This project is under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
 ## Disclaimer
 
-Lighthouse is provided "as is", with no warranties regarding its efficacy in completely preventing MEV attacks or other vulnerabilities. Users are advised to conduct thorough testing and auditing.
+Lighthouse is provided "as is," without warranties of any kind, express or implied. There is no guarantee of its efficacy in preventing MEV attacks or other vulnerabilities on the Solana blockchain. Users are advised to conduct thorough testing and auditing before using it in production.
