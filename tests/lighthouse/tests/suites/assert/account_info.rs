@@ -20,19 +20,18 @@ use spl_associated_token_account::get_associated_token_address;
 #[tokio::test]
 async fn test_hijack_account_ownership() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
     let unprotected_user = create_user(context).await.unwrap();
     let bad_fee_payer = create_user(context).await.unwrap();
 
     // User loses control of their account to malicious actor.
-    let tx = blackhat_program
-        .hijack_account_ownership(unprotected_user.pubkey())
-        .to_transaction_and_sign(
-            vec![&unprotected_user, &bad_fee_payer],
-            bad_fee_payer.encodable_pubkey(),
-            context.get_blockhash().await,
-        )
-        .unwrap();
+    let tx = Transaction::new_signed_with_payer(
+        &[BlackhatProgram::hijack_account_ownership(
+            unprotected_user.pubkey(),
+        )],
+        Some(&bad_fee_payer.pubkey()),
+        &[&unprotected_user, &bad_fee_payer],
+        context.get_blockhash().await,
+    );
 
     process_transaction_assert_success(context, tx)
         .await
@@ -52,9 +51,7 @@ async fn test_hijack_account_ownership() {
     let tx = TxBuilder {
         look_up_tables: None,
         ixs: vec![
-            blackhat_program
-                .hijack_account_ownership(protected_user.pubkey())
-                .ix(),
+            BlackhatProgram::hijack_account_ownership(protected_user.pubkey()),
             AssertAccountInfoBuilder::new()
                 .target_account(protected_user.pubkey())
                 .log_level(lighthouse_sdk::types::LogLevel::Silent)

@@ -33,7 +33,7 @@ async fn simple() {
         ixs: vec![
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -42,7 +42,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::I8 {
                     value: -1,
                     operator: IntegerOperator::Equal,
@@ -51,7 +51,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U16 {
                     value: (u8::MAX as u16) + 1,
                     operator: IntegerOperator::Equal,
@@ -60,7 +60,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::I16 {
                     value: (i8::MIN as i16) - 1,
                     operator: IntegerOperator::Equal,
@@ -69,7 +69,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U32 {
                     value: (u16::MAX as u32) + 1,
                     operator: IntegerOperator::Equal,
@@ -78,7 +78,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::I32 {
                     value: (i16::MIN as i32) - 1,
                     operator: IntegerOperator::Equal,
@@ -87,7 +87,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U64 {
                     value: (u32::MAX as u64) + 1,
                     operator: IntegerOperator::Equal,
@@ -96,7 +96,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::I64 {
                     value: (i32::MIN as i64) - 1,
                     operator: IntegerOperator::Equal,
@@ -105,7 +105,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U128 {
                     value: (u64::MAX as u128) + 1,
                     operator: IntegerOperator::Equal,
@@ -114,7 +114,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::I128 {
                     value: (i64::MIN as i128) - 1,
                     operator: IntegerOperator::Equal,
@@ -123,7 +123,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![u8::MAX; 32].into(),
                     operator: EquatableOperator::Equal,
@@ -132,7 +132,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Bool {
                     value: true,
                     operator: EquatableOperator::Equal,
@@ -142,7 +142,7 @@ async fn simple() {
             // False represented as 0
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -152,7 +152,7 @@ async fn simple() {
             // Some in Option<u8>
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U8 {
                     value: 1,
                     operator: IntegerOperator::Equal,
@@ -161,7 +161,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U8 {
                     value: u8::MAX,
                     operator: IntegerOperator::Equal,
@@ -170,7 +170,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::U8 {
                     value: 0,
                     operator: IntegerOperator::Equal,
@@ -179,7 +179,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![1, 255, 255].into(),
                     operator: EquatableOperator::Equal,
@@ -188,7 +188,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Bytes {
                     value: vec![0].into(),
                     operator: EquatableOperator::Equal,
@@ -197,7 +197,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Pubkey {
                     value: user.encodable_pubkey(),
                     operator: EquatableOperator::Equal,
@@ -206,7 +206,7 @@ async fn simple() {
                 .instruction(),
             AssertAccountDataBuilder::new()
                 .target_account(test_account.encodable_pubkey())
-                .log_level(log_level.clone())
+                .log_level(log_level)
                 .assertion(DataValueAssertion::Bytes {
                     value: [32, 0, 0, 0]
                         .iter()

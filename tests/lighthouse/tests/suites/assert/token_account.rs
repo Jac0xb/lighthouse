@@ -30,7 +30,6 @@ use spl_token::state::{Account, AccountState};
 #[tokio::test]
 async fn set_token_close_authority() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -52,23 +51,21 @@ async fn set_token_close_authority() {
         .unwrap();
 
     let token_account = get_associated_token_address(&user.pubkey(), &mint.pubkey());
-    let mut tx_builder = blackhat_program.switch_token_account_authority(
-        user.encodable_pubkey(),
-        Some(bad_actor.pubkey()),
-        token_account,
-        spl_token::instruction::AuthorityType::CloseAccount,
+    let tx = Transaction::new_signed_with_payer(
+        &[BlackhatProgram::switch_token_account_authority(
+            user.encodable_pubkey(),
+            Some(bad_actor.pubkey()),
+            token_account,
+            spl_token::instruction::AuthorityType::CloseAccount,
+        )],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
     );
 
-    let blockhash = context.get_blockhash().await;
-
-    process_transaction_assert_success(
-        context,
-        tx_builder
-            .to_transaction_and_sign(vec![&user], user.encodable_pubkey(), blockhash)
-            .unwrap(),
-    )
-    .await
-    .unwrap();
+    process_transaction_assert_success(context, tx)
+        .await
+        .unwrap();
 
     // close token account to bad actor
 
@@ -107,7 +104,6 @@ async fn set_token_close_authority() {
 #[tokio::test]
 async fn set_token_close_authority_native() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -151,19 +147,17 @@ async fn set_token_close_authority_native() {
     assert_eq!(token_account_data.amount, 100_000);
 
     // close token account to bad actor
-    let tx = blackhat_program
-        .switch_token_account_authority(
+    let tx = Transaction::new_signed_with_payer(
+        &[BlackhatProgram::switch_token_account_authority(
             user.encodable_pubkey(),
             Some(bad_actor.pubkey()),
             native_token_account,
             spl_token::instruction::AuthorityType::CloseAccount,
-        )
-        .to_transaction_and_sign(
-            vec![&user],
-            user.encodable_pubkey(),
-            context.get_blockhash().await,
-        )
-        .unwrap();
+        )],
+        Some(&user.pubkey()),
+        &[&user],
+        context.get_blockhash().await,
+    );
 
     process_transaction_assert_success(context, tx)
         .await
@@ -214,7 +208,6 @@ async fn set_token_close_authority_native() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_owner_equal() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -243,14 +236,12 @@ async fn set_token_owner_attack_assert_owner_equal() {
         context,
         TxBuilder {
             ixs: vec![
-                blackhat_program
-                    .switch_token_account_authority(
-                        user.encodable_pubkey(),
-                        Some(bad_actor.pubkey()),
-                        token_account,
-                        spl_token::instruction::AuthorityType::AccountOwner,
-                    )
-                    .ix(),
+                BlackhatProgram::switch_token_account_authority(
+                    user.encodable_pubkey(),
+                    Some(bad_actor.pubkey()),
+                    token_account,
+                    spl_token::instruction::AuthorityType::AccountOwner,
+                ),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
                     .log_level(lighthouse_sdk::types::LogLevel::Silent)
@@ -274,7 +265,6 @@ async fn set_token_owner_attack_assert_owner_equal() {
 #[tokio::test]
 async fn set_token_owner_attack_assert_token_owner_derived() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
     let user = create_user(context).await.unwrap();
     let bad_actor = create_user(context).await.unwrap();
 
@@ -302,14 +292,12 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
         context,
         TxBuilder {
             ixs: vec![
-                blackhat_program
-                    .switch_token_account_authority(
-                        user.encodable_pubkey(),
-                        Some(bad_actor.pubkey()),
-                        token_account,
-                        spl_token::instruction::AuthorityType::AccountOwner,
-                    )
-                    .ix(),
+                BlackhatProgram::switch_token_account_authority(
+                    user.encodable_pubkey(),
+                    Some(bad_actor.pubkey()),
+                    token_account,
+                    spl_token::instruction::AuthorityType::AccountOwner,
+                ),
                 AssertTokenAccountBuilder::new()
                     .target_account(token_account)
                     .log_level(lighthouse_sdk::types::LogLevel::Silent)
@@ -330,7 +318,6 @@ async fn set_token_owner_attack_assert_token_owner_derived() {
 #[tokio::test]
 async fn test_drain_token_account() {
     let context = &mut TestContext::new().await.unwrap();
-    let blackhat_program = BlackhatProgram {};
 
     let drainer = Keypair::new();
     let user = create_user(context).await.unwrap();
@@ -357,13 +344,7 @@ async fn test_drain_token_account() {
 
     let tx = Transaction::new_signed_with_payer(
         &[
-            blackhat_program
-                .drain_token_account(
-                    user.encodable_pubkey(),
-                    drainer.encodable_pubkey(),
-                    mint.pubkey(),
-                )
-                .ix(),
+            BlackhatProgram::drain_token_account(&user.pubkey(), &drainer.pubkey(), &mint.pubkey()),
             AssertTokenAccountBuilder::new()
                 .target_account(user_ata)
                 .assertion(TokenAccountAssertion::Amount {
