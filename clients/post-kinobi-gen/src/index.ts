@@ -54,7 +54,7 @@ async function generateAssertionFilesFromTemplate(args: AssertionTemplateArgs) {
 
         fs.writeFileSync(
           appRoot.resolve(
-            `../preview-js/src/registry/${args.assertionName}Assertion.ts`
+            `../kit-js/src/registry/${args.assertionName}Assertion.ts`
           ),
           code
         );

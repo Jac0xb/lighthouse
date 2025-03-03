@@ -1,6 +1,6 @@
 # JavaScript client
 
-A generated JavaScript library for the Lighthouse program for the web3.js v2 tech preview.
+A generated JavaScript library for the Lighthouse program for the @solana/kit library.
 
 # Instructions
 

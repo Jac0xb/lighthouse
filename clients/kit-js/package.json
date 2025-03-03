@@ -1,6 +1,6 @@
 {
   "name": "lighthouse-sdk",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "@solana/web3.js preview client for Lighthouse",
   "sideEffects": false,
   "module": "dist/src/index.mjs",
