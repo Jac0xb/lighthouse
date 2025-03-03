@@ -26,7 +26,7 @@ import {
   type GetDiscriminatedUnionVariantContent,
   type Option,
   type OptionOrNullable,
-} from '@solana/web3.js';
+} from '@solana/kit';
 import {
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,

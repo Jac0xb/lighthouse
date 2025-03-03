@@ -53,7 +53,7 @@ import {
   type Option,
   type OptionOrNullable,
   type ReadonlyUint8Array,
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export type AssertionResult =
   | {

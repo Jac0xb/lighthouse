@@ -21,7 +21,7 @@ import {
   type IInstruction,
   type IInstructionWithAccounts,
   type IInstructionWithData,
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import {
   LogLevel,

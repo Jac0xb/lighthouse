@@ -13,7 +13,7 @@ import {
   getUtf8Encoder,
   type Address,
   type ProgramDerivedAddress,
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export type MemorySeeds = {
   payer: Address;

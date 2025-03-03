@@ -32,7 +32,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@solana/web3.js": "^2"
+    "@solana/kit": "^2.1.0"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",

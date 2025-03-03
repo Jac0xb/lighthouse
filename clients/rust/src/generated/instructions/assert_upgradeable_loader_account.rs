@@ -11,6 +11,7 @@ use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
 /// Accounts.
+#[derive(Debug)]
 pub struct AssertUpgradeableLoaderAccount {
     /// Target account to be asserted
     pub target_account: solana_program::pubkey::Pubkey,
@@ -35,10 +36,9 @@ impl AssertUpgradeableLoaderAccount {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = AssertUpgradeableLoaderAccountInstructionData::new()
-            .try_to_vec()
-            .unwrap();
-        let mut args = args.try_to_vec().unwrap();
+        let mut data =
+            borsh::to_vec(&AssertUpgradeableLoaderAccountInstructionData::new()).unwrap();
+        let mut args = borsh::to_vec(&args).unwrap();
         data.append(&mut args);
 
         solana_program::instruction::Instruction {
@@ -49,7 +49,8 @@ impl AssertUpgradeableLoaderAccount {
     }
 }
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssertUpgradeableLoaderAccountInstructionData {
     discriminator: u8,
 }
@@ -212,10 +213,9 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = AssertUpgradeableLoaderAccountInstructionData::new()
-            .try_to_vec()
-            .unwrap();
-        let mut args = self.__args.try_to_vec().unwrap();
+        let mut data =
+            borsh::to_vec(&AssertUpgradeableLoaderAccountInstructionData::new()).unwrap();
+        let mut args = borsh::to_vec(&self.__args).unwrap();
         data.append(&mut args);
 
         let instruction = solana_program::instruction::Instruction {

@@ -22,7 +22,7 @@ import {
   type IInstructionWithAccounts,
   type IInstructionWithData,
   type ReadonlyAccount,
-} from '@solana/web3.js';
+} from '@solana/kit';
 import {
   getUpgradeableLoaderStateAssertionsDecoder,
   getUpgradeableLoaderStateAssertionsEncoder,

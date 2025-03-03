@@ -22,7 +22,7 @@ import {
   type Encoder,
   type GetDiscriminatedUnionVariant,
   type GetDiscriminatedUnionVariantContent,
-} from '@solana/web3.js';
+} from '@solana/kit';
 import {
   getEquatableOperatorDecoder,
   getEquatableOperatorEncoder,
