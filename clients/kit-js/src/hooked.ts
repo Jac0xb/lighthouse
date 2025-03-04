@@ -14,7 +14,7 @@ import {
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { LEB128, UnsignedLEB128 } from '@minhducsun2002/leb128';
 import {
   AccountInfoAssertion,
