@@ -18,13 +18,18 @@ import {
 import { LEB128, UnsignedLEB128 } from '@minhducsun2002/leb128';
 import {
   AccountInfoAssertion,
+  AccountInfoAssertionArgs,
   AssertAccountDataInstructionData,
   DataValueAssertion,
   DataValueAssertionArgs,
   MintAccountAssertion,
+  MintAccountAssertionArgs,
   StakeAccountAssertion,
+  StakeAccountAssertionArgs,
   TokenAccountAssertion,
+  TokenAccountAssertionArgs,
   UpgradeableLoaderStateAssertion,
+  UpgradeableLoaderStateAssertionArgs,
   getAccountInfoAssertionDecoder,
   getAccountInfoAssertionEncoder,
   getDataValueAssertionDecoder,
@@ -81,7 +86,7 @@ export const getCompactU64Decoder = (): VariableSizeDecoder<number> =>
   });
 
 export type AccountInfoAssertions = Array<AccountInfoAssertion>;
-export type AccountInfoAssertionsArgs = Array<AccountInfoAssertion>;
+export type AccountInfoAssertionsArgs = Array<AccountInfoAssertionArgs>;
 
 export function getAccountInfoAssertionsEncoder() {
   return getArrayEncoder(getAccountInfoAssertionEncoder(), {
@@ -96,7 +101,7 @@ export function getAccountInfoAssertionsDecoder() {
 }
 
 export type MintAccountAssertions = Array<MintAccountAssertion>;
-export type MintAccountAssertionsArgs = Array<MintAccountAssertion>;
+export type MintAccountAssertionsArgs = Array<MintAccountAssertionArgs>;
 
 export function getMintAccountAssertionsEncoder() {
   return getArrayEncoder(getMintAccountAssertionEncoder(), {
@@ -111,7 +116,7 @@ export function getMintAccountAssertionsDecoder() {
 }
 
 export type StakeAccountAssertions = Array<StakeAccountAssertion>;
-export type StakeAccountAssertionsArgs = Array<StakeAccountAssertion>;
+export type StakeAccountAssertionsArgs = Array<StakeAccountAssertionArgs>;
 
 export function getStakeAccountAssertionsEncoder() {
   return getArrayEncoder(getStakeAccountAssertionEncoder(), {
@@ -126,7 +131,7 @@ export function getStakeAccountAssertionsDecoder() {
 }
 
 export type TokenAccountAssertions = Array<TokenAccountAssertion>;
-export type TokenAccountAssertionsArgs = Array<TokenAccountAssertion>;
+export type TokenAccountAssertionsArgs = Array<TokenAccountAssertionArgs>;
 
 export function getTokenAccountAssertionsEncoder() {
   return getArrayEncoder(getTokenAccountAssertionEncoder(), {
@@ -143,7 +148,7 @@ export function getTokenAccountAssertionsDecoder() {
 export type UpgradeableLoaderStateAssertions =
   Array<UpgradeableLoaderStateAssertion>;
 export type UpgradeableLoaderStateAssertionsArgs =
-  Array<UpgradeableLoaderStateAssertion>;
+  Array<UpgradeableLoaderStateAssertionArgs>;
 
 export function getUpgradeableLoaderStateAssertionsEncoder() {
   return getArrayEncoder(getUpgradeableLoaderStateAssertionEncoder(), {
@@ -185,7 +190,7 @@ export function getAccountDataAssertionDecoder(): Decoder<AccountDataAssertion> 
 }
 
 export type AccountDataAssertions = Array<AccountDataAssertion>;
-export type AccountDataAssertionsArgs = Array<AccountDataAssertion>;
+export type AccountDataAssertionsArgs = Array<AccountDataAssertionArgs>;
 
 export function getAccountDataAssertionsEncoder() {
   return getArrayEncoder(getAccountDataAssertionEncoder(), {
