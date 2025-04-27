@@ -1,5 +1,5 @@
 {
-  "name": "ts-test-client",
+  "name": "ts-kit-client",
   "version": "0.0.0",
   "description": "Client to test lighthouse-sdk",
   "sideEffects": false,
@@ -7,7 +7,7 @@
   "main": "dist/src/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
+    "build": "rimraf dist && tsup src/index.ts",
     "start": "ts-node src/index.ts",
     "build:docs": "typedoc",
     "test": "ava",
@@ -23,18 +23,17 @@
   "license": "MIT",
   "dependencies": {
     "@solana-program/system": "^0.6.2",
-    "@solana/accounts": "^2",
-    "@solana/addresses": "^2",
-    "@solana/codecs": "^2",
-    "@solana/instructions": "^2",
-    "@solana/programs": "^2",
-    "@solana/signers": "^2",
-    "@solana/spl-token": "^0.4.6",
-    "@solana/transactions": "^2",
-    "@solana/web3.js": "^2",
-    "legacy-web3.js": "npm:@solana/web3.js@1.91.7",
+    "@solana/accounts": "2.1.0",
+    "@solana/addresses": "2.1.0",
+    "@solana/codecs": "2.1.0",
+    "@solana/instructions": "2.1.0",
+    "@solana/programs": "2.1.0",
+    "@solana/signers": "2.1.0",
+    "@solana-program/token": "0.5.1",
+    "@solana/transactions": "2.1.0",
+    "@solana/kit": "2.1.0",
     "js-sha3": "^0.9.3",
-    "lighthouse-sdk": "2.0.1"
+    "lighthouse-sdk": "file:../../clients/kit-js"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",

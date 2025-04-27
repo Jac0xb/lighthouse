@@ -1,16 +1,16 @@
-import { Address, address } from '@solana/addresses';
+import { Address, address } from "@solana/addresses";
 import {
   AccountRole,
   IInstruction,
   WritableSignerAccount,
-} from '@solana/instructions';
+} from "@solana/instructions";
 
-import fs from 'fs';
+import fs from "fs";
 
 import {
   SYSTEM_PROGRAM_ADDRESS,
   getTransferSolInstruction,
-} from '@solana-program/system';
+} from "@solana-program/system";
 import {
   KeyPairSigner,
   addSignersToTransactionMessage,
@@ -18,7 +18,7 @@ import {
   generateKeyPairSigner,
   setTransactionMessageFeePayerSigner,
   signTransactionMessageWithSigners,
-} from '@solana/signers';
+} from "@solana/signers";
 import {
   AccountInfoBase,
   AccountInfoWithBase64EncodedData,
@@ -38,31 +38,26 @@ import {
   setTransactionMessageFeePayer,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransaction,
-} from '@solana/web3.js';
-import { generateKeyPairSync } from 'crypto';
-import {
-  createInitializeMint2Instruction,
-  createMint,
-} from '@solana/spl-token';
+} from "@solana/kit";
 
-import crypto from 'crypto';
+import crypto from "crypto";
 import {
   EquatableOperator,
   getAssertAccountDataInstruction,
   getAssertAccountInfoInstruction,
   getAssertAccountInfoMultiInstruction,
   IntegerOperator,
-} from 'lighthouse-sdk';
+} from "lighthouse-sdk";
 
 (async () => {
   const keypairPath =
-    '/Users/jacob/Desktop/W1ckNjLqZ2UoijogQj9rMCacdFtn6KJm3Caxs1oPgdx.json';
+    "/Users/jacob/Desktop/W1ckNjLqZ2UoijogQj9rMCacdFtn6KJm3Caxs1oPgdx.json";
 
   console.log(globalThis.crypto);
 
   const array = JSON.parse(fs.readFileSync(keypairPath).toString());
   const signer = await createKeyPairSignerFromBytes(Uint8Array.from(array));
-  const rpc = createSolanaRpc('https://api.devnet.solana.com');
+  const rpc = createSolanaRpc("https://api.devnet.solana.com");
 
   // const result = await rpc
   //   .sendTransaction(getBase64EncodedWireTransaction(tx), {
@@ -103,27 +98,27 @@ import {
         targetAccount: destination.address,
         assertions: [
           {
-            __kind: 'Lamports',
+            __kind: "Lamports",
             value: BigInt(0.001e9),
             operator: IntegerOperator.Equal,
           },
           {
-            __kind: 'Lamports',
+            __kind: "Lamports",
             value: BigInt(0.001e9),
             operator: IntegerOperator.Equal,
           },
           {
-            __kind: 'Lamports',
+            __kind: "Lamports",
             value: BigInt(0.001e9),
             operator: IntegerOperator.Equal,
           },
           {
-            __kind: 'Lamports',
+            __kind: "Lamports",
             value: BigInt(0.001e9),
             operator: IntegerOperator.Equal,
           },
           {
-            __kind: 'Lamports',
+            __kind: "Lamports",
             value: BigInt(0.001e9),
             operator: IntegerOperator.Equal,
           },
@@ -150,9 +145,9 @@ import {
       sigVerify: false,
       accounts: {
         addresses: [signer.address],
-        encoding: 'base64',
+        encoding: "base64",
       },
-      encoding: 'base64',
+      encoding: "base64",
     })
     .send();
 
