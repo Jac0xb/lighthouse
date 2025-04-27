@@ -12,7 +12,7 @@ Lighthouse instructions can be built using either the rust or javascript sdk. Fo
 $ cargo install lighthouse-sdk
 ```
 
-For the web3.js tech preview version of the javascript sdk, you can install the sdk using npm:
+For the @solana/kit version of the javascript sdk, you can install the sdk using npm:
 
 ```bash
 $ npm install lighthouse-sdk

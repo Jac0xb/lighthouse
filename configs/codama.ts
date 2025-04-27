@@ -94,10 +94,10 @@ const linkOverrides = {
   },
 };
 
-// Render JavaScript SDK (web3.js v2.x.x).
-const previewJsDir = path.join(clientDir, 'preview-js', 'src', 'generated');
+// Render JavaScript SDK (@solana/kit v2.x.x).
+const previewJsDir = path.join(clientDir, 'kit-js', 'src', 'generated');
 const previewPrettier = require(
-  path.join(clientDir, 'preview-js', '.prettierrc.json')
+  path.join(clientDir, 'kit-js', '.prettierrc.json')
 );
 codama.accept(
   renderJavaScriptVisitor(previewJsDir, {
