@@ -9,7 +9,7 @@ description: How to Lighthouse.
 Lighthouse instructions can be built using either the rust or javascript sdk. For the rust sdk, you can install the sdk using cargo:
 
 ```bash
-$ cargo install lighthouse-sdk
+$ cargo add lighthouse-sdk
 ```
 
 For the @solana/kit version of the javascript sdk, you can install the sdk using npm:
