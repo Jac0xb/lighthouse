@@ -17,10 +17,10 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
   type ReadonlyAccount,
 } from '@solana/kit';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
@@ -44,12 +44,12 @@ export function getAssertAccountDeltaDiscriminatorBytes() {
 
 export type AssertAccountDeltaInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountAccountA extends string | IAccountMeta<string> = string,
-  TAccountAccountB extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+  TAccountAccountA extends string | AccountMeta<string> = string,
+  TAccountAccountB extends string | AccountMeta<string> = string,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountAccountA extends string
         ? ReadonlyAccount<TAccountAccountA>
@@ -57,7 +57,7 @@ export type AssertAccountDeltaInstruction<
       TAccountAccountB extends string
         ? ReadonlyAccount<TAccountAccountB>
         : TAccountAccountB,
-      ...TRemainingAccounts,
+      ...TRemainingAccounts
     ]
   >;
 
@@ -107,7 +107,7 @@ export function getAssertAccountDeltaInstructionDataCodec(): Codec<
 
 export type AssertAccountDeltaInput<
   TAccountAccountA extends string = string,
-  TAccountAccountB extends string = string,
+  TAccountAccountB extends string = string
 > = {
   /** Account A where the delta is calculated from */
   accountA: Address<TAccountAccountA>;
@@ -120,7 +120,7 @@ export type AssertAccountDeltaInput<
 export function getAssertAccountDeltaInstruction<
   TAccountAccountA extends string,
   TAccountAccountB extends string,
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: AssertAccountDeltaInput<TAccountAccountA, TAccountAccountB>,
   config?: { programAddress?: TProgramAddress }
@@ -166,7 +166,7 @@ export function getAssertAccountDeltaInstruction<
 
 export type ParsedAssertAccountDeltaInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[]
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -180,11 +180,11 @@ export type ParsedAssertAccountDeltaInstruction<
 
 export function parseAssertAccountDeltaInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[]
 >(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> &
+    InstructionWithAccounts<TAccountMetas> &
+    InstructionWithData<Uint8Array>
 ): ParsedAssertAccountDeltaInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 2) {
     // TODO: Coded error.

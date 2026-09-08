@@ -17,11 +17,11 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IAccountSignerMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type AccountSignerMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
   type ReadonlyAccount,
   type TransactionSigner,
   type WritableAccount,
@@ -52,17 +52,17 @@ export type MemoryWriteInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountProgramId extends
     | string
-    | IAccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
+    | AccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
   TAccountSystemProgram extends
     | string
-    | IAccountMeta<string> = '11111111111111111111111111111111',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TAccountSourceAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+    | AccountMeta<string> = '11111111111111111111111111111111',
+  TAccountPayer extends string | AccountMeta<string> = string,
+  TAccountMemory extends string | AccountMeta<string> = string,
+  TAccountSourceAccount extends string | AccountMeta<string> = string,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountProgramId extends string
         ? ReadonlyAccount<TAccountProgramId>
@@ -72,7 +72,7 @@ export type MemoryWriteInstruction<
         : TAccountSystemProgram,
       TAccountPayer extends string
         ? WritableSignerAccount<TAccountPayer> &
-            IAccountSignerMeta<TAccountPayer>
+            AccountSignerMeta<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
         ? WritableAccount<TAccountMemory>
@@ -80,7 +80,7 @@ export type MemoryWriteInstruction<
       TAccountSourceAccount extends string
         ? ReadonlyAccount<TAccountSourceAccount>
         : TAccountSourceAccount,
-      ...TRemainingAccounts,
+      ...TRemainingAccounts
     ]
   >;
 
@@ -141,7 +141,7 @@ export type MemoryWriteInput<
   TAccountSystemProgram extends string = string,
   TAccountPayer extends string = string,
   TAccountMemory extends string = string,
-  TAccountSourceAccount extends string = string,
+  TAccountSourceAccount extends string = string
 > = {
   /** Lighthouse program */
   programId?: Address<TAccountProgramId>;
@@ -165,7 +165,7 @@ export function getMemoryWriteInstruction<
   TAccountPayer extends string,
   TAccountMemory extends string,
   TAccountSourceAccount extends string,
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: MemoryWriteInput<
     TAccountProgramId,
@@ -239,7 +239,7 @@ export function getMemoryWriteInstruction<
 
 export type ParsedMemoryWriteInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[]
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -259,11 +259,11 @@ export type ParsedMemoryWriteInstruction<
 
 export function parseMemoryWriteInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[]
 >(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> &
+    InstructionWithAccounts<TAccountMetas> &
+    InstructionWithData<Uint8Array>
 ): ParsedMemoryWriteInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
     // TODO: Coded error.

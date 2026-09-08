@@ -94,7 +94,7 @@ const linkOverrides = {
   },
 };
 
-// Render JavaScript SDK (@solana/kit v2.x.x).
+// Render the Kit SDK. generate:codama then updates the Kit type names.
 const previewJsDir = path.join(clientDir, 'kit-js', 'src', 'generated');
 const previewPrettier = require(
   path.join(clientDir, 'kit-js', '.prettierrc.json')

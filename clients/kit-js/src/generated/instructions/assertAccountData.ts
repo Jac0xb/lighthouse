@@ -17,10 +17,10 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
   type ReadonlyAccount,
 } from '@solana/kit';
 import {
@@ -50,16 +50,16 @@ export function getAssertAccountDataDiscriminatorBytes() {
 
 export type AssertAccountDataInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountTargetAccount extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+  TAccountTargetAccount extends string | AccountMeta<string> = string,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountTargetAccount extends string
         ? ReadonlyAccount<TAccountTargetAccount>
         : TAccountTargetAccount,
-      ...TRemainingAccounts,
+      ...TRemainingAccounts
     ]
   >;
 
@@ -112,7 +112,7 @@ export function getAssertAccountDataInstructionDataCodec(): Codec<
 }
 
 export type AssertAccountDataInput<
-  TAccountTargetAccount extends string = string,
+  TAccountTargetAccount extends string = string
 > = {
   /** Target account to be asserted */
   targetAccount: Address<TAccountTargetAccount>;
@@ -123,7 +123,7 @@ export type AssertAccountDataInput<
 
 export function getAssertAccountDataInstruction<
   TAccountTargetAccount extends string,
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: AssertAccountDataInput<TAccountTargetAccount>,
   config?: { programAddress?: TProgramAddress }
@@ -157,7 +157,7 @@ export function getAssertAccountDataInstruction<
 
 export type ParsedAssertAccountDataInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[]
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -169,11 +169,11 @@ export type ParsedAssertAccountDataInstruction<
 
 export function parseAssertAccountDataInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[]
 >(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> &
+    InstructionWithAccounts<TAccountMetas> &
+    InstructionWithData<Uint8Array>
 ): ParsedAssertAccountDataInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 1) {
     // TODO: Coded error.

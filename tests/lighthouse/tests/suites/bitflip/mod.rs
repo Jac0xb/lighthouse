@@ -1,6 +1,7 @@
 use crate::utils::blackhat_program::BlackhatProgram;
 use crate::utils::process_transaction_assert_failure;
 use crate::utils::process_transaction_assert_success;
+use crate::utils::to_legacy_instruction;
 use crate::utils::to_transaction_error;
 use crate::utils::CreateMintParameters;
 use crate::utils::{context::TestContext, create_mint, create_user};
@@ -62,13 +63,15 @@ async fn test_bitflip_drain_token_account() {
                 &mint.pubkey(),
                 bytes,
             ),
-            AssertTokenAccountBuilder::new()
-                .target_account(user_ata)
-                .assertion(TokenAccountAssertion::Amount {
-                    value: 69_000,
-                    operator: IntegerOperator::Equal,
-                })
-                .instruction(),
+            to_legacy_instruction(
+                AssertTokenAccountBuilder::new()
+                    .target_account(user_ata.to_bytes().into())
+                    .assertion(TokenAccountAssertion::Amount {
+                        value: 69_000,
+                        operator: IntegerOperator::Equal,
+                    })
+                    .instruction(),
+            ),
         ],
         Some(&user.pubkey()),
         &[&user],

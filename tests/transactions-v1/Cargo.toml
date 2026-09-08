@@ -1,0 +1,19 @@
+[package]
+name = "lighthouse-transaction-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+lighthouse-sdk = { path = "../../clients/rust" }
+litesvm = "0.16.0"
+solana-account = "4.3.0"
+solana-keypair = "3.1.2"
+solana-message = "~4.4.1"
+solana-signer = "3.0.1"
+solana-system-interface = { version = "~3.2.0", features = ["bincode"] }
+solana-transaction = "~4.1.6"
+
+[[test]]
+name = "v1"
+path = "v1.rs"

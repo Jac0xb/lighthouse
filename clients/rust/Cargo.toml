@@ -2,6 +2,7 @@
 name = "lighthouse-sdk"
 version = "2.0.0"
 edition = "2021"
+rust-version = "1.89"
 readme = "README.md"
 license-file = "../../LICENSE"
 description = "A rust client for Lighthouse, a transaction safeguard Solana program"
@@ -14,7 +15,7 @@ crate-type = ["cdylib", "lib"]
 [features]
 serde = ["dep:serde", "dep:serde_with"]
 cpi = []
-sdk = ["dep:solana-sdk"]
+sdk = []
 
 default = []
 
@@ -24,11 +25,22 @@ num-derive = "^0.3"
 num-traits = "^0.2"
 serde = { version = "^1.0", features = ["derive"], optional = true }
 serde_with = { version = "^3.0", optional = true }
-solana-program = "1.17.23"
-solana-sdk = { version = "1.17.23", optional = true }
+solana-program = "2.3.0"
 thiserror = "^1.0"
 base64 = "0.22.0"
 lighthouse-common = { path = "../../lighthouse-common", version = "2.0.0", features = ["serde"]}
 
+[target.'cfg(not(target_os = "solana"))'.dependencies]
+solana-instruction = "~3.4.0"
+solana-signer = "3.0.1"
+solana-message = { version = "~4.4.1", features = ["wincode"] }
+solana-transaction = { version = "~4.1.6", features = ["wincode"] }
+wincode = "0.5.0"
+
 [dev-dependencies]
 assert_matches = "1.5.0"
+solana-keypair = "3.0.0"
+solana-transaction = { version = "~4.1.6", features = ["verify"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
