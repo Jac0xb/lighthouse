@@ -17,11 +17,11 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IAccountSignerMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type AccountSignerMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
   type ReadonlyAccount,
   type TransactionSigner,
   type WritableAccount,
@@ -40,25 +40,25 @@ export type MemoryCloseInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
   TAccountProgramId extends
     | string
-    | IAccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountMemory extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+    | AccountMeta<string> = 'L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95',
+  TAccountPayer extends string | AccountMeta<string> = string,
+  TAccountMemory extends string | AccountMeta<string> = string,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountProgramId extends string
         ? ReadonlyAccount<TAccountProgramId>
         : TAccountProgramId,
       TAccountPayer extends string
         ? WritableSignerAccount<TAccountPayer> &
-            IAccountSignerMeta<TAccountPayer>
+            AccountSignerMeta<TAccountPayer>
         : TAccountPayer,
       TAccountMemory extends string
         ? WritableAccount<TAccountMemory>
         : TAccountMemory,
-      ...TRemainingAccounts,
+      ...TRemainingAccounts
     ]
   >;
 
@@ -105,7 +105,7 @@ export function getMemoryCloseInstructionDataCodec(): Codec<
 export type MemoryCloseInput<
   TAccountProgramId extends string = string,
   TAccountPayer extends string = string,
-  TAccountMemory extends string = string,
+  TAccountMemory extends string = string
 > = {
   /** Lighthouse program */
   programId?: Address<TAccountProgramId>;
@@ -121,7 +121,7 @@ export function getMemoryCloseInstruction<
   TAccountProgramId extends string,
   TAccountPayer extends string,
   TAccountMemory extends string,
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: MemoryCloseInput<TAccountProgramId, TAccountPayer, TAccountMemory>,
   config?: { programAddress?: TProgramAddress }
@@ -177,7 +177,7 @@ export function getMemoryCloseInstruction<
 
 export type ParsedMemoryCloseInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[]
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -193,11 +193,11 @@ export type ParsedMemoryCloseInstruction<
 
 export function parseMemoryCloseInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[]
 >(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> &
+    InstructionWithAccounts<TAccountMetas> &
+    InstructionWithData<Uint8Array>
 ): ParsedMemoryCloseInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
     // TODO: Coded error.

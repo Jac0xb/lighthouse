@@ -17,10 +17,10 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
   type ReadonlyAccount,
 } from '@solana/kit';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
@@ -44,13 +44,13 @@ export function getAssertMerkleTreeAccountDiscriminatorBytes() {
 
 export type AssertMerkleTreeAccountInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountTargetMerkleTree extends string | IAccountMeta<string> = string,
-  TAccountRoot extends string | IAccountMeta<string> = string,
-  TAccountSplAccountCompression extends string | IAccountMeta<string> = string,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+  TAccountTargetMerkleTree extends string | AccountMeta<string> = string,
+  TAccountRoot extends string | AccountMeta<string> = string,
+  TAccountSplAccountCompression extends string | AccountMeta<string> = string,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountTargetMerkleTree extends string
         ? ReadonlyAccount<TAccountTargetMerkleTree>
@@ -61,7 +61,7 @@ export type AssertMerkleTreeAccountInstruction<
       TAccountSplAccountCompression extends string
         ? ReadonlyAccount<TAccountSplAccountCompression>
         : TAccountSplAccountCompression,
-      ...TRemainingAccounts,
+      ...TRemainingAccounts
     ]
   >;
 
@@ -112,7 +112,7 @@ export function getAssertMerkleTreeAccountInstructionDataCodec(): Codec<
 export type AssertMerkleTreeAccountInput<
   TAccountTargetMerkleTree extends string = string,
   TAccountRoot extends string = string,
-  TAccountSplAccountCompression extends string = string,
+  TAccountSplAccountCompression extends string = string
 > = {
   /** Target merkle tree account to be asserted */
   targetMerkleTree: Address<TAccountTargetMerkleTree>;
@@ -128,7 +128,7 @@ export function getAssertMerkleTreeAccountInstruction<
   TAccountTargetMerkleTree extends string,
   TAccountRoot extends string,
   TAccountSplAccountCompression extends string,
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: AssertMerkleTreeAccountInput<
     TAccountTargetMerkleTree,
@@ -188,7 +188,7 @@ export function getAssertMerkleTreeAccountInstruction<
 
 export type ParsedAssertMerkleTreeAccountInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[]
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -204,11 +204,11 @@ export type ParsedAssertMerkleTreeAccountInstruction<
 
 export function parseAssertMerkleTreeAccountInstruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[]
 >(
-  instruction: IInstruction<TProgram> &
-    IInstructionWithAccounts<TAccountMetas> &
-    IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> &
+    InstructionWithAccounts<TAccountMetas> &
+    InstructionWithData<Uint8Array>
 ): ParsedAssertMerkleTreeAccountInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
     // TODO: Coded error.

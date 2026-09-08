@@ -11,8 +11,8 @@ import {
   isProgramDerivedAddress,
   isTransactionSigner as kitIsTransactionSigner,
   type Address,
-  type IAccountMeta,
-  type IAccountSignerMeta,
+  type AccountMeta,
+  type AccountSignerMeta,
   type ProgramDerivedAddress,
   type TransactionSigner,
   upgradeRoleToSigner,
@@ -99,11 +99,7 @@ export type ResolvedAccount<
     | Address<T>
     | ProgramDerivedAddress<T>
     | TransactionSigner<T>
-    | null =
-    | Address<T>
-    | ProgramDerivedAddress<T>
-    | TransactionSigner<T>
-    | null,
+    | null = Address<T> | ProgramDerivedAddress<T> | TransactionSigner<T> | null
 > = {
   isWritable: boolean;
   value: U;
@@ -127,7 +123,7 @@ export function getAccountMetaFactory(
 ) {
   return (
     account: ResolvedAccount
-  ): IAccountMeta | IAccountSignerMeta | undefined => {
+  ): AccountMeta | AccountSignerMeta | undefined => {
     if (!account.value) {
       if (optionalAccountStrategy === 'omitted') return;
       return Object.freeze({

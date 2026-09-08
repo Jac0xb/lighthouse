@@ -20,7 +20,7 @@
   "scripts": {
     "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
     "build:docs": "typedoc",
-    "test": "ava",
+    "test": "pnpm build && tsc -p tsconfig.test.json && node --test test/*.test.cjs",
     "lint": "eslint --ext js,ts,tsx src",
     "lint:fix": "eslint --fix --ext js,ts,tsx src",
     "format": "prettier --check src test",
@@ -32,10 +32,11 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@solana/kit": "^2.1.0"
+    "@solana/kit": "^8.2.0"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
+    "@types/node": "^22.0.0",
     "@solana/webcrypto-ed25519-polyfill": "^2",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",

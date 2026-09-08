@@ -32,7 +32,11 @@ pub type Result<T> = result::Result<T, Box<error::Error>>;
 pub type BanksResult<T> = std::result::Result<T, BanksClientError>;
 
 pub fn program_test() -> ProgramTest {
-    let mut test = ProgramTest::new("lighthouse", lighthouse_sdk::ID, None);
+    let mut test = ProgramTest::new(
+        "lighthouse",
+        Pubkey::new_from_array(lighthouse_sdk::ID.to_bytes()),
+        None,
+    );
     test.add_program("blackhat", blackhat::id(), None);
     test.add_program("test_program", test_program::id(), None);
     test.add_program(
@@ -55,6 +59,24 @@ pub fn program_test() -> ProgramTest {
 // `Copy/Clone` themselves (for some good reasons).
 pub fn clone_keypair(k: &Keypair) -> Keypair {
     Keypair::from_bytes(k.to_bytes().as_slice()).unwrap()
+}
+
+pub fn to_legacy_instruction(
+    instruction: solana_program_v2::instruction::Instruction,
+) -> Instruction {
+    Instruction {
+        program_id: Pubkey::new_from_array(instruction.program_id.to_bytes()),
+        accounts: instruction
+            .accounts
+            .into_iter()
+            .map(|account| solana_sdk::instruction::AccountMeta {
+                pubkey: Pubkey::new_from_array(account.pubkey.to_bytes()),
+                is_signer: account.is_signer,
+                is_writable: account.is_writable,
+            })
+            .collect(),
+        data: instruction.data,
+    }
 }
 
 pub async fn create_user(ctx: &mut TestContext) -> Result<Keypair> {

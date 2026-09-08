@@ -17,10 +17,10 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
-  type IAccountMeta,
-  type IInstruction,
-  type IInstructionWithAccounts,
-  type IInstructionWithData,
+  type AccountMeta,
+  type Instruction,
+  type InstructionWithAccounts,
+  type InstructionWithData,
 } from '@solana/kit';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from '../programs';
 import {
@@ -42,10 +42,10 @@ export function getAssertSysvarClockDiscriminatorBytes() {
 
 export type AssertSysvarClockInstruction<
   TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<TRemainingAccounts>;
+  TRemainingAccounts extends readonly AccountMeta<string>[] = []
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<TRemainingAccounts>;
 
 export type AssertSysvarClockInstructionData = {
   discriminator: number;
@@ -97,7 +97,7 @@ export type AssertSysvarClockInput = {
 };
 
 export function getAssertSysvarClockInstruction<
-  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 >(
   input: AssertSysvarClockInput,
   config?: { programAddress?: TProgramAddress }
@@ -119,14 +119,14 @@ export function getAssertSysvarClockInstruction<
 }
 
 export type ParsedAssertSysvarClockInstruction<
-  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS,
+  TProgram extends string = typeof LIGHTHOUSE_PROGRAM_ADDRESS
 > = {
   programAddress: Address<TProgram>;
   data: AssertSysvarClockInstructionData;
 };
 
 export function parseAssertSysvarClockInstruction<TProgram extends string>(
-  instruction: IInstruction<TProgram> & IInstructionWithData<Uint8Array>
+  instruction: Instruction<TProgram> & InstructionWithData<Uint8Array>
 ): ParsedAssertSysvarClockInstruction<TProgram> {
   return {
     programAddress: instruction.programAddress,
