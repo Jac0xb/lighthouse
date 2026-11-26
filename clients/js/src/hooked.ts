@@ -2,7 +2,6 @@ import {
   Serializer,
   mapSerializer,
 } from '@metaplex-foundation/umi-serializers-core';
-import { UnsignedLEB128 } from '@minhducsun2002/leb128';
 import { array, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoAssertion,
@@ -24,18 +23,61 @@ import {
   getUpgradeableLoaderStateAssertionSerializer,
 } from './generated';
 
+const MAX_U64 = 0xffff_ffff_ffff_ffffn;
+
+function encodeUnsignedLeb128(value: bigint | number): Uint8Array {
+  let n = typeof value === 'bigint' ? value : BigInt(value);
+  if (n < 0n || n > MAX_U64) {
+    throw new RangeError(`CompactU64 value out of range: ${value}`);
+  }
+  const bytes: number[] = [];
+  do {
+    let byte = Number(n & 0x7fn);
+    n >>= 7n;
+    if (n !== 0n) {
+      byte |= 0x80;
+    }
+    bytes.push(byte);
+  } while (n !== 0n);
+  return new Uint8Array(bytes);
+}
+
+function decodeUnsignedLeb128(bytes: Uint8Array, offset = 0): [bigint, number] {
+  let result = 0n;
+  let shift = 0n;
+  let pos = offset;
+  while (pos < bytes.length) {
+    const byte = bytes[pos++];
+    if (shift === 63n && byte > 1) {
+      throw new RangeError('CompactU64 LEB128 overflow');
+    }
+    result |= BigInt(byte & 0x7f) << shift;
+    if ((byte & 0x80) === 0) {
+      return [result, pos];
+    }
+    shift += 7n;
+    if (shift > 63n) {
+      throw new RangeError('CompactU64 LEB128 overflow');
+    }
+  }
+  throw new RangeError('Unexpected end of input while decoding CompactU64');
+}
+
 export type CompactU64 = number;
 export type CompactU64Args = number;
 
 export const getCompactU64Serializer = (): Serializer<number> => ({
   description: 'leb128',
   fixedSize: null,
-  maxSize: null,
-  serialize: (value: number): Uint8Array => UnsignedLEB128.encode(value),
+  maxSize: 10,
+  serialize: (value: number): Uint8Array => encodeUnsignedLeb128(value),
   deserialize: (bytes: Uint8Array, offset = 0): [number, number] => {
-    const value = UnsignedLEB128.decode(bytes as Uint8Array, offset);
+    const [value, nextOffset] = decodeUnsignedLeb128(bytes, offset);
+    if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+      throw new RangeError('CompactU64 value exceeds Number.MAX_SAFE_INTEGER');
+    }
 
-    return [value, offset + UnsignedLEB128.encode(value).length];
+    return [Number(value), nextOffset];
   },
 });
 

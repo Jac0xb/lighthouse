@@ -24,7 +24,7 @@ lighthouse-common = { path = "../../lighthouse-common", version = "3.0.0" }
 num-derive = "^0.4"
 num-traits = "^0.2"
 serde = { version = "^1.0", features = ["derive"], optional = true }
-serde_with = { version = "^3.0", optional = true }
+serde_with = { version = "^3.21", optional = true }
 solana-account-info = "^3.1"
 solana-address = { version = "^2.2", features = ["borsh", "copy", "curve25519", "decode"] }
 solana-cpi = "^3.1"

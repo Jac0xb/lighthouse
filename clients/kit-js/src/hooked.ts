@@ -15,7 +15,6 @@ import {
   getU8Encoder,
   transformEncoder,
 } from '@solana/kit';
-import { UnsignedLEB128 } from '@minhducsun2002/leb128';
 import {
   AccountInfoAssertion,
   AccountInfoAssertionArgs,
@@ -43,28 +42,62 @@ import {
   getUpgradeableLoaderStateAssertionEncoder,
 } from './generated';
 
+const MAX_U64 = 0xffff_ffff_ffff_ffffn;
+
+function encodeUnsignedLeb128(value: bigint | number): Uint8Array {
+  let n = typeof value === 'bigint' ? value : BigInt(value);
+  if (n < 0n || n > MAX_U64) {
+    throw new RangeError(`CompactU64 value out of range: ${value}`);
+  }
+  const bytes: number[] = [];
+  do {
+    let byte = Number(n & 0x7fn);
+    n >>= 7n;
+    if (n !== 0n) {
+      byte |= 0x80;
+    }
+    bytes.push(byte);
+  } while (n !== 0n);
+  return new Uint8Array(bytes);
+}
+
+function decodeUnsignedLeb128(
+  bytes: ReadonlyUint8Array | Uint8Array,
+  offset = 0
+): [bigint, number] {
+  let result = 0n;
+  let shift = 0n;
+  let pos = offset;
+  while (pos < bytes.length) {
+    const byte = bytes[pos++];
+    if (shift === 63n && byte > 1) {
+      throw new RangeError('CompactU64 LEB128 overflow');
+    }
+    result |= BigInt(byte & 0x7f) << shift;
+    if ((byte & 0x80) === 0) {
+      return [result, pos];
+    }
+    shift += 7n;
+    if (shift > 63n) {
+      throw new RangeError('CompactU64 LEB128 overflow');
+    }
+  }
+  throw new RangeError('Unexpected end of input while decoding CompactU64');
+}
+
 export type CompactU64 = number;
-export type CompactU64Args = number;
+export type CompactU64Args = number | bigint;
 
 export function getCompactU64Encoder(): VariableSizeEncoder<bigint | number> {
   return createEncoder({
-    getSizeFromValue: (value: bigint | number): number => {
-      if (typeof value === 'bigint' && value > Number.MAX_SAFE_INTEGER) {
-        throw new Error('CompactU64 value is too large');
-      }
-
-      return UnsignedLEB128.encode(Number(value)).length;
-    },
+    getSizeFromValue: (value: bigint | number): number =>
+      encodeUnsignedLeb128(value).length,
     write: (
       value: bigint | number,
       bytes: Uint8Array,
       offset: Offset
     ): Offset => {
-      if (typeof value === 'bigint' && value > Number.MAX_SAFE_INTEGER) {
-        throw new Error('CompactU64 value is too large');
-      }
-
-      const encodedNumber = UnsignedLEB128.encode(Number(value));
+      const encodedNumber = encodeUnsignedLeb128(value);
       bytes.set(encodedNumber, offset);
 
       return offset + encodedNumber.length;
@@ -78,9 +111,12 @@ export const getCompactU64Decoder = (): VariableSizeDecoder<number> =>
       bytes: ReadonlyUint8Array | Uint8Array,
       offset
     ): [number, Offset] => {
-      const value = UnsignedLEB128.decode(bytes as Uint8Array, offset);
+      const [value, nextOffset] = decodeUnsignedLeb128(bytes, offset);
+      if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+        throw new RangeError('CompactU64 value exceeds Number.MAX_SAFE_INTEGER');
+      }
 
-      return [value, offset + UnsignedLEB128.encode(value).length];
+      return [Number(value), nextOffset];
     },
   });
 

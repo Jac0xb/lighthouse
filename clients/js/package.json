@@ -21,8 +21,8 @@
     "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
     "build:docs": "typedoc",
     "test": "tsx --test test/**/*.test.ts",
-    "lint": "eslint --ext js,ts,tsx src",
-    "lint:fix": "eslint --fix --ext js,ts,tsx src",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src",
     "format": "prettier --check src test",
     "format:fix": "prettier --write src test"
   },
@@ -34,26 +34,24 @@
   "dependencies": {
     "@metaplex-foundation/umi": "^1.6.0",
     "@metaplex-foundation/umi-serializers-core": "^1.6.0",
-    "@minhducsun2002/leb128": "^1.0.0",
     "@solana/web3.js": "^1.99.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.2",
-    "@typescript-eslint/eslint-plugin": "^7.7.0",
-    "@typescript-eslint/parser": "^7.7.0",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-typescript": "^17.1.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-prettier": "^4.2.1",
+    "eslint": "^10.15.0",
     "prettier": "^3.8.1",
-    "rimraf": "^5.0.5",
-    "tsup": "^8.5.0",
+    "rimraf": "^6.1.4",
+    "tsup": "^9.0.0",
     "tsx": "^4.23.15",
-    "typedoc": "^0.25.13",
-    "typedoc-plugin-expand-object-like-types": "^0.1.2",
-    "typedoc-plugin-missing-exports": "^2.2.0",
-    "typescript": "~5.7.3"
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-missing-exports": "^4.1.4",
+    "typescript": "~5.7.3",
+    "typescript-eslint": "^8.74.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "base-x": "^3.0.11"
+    }
   },
   "packageManager": "pnpm@10.33.0"
 }

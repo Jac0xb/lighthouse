@@ -143,7 +143,7 @@ async function main() {
         'num-derive': '^0.4',
         'num-traits': '^0.2',
         serde: { version: '^1.0', features: ['derive'], optional: true },
-        serde_with: { version: '^3.0', optional: true },
+        serde_with: { version: '^3.21', optional: true },
         'solana-account-info': '^3.1',
         'solana-address': {
           version: '^2.2',
