@@ -30,7 +30,19 @@ test('CompactU64 encodes and decodes unsigned LEB128 values accurately', () => {
   const encoder = getCompactU64Encoder();
   const decoder = getCompactU64Decoder();
 
-  for (const value of [0, 1, 63, 64, 127, 128, 1000, 16384]) {
+  for (const value of [
+    0,
+    1,
+    63,
+    64,
+    127,
+    128,
+    1000,
+    16384,
+    2 ** 31,
+    2 ** 32,
+    Number.MAX_SAFE_INTEGER,
+  ]) {
     const encoded = encoder.encode(value);
     const [decoded, bytesRead] = decoder.read(encoded, 0);
     assert.equal(decoded, value);
@@ -42,6 +54,22 @@ test('CompactU64 encodes and decodes unsigned LEB128 values accurately', () => {
   assert.equal(encoder.encode(127).length, 1);
   // 1000 = 0b11101000, 0b00000111
   assert.deepEqual(Array.from(encoder.encode(1000)), [0xe8, 0x07]);
+  // u64::MAX matches lighthouse-common Rust encoding
+  assert.deepEqual(Array.from(encoder.encode(0xffff_ffff_ffff_ffffn)), [
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01,
+  ]);
+  // Reject negative, out-of-range, truncated, and overflowing inputs
+  assert.throws(() => encoder.encode(-1), RangeError);
+  assert.throws(() => encoder.encode(0x1_0000_0000_0000_0000n), RangeError);
+  assert.throws(() => decoder.read(new Uint8Array([0x80]), 0), RangeError);
+  assert.throws(
+    () =>
+      decoder.read(
+        new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x02]),
+        0
+      ),
+    RangeError
+  );
 });
 
 test('findMemoryPda derives a deterministic PDA', async () => {

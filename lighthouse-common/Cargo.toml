@@ -11,12 +11,11 @@ license = "MIT"
 crate-type = ["cdylib", "lib"]
 
 [features]
-serde = ["dep:serde", "dep:serde_with"]
+serde = ["dep:serde"]
 
 default = []
 
 [dependencies]
 borsh = { version = "^1.0", features = ["derive"] }
 serde = { version = "^1.0", features = ["derive"], optional = true }
-serde_with = { version = "^3.0", optional = true }
 leb128 = "0.2.5"
