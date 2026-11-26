@@ -24,13 +24,27 @@ const mockContext: Pick<Context, 'programs'> = {
 
 test('CompactU64 serializer encodes and decodes unsigned LEB128 accurately', () => {
   const serializer = getCompactU64Serializer();
-  for (const value of [0, 1, 63, 64, 127, 128, 1000, 16384]) {
+  for (const value of [
+    0,
+    1,
+    63,
+    64,
+    127,
+    128,
+    1000,
+    16384,
+    2 ** 31,
+    2 ** 32,
+    Number.MAX_SAFE_INTEGER,
+  ]) {
     const encoded = serializer.serialize(value);
     const [decoded, bytesRead] = serializer.deserialize(encoded, 0);
     assert.equal(decoded, value);
     assert.equal(bytesRead, encoded.length);
   }
   assert.deepEqual(Array.from(serializer.serialize(1000)), [0xe8, 0x07]);
+  assert.throws(() => serializer.serialize(-1), RangeError);
+  assert.throws(() => serializer.deserialize(new Uint8Array([0x80]), 0), RangeError);
 });
 
 test('findMemoryPda and Umi builders produce valid instructions', () => {
