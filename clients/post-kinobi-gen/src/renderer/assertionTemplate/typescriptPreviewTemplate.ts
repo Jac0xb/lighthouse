@@ -2,7 +2,7 @@ import Handlebars from 'handlebars';
 import { AssertionTemplateArgs, renderAssertionArgs } from './args';
 
 const template = `
-import { Address } from '@solana/web3.js';
+import { Address } from '@solana/kit';
 import {
   EquatableOperator,
   IntegerOperator,

@@ -48,12 +48,12 @@ impl Assert{{assertionName}}Builder {
         self
     }
 
-    pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
+    pub fn target_account(&mut self, target_account: solana_address::Address) -> &mut Self {
         self.0.target_account(target_account);
         self
     }
 
-    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+    pub fn instruction(&self) -> solana_instruction::Instruction {
         self.0.instruction()
     }
 }

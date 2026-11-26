@@ -14,13 +14,12 @@ import {
   enumValueNode,
   deleteNodesVisitor,
   InstructionArgumentNode,
+  InstructionNode,
 } from 'codama';
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
-import {
-  renderJavaScriptUmiVisitor,
-  renderJavaScriptVisitor,
-  renderRustVisitor,
-} from '@codama/renderers';
+import { renderVisitor as renderJavaScriptVisitor } from '@codama/renderers-js';
+import { renderVisitor as renderJavaScriptUmiVisitor } from '@codama/renderers-js-umi';
+import { renderVisitor as renderRustVisitor } from '@codama/renderers-rust';
 
 // Paths to clients and lighthouse program directory.
 const clientDir = path.join(__dirname, '..', 'clients');
@@ -79,6 +78,19 @@ codama.update(
 // Delete testAccountV1 type. This is used in testing but picked up by shank.
 codama.update(deleteNodesVisitor(['testAccountV1']));
 
+// Ensure every instruction has an accounts array (renderers-rust accesses `instruction.accounts.length + 1`).
+codama.update(
+  bottomUpTransformerVisitor([
+    {
+      select: '[instructionNode]',
+      transform: (node) => {
+        const ix = node as InstructionNode;
+        return ix.accounts ? ix : { ...ix, accounts: [] };
+      },
+    },
+  ])
+);
+
 // Link overrides for hooked types. The hooked types are then defined in the hooked.(ts/rs) file.
 const linkOverrides = {
   definedTypes: {
@@ -94,35 +106,74 @@ const linkOverrides = {
   },
 };
 
-// Render JavaScript SDK (@solana/kit v2.x.x).
-const previewJsDir = path.join(clientDir, 'kit-js', 'src', 'generated');
-const previewPrettier = require(
-  path.join(clientDir, 'kit-js', '.prettierrc.json')
-);
-codama.accept(
-  renderJavaScriptVisitor(previewJsDir, {
-    prettierOptions: previewPrettier,
-    linkOverrides,
-  })
-);
+async function main() {
+  // Render JavaScript SDK (@solana/kit).
+  const kitJsDir = path.join(clientDir, 'kit-js');
+  const { parser: _kitParser, ...kitPrettier } = require(
+    path.join(kitJsDir, '.prettierrc.json')
+  );
+  await codama.accept(
+    renderJavaScriptVisitor(kitJsDir, {
+      prettierOptions: kitPrettier,
+      linkOverrides,
+      kitImportStrategy: 'preferRoot',
+      syncPackageJson: true,
+    })
+  );
 
-// Render JavaScript umi SDK.
-const jsDir = path.join(clientDir, 'js', 'src', 'generated');
-const prettier = require(path.join(clientDir, 'js', '.prettierrc.json'));
-codama.accept(
-  renderJavaScriptUmiVisitor(jsDir, {
-    prettierOptions: prettier,
-    linkOverrides,
-  })
-);
+  // Render JavaScript Umi SDK (legacy).
+  const jsDir = path.join(clientDir, 'js', 'src', 'generated');
+  const prettier = require(path.join(clientDir, 'js', '.prettierrc.json'));
+  await codama.accept(
+    renderJavaScriptUmiVisitor(jsDir, {
+      prettierOptions: prettier,
+      linkOverrides,
+    })
+  );
 
-// Render Rust SDK.
-const crateDir = path.join(clientDir, 'rust');
-const rustDir = path.join(clientDir, 'rust', 'src', 'generated');
-codama.accept(
-  renderRustVisitor(rustDir, {
-    formatCode: true,
-    crateFolder: crateDir,
-    linkOverrides,
-  })
-);
+  // Render Rust SDK.
+  const crateDir = path.join(clientDir, 'rust');
+  codama.accept(
+    renderRustVisitor(crateDir, {
+      formatCode: true,
+      syncCargoToml: false,
+      linkOverrides,
+      dependencyVersions: {
+        borsh: { version: '^1.0', features: ['derive'] },
+        'num-derive': '^0.4',
+        'num-traits': '^0.2',
+        serde: { version: '^1.0', features: ['derive'], optional: true },
+        serde_with: { version: '^3.0', optional: true },
+        'solana-account-info': '^3.1',
+        'solana-address': {
+          version: '^2.2',
+          features: ['borsh', 'copy', 'curve25519', 'decode'],
+        },
+        'solana-cpi': '^3.1',
+        'solana-instruction': '^3.2',
+        'solana-program-error': '^3.0',
+        thiserror: '^1.0',
+      },
+      traitOptions: {
+        baseDefaults: [
+          'borsh::BorshSerialize',
+          'borsh::BorshDeserialize',
+          'Clone',
+          'Debug',
+          'Eq',
+          'PartialEq',
+          'serde::Serialize',
+          'serde::Deserialize',
+        ],
+        featureFlags: {
+          serde: ['serde::Serialize', 'serde::Deserialize'],
+        },
+      },
+    })
+  );
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -8,7 +8,9 @@ WORKING_DIR=$(pwd)
 # command-line input
 ARGS=$*
 
-# js client tests folder
-cd ${WORKING_DIR}/clients/js
+# js client tests
+cd "${WORKING_DIR}/clients/kit-js"
+pnpm install && pnpm build && pnpm test ${ARGS}
 
+cd "${WORKING_DIR}/clients/js"
 pnpm install && pnpm build && pnpm test ${ARGS}

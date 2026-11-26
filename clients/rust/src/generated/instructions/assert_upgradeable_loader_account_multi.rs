@@ -10,18 +10,20 @@ use crate::hooked::UpgradeableLoaderStateAssertions;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
+pub const ASSERT_UPGRADEABLE_LOADER_ACCOUNT_MULTI_DISCRIMINATOR: u8 = 14;
+
 /// Accounts.
 #[derive(Debug)]
 pub struct AssertUpgradeableLoaderAccountMulti {
     /// Target account to be asserted
-    pub target_account: solana_program::pubkey::Pubkey,
+    pub target_account: solana_address::Address,
 }
 
 impl AssertUpgradeableLoaderAccountMulti {
     pub fn instruction(
         &self,
         args: AssertUpgradeableLoaderAccountMultiInstructionArgs,
-    ) -> solana_program::instruction::Instruction {
+    ) -> solana_instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::arithmetic_side_effects)]
@@ -29,20 +31,21 @@ impl AssertUpgradeableLoaderAccountMulti {
     pub fn instruction_with_remaining_accounts(
         &self,
         args: AssertUpgradeableLoaderAccountMultiInstructionArgs,
-        remaining_accounts: &[solana_program::instruction::AccountMeta],
-    ) -> solana_program::instruction::Instruction {
+        remaining_accounts: &[solana_instruction::AccountMeta],
+    ) -> solana_instruction::Instruction {
         let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.target_account,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data =
-            borsh::to_vec(&AssertUpgradeableLoaderAccountMultiInstructionData::new()).unwrap();
-        let mut args = borsh::to_vec(&args).unwrap();
+        let mut data = AssertUpgradeableLoaderAccountMultiInstructionData::new()
+            .try_to_vec()
+            .unwrap();
+        let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
-        solana_program::instruction::Instruction {
+        solana_instruction::Instruction {
             program_id: crate::LIGHTHOUSE_ID,
             accounts,
             data,
@@ -60,6 +63,10 @@ impl AssertUpgradeableLoaderAccountMultiInstructionData {
     pub fn new() -> Self {
         Self { discriminator: 14 }
     }
+
+    pub(crate) fn try_to_vec(&self) -> Result<Vec<u8>, std::io::Error> {
+        borsh::to_vec(self)
+    }
 }
 
 impl Default for AssertUpgradeableLoaderAccountMultiInstructionData {
@@ -75,6 +82,12 @@ pub struct AssertUpgradeableLoaderAccountMultiInstructionArgs {
     pub assertions: UpgradeableLoaderStateAssertions,
 }
 
+impl AssertUpgradeableLoaderAccountMultiInstructionArgs {
+    pub(crate) fn try_to_vec(&self) -> Result<Vec<u8>, std::io::Error> {
+        borsh::to_vec(self)
+    }
+}
+
 /// Instruction builder for `AssertUpgradeableLoaderAccountMulti`.
 ///
 /// ### Accounts:
@@ -82,10 +95,10 @@ pub struct AssertUpgradeableLoaderAccountMultiInstructionArgs {
 ///   0. `[]` target_account
 #[derive(Clone, Debug, Default)]
 pub struct AssertUpgradeableLoaderAccountMultiBuilder {
-    target_account: Option<solana_program::pubkey::Pubkey>,
+    target_account: Option<solana_address::Address>,
     log_level: Option<LogLevel>,
     assertions: Option<UpgradeableLoaderStateAssertions>,
-    __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
+    __remaining_accounts: Vec<solana_instruction::AccountMeta>,
 }
 
 impl AssertUpgradeableLoaderAccountMultiBuilder {
@@ -94,7 +107,7 @@ impl AssertUpgradeableLoaderAccountMultiBuilder {
     }
     /// Target account to be asserted
     #[inline(always)]
-    pub fn target_account(&mut self, target_account: solana_program::pubkey::Pubkey) -> &mut Self {
+    pub fn target_account(&mut self, target_account: solana_address::Address) -> &mut Self {
         self.target_account = Some(target_account);
         self
     }
@@ -111,10 +124,7 @@ impl AssertUpgradeableLoaderAccountMultiBuilder {
     }
     /// Add an additional account to the instruction.
     #[inline(always)]
-    pub fn add_remaining_account(
-        &mut self,
-        account: solana_program::instruction::AccountMeta,
-    ) -> &mut Self {
+    pub fn add_remaining_account(&mut self, account: solana_instruction::AccountMeta) -> &mut Self {
         self.__remaining_accounts.push(account);
         self
     }
@@ -122,13 +132,13 @@ impl AssertUpgradeableLoaderAccountMultiBuilder {
     #[inline(always)]
     pub fn add_remaining_accounts(
         &mut self,
-        accounts: &[solana_program::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> &mut Self {
         self.__remaining_accounts.extend_from_slice(accounts);
         self
     }
     #[allow(clippy::clone_on_copy)]
-    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+    pub fn instruction(&self) -> solana_instruction::Instruction {
         let accounts = AssertUpgradeableLoaderAccountMulti {
             target_account: self.target_account.expect("target_account is not set"),
         };
@@ -144,22 +154,22 @@ impl AssertUpgradeableLoaderAccountMultiBuilder {
 /// `assert_upgradeable_loader_account_multi` CPI accounts.
 pub struct AssertUpgradeableLoaderAccountMultiCpiAccounts<'a, 'b> {
     /// Target account to be asserted
-    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub target_account: &'b solana_account_info::AccountInfo<'a>,
 }
 
 /// `assert_upgradeable_loader_account_multi` CPI instruction.
 pub struct AssertUpgradeableLoaderAccountMultiCpi<'a, 'b> {
     /// The program to invoke.
-    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub __program: &'b solana_account_info::AccountInfo<'a>,
     /// Target account to be asserted
-    pub target_account: &'b solana_program::account_info::AccountInfo<'a>,
+    pub target_account: &'b solana_account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertUpgradeableLoaderAccountMultiInstructionArgs,
 }
 
 impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpi<'a, 'b> {
     pub fn new(
-        program: &'b solana_program::account_info::AccountInfo<'a>,
+        program: &'b solana_account_info::AccountInfo<'a>,
         accounts: AssertUpgradeableLoaderAccountMultiCpiAccounts<'a, 'b>,
         args: AssertUpgradeableLoaderAccountMultiInstructionArgs,
     ) -> Self {
@@ -170,25 +180,18 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpi<'a, 'b> {
         }
     }
     #[inline(always)]
-    pub fn invoke(&self) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke(&self) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(&[], &[])
     }
     #[inline(always)]
     pub fn invoke_with_remaining_accounts(
         &self,
-        remaining_accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
-    ) -> solana_program::entrypoint::ProgramResult {
+        remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
+    ) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(&[], remaining_accounts)
     }
     #[inline(always)]
-    pub fn invoke_signed(
-        &self,
-        signers_seeds: &[&[&[u8]]],
-    ) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke_signed(&self, signers_seeds: &[&[&[u8]]]) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(signers_seeds, &[])
     }
     #[allow(clippy::arithmetic_side_effects)]
@@ -197,30 +200,27 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpi<'a, 'b> {
     pub fn invoke_signed_with_remaining_accounts(
         &self,
         signers_seeds: &[&[&[u8]]],
-        remaining_accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
-    ) -> solana_program::entrypoint::ProgramResult {
+        remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
+    ) -> solana_program_error::ProgramResult {
         let mut accounts = Vec::with_capacity(1 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             *self.target_account.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
-            accounts.push(solana_program::instruction::AccountMeta {
+            accounts.push(solana_instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
-                is_signer: remaining_account.1,
-                is_writable: remaining_account.2,
+                is_writable: remaining_account.1,
+                is_signer: remaining_account.2,
             })
         });
-        let mut data =
-            borsh::to_vec(&AssertUpgradeableLoaderAccountMultiInstructionData::new()).unwrap();
-        let mut args = borsh::to_vec(&self.__args).unwrap();
+        let mut data = AssertUpgradeableLoaderAccountMultiInstructionData::new()
+            .try_to_vec()
+            .unwrap();
+        let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
-        let instruction = solana_program::instruction::Instruction {
+        let instruction = solana_instruction::Instruction {
             program_id: crate::LIGHTHOUSE_ID,
             accounts,
             data,
@@ -233,9 +233,9 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpi<'a, 'b> {
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
 
         if signers_seeds.is_empty() {
-            solana_program::program::invoke(&instruction, &account_infos)
+            solana_cpi::invoke(&instruction, &account_infos)
         } else {
-            solana_program::program::invoke_signed(&instruction, &account_infos, signers_seeds)
+            solana_cpi::invoke_signed(&instruction, &account_infos, signers_seeds)
         }
     }
 }
@@ -251,7 +251,7 @@ pub struct AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
 }
 
 impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
-    pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
+    pub fn new(program: &'b solana_account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(AssertUpgradeableLoaderAccountMultiCpiBuilderInstruction {
             __program: program,
             target_account: None,
@@ -265,7 +265,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn target_account(
         &mut self,
-        target_account: &'b solana_program::account_info::AccountInfo<'a>,
+        target_account: &'b solana_account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.target_account = Some(target_account);
         self
@@ -285,7 +285,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn add_remaining_account(
         &mut self,
-        account: &'b solana_program::account_info::AccountInfo<'a>,
+        account: &'b solana_account_info::AccountInfo<'a>,
         is_writable: bool,
         is_signer: bool,
     ) -> &mut Self {
@@ -301,11 +301,7 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn add_remaining_accounts(
         &mut self,
-        accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
+        accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
     ) -> &mut Self {
         self.instruction
             .__remaining_accounts
@@ -313,15 +309,12 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn invoke(&self) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke(&self) -> solana_program_error::ProgramResult {
         self.invoke_signed(&[])
     }
     #[allow(clippy::clone_on_copy)]
     #[allow(clippy::vec_init_then_push)]
-    pub fn invoke_signed(
-        &self,
-        signers_seeds: &[&[&[u8]]],
-    ) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke_signed(&self, signers_seeds: &[&[&[u8]]]) -> solana_program_error::ProgramResult {
         let args = AssertUpgradeableLoaderAccountMultiInstructionArgs {
             log_level: self
                 .instruction
@@ -352,14 +345,10 @@ impl<'a, 'b> AssertUpgradeableLoaderAccountMultiCpiBuilder<'a, 'b> {
 
 #[derive(Clone, Debug)]
 struct AssertUpgradeableLoaderAccountMultiCpiBuilderInstruction<'a, 'b> {
-    __program: &'b solana_program::account_info::AccountInfo<'a>,
-    target_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    __program: &'b solana_account_info::AccountInfo<'a>,
+    target_account: Option<&'b solana_account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
     assertions: Option<UpgradeableLoaderStateAssertions>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
-    __remaining_accounts: Vec<(
-        &'b solana_program::account_info::AccountInfo<'a>,
-        bool,
-        bool,
-    )>,
+    __remaining_accounts: Vec<(&'b solana_account_info::AccountInfo<'a>, bool, bool)>,
 }

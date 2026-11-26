@@ -10,22 +10,24 @@ use crate::generated::types::MerkleTreeAssertion;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
 
+pub const ASSERT_MERKLE_TREE_ACCOUNT_DISCRIMINATOR: u8 = 16;
+
 /// Accounts.
 #[derive(Debug)]
 pub struct AssertMerkleTreeAccount {
     /// Target merkle tree account to be asserted
-    pub target_merkle_tree: solana_program::pubkey::Pubkey,
+    pub target_merkle_tree: solana_address::Address,
     /// The current root of the merkle tree
-    pub root: solana_program::pubkey::Pubkey,
+    pub root: solana_address::Address,
     /// SPL account compression program
-    pub spl_account_compression: solana_program::pubkey::Pubkey,
+    pub spl_account_compression: solana_address::Address,
 }
 
 impl AssertMerkleTreeAccount {
     pub fn instruction(
         &self,
         args: AssertMerkleTreeAccountInstructionArgs,
-    ) -> solana_program::instruction::Instruction {
+    ) -> solana_instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::arithmetic_side_effects)]
@@ -33,26 +35,28 @@ impl AssertMerkleTreeAccount {
     pub fn instruction_with_remaining_accounts(
         &self,
         args: AssertMerkleTreeAccountInstructionArgs,
-        remaining_accounts: &[solana_program::instruction::AccountMeta],
-    ) -> solana_program::instruction::Instruction {
+        remaining_accounts: &[solana_instruction::AccountMeta],
+    ) -> solana_instruction::Instruction {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.target_merkle_tree,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.root, false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.spl_account_compression,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = borsh::to_vec(&AssertMerkleTreeAccountInstructionData::new()).unwrap();
-        let mut args = borsh::to_vec(&args).unwrap();
+        let mut data = AssertMerkleTreeAccountInstructionData::new()
+            .try_to_vec()
+            .unwrap();
+        let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
-        solana_program::instruction::Instruction {
+        solana_instruction::Instruction {
             program_id: crate::LIGHTHOUSE_ID,
             accounts,
             data,
@@ -70,6 +74,10 @@ impl AssertMerkleTreeAccountInstructionData {
     pub fn new() -> Self {
         Self { discriminator: 16 }
     }
+
+    pub(crate) fn try_to_vec(&self) -> Result<Vec<u8>, std::io::Error> {
+        borsh::to_vec(self)
+    }
 }
 
 impl Default for AssertMerkleTreeAccountInstructionData {
@@ -85,6 +93,12 @@ pub struct AssertMerkleTreeAccountInstructionArgs {
     pub assertion: MerkleTreeAssertion,
 }
 
+impl AssertMerkleTreeAccountInstructionArgs {
+    pub(crate) fn try_to_vec(&self) -> Result<Vec<u8>, std::io::Error> {
+        borsh::to_vec(self)
+    }
+}
+
 /// Instruction builder for `AssertMerkleTreeAccount`.
 ///
 /// ### Accounts:
@@ -94,12 +108,12 @@ pub struct AssertMerkleTreeAccountInstructionArgs {
 ///   2. `[]` spl_account_compression
 #[derive(Clone, Debug, Default)]
 pub struct AssertMerkleTreeAccountBuilder {
-    target_merkle_tree: Option<solana_program::pubkey::Pubkey>,
-    root: Option<solana_program::pubkey::Pubkey>,
-    spl_account_compression: Option<solana_program::pubkey::Pubkey>,
+    target_merkle_tree: Option<solana_address::Address>,
+    root: Option<solana_address::Address>,
+    spl_account_compression: Option<solana_address::Address>,
     log_level: Option<LogLevel>,
     assertion: Option<MerkleTreeAssertion>,
-    __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
+    __remaining_accounts: Vec<solana_instruction::AccountMeta>,
 }
 
 impl AssertMerkleTreeAccountBuilder {
@@ -108,16 +122,13 @@ impl AssertMerkleTreeAccountBuilder {
     }
     /// Target merkle tree account to be asserted
     #[inline(always)]
-    pub fn target_merkle_tree(
-        &mut self,
-        target_merkle_tree: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
+    pub fn target_merkle_tree(&mut self, target_merkle_tree: solana_address::Address) -> &mut Self {
         self.target_merkle_tree = Some(target_merkle_tree);
         self
     }
     /// The current root of the merkle tree
     #[inline(always)]
-    pub fn root(&mut self, root: solana_program::pubkey::Pubkey) -> &mut Self {
+    pub fn root(&mut self, root: solana_address::Address) -> &mut Self {
         self.root = Some(root);
         self
     }
@@ -125,7 +136,7 @@ impl AssertMerkleTreeAccountBuilder {
     #[inline(always)]
     pub fn spl_account_compression(
         &mut self,
-        spl_account_compression: solana_program::pubkey::Pubkey,
+        spl_account_compression: solana_address::Address,
     ) -> &mut Self {
         self.spl_account_compression = Some(spl_account_compression);
         self
@@ -143,10 +154,7 @@ impl AssertMerkleTreeAccountBuilder {
     }
     /// Add an additional account to the instruction.
     #[inline(always)]
-    pub fn add_remaining_account(
-        &mut self,
-        account: solana_program::instruction::AccountMeta,
-    ) -> &mut Self {
+    pub fn add_remaining_account(&mut self, account: solana_instruction::AccountMeta) -> &mut Self {
         self.__remaining_accounts.push(account);
         self
     }
@@ -154,13 +162,13 @@ impl AssertMerkleTreeAccountBuilder {
     #[inline(always)]
     pub fn add_remaining_accounts(
         &mut self,
-        accounts: &[solana_program::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> &mut Self {
         self.__remaining_accounts.extend_from_slice(accounts);
         self
     }
     #[allow(clippy::clone_on_copy)]
-    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+    pub fn instruction(&self) -> solana_instruction::Instruction {
         let accounts = AssertMerkleTreeAccount {
             target_merkle_tree: self
                 .target_merkle_tree
@@ -182,30 +190,30 @@ impl AssertMerkleTreeAccountBuilder {
 /// `assert_merkle_tree_account` CPI accounts.
 pub struct AssertMerkleTreeAccountCpiAccounts<'a, 'b> {
     /// Target merkle tree account to be asserted
-    pub target_merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
+    pub target_merkle_tree: &'b solana_account_info::AccountInfo<'a>,
     /// The current root of the merkle tree
-    pub root: &'b solana_program::account_info::AccountInfo<'a>,
+    pub root: &'b solana_account_info::AccountInfo<'a>,
     /// SPL account compression program
-    pub spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+    pub spl_account_compression: &'b solana_account_info::AccountInfo<'a>,
 }
 
 /// `assert_merkle_tree_account` CPI instruction.
 pub struct AssertMerkleTreeAccountCpi<'a, 'b> {
     /// The program to invoke.
-    pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    pub __program: &'b solana_account_info::AccountInfo<'a>,
     /// Target merkle tree account to be asserted
-    pub target_merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
+    pub target_merkle_tree: &'b solana_account_info::AccountInfo<'a>,
     /// The current root of the merkle tree
-    pub root: &'b solana_program::account_info::AccountInfo<'a>,
+    pub root: &'b solana_account_info::AccountInfo<'a>,
     /// SPL account compression program
-    pub spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+    pub spl_account_compression: &'b solana_account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: AssertMerkleTreeAccountInstructionArgs,
 }
 
 impl<'a, 'b> AssertMerkleTreeAccountCpi<'a, 'b> {
     pub fn new(
-        program: &'b solana_program::account_info::AccountInfo<'a>,
+        program: &'b solana_account_info::AccountInfo<'a>,
         accounts: AssertMerkleTreeAccountCpiAccounts<'a, 'b>,
         args: AssertMerkleTreeAccountInstructionArgs,
     ) -> Self {
@@ -218,25 +226,18 @@ impl<'a, 'b> AssertMerkleTreeAccountCpi<'a, 'b> {
         }
     }
     #[inline(always)]
-    pub fn invoke(&self) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke(&self) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(&[], &[])
     }
     #[inline(always)]
     pub fn invoke_with_remaining_accounts(
         &self,
-        remaining_accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
-    ) -> solana_program::entrypoint::ProgramResult {
+        remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
+    ) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(&[], remaining_accounts)
     }
     #[inline(always)]
-    pub fn invoke_signed(
-        &self,
-        signers_seeds: &[&[&[u8]]],
-    ) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke_signed(&self, signers_seeds: &[&[&[u8]]]) -> solana_program_error::ProgramResult {
         self.invoke_signed_with_remaining_accounts(signers_seeds, &[])
     }
     #[allow(clippy::arithmetic_side_effects)]
@@ -245,37 +246,35 @@ impl<'a, 'b> AssertMerkleTreeAccountCpi<'a, 'b> {
     pub fn invoke_signed_with_remaining_accounts(
         &self,
         signers_seeds: &[&[&[u8]]],
-        remaining_accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
-    ) -> solana_program::entrypoint::ProgramResult {
+        remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
+    ) -> solana_program_error::ProgramResult {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             *self.target_merkle_tree.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             *self.root.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
             *self.spl_account_compression.key,
             false,
         ));
         remaining_accounts.iter().for_each(|remaining_account| {
-            accounts.push(solana_program::instruction::AccountMeta {
+            accounts.push(solana_instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
-                is_signer: remaining_account.1,
-                is_writable: remaining_account.2,
+                is_writable: remaining_account.1,
+                is_signer: remaining_account.2,
             })
         });
-        let mut data = borsh::to_vec(&AssertMerkleTreeAccountInstructionData::new()).unwrap();
-        let mut args = borsh::to_vec(&self.__args).unwrap();
+        let mut data = AssertMerkleTreeAccountInstructionData::new()
+            .try_to_vec()
+            .unwrap();
+        let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
-        let instruction = solana_program::instruction::Instruction {
+        let instruction = solana_instruction::Instruction {
             program_id: crate::LIGHTHOUSE_ID,
             accounts,
             data,
@@ -290,9 +289,9 @@ impl<'a, 'b> AssertMerkleTreeAccountCpi<'a, 'b> {
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
 
         if signers_seeds.is_empty() {
-            solana_program::program::invoke(&instruction, &account_infos)
+            solana_cpi::invoke(&instruction, &account_infos)
         } else {
-            solana_program::program::invoke_signed(&instruction, &account_infos, signers_seeds)
+            solana_cpi::invoke_signed(&instruction, &account_infos, signers_seeds)
         }
     }
 }
@@ -310,7 +309,7 @@ pub struct AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
 }
 
 impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
-    pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
+    pub fn new(program: &'b solana_account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(AssertMerkleTreeAccountCpiBuilderInstruction {
             __program: program,
             target_merkle_tree: None,
@@ -326,14 +325,14 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn target_merkle_tree(
         &mut self,
-        target_merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
+        target_merkle_tree: &'b solana_account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.target_merkle_tree = Some(target_merkle_tree);
         self
     }
     /// The current root of the merkle tree
     #[inline(always)]
-    pub fn root(&mut self, root: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+    pub fn root(&mut self, root: &'b solana_account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.root = Some(root);
         self
     }
@@ -341,7 +340,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn spl_account_compression(
         &mut self,
-        spl_account_compression: &'b solana_program::account_info::AccountInfo<'a>,
+        spl_account_compression: &'b solana_account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.spl_account_compression = Some(spl_account_compression);
         self
@@ -361,7 +360,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn add_remaining_account(
         &mut self,
-        account: &'b solana_program::account_info::AccountInfo<'a>,
+        account: &'b solana_account_info::AccountInfo<'a>,
         is_writable: bool,
         is_signer: bool,
     ) -> &mut Self {
@@ -377,11 +376,7 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn add_remaining_accounts(
         &mut self,
-        accounts: &[(
-            &'b solana_program::account_info::AccountInfo<'a>,
-            bool,
-            bool,
-        )],
+        accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
     ) -> &mut Self {
         self.instruction
             .__remaining_accounts
@@ -389,15 +384,12 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn invoke(&self) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke(&self) -> solana_program_error::ProgramResult {
         self.invoke_signed(&[])
     }
     #[allow(clippy::clone_on_copy)]
     #[allow(clippy::vec_init_then_push)]
-    pub fn invoke_signed(
-        &self,
-        signers_seeds: &[&[&[u8]]],
-    ) -> solana_program::entrypoint::ProgramResult {
+    pub fn invoke_signed(&self, signers_seeds: &[&[&[u8]]]) -> solana_program_error::ProgramResult {
         let args = AssertMerkleTreeAccountInstructionArgs {
             log_level: self
                 .instruction
@@ -435,16 +427,12 @@ impl<'a, 'b> AssertMerkleTreeAccountCpiBuilder<'a, 'b> {
 
 #[derive(Clone, Debug)]
 struct AssertMerkleTreeAccountCpiBuilderInstruction<'a, 'b> {
-    __program: &'b solana_program::account_info::AccountInfo<'a>,
-    target_merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    root: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    spl_account_compression: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    __program: &'b solana_account_info::AccountInfo<'a>,
+    target_merkle_tree: Option<&'b solana_account_info::AccountInfo<'a>>,
+    root: Option<&'b solana_account_info::AccountInfo<'a>>,
+    spl_account_compression: Option<&'b solana_account_info::AccountInfo<'a>>,
     log_level: Option<LogLevel>,
     assertion: Option<MerkleTreeAssertion>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
-    __remaining_accounts: Vec<(
-        &'b solana_program::account_info::AccountInfo<'a>,
-        bool,
-        bool,
-    )>,
+    __remaining_accounts: Vec<(&'b solana_account_info::AccountInfo<'a>, bool, bool)>,
 }

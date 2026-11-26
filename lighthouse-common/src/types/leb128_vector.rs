@@ -1,7 +1,6 @@
-use borsh::maybestd::io::Read;
+use borsh::io::{self, Error, ErrorKind, Read, Write};
 use borsh::{BorshDeserialize, BorshSerialize};
 use std::fmt::Debug;
-use std::io::Write;
 use std::ops::{Deref, DerefMut};
 
 #[derive(Clone, Eq, PartialEq)]
@@ -46,12 +45,11 @@ impl<T> BorshDeserialize for LEB128Vec<T>
 where
     T: BorshSerialize + BorshDeserialize,
 {
-    fn deserialize_reader<R: Read>(reader: &mut R) -> borsh::maybestd::io::Result<Self> {
+    fn deserialize_reader<R: Read>(reader: &mut R) -> io::Result<Self> {
         let mut items: Vec<T> = Vec::new();
 
-        let len = leb128::read::unsigned(reader).map_err(|e| {
-            borsh::maybestd::io::Error::new(borsh::maybestd::io::ErrorKind::InvalidData, e)
-        })? as usize;
+        let len = leb128::read::unsigned(reader)
+            .map_err(|e| Error::new(ErrorKind::InvalidData, e))? as usize;
 
         for _ in 0..len {
             items.push(T::deserialize_reader(reader)?);
@@ -65,7 +63,7 @@ impl<T> BorshSerialize for LEB128Vec<T>
 where
     T: BorshSerialize + BorshDeserialize,
 {
-    fn serialize<W: Write>(&self, writer: &mut W) -> borsh::maybestd::io::Result<()> {
+    fn serialize<W: Write>(&self, writer: &mut W) -> io::Result<()> {
         leb128::write::unsigned(writer, self.0.len() as u64)?;
 
         for item in self.0.iter() {

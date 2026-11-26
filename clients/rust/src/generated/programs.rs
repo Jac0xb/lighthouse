@@ -5,7 +5,7 @@
 //! <https://github.com/codama-idl/codama>
 //!
 
-use solana_program::{pubkey, pubkey::Pubkey};
+use solana_address::{address, Address};
 
 /// `lighthouse` program ID.
-pub const LIGHTHOUSE_ID: Pubkey = pubkey!("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");
+pub const LIGHTHOUSE_ID: Address = address!("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");

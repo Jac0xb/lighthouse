@@ -1,83 +1,40 @@
-import { Address, address } from "@solana/addresses";
-import {
-  AccountRole,
-  IInstruction,
-  WritableSignerAccount,
-} from "@solana/instructions";
-
 import fs from "fs";
-
 import {
   SYSTEM_PROGRAM_ADDRESS,
   getTransferSolInstruction,
 } from "@solana-program/system";
 import {
-  KeyPairSigner,
+  type AccountInfoBase,
+  type AccountInfoWithBase64EncodedData,
+  type Address,
+  type Instruction,
+  type KeyPairSigner,
+  type Rpc,
+  type SolanaRpcApi,
+  type Transaction,
   addSignersToTransactionMessage,
-  createKeyPairSignerFromBytes,
-  generateKeyPairSigner,
-  setTransactionMessageFeePayerSigner,
-  signTransactionMessageWithSigners,
-} from "@solana/signers";
-import {
-  AccountInfoBase,
-  AccountInfoWithBase64EncodedData,
-  ITransactionMessageWithFeePayer,
-  Rpc,
-  SolanaRpcApi,
-  Transaction,
-  TransactionMessage,
-  appendTransactionMessageInstruction,
   appendTransactionMessageInstructions,
-  compileTransactionMessage,
+  createKeyPairSignerFromBytes,
   createSolanaRpc,
   createTransactionMessage,
-  decompileTransactionMessage,
+  generateKeyPairSigner,
   getBase64EncodedWireTransaction,
   pipe,
   setTransactionMessageFeePayer,
   setTransactionMessageLifetimeUsingBlockhash,
-  signTransaction,
+  signTransactionMessageWithSigners,
 } from "@solana/kit";
-
-import crypto from "crypto";
 import {
-  EquatableOperator,
-  getAssertAccountDataInstruction,
-  getAssertAccountInfoInstruction,
   getAssertAccountInfoMultiInstruction,
   IntegerOperator,
 } from "lighthouse-sdk";
 
 (async () => {
-  const keypairPath =
-    "/Users/jacob/Desktop/W1ckNjLqZ2UoijogQj9rMCacdFtn6KJm3Caxs1oPgdx.json";
-
-  console.log(globalThis.crypto);
+  const keypairPath = process.env.KEYPAIR_PATH ?? "";
 
   const array = JSON.parse(fs.readFileSync(keypairPath).toString());
   const signer = await createKeyPairSignerFromBytes(Uint8Array.from(array));
   const rpc = createSolanaRpc("https://api.devnet.solana.com");
-
-  // const result = await rpc
-  //   .sendTransaction(getBase64EncodedWireTransaction(tx), {
-  //     encoding: 'base64',
-  //   })
-  //   .send();
-
-  // console.log(result);
-
-  // const config: AccountsConfigWithBase64EncodingZstdCompression &
-  //   SigVerifyAndReplaceRecentBlockhashConfig &
-  //   SimulateTransactionConfigBase = {
-  //   replaceRecentBlockhash: true,
-  //   sigVerify: true,
-  //   accounts: {
-  //     addresses: [],
-  //     encoding: 'base64+zstd',
-  //   },
-  //   encoding: 'base64',
-  // };
 
   const destination = await generateKeyPairSigner();
 
@@ -87,12 +44,12 @@ import {
       getTransferSolInstruction({
         source: signer,
         destination: signer.address,
-        amount: 10,
+        amount: 10n,
       }),
       getTransferSolInstruction({
         source: signer,
         destination: destination.address,
-        amount: 0.001e9,
+        amount: BigInt(0.001e9),
       }),
       getAssertAccountInfoMultiInstruction({
         targetAccount: destination.address,
@@ -139,6 +96,8 @@ import {
     .getMultipleAccounts(writeableAccounts)
     .send();
 
+  console.log(accounts);
+
   const result = await rpc
     .simulateTransaction(getBase64EncodedWireTransaction(tx), {
       replaceRecentBlockhash: true,
@@ -156,7 +115,7 @@ import {
 
 async function buildTransaction(
   rpc: Rpc<SolanaRpcApi>,
-  instructions: IInstruction[],
+  instructions: Instruction[],
   signers: KeyPairSigner[]
 ) {
   const { value: recentBlockhash } = await rpc.getLatestBlockhash().send();
@@ -172,33 +131,13 @@ async function buildTransaction(
   return await signTransactionMessageWithSigners(message);
 }
 
-(BigInt.prototype as any).toJSON = function () {
+(BigInt.prototype as unknown as { toJSON: () => string }).toJSON = function () {
   return this.toString();
 };
 
-async function strictVerify() {}
-
-async function getWriteablesAndSigners(tx: Transaction) {
+async function getWriteablesAndSigners(_tx: Transaction) {
   const signerAccounts: Set<Address> = new Set();
   const writeableAccounts: Set<Address> = new Set();
-
-  // const message: TransactionMessage & ITransactionMessageWithFeePayer =
-  //   createTransactionMessage({});
-
-  // for (const instruction of tx.messageBytes.instructions) {
-  //   for (const account of instruction.accounts ?? []) {
-  //     if (account.role === AccountRole.WRITABLE) {
-  //       writeableAccounts.add(account.address);
-  //     }
-
-  //     if (account.role === AccountRole.WRITABLE_SIGNER) {
-  //       writeableAccounts.add(account.address);
-  //       signerAccounts.add(account.address);
-  //     }
-  //   }
-  // }
-
-  // signerAccounts.add(tx.feePayer);
 
   return {
     writeableAccounts: [...writeableAccounts],
@@ -225,7 +164,7 @@ type ResolvedSystemProgramAccount = ResolvedAccount & {
   accountType: AccountType.SYSTEM_PROGRAM;
 };
 
-async function resolveAccount(
+export async function resolveAccount(
   account: AccountInfo | null
 ): Promise<ResolvedAccount> {
   if (!account) {
@@ -241,7 +180,7 @@ async function resolveAccount(
 }
 
 async function resolveSystemProgramAccount(
-  account: AccountInfo
+  _account: AccountInfo
 ): Promise<ResolvedSystemProgramAccount> {
   return { accountType: AccountType.SYSTEM_PROGRAM };
 }

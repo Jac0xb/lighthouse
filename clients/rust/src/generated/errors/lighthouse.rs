@@ -63,14 +63,8 @@ pub enum LighthouseError {
     CrossProgramInvokeViolation = 0x1780,
 }
 
-impl solana_program::program_error::PrintProgramError for LighthouseError {
-    fn print<E>(&self) {
-        solana_program::msg!(&self.to_string());
-    }
-}
-
-impl<T> solana_program::decode_error::DecodeError<T> for LighthouseError {
-    fn type_of() -> &'static str {
-        "LighthouseError"
+impl From<LighthouseError> for solana_program_error::ProgramError {
+    fn from(e: LighthouseError) -> Self {
+        solana_program_error::ProgramError::Custom(e as u32)
     }
 }

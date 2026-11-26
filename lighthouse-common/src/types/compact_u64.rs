@@ -1,7 +1,6 @@
-use borsh::maybestd::io::Read;
+use borsh::io::{Error, ErrorKind, Read, Result, Write};
 use borsh::{BorshDeserialize, BorshSerialize};
 use std::fmt::Debug;
-use std::io::Write;
 use std::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -9,7 +8,7 @@ use std::ops::{Deref, DerefMut};
 pub struct CompactU64(pub u64);
 
 impl BorshSerialize for CompactU64 {
-    fn serialize<W: Write>(&self, writer: &mut W) -> borsh::maybestd::io::Result<()> {
+    fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
         leb128::write::unsigned(writer, self.0)?;
 
         Ok(())
@@ -17,10 +16,8 @@ impl BorshSerialize for CompactU64 {
 }
 
 impl BorshDeserialize for CompactU64 {
-    fn deserialize_reader<R: Read>(reader: &mut R) -> borsh::maybestd::io::Result<Self> {
-        let value = leb128::read::unsigned(reader).map_err(|e| {
-            borsh::maybestd::io::Error::new(borsh::maybestd::io::ErrorKind::InvalidData, e)
-        })?;
+    fn deserialize_reader<R: Read>(reader: &mut R) -> Result<Self> {
+        let value = leb128::read::unsigned(reader).map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
 
         Ok(Self(value))
     }

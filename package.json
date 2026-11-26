@@ -9,7 +9,7 @@
     "clients:js:test": "bash configs/scripts/env-run.sh ./configs/scripts/client/test-js.sh",
     "generate": "pnpm run generate:shank && pnpm run generate:codama",
     "generate:shank": "bash configs/scripts/env-run.sh node ./configs/shank.cjs",
-    "generate:codama": "bash configs/scripts/env-run.sh ts-node ./configs/codama",
+    "generate:codama": "bash configs/scripts/env-run.sh tsx ./configs/codama.ts",
     "generate:registry": "bash configs/scripts/env-run.sh ./configs/scripts/generate-registry.sh",
     "validator": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
     "validator:debug": "bash configs/scripts/env-run.sh amman start --config ./configs/validator.cjs",
@@ -22,11 +22,13 @@
     "@metaplex-foundation/shank-js": "^0.1.7",
     "@types/node": "^22.7.5"
   },
-  "packageManager": "pnpm@8.15.5+sha1.a58c038faac410c947dbdb93eb30994037d0fce2",
+  "packageManager": "pnpm@10.33.0",
   "dependencies": {
-    "@codama/nodes-from-anchor": "^1.1.12",
-    "@codama/renderers": "^1.0.20",
-    "codama": "^1.2.12",
-    "ts-node": "^10.9.2"
+    "@codama/nodes-from-anchor": "^1.5.6",
+    "@codama/renderers-js": "^2.9.1",
+    "@codama/renderers-js-umi": "^1.1.25",
+    "@codama/renderers-rust": "^3.1.3",
+    "codama": "^1.11.0",
+    "tsx": "^4.23.15"
   }
 }
