@@ -3,6 +3,10 @@
 mod generated;
 pub mod hooked;
 pub mod registry;
+#[cfg(feature = "sdk")]
+pub mod transaction;
+#[cfg(feature = "sdk")]
+pub mod utils;
 
 pub use generated::programs::LIGHTHOUSE_ID;
 pub use generated::programs::LIGHTHOUSE_ID as ID;
@@ -25,11 +29,10 @@ pub mod instructions {
 #[cfg(feature = "cpi")]
 pub mod cpi {
     pub use crate::generated::instructions::{
-        AssertAccountDataCpiBuilder, AssertAccountDataMultiCpiBuilder,
-        AssertAccountDeltaCpiBuilder, AssertAccountInfoCpiBuilder,
-        AssertAccountInfoMultiCpiBuilder, AssertBubblegumTreeConfigAccountCpiBuilder,
-        AssertMerkleTreeAccountCpiBuilder, AssertMintAccountCpiBuilder,
-        AssertMintAccountMultiCpiBuilder, AssertStakeAccountCpiBuilder,
+        AssertAccountDataCpiBuilder, AssertAccountDataMultiCpiBuilder, AssertAccountDeltaCpiBuilder,
+        AssertAccountInfoCpiBuilder, AssertAccountInfoMultiCpiBuilder,
+        AssertBubblegumTreeConfigAccountCpiBuilder, AssertMerkleTreeAccountCpiBuilder,
+        AssertMintAccountCpiBuilder, AssertMintAccountMultiCpiBuilder, AssertStakeAccountCpiBuilder,
         AssertStakeAccountMultiCpiBuilder, AssertSysvarClockCpiBuilder,
         AssertTokenAccountCpiBuilder, AssertTokenAccountMultiCpiBuilder,
         AssertUpgradeableLoaderAccountCpiBuilder, AssertUpgradeableLoaderAccountMultiCpiBuilder,
@@ -79,181 +82,6 @@ pub fn find_memory_pda_bump_iterate(
     None
 }
 
-#[cfg(feature = "sdk")]
-pub mod utils {
-    use crate::generated::types::AssertionResult;
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
-    use borsh::BorshDeserialize;
-    use solana_instruction::{AccountMeta, Instruction};
-    use solana_message::{legacy, v0, CompileError, Message, VersionedMessage};
-    use solana_signer::{Signer, SignerError};
-    use solana_transaction::{versioned::VersionedTransaction, Transaction};
-
-    #[derive(Debug, thiserror::Error)]
-    #[repr(u32)]
-    pub enum ClientError {
-        #[error("Transaction already signed")]
-        TransactionAlreadySigned,
-        #[error("Address table lookups not supported")]
-        AddressTableLookupsNotSupported,
-        #[error("Empty transaction")]
-        EmptyTransaction,
-        #[error("Compile error: {0}")]
-        CompileError(CompileError),
-        #[error("Signer error: {0}")]
-        SignerError(SignerError),
-        #[error("Base64 decode error: {0}")]
-        Base64DecodeError(base64::DecodeError),
-        #[error("IO error: {0}")]
-        IOError(std::io::Error),
-    }
-
-    pub fn parse_evaluation_payloads_from_logs(
-        logs: Vec<&String>,
-    ) -> Result<Vec<AssertionResult>, ClientError> {
-        logs.iter()
-            .filter(|log| log.contains("Program data: "))
-            .map(|log| {
-                let encoded = log.split("Program data: ").collect::<Vec<&str>>()[1];
-                let decoded = STANDARD
-                    .decode(encoded)
-                    .map_err(ClientError::Base64DecodeError)?;
-                AssertionResult::try_from_slice(&decoded).map_err(ClientError::IOError)
-            })
-            .collect()
-    }
-
-    pub fn append_instructions_to_transaction(
-        transaction: &Transaction,
-        ixs: Vec<Instruction>,
-    ) -> Result<Transaction, ClientError> {
-        if !transaction.signatures.is_empty() {
-            return Err(ClientError::TransactionAlreadySigned);
-        }
-
-        let mut merged_ixs = decompile_instruction_from_transaction(transaction)?;
-        merged_ixs.extend(ixs);
-
-        let transaction = Transaction::new_unsigned(Message::new(
-            &merged_ixs,
-            Some(
-                transaction
-                    .message
-                    .account_keys
-                    .first()
-                    .ok_or(ClientError::EmptyTransaction)?,
-            ),
-        ));
-
-        Ok(transaction)
-    }
-
-    pub fn append_instructions_to_versioned_transaction(
-        transaction: &VersionedTransaction,
-        ixs: Vec<Instruction>,
-        signers: &[&dyn Signer],
-    ) -> Result<VersionedTransaction, ClientError> {
-        if !transaction.signatures.is_empty() {
-            return Err(ClientError::TransactionAlreadySigned);
-        }
-
-        if transaction.message.address_table_lookups().is_some() {
-            return Err(ClientError::AddressTableLookupsNotSupported);
-        }
-
-        let mut merged_ixs = decompile_instruction_from_versioned_transaction(transaction)?;
-        merged_ixs.extend(ixs);
-
-        let payer = transaction
-            .message
-            .static_account_keys()
-            .first()
-            .ok_or(ClientError::EmptyTransaction)?;
-
-        let recent_blockhash = transaction.message.recent_blockhash().clone();
-
-        let versioned_message = match transaction.message {
-            VersionedMessage::Legacy(_) => {
-                VersionedMessage::Legacy(legacy::Message::new(&merged_ixs, Some(payer)))
-            }
-            VersionedMessage::V0(_) => VersionedMessage::V0(
-                v0::Message::try_compile(payer, &merged_ixs, &[], recent_blockhash.clone())
-                    .map_err(ClientError::CompileError)?,
-            ),
-        };
-
-        let mut transaction = VersionedTransaction::try_new(versioned_message, signers)
-            .map_err(ClientError::SignerError)?;
-
-        transaction.message.set_recent_blockhash(recent_blockhash);
-
-        Ok(transaction)
-    }
-
-    pub fn decompile_instruction_from_versioned_transaction(
-        transaction: &VersionedTransaction,
-    ) -> Result<Vec<Instruction>, ClientError> {
-        if !transaction.signatures.is_empty() {
-            return Err(ClientError::TransactionAlreadySigned);
-        }
-
-        if transaction.message.address_table_lookups().is_some() {
-            return Err(ClientError::AddressTableLookupsNotSupported);
-        }
-
-        let mut modified_ixs = vec![];
-        let compiled_ixs = transaction.message.instructions();
-
-        for instruction in compiled_ixs {
-            let account_keys = transaction.message.static_account_keys();
-
-            modified_ixs.push(Instruction {
-                program_id: account_keys[instruction.program_id_index as usize],
-                accounts: instruction
-                    .accounts
-                    .iter()
-                    .map(|index| AccountMeta {
-                        pubkey: account_keys[*index as usize],
-                        is_signer: index < &transaction.message.header().num_required_signatures,
-                        is_writable: transaction.message.is_maybe_writable(*index as usize, None),
-                    })
-                    .collect(),
-                data: instruction.data.clone(),
-            });
-        }
-
-        Ok(modified_ixs)
-    }
-
-    pub fn decompile_instruction_from_transaction(
-        transaction: &Transaction,
-    ) -> Result<Vec<Instruction>, ClientError> {
-        if !transaction.signatures.is_empty() {
-            return Err(ClientError::TransactionAlreadySigned);
-        }
-
-        let mut modified_ixs = vec![];
-
-        for instruction in &transaction.message.instructions {
-            modified_ixs.push(Instruction {
-                program_id: transaction.message.account_keys[instruction.program_id_index as usize],
-                accounts: instruction
-                    .accounts
-                    .iter()
-                    .map(|index| AccountMeta {
-                        pubkey: transaction.message.account_keys[*index as usize],
-                        is_signer: index < &transaction.message.header.num_required_signatures,
-                        is_writable: transaction.message.is_maybe_writable(*index as usize, None),
-                    })
-                    .collect(),
-                data: instruction.data.clone(),
-            });
-        }
-
-        Ok(modified_ixs)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -266,7 +94,6 @@ mod tests {
         AccountInfoAssertion, DataValueAssertion, EquatableOperator, IntegerOperator, LogLevel,
         SysvarClockAssertion, WriteType,
     };
-    use borsh::BorshDeserialize;
 
     #[test]
     fn test_find_memory_pda() {
@@ -379,6 +206,7 @@ mod tests {
     #[test]
     fn test_parse_evaluation_payloads_from_logs() {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
+        use borsh::BorshDeserialize;
         let expected = types::AssertionResult::U64(Some(100), Some(100), 0, true);
         let bytes = borsh::to_vec(&expected).unwrap();
         let log_line = format!("Program data: {}", STANDARD.encode(&bytes));
@@ -386,7 +214,6 @@ mod tests {
         let parsed =
             utils::parse_evaluation_payloads_from_logs(vec![&other_line, &log_line]).unwrap();
         assert_eq!(parsed, vec![expected]);
-        // Also verify round-trip borsh deserialization directly
         assert_eq!(
             types::AssertionResult::try_from_slice(&bytes).unwrap(),
             parsed[0]
