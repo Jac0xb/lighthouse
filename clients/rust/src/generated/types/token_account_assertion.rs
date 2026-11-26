@@ -9,7 +9,7 @@ use crate::generated::types::EquatableOperator;
 use crate::generated::types::IntegerOperator;
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
-use solana_program::pubkey::Pubkey;
+use solana_address::Address;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -19,7 +19,7 @@ pub enum TokenAccountAssertion {
             feature = "serde",
             serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
         )]
-        value: Pubkey,
+        value: Address,
         operator: EquatableOperator,
     },
     Owner {
@@ -27,7 +27,7 @@ pub enum TokenAccountAssertion {
             feature = "serde",
             serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
         )]
-        value: Pubkey,
+        value: Address,
         operator: EquatableOperator,
     },
     Amount {
@@ -35,7 +35,7 @@ pub enum TokenAccountAssertion {
         operator: IntegerOperator,
     },
     Delegate {
-        value: Option<Pubkey>,
+        value: Option<Address>,
         operator: EquatableOperator,
     },
     State {
@@ -51,7 +51,7 @@ pub enum TokenAccountAssertion {
         operator: IntegerOperator,
     },
     CloseAuthority {
-        value: Option<Pubkey>,
+        value: Option<Address>,
         operator: EquatableOperator,
     },
     TokenAccountOwnerIsDerived,

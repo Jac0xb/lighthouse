@@ -1,4 +1,3 @@
-use anchor_spl::associated_token;
 use borsh::BorshDeserialize;
 use clap::{Parser, Subcommand};
 use lighthouse_sdk::find_memory_pda;
@@ -15,17 +14,19 @@ use solana_client::client_error::ClientErrorKind;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_client::rpc_request::RpcError;
-use solana_program::system_instruction;
-use solana_sdk::commitment_config::CommitmentConfig;
+use solana_commitment_config::{CommitmentConfig, CommitmentLevel};
 use solana_sdk::program_pack::Pack;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::rent::Rent;
 use solana_sdk::signature::{Keypair, Signer};
 use solana_sdk::signer::EncodableKeypair;
-use solana_sdk::stake::state::StakeStateV2;
 use solana_sdk::transaction::Transaction;
-use spl_associated_token_account::get_associated_token_address;
-use spl_token::state::Mint;
+use solana_stake_interface::state::StakeStateV2;
+use solana_system_interface::instruction as system_instruction;
+use spl_associated_token_account_interface::address::get_associated_token_address;
+use spl_associated_token_account_interface::instruction as ata_instruction;
+use spl_token_interface as spl_token;
+use spl_token_interface::state::Mint;
 use std::error::Error;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -71,7 +72,7 @@ fn main() {
     let keypair_path = cli.keypair.as_path();
     let data = std::fs::read_to_string(keypair_path).unwrap();
     let numbers: Vec<u8> = serde_json::from_str(&data).unwrap();
-    let wallet_keypair = Keypair::from_bytes(&numbers).unwrap();
+    let wallet_keypair = Keypair::try_from(numbers.as_slice()).unwrap();
 
     let rpc_url = String::from("https://api.devnet.solana.com");
     let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
@@ -140,7 +141,7 @@ fn main() {
     let sig = connection.send_and_confirm_transaction_with_spinner_and_config(
         &tx,
         CommitmentConfig {
-            commitment: solana_sdk::commitment_config::CommitmentLevel::Confirmed,
+            commitment: CommitmentLevel::Confirmed,
         },
         RpcSendTransactionConfig {
             skip_preflight: true,
@@ -316,12 +317,12 @@ fn build_safe_send_token_transaction(
 
     match dest_token_account {
         Ok(_account) => {}
-        Err(e) => match e.kind {
+        Err(e) => match e.kind.as_ref() {
             ClientErrorKind::RpcError(RpcError::ForUser(message)) => {
                 if message.contains("AccountNotFound") {
                     ixs.insert(
                         1,
-                        spl_associated_token_account::instruction::create_associated_token_account(
+                        ata_instruction::create_associated_token_account(
                             &wallet_keypair.pubkey(),
                             destination_user,
                             mint,
@@ -556,14 +557,13 @@ pub fn create_mint(
     ixs.push(mint_ix);
 
     if let Some((dest, amount)) = parameters.mint_to {
-        let token_account = associated_token::get_associated_token_address(&dest, &mint.pubkey());
-        let create_account_ix =
-            spl_associated_token_account::instruction::create_associated_token_account(
-                &payer.pubkey(),
-                &dest,
-                &mint.pubkey(),
-                &spl_token::id(),
-            );
+        let token_account = get_associated_token_address(&dest, &mint.pubkey());
+        let create_account_ix = ata_instruction::create_associated_token_account(
+            &payer.pubkey(),
+            &dest,
+            &mint.pubkey(),
+            &spl_token::id(),
+        );
 
         let mint_to_ix = spl_token::instruction::mint_to(
             &spl_token::id(),

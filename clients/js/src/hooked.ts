@@ -2,7 +2,7 @@ import {
   Serializer,
   mapSerializer,
 } from '@metaplex-foundation/umi-serializers-core';
-import { LEB128 } from '@minhducsun2002/leb128';
+import { UnsignedLEB128 } from '@minhducsun2002/leb128';
 import { array, struct, u8 } from '@metaplex-foundation/umi/serializers';
 import {
   AccountInfoAssertion,
@@ -31,11 +31,11 @@ export const getCompactU64Serializer = (): Serializer<number> => ({
   description: 'leb128',
   fixedSize: null,
   maxSize: null,
-  serialize: (value: number): Uint8Array => LEB128.encode(value),
+  serialize: (value: number): Uint8Array => UnsignedLEB128.encode(value),
   deserialize: (bytes: Uint8Array, offset = 0): [number, number] => {
-    const value = LEB128.decode(bytes as Uint8Array, offset);
+    const value = UnsignedLEB128.decode(bytes as Uint8Array, offset);
 
-    return [value, offset + LEB128.encode(value).length];
+    return [value, offset + UnsignedLEB128.encode(value).length];
   },
 });
 

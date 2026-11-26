@@ -15,7 +15,7 @@ import {
   getU8Encoder,
   transformEncoder,
 } from '@solana/kit';
-import { LEB128, UnsignedLEB128 } from '@minhducsun2002/leb128';
+import { UnsignedLEB128 } from '@minhducsun2002/leb128';
 import {
   AccountInfoAssertion,
   AccountInfoAssertionArgs,
@@ -53,7 +53,7 @@ export function getCompactU64Encoder(): VariableSizeEncoder<bigint | number> {
         throw new Error('CompactU64 value is too large');
       }
 
-      return LEB128.encode(Number(value)).length;
+      return UnsignedLEB128.encode(Number(value)).length;
     },
     write: (
       value: bigint | number,

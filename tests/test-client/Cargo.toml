@@ -1,22 +1,22 @@
 [package]
 name = "lighthouse-test-client"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jac0xb"]
 description = "A simple CLI application to test Lighthouse on Solana network"
 
-# Define your dependencies here
 [dependencies]
-clap = { version = "^4.5.1", features = ["derive"] }
-solana-sdk = "1.17.23"
-lighthouse-sdk = { path = "../../clients/rust", version = "2.0.0" }
-serde_json = "1.0.114"
-solana-program = "1.17.23"
-solana-client = "1.17.23"
-solana-rpc-client-api = "1.17.23"
-rayon = "1.8.1"
-borsh = "^0.10.0"
-spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }
-spl-token = { version = ">= 3.5.0, < 5.0", features = ["no-entrypoint"] }
-anchor-spl = "0.29.0"
-bincode = "1"
+bincode = "^1.3"
+borsh = { version = "^1.0", features = ["derive"] }
+clap = { version = "^4.5", features = ["derive"] }
+lighthouse-sdk = { path = "../../clients/rust", version = "3.0.0" }
+rayon = "^1.10"
+serde_json = "^1.0"
+solana-client = "^3.1"
+solana-commitment-config = "^3.1"
+solana-rpc-client-api = "^3.1"
+solana-sdk = "^3.0"
+solana-stake-interface = { version = "^2.0", features = ["bincode", "borsh"] }
+solana-system-interface = { version = "^3.0", features = ["bincode"] }
+spl-associated-token-account-interface = "^2.0"
+spl-token-interface = "^2.0"
